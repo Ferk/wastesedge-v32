@@ -1,0 +1,6 @@
+{
+  "id": "open_inn_door",
+  "actions": [
+    { "op": "set_entity_state", "entity": "redwyne_inn_door", "state": "open" }
+  ]
+}

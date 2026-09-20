@@ -1,0 +1,8 @@
+// Reusable definitions. Scene placement belongs in the corresponding .tmj.
+{
+  "entities": [
+    { "id": "player", "kind": "actor", "player_controlled": true },
+    { "id": "talan", "kind": "actor" },
+    { "id": "redwyne_inn_door", "kind": "object" }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_talan",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "talan_intro" }
+  ]
+}

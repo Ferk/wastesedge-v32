@@ -1,0 +1,92 @@
+{
+  "id": "talan_intro",
+  "start": "n1",
+  "speakers": [
+    {
+      "id": "player",
+      "name": "Player",
+      "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    },
+    {
+      "id": "talan",
+      "name": "Talan Wendth",
+      "role": "npc",
+      "entity": "talan",
+      "portrait": "assets/ui/portraits/talan.png"
+    },
+    {
+      "id": "narrator",
+      "name": "Narrator",
+      "role": "narrator"
+    }
+  ],
+  "nodes": [
+    { "id": "n1", "speaker": "talan", "text": "Your employer, eh? Who might that be?", "choices": [
+      { "text": "The Lady Silverhair, and she must have great need of me, so let me pass!", "next": "n2" },
+      { "text": "That is none of your concern. All you need know is that she is within your walls and will need me close if there is trouble at hand.", "next": "n10" }
+    ] },
+    { "id": "n2", "speaker": "player", "text": "The Lady Silverhair, and she must have great need of me, so let me pass!", "next": "n3" },
+    { "id": "n3", "speaker": "talan", "text": "Nay, if you are Silverhair's man, then I shall not let you pass. That one is the source of all this mess, and I'll be switched if I let her accomplice in to free her. Be on your way!", "choices": [
+      { "text": "What sort of mess, man? If my Lady is in trouble, I must know!", "next": "n4" }
+    ] },
+    { "id": "n4", "speaker": "player", "text": "What sort of mess, man? If my Lady is in trouble, I must know!", "next": "n6" },
+    { "id": "n5", "speaker": "player", "text": "Don't be foolish! I must see my Lady at once. Open this gate!", "next": "n21" },
+    { "id": "n6", "speaker": "talan", "text": "The sort of trouble we have no wish to put up with, that's certain. The Lady is being held for theft, and a grievous theft it was.", "choices": [
+      { "text": "Theft? But that cannot be, the Lady Silverhair is a wealthy noble in her own right. She need not stoop to theft.", "next": "n7" },
+      { "text": "You speak madness, man! There can have been no theft. Allow me in, and I shall prove to you the Lady is innocent.", "next": "n8" }
+    ] },
+    { "id": "n7", "speaker": "player", "text": "Theft? But that cannot be, the Lady Silverhair is a wealthy noble in her own right. She need not stoop to theft.", "next": "n17" },
+    { "id": "n8", "speaker": "player", "text": "You speak madness, man! There can have been no theft. Allow me in, and I shall prove to you the Lady is innocent.", "next": "n19" },
+    { "id": "n9", "speaker": "player", "text": "But I must! If my Lady is in need of me I cannot simply walk away! Please, I beg you to open the gate so I may aid her.", "next": "n26" },
+    { "id": "n10", "speaker": "player", "text": "That is none of your concern. All you need know is that she is within your walls and will need me close if there is trouble at hand.", "next": "n11" },
+    { "id": "n11", "speaker": "talan", "text": "She, eh? Your employer wouldn't be an elven lady named Silverhair, would she?", "choices": [
+      { "text": "Of course she is, you fool! Who else would it be? Are you going to open this gate or not?", "next": "n12" },
+      { "text": "Er, no. No, it is not. In fact, my employer is no lady at all.", "next": "n13" }
+    ] },
+    { "id": "n12", "speaker": "player", "text": "Of course she is, you fool! Who else would it be? Are you going to open this gate or not?", "next": "n3" },
+    { "id": "n13", "speaker": "player", "text": "Er, no. No, it is not. In fact, my employer is no lady at all.", "next": "n14" },
+    { "id": "n14", "speaker": "talan", "text": "Huh! You won't get in these doors by lying to me. You said your employer was a lady and there's only one in here who'd employ one of your sort.", "choices": [
+      { "text": "Very well then, my employer is Lady Silverhair. What of it?", "next": "n15" }
+    ] },
+    { "id": "n15", "speaker": "player", "text": "Very well then, my employer is Lady Silverhair. What of it?", "next": "n16" },
+    { "id": "n16", "speaker": "talan", "text": "Your Lady is being held for theft, and a grievous theft it was! And you'll certainly not be coming in here to make the situation even worse.", "choices": [
+      { "text": "Theft? But that cannot be, the Lady Silverhair is a wealthy noble in her own right. She need not stoop to theft.", "next": "n7" },
+      { "text": "You speak madness, man! There can have been no theft. Allow me in, and I shall prove to you the Lady is innocent.", "next": "n8" }
+    ] },
+    { "id": "n17", "speaker": "talan", "text": "That's what you are saying. But fact is, she first argued with the victim over his goods and the other morning they were gone. Now he demands justice and Silverhair is known to need them badly. So what would you say the truth is?", "choices": [
+      { "text": "I cannot tell you the truth unless you let me see for myself.", "next": "n18" }
+    ] },
+    { "id": "n18", "speaker": "player", "text": "I cannot tell you the truth unless you let me see for myself.", "next": "n20" },
+    { "id": "n19", "speaker": "talan", "text": "You'll have a damned hard time doing that. The lady is guilty and has been seen to be guilty. The truth is that she is the thief and that is all there is to it.", "choices": [
+      { "text": "I cannot tell you the truth unless you let me see for myself.", "next": "n18" }
+    ] },
+    { "id": "n20", "speaker": "talan", "text": "I tell you again, you shall not come in.", "choices": [
+      { "text": "But I must! If my Lady is in need of me I cannot simply walk away! Please, I beg you to open the gate so I may aid her.", "next": "n9" }
+    ] },
+    { "id": "n21", "speaker": "talan", "text": "I tell you I can't allow you in.", "choices": [
+      { "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n22" },
+      { "text": "You'll be in more trouble for not opening that gate than you will be for letting me in, I assure you of that. Now do as I say!", "next": "n24" }
+    ] },
+    { "id": "n22", "speaker": "player", "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n23" },
+    { "id": "n23", "speaker": "narrator", "text": "The guard hesitates for a moment, and even from where you stand you can see he is uncertain.", "next": "n25" },
+    { "id": "n24", "speaker": "player", "text": "You'll be in more trouble for not opening that gate than you will be for letting me in, I assure you of that. Now do as I say!", "next": "n23" },
+    { "id": "n25", "speaker": "narrator", "text": "But finally he seems to reach a conclusion, and after carefully scanning the surroundings, he beckons you in.", "end": true },
+    { "id": "n26", "speaker": "talan", "text": "Aid her? That is why you can't be allowed in. If you aid her too much, she might escape.", "choices": [
+      { "text": "I promise, please. I am becoming sick with worry. Can you not help me?", "next": "n27" },
+      { "text": "How could she escape from a guarded camp, even if I did help? Now let me in!", "next": "n28" },
+      { "text": "Don't be foolish! I must see my Lady at once. Open this gate!", "next": "n5" }
+    ] },
+    { "id": "n27", "speaker": "player", "text": "I promise, please. I am becoming sick with worry. Can you not help me?", "next": "n29" },
+    { "id": "n28", "speaker": "player", "text": "How could she escape from a guarded camp, even if I did help? Now let me in!", "next": "n29" },
+    { "id": "n29", "speaker": "talan", "text": "I wish I could, friend. But If I were to open this gate, I would be in terrible trouble.", "choices": [
+      { "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n30" },
+      { "text": "Don't be foolish! I must see my Lady at once. Open this gate!", "next": "n5" }
+    ] },
+    { "id": "n30", "speaker": "player", "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n31" },
+    { "id": "n31", "speaker": "talan", "text": "I tell you I can't allow you in.", "choices": [
+      { "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n22" },
+      { "text": "You'll be in more trouble for not opening that gate than you will be for letting me in, I assure you of that. Now do as I say!", "next": "n24" }
+    ] }
+  ]
+}

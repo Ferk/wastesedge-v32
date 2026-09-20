@@ -1,0 +1,41 @@
+{
+  "compressionlevel": -1,
+  "height": 9,
+  "infinite": false,
+  "layers": [
+    {
+      "draworder": "topdown",
+      "id": 1,
+      "name": "objects",
+      "objects": [
+        {
+          "id": 1,
+          "name": "front_door",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "front_door" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "x": 260,
+          "y": 140
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 2,
+  "nextobjectid": 2,
+  "orientation": "orthogonal",
+  "properties": [{ "name": "id", "type": "string", "value": "redwyne_inn" }],
+  "renderorder": "right-down",
+  "tiledversion": "1.11.0",
+  "tileheight": 20,
+  "tilewidth": 20,
+  "type": "map",
+  "version": "1.10",
+  "width": 15
+}

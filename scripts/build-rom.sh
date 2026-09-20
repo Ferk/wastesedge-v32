@@ -4,15 +4,16 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/build-rom.sh [--entry NAME] [--include DIR] [--extra-source FILE]
+Usage: scripts/build-rom.sh [--entry NAME] [--rom-name FILE] [--include DIR] [--extra-source FILE]
                             [--texture PNG] [--sound WAV] [--embedded-words NAME=FILE]
                             [--tilemap NAME=TMX] [--normalize]
                             INPUT.c OUTPUT_DIR
 
 Compile INPUT.c plus any --extra-source files as the current freestanding
 VirconWasm profile, then write .wasm, .asm, .vbin, ROM definition XML, and
-.v32 files to OUTPUT_DIR. --normalize retains raw linked Wasm as *.raw.wasm
-and runs the supported Binaryen cleanup profile before wasm2vircon.
+.v32 files to OUTPUT_DIR. --normalize is an optional diagnostic mode: it
+retains raw linked Wasm as *.raw.wasm and performs the legacy external
+Binaryen cleanup before wasm2vircon.
 
 Each --texture and --sound is converted with the official PNG/WAV conversion
 tool from PATH and is added to the generated ROM definition in option order.
@@ -29,6 +30,7 @@ EOF
 }
 
 entry=__original_main
+rom_name=
 extra_sources=()
 include_dirs=()
 texture_sources=()
@@ -44,6 +46,14 @@ while [ "$#" -gt 0 ]; do
         exit 2
       fi
       entry=$2
+      shift 2
+      ;;
+    --rom-name)
+      if [ "$#" -lt 2 ]; then
+        echo "build-rom: --rom-name requires a filename" >&2
+        exit 2
+      fi
+      rom_name=$2
       shift 2
       ;;
     --extra-source)
@@ -165,6 +175,12 @@ if [ "$program_name" = "$source_name" ] || [ -z "$program_name" ]; then
   echo "build-rom: input must have a .c filename: $source_file" >&2
   exit 2
 fi
+if [ -z "$rom_name" ]; then
+  rom_name="$program_name.v32"
+elif [[ ! "$rom_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*\.v32$ ]]; then
+  echo "build-rom: --rom-name must be a .v32 filename without a path: $rom_name" >&2
+  exit 2
+fi
 
 mkdir -p "$output_dir"
 wasm_file="$output_dir/$program_name.wasm"
@@ -172,12 +188,12 @@ raw_wasm_file="$wasm_file"
 asm_file="$output_dir/$program_name.asm"
 vbin_file="$output_dir/$program_name.vbin"
 xml_file="$output_dir/$program_name.xml"
-rom_file="$output_dir/$program_name.v32"
+rom_file="$output_dir/$rom_name"
 
-# Keep source-level multi-way branches as ordinary structured branches. The
-# backend deliberately has no br_table support yet; this flag is part of the
-# supported frontend contract, not a test-specific workaround.
-clang_flags=(--target=wasm32-unknown-unknown -O2 -fno-jump-tables -ffreestanding -fno-builtin -nostdlib)
+# wasm2vircon v1.14 supports structured br_table dispatch, canonical Clang
+# stack-pointer globals, and its own narrow input cleanup. Keep the frontend
+# otherwise freestanding and avoid assuming a hosted C runtime.
+clang_flags=(--target=wasm32-unknown-unknown -O2 -ffreestanding -fno-builtin -nostdlib)
 for include_dir in "${include_dirs[@]}"; do
   if [ ! -d "$include_dir" ]; then
     echo "build-rom: include directory not found: $include_dir" >&2

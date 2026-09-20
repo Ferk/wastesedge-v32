@@ -1,0 +1,17 @@
+// The complete set of editable inputs for the content compiler.
+{
+  "format": "wastesedge-content-v1",
+  "initial_scene": "redwyne_exterior",
+  "maps": [
+    "maps/intro_exterior.tmj",
+    "maps/redwyne_exterior.tmj",
+    "maps/redwyne_inn.tmj"
+  ],
+  "entities": ["entities/core.jsonc"],
+  "dialogue": ["dialogue/talan_intro.jsonc"],
+  "scripts": [
+    "scripts/talk_to_talan.jsonc",
+    "scripts/open_inn_door.jsonc",
+    "scripts/enter_inn.jsonc"
+  ]
+}

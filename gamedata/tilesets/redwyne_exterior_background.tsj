@@ -1,0 +1,492 @@
+{
+  "columns": 0,
+  "name": "redwyne_exterior_background",
+  "tilecount": 20,
+  "tileheight": 20,
+  "tilewidth": 20,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_ground.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 1,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_0_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_ground.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 2,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_1_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_ground.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 3,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_1_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_ground.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 4,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_medium_height_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_medium-height.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 5,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_sandy_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_sandy.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 6,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_sandy_to_grass_bot_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_sandy_to_grass_bot.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 7,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_sandy_to_grass_top_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_sandy_to_grass_top.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 8,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_to_stone_left.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 9,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_0_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_to_stone_left.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 10,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_1_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_to_stone_left.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 11,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_1_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_to_stone_left.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 12,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_to_grass.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 13,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_0_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_to_grass.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 14,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_1_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_to_grass.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 15,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_1_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_to_grass.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 16,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_0_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_to_stone.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 17,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_0_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_to_stone.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 0
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 18,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_1_0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_to_stone.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    },
+    {
+      "id": 19,
+      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_1_1.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_to_stone.mobj"
+        },
+        {
+          "name": "source_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_y",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "terrain"
+    }
+  ],
+  "tiledversion": "1.11.0",
+  "type": "tileset",
+  "version": "1.10"
+}

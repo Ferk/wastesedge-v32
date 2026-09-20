@@ -1,0 +1,8 @@
+{
+  "id": "enter_inn",
+  "actions": [
+    { "op": "set_control", "enabled": false },
+    { "op": "change_scene", "scene": "redwyne_inn", "spawn": "front_door", "facing": "north" },
+    { "op": "set_control", "enabled": true }
+  ]
+}

@@ -1,0 +1,3743 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_exterior",
+  "tilecount": 69,
+  "tiledversion": "1.11.0",
+  "tileheight": 320,
+  "tilewidth": 160,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_door_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_door.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 1,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_leftwing_a0_i0.png",
+      "imagewidth": 160,
+      "imageheight": 320,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_leftwing.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 15
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 16
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 2,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_left_bot_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_left_bot.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 3,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_mid_bot_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_mid_bot.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 4,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/entrance.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 5,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_right_bot_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_right_bot.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 6,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_roof_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_roof.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 11
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 7,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__barn_backpart_a0_i0.png",
+      "imagewidth": 100,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/barn_backpart.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 12
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 13
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 8,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__barnroof_a0_i0.png",
+      "imagewidth": 100,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/barnroof.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 9,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_top_a0_i0.png",
+      "imagewidth": 60,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/entrance-top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 10,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_top_fore_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 35,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/entrance-top-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 11,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__mainleft_top_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/mainleft-top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 12,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__mainright_top_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/mainright-top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 13,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__main_ltop_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/main-ltop.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 14,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__main_rtop_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/main-rtop.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 15,
+      "image": "../assets/tiles/redwyne_exterior/terrains__hay_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/hay.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 16,
+      "image": "../assets/tiles/redwyne_exterior/terrains__hay_bot_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/hay-bot.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 17,
+      "image": "../assets/tiles/redwyne_exterior/terrains__stone_ground_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_ground.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 18,
+      "image": "../assets/tiles/redwyne_exterior/walls__stone__stone_wall_tr_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/stone/stone-wall-tr.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 19,
+      "image": "../assets/tiles/redwyne_exterior/walls__stone__stone_wall_bl_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/stone/stone-wall-bl.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 20,
+      "image": "../assets/tiles/redwyne_exterior/walls__stone__stone_wall_br_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/stone/stone-wall-br.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 21,
+      "image": "../assets/tiles/redwyne_exterior/walls__stone__stone_wall_h_a0_i0.png",
+      "imagewidth": 60,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/stone/stone-wall-h.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 22,
+      "image": "../assets/tiles/redwyne_exterior/walls__stone__stone_wall_v_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/stone/stone-wall-v.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 23,
+      "image": "../assets/tiles/redwyne_exterior/floorings__woodenplanks_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/woodenplanks.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 24,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__tree_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/tree.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 25,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__treeleaves_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/treeleaves.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 26,
+      "image": "../assets/tiles/redwyne_exterior/terrains__tree_ground_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/tree_ground.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 27,
+      "image": "../assets/tiles/redwyne_exterior/icons__arrows__red_left_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "icons/arrows/red-left.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 28,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__guardhouse_main_a0_i0.png",
+      "imagewidth": 160,
+      "imageheight": 300,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/guardhouse_main.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 15
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 29,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__guardhouse_entrance_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/guardhouse_entrance.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 30,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_back_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 31,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_back_a0_i1.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 32,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_back_a0_i2.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 33,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_back_a0_i3.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 34,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_back_a0_i4.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 35,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_fore_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": -3
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 36,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_fore_a0_i1.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": -3
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 37,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_fore_a0_i2.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": -3
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 38,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_fore_a0_i3.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": -3
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 39,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__gate_fore_a0_i4.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/gate-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": -3
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 40,
+      "image": "../assets/tiles/redwyne_exterior/floorings__behind_window_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/behind-window.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 41,
+      "image": "../assets/tiles/redwyne_exterior/terrains__road_sandy_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_sandy.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 42,
+      "image": "../assets/tiles/redwyne_exterior/terrains__road_sandy_to_grass_bot_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_sandy_to_grass_bot.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 43,
+      "image": "../assets/tiles/redwyne_exterior/terrains__road_sandy_to_grass_top_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_sandy_to_grass_top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 44,
+      "image": "../assets/tiles/redwyne_exterior/terrains__grass_medium_height_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_medium-height.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 45,
+      "image": "../assets/tiles/redwyne_exterior/terrains__grass_medium_height_front_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_medium-height_front.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 46,
+      "image": "../assets/tiles/redwyne_exterior/terrains__road_to_stone_left_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/road_to_stone_left.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 47,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_bot_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_bot.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 48,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_bot_leaves_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_bot_leaves.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 49,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_left_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_left.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 8
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 50,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_left_leaves_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_left_leaves.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 8
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 51,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_mid_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_mid.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 52,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_mid_leaves_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 100,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_mid_leaves.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 53,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_br_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 200,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_br.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 10
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 54,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_br_leaves_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 200,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_br_leaves.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 10
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 55,
+      "image": "../assets/tiles/redwyne_exterior/terrains__stone_to_grass_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/stone_to_grass.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 56,
+      "image": "../assets/tiles/redwyne_exterior/terrains__grass_to_stone_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/grass_to_stone.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 57,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_top_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 58,
+      "image": "../assets/tiles/redwyne_exterior/terrains__forest_top_leaves_a0_i0.png",
+      "imagewidth": 140,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "terrains/forest_top_leaves.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 59,
+      "image": "../assets/tiles/redwyne_exterior/walls__gate_back_wall_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/gate_back_wall.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": -3
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 12
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 60,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__vine_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/vine.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 40
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 120
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 7
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 61,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__vine_a1_i0.png",
+      "imagewidth": 60,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/vine.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 20
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 60
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 7
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 62,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__vine_a2_i0.png",
+      "imagewidth": 60,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/vine.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 7
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 63,
+      "image": "../assets/tiles/redwyne_exterior/exteriors__hay_cart_a0_i0.png",
+      "imagewidth": 60,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "exteriors/hay-cart.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 64,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_mid_top_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_mid_top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 65,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_left_top_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_left_top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 66,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__inn_mainwing_right_top_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 180,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/inn_mainwing_right_top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 9
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 67,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__barn_frontpart_a0_i0.png",
+      "imagewidth": 100,
+      "imageheight": 140,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/barn_frontpart.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 7
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 68,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__barn_frontpart_entrance_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/barn_frontpart_entrance.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}
