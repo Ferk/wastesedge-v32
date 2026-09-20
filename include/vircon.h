@@ -1,0 +1,116 @@
+#ifndef VIRCON_RUNTIME_H
+#define VIRCON_RUNTIME_H
+
+/* Application-facing runtime API. print_at is library code, not a Wasm import.
+ * Its text argument is a NUL-terminated CP-1252 byte string, not UTF-8. */
+void clear_screen(int color);
+void print_at(int drawing_x, int drawing_y, const char *text);
+void print_uint_at(int drawing_x, int drawing_y, unsigned value);
+void print_int_at(int drawing_x, int drawing_y, int value);
+void print_fixed_2_at(int drawing_x, int drawing_y, float value);
+void end_frame(void);
+
+/* Basic cartridge-texture operations. These are runtime functions, not Wasm
+ * compiler intrinsics. */
+void select_texture(int texture_id);
+void select_region(int region_id);
+void set_region_minimum(int x, int y);
+void set_region_maximum(int x, int y);
+void set_region_hotspot(int x, int y);
+void draw_region_at(int drawing_x, int drawing_y);
+void set_multiply_color(int color);
+void set_blending_mode(int mode);
+void set_drawing_point(int drawing_x, int drawing_y);
+/* Scale values are IEEE-754 single-precision bit patterns. This keeps the
+ * currently integer-only VirconWasm profile independent of C float lowering. */
+void set_drawing_scale_bits(int scale_x_bits, int scale_y_bits);
+void set_drawing_scale(float scale_x, float scale_y);
+void set_drawing_angle(float angle);
+void draw_region_zoomed(void);
+void draw_region_rotozoomed_at(int drawing_x, int drawing_y);
+
+/* BIOS white-pixel primitives. They intentionally leave the BIOS texture and
+ * region selected, like the corresponding official helper. */
+void draw_bios_horizontal_line(int x1, int y1, int x2);
+void draw_bios_vertical_line(int x1, int y1, int y2);
+
+/* TileMap's small input/timer surface. Gamepad direction writes -1, 0, or 1
+ * through normal byte-addressed C pointers. */
+void select_gamepad(int gamepad_id);
+void gamepad_direction(int *delta_x, int *delta_y);
+int gamepad_direction_x(void);
+int gamepad_direction_y(void);
+int gamepad_left(void);
+int gamepad_right(void);
+int gamepad_up(void);
+int gamepad_down(void);
+int gamepad_is_connected(void);
+int gamepad_button_a(void);
+int gamepad_button_b(void);
+int gamepad_button_x(void);
+int gamepad_button_y(void);
+int gamepad_button_l(void);
+int gamepad_button_r(void);
+int gamepad_button_start(void);
+int get_frame_counter(void);
+int get_time(void);
+int get_date(void);
+int rand(void);
+void srand(int seed);
+void sleep(int frames);
+
+/* A runtime representation avoids a general ten-argument Wasm call while
+ * retaining the official define_region_matrix behaviour. */
+struct vircon_region_matrix {
+    int first_id;
+    int first_min_x;
+    int first_min_y;
+    int first_max_x;
+    int first_max_y;
+    int first_hotspot_x;
+    int first_hotspot_y;
+    int elements_x;
+    int elements_y;
+    int gap;
+};
+void define_region_matrix(const struct vircon_region_matrix *definition);
+
+/* Kept inline so a constant region description remains ordinary application
+ * C and needs no six-argument backend ABI. */
+static inline void define_region_center(int min_x, int min_y,
+                                        int max_x, int max_y)
+{
+    set_region_minimum(min_x, min_y);
+    set_region_maximum(max_x, max_y);
+    set_region_hotspot((min_x + max_x) / 2, (min_y + max_y) / 2);
+}
+
+/* Minimal selected-channel sound helper. */
+void select_sound(int sound_id);
+void set_sound_loop(int enabled);
+void set_sound_loop_start(int position);
+void set_sound_loop_end(int position);
+void play_sound_in_channel(int sound_id, int channel_id);
+void select_channel(int channel_id);
+void assign_channel_sound(int channel_id, int sound_id);
+void set_channel_volume(float volume);
+void set_channel_speed(float speed);
+void set_channel_loop(int enabled);
+void set_global_volume(float volume);
+void play_channel(int channel_id);
+void pause_channel(int channel_id);
+int get_channel_state(int channel_id);
+int play_sound(int sound_id);
+
+/* Small finite-input math layer. These are ordinary runtime functions; their
+ * low-level CPU operations remain private platform imports. */
+float sinf(float x);
+float cosf(float x);
+float tanf(float x);
+float asinf(float x);
+float acosf(float x);
+float expf(float x);
+float logf(float x);
+float powf(float x, float y);
+
+#endif
