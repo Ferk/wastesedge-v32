@@ -1,0 +1,207 @@
+{
+  "id": "tristan_start",
+  "start": [
+    {
+      "node": "repeat_narration",
+      "when": { "flag": "tristan_talked", "equals": 1 }
+    },
+    { "node": "first_narration" }
+  ],
+  "speakers": [
+    {
+      "id": "player",
+      "name": "Banec",
+      "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    },
+    {
+      "id": "tristan",
+      "name": "Tristan Illig",
+      "role": "npc",
+      "entity": "tristan",
+      "portrait": "assets/ui/portraits/tristan.png"
+    },
+    {
+      "id": "narrator",
+      "name": "Narrator",
+      "role": "narrator"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "first_narration",
+      "speaker": "narrator",
+      "text": "The small man before you wears a cold expression. Judging by his garments he is sort of a merchant, and a rather successful one by the looks of it.",
+      "next": "tristan_yes"
+    },
+    {
+      "id": "tristan_yes",
+      "speaker": "tristan",
+      "text": "Yes?",
+      "choices": [
+        {
+          "text": "Greetings sir, I am Banec. I wonder whether you know anything about that theft.",
+          "actions": [
+            { "op": "set", "flag": "tristan_talked", "value": 1 }
+          ],
+          "next": "player_greeting"
+        }
+      ]
+    },
+    {
+      "id": "player_greeting",
+      "speaker": "player",
+      "text": "Greetings sir, I am Banec. I wonder whether you know anything about that theft.",
+      "next": "tristan_introduction"
+    },
+    {
+      "id": "tristan_introduction",
+      "speaker": "tristan",
+      "text": "My name is Tristan Illig and I'm a merchant by trade, no thieftaker. All I know is that they are making a big fuss about a few worthless gems stolen from that Dwarf, Fingolson.",
+      "choices": [
+        {
+          "text": "Right then, sorry to bother you, Master Illig.",
+          "next": "player_leave"
+        },
+        {
+          "text": "Who is \"they\"?",
+          "next": "player_who"
+        }
+      ]
+    },
+    {
+      "id": "player_leave",
+      "speaker": "player",
+      "text": "Right then, sorry to bother you, Master Illig.",
+      "end": true
+    },
+    {
+      "id": "player_who",
+      "speaker": "player",
+      "text": "Who is \"they\"?",
+      "next": "tristan_guards"
+    },
+    {
+      "id": "tristan_guards",
+      "speaker": "tristan",
+      "text": "Above all Fingolson himself. He seems to consider the theft a personal affront. And not to forget that excuse for a guard; Jelom by name I believe. He is responsible for locking us all in here.",
+      "next": "tristan_silverhair_claim"
+    },
+    {
+      "id": "tristan_silverhair_claim",
+      "speaker": "tristan",
+      "text": "And it's not as if they would still be looking for the thief. As it turned out, it's been that Elf, Lady Silverhair. But so far they failed in retrieving the gems from her.",
+      "choices": [
+        {
+          "text": "As my mistress did certainly not steal them, they'll have a hard time in doing so I guess.",
+          "next": "player_denial"
+        }
+      ]
+    },
+    {
+      "id": "player_denial",
+      "speaker": "player",
+      "text": "As my mistress did certainly not steal them, they'll have a hard time in doing so I guess.",
+      "next": "tristan_accusation"
+    },
+    {
+      "id": "tristan_accusation",
+      "speaker": "tristan",
+      "text": "Oh, now I understand! You are working for Silverhair! You are not really investigating anything then, are you? You are just trying to get her freed at any cost!",
+      "next": "tristan_warning"
+    },
+    {
+      "id": "tristan_warning",
+      "speaker": "tristan",
+      "text": "I warn you, Half-Elf, I am losing my patience with you and this whole affair. I am losing money by the hour, while you bumble around, bothering everyone with questions!",
+      "choices": [
+        {
+          "text": "All right, all right! I'll leave you alone. But I shall be watching you!",
+          "next": "player_watch"
+        },
+        {
+          "text": "Could it be that you have something to hide, what with all this blustering?",
+          "next": "player_challenge"
+        }
+      ]
+    },
+    {
+      "id": "player_watch",
+      "speaker": "player",
+      "text": "All right, all right! I'll leave you alone. But I shall be watching you!",
+      "end": true
+    },
+    {
+      "id": "player_challenge",
+      "speaker": "player",
+      "text": "Could it be that you have something to hide, what with all this blustering?",
+      "next": "tristan_anger"
+    },
+    {
+      "id": "tristan_anger",
+      "speaker": "tristan",
+      "text": "You have the nerve to accuse me, Half-Elf?! I don't have to take this. Go! Go before I lose my temper!",
+      "choices": [
+        {
+          "text": "All right, all right! I'll leave you alone. But I shall be watching you!",
+          "next": "player_watch"
+        }
+      ]
+    },
+    {
+      "id": "repeat_narration",
+      "speaker": "narrator",
+      "text": "Tristan looks irritated as you approach him again.",
+      "next": "tristan_repeat_warning"
+    },
+    {
+      "id": "tristan_repeat_warning",
+      "speaker": "tristan",
+      "text": "Listen, Banec, I already told you! I know nothing, saw nothing, heard nothing. I would be quite pleased if you conducted your investigation efficiently so I can finally leave this place.",
+      "next": "tristan_losses"
+    },
+    {
+      "id": "tristan_losses",
+      "speaker": "tristan",
+      "text": "There is a caravan with Saffron waiting for me, worth ten times the money that Dwarf claims to have lost. And if I cannot reach it in time ... I'll be ruined! Ruined!",
+      "next": "tristan_saffron"
+    },
+    {
+      "id": "tristan_saffron",
+      "speaker": "tristan",
+      "text": "Nobody will buy any Saffron if those cutpurses from Elminscourt arrive with their cheap Achiote or Safflor before I have completed my business in Cirdanth.",
+      "next": "tristan_plea"
+    },
+    {
+      "id": "tristan_plea",
+      "speaker": "tristan",
+      "text": "Now leave me alone, please. I assure you that I know nothing about the theft, let alone have any part in it. Or do you think I would endanger my whole business for a few worthless pebbles?",
+      "choices": [
+        {
+          "text": "Do you perhaps think my mistress is in need of stealing? Yet she is accused!",
+          "next": "player_silverhair"
+        },
+        {
+          "text": "Right then, sorry to bother you, Master Illig.",
+          "next": "player_leave"
+        },
+        {
+          "text": "Who says you aren't broke already?",
+          "next": "player_broke"
+        }
+      ]
+    },
+    {
+      "id": "player_silverhair",
+      "speaker": "player",
+      "text": "Do you perhaps think my mistress is in need of stealing? Yet she is accused!",
+      "next": "tristan_accusation"
+    },
+    {
+      "id": "player_broke",
+      "speaker": "player",
+      "text": "Who says you aren't broke already?",
+      "next": "tristan_anger"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schedules": [
+    {
+      "id": "talan_gate_patrol",
+      "entity": "talan",
+      "loop": true,
+      "steps": [
+        { "op": "move", "scene": "redwyne_exterior", "x": 7, "y": 19, "facing": "south" },
+        { "op": "move", "scene": "redwyne_exterior", "x": 11, "y": 19, "facing": "north",
+          "delay_min_frames": 60, "delay_max_frames": 114 },
+        { "op": "move", "scene": "redwyne_exterior", "x": 11, "y": 17, "facing": "south",
+          "delay_min_frames": 60, "delay_max_frames": 114 }
+      ]
+    },
+    {
+      "id": "tristan_inn_and_gate",
+      "entity": "tristan",
+      "loop": true,
+      "steps": [
+        { "op": "move", "scene": "redwyne_inn", "x": 4, "y": 5, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 5, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 6, "facing": "south" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 6, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 8, "facing": "south" },
+        { "op": "place", "scene": "redwyne_exterior", "x": 18, "y": 14, "facing": "south" },
+        { "op": "move", "scene": "redwyne_exterior", "x": 18, "y": 18, "facing": "south" },
+        { "op": "move", "scene": "redwyne_exterior", "x": 12, "y": 18, "facing": "west",
+          "delay_min_frames": 360, "delay_max_frames": 540 },
+        { "op": "move", "scene": "redwyne_exterior", "x": 12, "y": 15, "facing": "north" },
+        { "op": "move", "scene": "redwyne_exterior", "x": 18, "y": 15, "facing": "east" },
+        { "op": "move", "scene": "redwyne_exterior", "x": 18, "y": 13, "facing": "north" },
+        { "op": "place", "scene": "redwyne_inn", "x": 13, "y": 7, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 5, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 5, "facing": "west" },
+        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 6, "facing": "south" },
+        { "op": "move", "scene": "redwyne_inn", "x": 4, "y": 6, "facing": "west",
+          "delay_min_frames": 270, "delay_max_frames": 540 }
+      ]
+    }
+  ]
+}

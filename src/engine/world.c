@@ -6,27 +6,6 @@
 #define WALK_WEST 8
 #define WALK_PIXELS_PER_FRAME 2
 
-/* wasm2vircon accepts the canonical stack-pointer ABI, so world_state may
- * live in main's automatic storage. Clang still combines adjacent assignments
- * here into a dynamic-address i64.store; retain this narrowly scoped i32
- * store helper until that lowering pattern is accepted as well. */
-#if defined(__clang__)
-#define WORLD_NOINLINE __attribute__((noinline))
-#else
-#define WORLD_NOINLINE
-#endif
-
-static WORLD_NOINLINE void store_int(int *slot, int value)
-{
-    *(volatile int *)slot = value;
-}
-
-static WORLD_NOINLINE void store_scene(const struct generated_runtime_scene **slot,
-                                       const struct generated_runtime_scene *scene)
-{
-    *(const struct generated_runtime_scene * volatile *)slot = scene;
-}
-
 static int opposite_mask(int move_x, int move_y)
 {
     if (move_y < 0) return WALK_SOUTH;
@@ -60,17 +39,37 @@ static int collision_mask_at(const struct generated_runtime_scene *scene, int ti
     return 15;
 }
 
+static struct world_actor_state *actor_state_for_entity(struct world_state *world, int entity_index)
+{
+    int definition = world->scene->entities[entity_index].definition;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return 0;
+    return &world->actors[definition];
+}
+
+static const struct world_actor_state *const_actor_state_for_entity(
+    const struct world_state *world, int entity_index)
+{
+    int definition = world->scene->entities[entity_index].definition;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return 0;
+    return &world->actors[definition];
+}
+
 static int entity_blocks_tile(const struct world_state *world, int entity_index, int tile_x, int tile_y)
 {
     const struct generated_runtime_entity *entity = &world->scene->entities[entity_index];
     const struct generated_runtime_actor_visual *visual;
+    const struct world_actor_state *actor;
     int x;
     int y;
-    if (entity_index == world->player_entity || !entity->blocks_movement)
+    if (entity_index == world->player_entity || !entity->blocks_movement ||
+        !world_entity_is_present(world, entity_index))
         return 0;
     visual = &generated_runtime_actor_visuals[entity->visual];
-    x = entity->tile_x;
-    y = entity->tile_y;
+    actor = const_actor_state_for_entity(world, entity_index);
+    x = actor->x;
+    y = actor->y;
     return tile_x == x && tile_y >= y - visual->base_y && tile_y <= y;
 }
 
@@ -84,14 +83,22 @@ static int can_move(const struct world_state *world, int move_x, int move_y)
     int target_mask = opposite_mask(move_x, move_y);
     int left = world->player_x - visual->base_x;
     int top = world->player_y - visual->base_y;
+
+    /* Directional map collision is defined at an actor's ground anchor. The
+     * visible/collision footprint extends above that anchor, so applying the
+     * terrain mask to every footprint cell incorrectly treats walls behind a
+     * character as walls under their feet (notably at the inn doorway).
+     * Actor-to-actor overlap still uses the complete footprint below. */
+    if (!(collision_mask_at(world->scene, world->player_x, world->player_y) & source_mask) ||
+        !(collision_mask_at(world->scene, world->player_x + move_x,
+                            world->player_y + move_y) & target_mask))
+        return 0;
+
     for (local_y = 0; local_y <= visual->base_y; ++local_y) {
         for (local_x = 0; local_x <= visual->base_x; ++local_x) {
             int x = left + local_x;
             int y = top + local_y;
             int entity_index;
-            if (!(collision_mask_at(world->scene, x, y) & source_mask) ||
-                !(collision_mask_at(world->scene, x + move_x, y + move_y) & target_mask))
-                return 0;
             for (entity_index = 0; entity_index < world->scene->entity_count; ++entity_index) {
                 if (entity_blocks_tile(world, entity_index, x + move_x, y + move_y))
                     return 0;
@@ -120,9 +127,12 @@ static int interaction_target(const struct world_state *world)
     if (world->player_facing == WORLD_EAST) move_x = 1;
     for (index = 0; index < world->scene->entity_count; ++index) {
         const struct generated_runtime_entity *entity = &world->scene->entities[index];
-        if (entity->interaction_dialogue >= 0 &&
+        const struct world_actor_state *actor = const_actor_state_for_entity(world, index);
+        int dialogue = actor != 0 && actor->dialogue >= 0 ?
+                       actor->dialogue : entity->interaction_dialogue;
+        if (dialogue >= 0 &&
             entity_blocks_tile(world, index, world->player_x + move_x, world->player_y + move_y))
-            return entity->interaction_dialogue;
+            return index;
     }
     return -1;
 }
@@ -139,11 +149,390 @@ static void apply_dialogue_choice(struct world_state *world,
     world->dialogue_node = choice->next_node;
 }
 
+static void start_script(struct world_state *world, int script)
+{
+    if (script < 0 || script >= generated_runtime_script_count)
+        return;
+    world->active_script = script;
+    world->script_action = 0;
+    world->script_wait = 0;
+}
+
+static int select_player_entity(struct world_state *world)
+{
+    int index;
+    world->player_entity = -1;
+    for (index = 0; index < world->scene->entity_count; ++index) {
+        if (world->scene->entities[index].player_controlled) {
+            world->player_entity = index;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void change_scene(struct world_state *world, int scene_index, int spawn_index)
+{
+    const struct generated_runtime_scene *scene;
+    const struct generated_runtime_spawn *spawn;
+    int index;
+    if (scene_index < 0 || scene_index >= generated_runtime_scene_count)
+        return;
+    scene = &generated_runtime_scenes[scene_index];
+    if (spawn_index < 0 || spawn_index >= scene->spawn_count)
+        return;
+    spawn = &scene->spawns[spawn_index];
+    world->scene = scene;
+    world->scene_index = scene_index;
+    if (!select_player_entity(world))
+        return;
+    world->player_x = spawn->tile_x;
+    world->player_y = spawn->tile_y;
+    world->player_facing = spawn->facing;
+    world->moving = 0;
+    world->move_x = 0;
+    world->move_y = 0;
+    world->move_progress = 0;
+    world->animation_frame = 0;
+    world->trigger_latch = -1;
+    for (index = 0; index < GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT; ++index)
+        world->object_states[index] = 0;
+    ++world->visual_revision;
+}
+
+static int start_position_trigger(struct world_state *world, int when)
+{
+    int index;
+    for (index = 0; index < world->scene->trigger_count; ++index) {
+        const struct generated_runtime_trigger *trigger = &world->scene->triggers[index];
+        if (trigger->when != when || world->trigger_latch == index + 1)
+            continue;
+        if (trigger->facing >= 0 && trigger->facing != world->player_facing)
+            continue;
+        if (world->player_x < trigger->x || world->player_y < trigger->y ||
+            world->player_x >= trigger->x + trigger->width ||
+            world->player_y >= trigger->y + trigger->height)
+            continue;
+        world->trigger_latch = index + 1;
+        start_script(world, trigger->script);
+        return 1;
+    }
+    return 0;
+}
+
 static void close_dialogue(struct world_state *world)
 {
-    store_int(&world->dialogue, -1);
-    store_int(&world->dialogue_node, 0);
-    store_int(&world->dialogue_choice, 0);
+    int end_script = -1;
+    if (world->dialogue >= 0)
+        end_script = generated_runtime_dialogues[world->dialogue].end_script;
+    world->dialogue = -1;
+    world->dialogue_node = 0;
+    world->dialogue_choice = 0;
+    world->dialogue_actor = -1;
+    if (end_script >= 0)
+        start_script(world, end_script);
+}
+
+static void start_dialogue(struct world_state *world, int dialogue)
+{
+    const struct generated_runtime_dialogue *runtime_dialogue;
+    int index;
+    if (dialogue < 0 || dialogue >= generated_runtime_dialogue_count)
+        return;
+    runtime_dialogue = &generated_runtime_dialogues[dialogue];
+    world->dialogue = dialogue;
+    world->dialogue_node = 0;
+    for (index = 0; index < runtime_dialogue->start_count; ++index) {
+        const struct generated_runtime_dialogue_start *start = &runtime_dialogue->starts[index];
+        if (start->flag < 0 ||
+            (start->flag < GENERATED_RUNTIME_FLAG_COUNT &&
+             world->flags[start->flag] == start->value)) {
+            world->dialogue_node = start->node;
+            break;
+        }
+    }
+    world->dialogue_choice = 0;
+}
+
+static int advance_player_motion(struct world_state *world)
+{
+    if (!world->moving)
+        return 1;
+    world->move_progress += WALK_PIXELS_PER_FRAME;
+    if ((world->move_progress & 3) == 0)
+        ++world->animation_frame;
+    if (world->move_progress < world->scene->tile_size)
+        return 0;
+    world->player_x += world->move_x;
+    world->player_y += world->move_y;
+    world->moving = 0;
+    world->move_progress = 0;
+    return 1;
+}
+
+static int schedule_random_delay(struct world_state *world, int minimum, int maximum)
+{
+    int range;
+    world->schedule_random = (world->schedule_random * 25173 + 13849) % 65536;
+    range = maximum - minimum + 1;
+    return range > 1 ? minimum + world->schedule_random % range : minimum;
+}
+
+static int actor_anchor_blocked(const struct world_state *world, int definition,
+                                int scene_index, int x, int y)
+{
+    int other;
+    if (scene_index == world->scene_index && x == world->player_x && y == world->player_y)
+        return 1;
+    for (other = 0; other < GENERATED_RUNTIME_ENTITY_COUNT; ++other) {
+        const struct world_actor_state *actor = &world->actors[other];
+        if (other != definition && actor->scene == scene_index && actor->x == x && actor->y == y)
+            return 1;
+    }
+    return 0;
+}
+
+static int scheduled_actor_can_move(const struct world_state *world, int definition,
+                                    int move_x, int move_y)
+{
+    const struct world_actor_state *actor = &world->actors[definition];
+    const struct generated_runtime_scene *scene;
+    int source_mask;
+    int target_mask;
+    if (actor->scene < 0 || actor->scene >= generated_runtime_scene_count)
+        return 0;
+    scene = &generated_runtime_scenes[actor->scene];
+    source_mask = direction_mask(move_x, move_y);
+    target_mask = opposite_mask(move_x, move_y);
+    if (!(collision_mask_at(scene, actor->x, actor->y) & source_mask) ||
+        !(collision_mask_at(scene, actor->x + move_x, actor->y + move_y) & target_mask))
+        return 0;
+    return !actor_anchor_blocked(world, definition, actor->scene,
+                                 actor->x + move_x, actor->y + move_y);
+}
+
+static void finish_schedule_step(struct world_state *world, int definition,
+                                 const struct generated_runtime_schedule_step *step)
+{
+    struct world_actor_state *actor = &world->actors[definition];
+    const struct generated_runtime_schedule *schedule =
+        &generated_runtime_schedules[actor->schedule];
+    actor->schedule_wait = schedule_random_delay(world, step->delay_min, step->delay_max);
+    ++actor->schedule_step;
+    if (actor->schedule_step >= schedule->step_count) {
+        if (schedule->loop)
+            actor->schedule_step = 0;
+        else
+            actor->schedule = -1;
+    }
+}
+
+static void update_actor_schedule(struct world_state *world, int definition)
+{
+    struct world_actor_state *actor = &world->actors[definition];
+    const struct generated_runtime_schedule *schedule;
+    const struct generated_runtime_schedule_step *step;
+    int move_x = 0;
+    int move_y = 0;
+    if (actor->schedule < 0 || actor->schedule >= generated_runtime_schedule_count ||
+        definition == world->dialogue_actor)
+        return;
+    if (actor->schedule_wait > 0) {
+        --actor->schedule_wait;
+        return;
+    }
+    schedule = &generated_runtime_schedules[actor->schedule];
+    if (actor->schedule_step < 0 || actor->schedule_step >= schedule->step_count) {
+        actor->schedule = -1;
+        return;
+    }
+    step = &schedule->steps[actor->schedule_step];
+    if (actor->moving) {
+        actor->move_progress += WALK_PIXELS_PER_FRAME;
+        if ((actor->move_progress & 3) == 0)
+            ++actor->animation_frame;
+        if (actor->move_progress >= generated_runtime_scenes[actor->scene].tile_size) {
+            actor->x += actor->move_x;
+            actor->y += actor->move_y;
+            actor->moving = 0;
+            actor->move_progress = 0;
+        }
+        ++world->visual_revision;
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_PLACE) {
+        actor->scene = step->scene;
+        actor->x = step->x;
+        actor->y = step->y;
+        actor->facing = step->facing;
+        actor->move_progress = 0;
+        ++world->visual_revision;
+        finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (actor->scene != step->scene)
+        return;
+    if (actor->x == step->x && actor->y == step->y) {
+        actor->facing = step->facing;
+        ++world->visual_revision;
+        finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (actor->x < step->x) move_x = 1;
+    if (actor->x > step->x) move_x = -1;
+    if (move_x == 0 && actor->y < step->y) move_y = 1;
+    if (move_x == 0 && actor->y > step->y) move_y = -1;
+    actor->facing = facing_for_direction(move_x, move_y);
+    if (!scheduled_actor_can_move(world, definition, move_x, move_y))
+        return;
+    actor->move_x = move_x;
+    actor->move_y = move_y;
+    actor->moving = 1;
+    actor->move_progress = 0;
+    ++world->visual_revision;
+}
+
+static void update_schedules(struct world_state *world)
+{
+    int definition;
+    for (definition = 0; definition < GENERATED_RUNTIME_ENTITY_COUNT; ++definition)
+        update_actor_schedule(world, definition);
+}
+
+static void start_actor_schedule(struct world_state *world, int definition,
+                                 int schedule, int delay)
+{
+    struct world_actor_state *actor;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT ||
+        schedule < 0 || schedule >= generated_runtime_schedule_count ||
+        generated_runtime_schedules[schedule].entity != definition)
+        return;
+    actor = &world->actors[definition];
+    actor->schedule = schedule;
+    actor->schedule_step = 0;
+    actor->schedule_wait = delay;
+}
+
+static void set_entity_state(struct world_state *world, int definition, int state)
+{
+    int index;
+    for (index = 0; index < world->scene->scenery_count; ++index) {
+        const struct generated_runtime_scenery *scenery = &world->scene->scenery[index];
+        if (scenery->definition != definition || scenery->state_slot < 0 ||
+            scenery->state_slot >= GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT)
+            continue;
+        if (world->object_states[scenery->state_slot] != state) {
+            world->object_states[scenery->state_slot] = state;
+            ++world->visual_revision;
+        }
+    }
+}
+
+static int begin_script_step(struct world_state *world, int target_x, int target_y, int facing)
+{
+    int move_x = 0;
+    int move_y = 0;
+    if (world->player_x == target_x && world->player_y == target_y) {
+        world->player_facing = facing;
+        return 1;
+    }
+    if (world->player_x < target_x) move_x = 1;
+    if (world->player_x > target_x) move_x = -1;
+    if (move_x == 0 && world->player_y < target_y) move_y = 1;
+    if (move_x == 0 && world->player_y > target_y) move_y = -1;
+    world->player_facing = facing_for_direction(move_x, move_y);
+    world->move_x = move_x;
+    world->move_y = move_y;
+    world->moving = 1;
+    world->move_progress = 0;
+    return 0;
+}
+
+static void update_script(struct world_state *world)
+{
+    const struct generated_runtime_script *script;
+    if (world->active_script < 0 || world->active_script >= generated_runtime_script_count)
+        return;
+    if (world->script_wait > 0) {
+        --world->script_wait;
+        return;
+    }
+    script = &generated_runtime_scripts[world->active_script];
+    while (world->script_action < script->action_count) {
+        const struct generated_runtime_script_action *action = &script->actions[world->script_action];
+        if (action->op == GENERATED_SCRIPT_SET_CONTROL) {
+            world->control_enabled = action->a;
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_SET_ENTITY_STATE) {
+            set_entity_state(world, action->a, action->b);
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_MOVE_ENTITY) {
+            int player_definition = world->scene->entities[world->player_entity].definition;
+            if (action->a != player_definition) {
+                ++world->script_action;
+                continue;
+            }
+            if (world->moving) {
+                if (advance_player_motion(world))
+                    continue;
+                return;
+            }
+            if (begin_script_step(world, action->b, action->c, action->d)) {
+                ++world->script_action;
+                continue;
+            }
+            return;
+        }
+        if (action->op == GENERATED_SCRIPT_WAIT) {
+            world->script_wait = action->a;
+            ++world->script_action;
+            return;
+        }
+        if (action->op == GENERATED_SCRIPT_SHOW_DIALOGUE) {
+            start_dialogue(world, action->a);
+            ++world->script_action;
+            return;
+        }
+        if (action->op == GENERATED_SCRIPT_CHANGE_SCENE) {
+            change_scene(world, action->a, action->b);
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_PLAY_MUSIC) {
+            if (world->music_track != action->a) {
+                world->music_track = action->a;
+                ++world->music_revision;
+            }
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_START_SCHEDULE) {
+            start_actor_schedule(world, action->a, action->b, action->c);
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_STOP_SCHEDULE) {
+            if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT) {
+                world->actors[action->a].schedule = -1;
+                world->actors[action->a].moving = 0;
+                world->actors[action->a].move_progress = 0;
+            }
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_SET_ENTITY_DIALOGUE) {
+            if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT)
+                world->actors[action->a].dialogue = action->b;
+            ++world->script_action;
+            continue;
+        }
+        ++world->script_action;
+    }
+    world->active_script = -1;
 }
 
 /* Player lines are the selectable answers themselves. The original dialogue
@@ -173,34 +562,73 @@ static void advance_past_player_lines(struct world_state *world)
 void world_initialize(struct world_state *world)
 {
     int index;
-    store_scene(&world->scene, &generated_runtime_scenes[generated_runtime_initial_scene]);
-    store_int(&world->player_entity, -1);
-    store_int(&world->player_x, 0);
-    store_int(&world->player_y, 0);
-    store_int(&world->player_facing, WORLD_SOUTH);
-    store_int(&world->moving, 0);
-    store_int(&world->move_x, 0);
-    store_int(&world->move_y, 0);
-    store_int(&world->move_progress, 0);
-    store_int(&world->animation_frame, 0);
-    store_int(&world->dialogue, -1);
-    store_int(&world->dialogue_node, 0);
-    store_int(&world->dialogue_choice, 0);
-    for (index = 0; index < GENERATED_RUNTIME_FLAG_STORAGE_COUNT; ++index)
-        store_int(&world->flags[index], 0);
-    for (index = 0; index < world->scene->entity_count; ++index) {
-        const struct generated_runtime_entity *entity = &world->scene->entities[index];
-        if (entity->player_controlled) {
-            world->player_entity = index;
-            world->player_x = entity->tile_x;
-            world->player_y = entity->tile_y;
-            world->player_facing = entity->facing;
-            if (world->scene->entry_dialogue >= 0) {
-                world->dialogue = world->scene->entry_dialogue;
-                world->dialogue_node = generated_runtime_dialogues[world->dialogue].start_node;
-            }
-            return;
+    int scene_index;
+    int entity_index;
+    world->scene = &generated_runtime_scenes[generated_runtime_initial_scene];
+    world->scene_index = generated_runtime_initial_scene;
+    world->player_entity = -1;
+    world->player_x = 0;
+    world->player_y = 0;
+    world->player_facing = WORLD_SOUTH;
+    world->moving = 0;
+    world->move_x = 0;
+    world->move_y = 0;
+    world->move_progress = 0;
+    world->animation_frame = 0;
+    world->dialogue = -1;
+    world->dialogue_node = 0;
+    world->dialogue_choice = 0;
+    world->dialogue_actor = -1;
+    for (index = 0; index < GENERATED_RUNTIME_ENTITY_STORAGE_COUNT; ++index) {
+        world->actors[index].scene = -1;
+        world->actors[index].x = 0;
+        world->actors[index].y = 0;
+        world->actors[index].facing = WORLD_SOUTH;
+        world->actors[index].moving = 0;
+        world->actors[index].move_x = 0;
+        world->actors[index].move_y = 0;
+        world->actors[index].move_progress = 0;
+        world->actors[index].animation_frame = 0;
+        world->actors[index].schedule = -1;
+        world->actors[index].schedule_step = 0;
+        world->actors[index].schedule_wait = 0;
+        world->actors[index].dialogue = -1;
+    }
+    for (scene_index = 0; scene_index < generated_runtime_scene_count; ++scene_index) {
+        const struct generated_runtime_scene *scene = &generated_runtime_scenes[scene_index];
+        for (entity_index = 0; entity_index < scene->entity_count; ++entity_index) {
+            const struct generated_runtime_entity *entity = &scene->entities[entity_index];
+            struct world_actor_state *actor;
+            if (entity->player_controlled || !entity->initially_present ||
+                entity->definition < 0 || entity->definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+                continue;
+            actor = &world->actors[entity->definition];
+            actor->scene = scene_index;
+            actor->x = entity->tile_x;
+            actor->y = entity->tile_y;
+            actor->facing = entity->facing;
         }
+    }
+    for (index = 0; index < GENERATED_RUNTIME_FLAG_STORAGE_COUNT; ++index)
+        world->flags[index] = 0;
+    for (index = 0; index < GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT; ++index)
+        world->object_states[index] = 0;
+    world->active_script = -1;
+    world->script_action = 0;
+    world->script_wait = 0;
+    world->trigger_latch = -1;
+    world->control_enabled = 1;
+    world->music_track = -1;
+    world->music_revision = 0;
+    world->visual_revision = 0;
+    world->schedule_random = 1;
+    if (select_player_entity(world)) {
+        const struct generated_runtime_entity *entity = &world->scene->entities[world->player_entity];
+        world->player_x = entity->tile_x;
+        world->player_y = entity->tile_y;
+        world->player_facing = entity->facing;
+        if (world->scene->entry_dialogue >= 0)
+            start_dialogue(world, world->scene->entry_dialogue);
     }
 }
 
@@ -210,6 +638,7 @@ void world_update(struct world_state *world, const struct world_actions *actions
     int move_y = actions->move_y;
     if (world->player_entity < 0)
         return;
+    update_schedules(world);
     if (world->dialogue >= 0) {
         const struct generated_runtime_dialogue *dialogue = &generated_runtime_dialogues[world->dialogue];
         const struct generated_runtime_dialogue_node *node = &dialogue->nodes[world->dialogue_node];
@@ -234,24 +663,34 @@ void world_update(struct world_state *world, const struct world_actions *actions
         }
         return;
     }
+    if (world->active_script >= 0) {
+        update_script(world);
+        return;
+    }
+    if (!world->control_enabled)
+        return;
     if (world->moving) {
-        world->move_progress += WALK_PIXELS_PER_FRAME;
-        if ((world->move_progress & 3) == 0)
-            ++world->animation_frame;
-        if (world->move_progress >= world->scene->tile_size) {
-            world->player_x += world->move_x;
-            world->player_y += world->move_y;
-            world->moving = 0;
-            world->move_progress = 0;
+        if (advance_player_motion(world)) {
+            world->trigger_latch = -1;
+            start_position_trigger(world, GENERATED_TRIGGER_ENTER);
         }
         return;
     }
     if (actions->interact_pressed) {
-        int dialogue = interaction_target(world);
-        if (dialogue >= 0) {
-            store_int(&world->dialogue, dialogue);
-            store_int(&world->dialogue_node, generated_runtime_dialogues[dialogue].start_node);
-            store_int(&world->dialogue_choice, 0);
+        int entity_index = interaction_target(world);
+        if (entity_index >= 0) {
+            const struct generated_runtime_entity *entity = &world->scene->entities[entity_index];
+            struct world_actor_state *actor = actor_state_for_entity(world, entity_index);
+            int dialogue = actor != 0 && actor->dialogue >= 0 ?
+                           actor->dialogue : entity->interaction_dialogue;
+            if (actor != 0) {
+                actor->facing = (world->player_facing == WORLD_NORTH) ? WORLD_SOUTH :
+                                (world->player_facing == WORLD_SOUTH) ? WORLD_NORTH :
+                                (world->player_facing == WORLD_WEST) ? WORLD_EAST : WORLD_WEST;
+                world->dialogue_actor = entity->definition;
+                ++world->visual_revision;
+            }
+            start_dialogue(world, dialogue);
         }
         return;
     }
@@ -262,6 +701,11 @@ void world_update(struct world_state *world, const struct world_actions *actions
     world->player_facing = facing_for_direction(move_x, move_y);
     if (!can_move(world, move_x, move_y))
         return;
+    if (start_position_trigger(world, GENERATED_TRIGGER_LEAVE)) {
+        update_script(world);
+        if (world->active_script >= 0)
+            return;
+    }
     world->move_x = move_x;
     world->move_y = move_y;
     world->moving = 1;
@@ -270,28 +714,105 @@ void world_update(struct world_state *world, const struct world_actions *actions
 
 int world_entity_x(const struct world_state *world, int entity_index)
 {
+    const struct world_actor_state *actor;
     if (entity_index == world->player_entity)
         return world->player_x;
-    return world->scene->entities[entity_index].tile_x;
+    actor = const_actor_state_for_entity(world, entity_index);
+    return actor != 0 ? actor->x : world->scene->entities[entity_index].tile_x;
 }
 
 int world_entity_y(const struct world_state *world, int entity_index)
 {
+    const struct world_actor_state *actor;
     if (entity_index == world->player_entity)
         return world->player_y;
-    return world->scene->entities[entity_index].tile_y;
+    actor = const_actor_state_for_entity(world, entity_index);
+    return actor != 0 ? actor->y : world->scene->entities[entity_index].tile_y;
 }
 
 int world_entity_facing(const struct world_state *world, int entity_index)
 {
+    const struct world_actor_state *actor;
     if (entity_index == world->player_entity)
         return world->player_facing;
-    return world->scene->entities[entity_index].facing;
+    actor = const_actor_state_for_entity(world, entity_index);
+    return actor != 0 ? actor->facing : world->scene->entities[entity_index].facing;
 }
 
 int world_entity_is_moving(const struct world_state *world, int entity_index)
 {
-    return entity_index == world->player_entity && world->moving;
+    const struct world_actor_state *actor;
+    if (entity_index == world->player_entity)
+        return world->moving;
+    actor = const_actor_state_for_entity(world, entity_index);
+    return actor != 0 && actor->moving;
+}
+
+int world_entity_is_present(const struct world_state *world, int entity_index)
+{
+    const struct world_actor_state *actor;
+    if (entity_index == world->player_entity)
+        return 1;
+    actor = const_actor_state_for_entity(world, entity_index);
+    return actor != 0 && actor->scene == world->scene_index;
+}
+
+int world_entity_pixel_x(const struct world_state *world, int entity_index)
+{
+    int x = world_entity_x(world, entity_index) * world->scene->tile_size;
+    const struct world_actor_state *actor;
+    if (entity_index == world->player_entity) {
+        if (world->moving)
+            x += world->move_x * world->move_progress;
+        return x;
+    }
+    actor = const_actor_state_for_entity(world, entity_index);
+    if (actor != 0 && actor->moving)
+        x += actor->move_x * actor->move_progress;
+    return x;
+}
+
+int world_entity_pixel_y(const struct world_state *world, int entity_index)
+{
+    int y = world_entity_y(world, entity_index) * world->scene->tile_size;
+    const struct world_actor_state *actor;
+    if (entity_index == world->player_entity) {
+        if (world->moving)
+            y += world->move_y * world->move_progress;
+        return y;
+    }
+    actor = const_actor_state_for_entity(world, entity_index);
+    if (actor != 0 && actor->moving)
+        y += actor->move_y * actor->move_progress;
+    return y;
+}
+
+int world_entity_animation_frame(const struct world_state *world, int entity_index)
+{
+    const struct world_actor_state *actor;
+    if (entity_index == world->player_entity)
+        return world->animation_frame;
+    actor = const_actor_state_for_entity(world, entity_index);
+    return actor != 0 ? actor->animation_frame : 0;
+}
+
+const struct generated_runtime_frame *world_scenery_frame(
+    const struct world_state *world,
+    const struct generated_runtime_scenery *scenery)
+{
+    const struct generated_runtime_object_visual *visual;
+    int state;
+    if (scenery->visual < 0 || scenery->visual >= generated_runtime_object_visual_count ||
+        scenery->state_slot < 0 ||
+        scenery->state_slot >= GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT)
+        return &scenery->frame;
+    visual = &generated_runtime_object_visuals[scenery->visual];
+    if (visual->frame_count <= 0)
+        return &scenery->frame;
+    state = world->object_states[scenery->state_slot];
+    if (state < 0) state = 0;
+    if (state >= visual->frame_count) state = visual->frame_count - 1;
+    return &visual->frames[state];
 }
 
 int world_dialogue_is_open(const struct world_state *world)

@@ -22,6 +22,7 @@
 #define DRAW_CYCLES_PER_COMMAND 160
 #define DRAW_SAFETY_CYCLES 20000
 #define DIRTY_PADDING 2
+#define MUSIC_CHANNEL 0
 
 /* Vircon32 has no writable framebuffer or display lists. Keep a small display
  * list in RAM so layout and depth work happen without touching the GPU, then
@@ -54,6 +55,7 @@ static int prepared_move_x;
 static int prepared_move_y;
 static int prepared_move_progress;
 static int prepared_animation_frame;
+static int prepared_visual_revision;
 static int prepared_camera_x;
 static int prepared_camera_y;
 static int prepared_player_left;
@@ -78,6 +80,7 @@ static int displayed_move_x;
 static int displayed_move_y;
 static int displayed_move_progress;
 static int displayed_animation_frame;
+static int displayed_visual_revision;
 static int displayed_camera_x;
 static int displayed_camera_y;
 static int displayed_player_left;
@@ -86,6 +89,7 @@ static int displayed_player_right;
 static int displayed_player_bottom;
 static int displayed_world_valid;
 static int cpu_cycles_per_frame = DEFAULT_CPU_CYCLES_PER_FRAME;
+static int applied_music_revision = -1;
 
 static void define_region_rectangle(int x, int y, int width, int height)
 {
@@ -306,7 +310,8 @@ static const struct generated_runtime_frame *entity_frame(const struct world_sta
     const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
     int facing = world_entity_facing(world, entity_index);
     if (world_entity_is_moving(world, entity_index) && visual->walking_count[facing] > 0)
-        return &visual->walking[facing][world->animation_frame % visual->walking_count[facing]];
+        return &visual->walking[facing][world_entity_animation_frame(world, entity_index) %
+                                        visual->walking_count[facing]];
     return &visual->standing[facing];
 }
 
@@ -315,9 +320,7 @@ static int entity_depth(const struct world_state *world, int entity_index)
     const struct generated_runtime_entity *entity = &world->scene->entities[entity_index];
     const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
     const struct generated_runtime_frame *frame = entity_frame(world, entity_index);
-    int y = world_entity_y(world, entity_index) * world->scene->tile_size;
-    if (entity_index == world->player_entity && world->moving)
-        y += world->move_y * world->move_progress;
+    int y = world_entity_pixel_y(world, entity_index);
     return y - visual->base_y * world->scene->tile_size + frame->offset_y + frame->height;
 }
 
@@ -326,15 +329,8 @@ static void draw_entity(const struct world_state *world, int entity_index, int c
     const struct generated_runtime_entity *entity = &world->scene->entities[entity_index];
     const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
     const struct generated_runtime_frame *frame = entity_frame(world, entity_index);
-    int x = world_entity_x(world, entity_index);
-    int y = world_entity_y(world, entity_index);
-    if (entity_index == world->player_entity && world->moving) {
-        x = x * world->scene->tile_size + world->move_x * world->move_progress;
-        y = y * world->scene->tile_size + world->move_y * world->move_progress;
-    } else {
-        x *= world->scene->tile_size;
-        y *= world->scene->tile_size;
-    }
+    int x = world_entity_pixel_x(world, entity_index);
+    int y = world_entity_pixel_y(world, entity_index);
     record_frame(frame, x - visual->base_x * world->scene->tile_size + frame->offset_x - camera_x,
                  y - visual->base_y * world->scene->tile_size + frame->offset_y - camera_y);
 }
@@ -391,6 +387,8 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
         int selected_y = 0;
         for (index = 0; index < scene->entity_count; ++index) {
             int y = entity_depth(world, index);
+            if (!world_entity_is_present(world, index))
+                continue;
             if (y < last_y || (y == last_y && index <= last_index))
                 continue;
             if (selected < 0 || y < selected_y || (y == selected_y && index < selected)) {
@@ -403,7 +401,8 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
         while (scenery_index < scene->scenery_count &&
                scene->scenery[scenery_index].depth <= selected_y) {
             const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
-            record_frame(&item->frame, item->x - camera_x, item->y - camera_y);
+            record_frame(world_scenery_frame(world, item),
+                         item->x - camera_x, item->y - camera_y);
         }
         draw_entity(world, selected, camera_x, camera_y);
         last_y = selected_y;
@@ -412,7 +411,8 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
     }
     while (scenery_index < scene->scenery_count) {
         const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
-        record_frame(&item->frame, item->x - camera_x, item->y - camera_y);
+        record_frame(world_scenery_frame(world, item),
+                     item->x - camera_x, item->y - camera_y);
     }
 }
 
@@ -471,6 +471,24 @@ void platform_initialize(void)
         set_region_maximum(glyph->max_x, glyph->max_y);
         set_region_hotspot(glyph->hotspot_x, glyph->min_y);
     }
+}
+
+void platform_update_audio(const struct world_state *world)
+{
+    const struct generated_runtime_music *track;
+    if (applied_music_revision == world->music_revision)
+        return;
+    applied_music_revision = world->music_revision;
+    if (world->music_track < 0 || world->music_track >= generated_runtime_music_count)
+        return;
+    track = &generated_runtime_music[world->music_track];
+    select_sound(track->sound);
+    set_sound_loop(track->loop);
+    assign_channel_sound(MUSIC_CHANNEL, track->sound);
+    set_channel_volume(track->volume);
+    set_channel_speed(track->speed);
+    set_channel_loop(track->loop);
+    play_channel(MUSIC_CHANNEL);
 }
 
 static void prepare_world_frame(const struct world_state *world)
@@ -640,6 +658,7 @@ static void remember_prepared_world(const struct world_state *world)
     prepared_move_y = world->move_y;
     prepared_move_progress = world->move_progress;
     prepared_animation_frame = world->animation_frame;
+    prepared_visual_revision = world->visual_revision;
 }
 
 static void remember_displayed_world(void)
@@ -653,6 +672,7 @@ static void remember_displayed_world(void)
     displayed_move_y = prepared_move_y;
     displayed_move_progress = prepared_move_progress;
     displayed_animation_frame = prepared_animation_frame;
+    displayed_visual_revision = prepared_visual_revision;
     displayed_camera_x = prepared_camera_x;
     displayed_camera_y = prepared_camera_y;
     displayed_player_left = prepared_player_left;
@@ -672,13 +692,15 @@ static int displayed_world_matches(const struct world_state *world)
            displayed_move_x == world->move_x &&
            displayed_move_y == world->move_y &&
            displayed_move_progress == world->move_progress &&
-           displayed_animation_frame == world->animation_frame;
+           displayed_animation_frame == world->animation_frame &&
+           displayed_visual_revision == world->visual_revision;
 }
 
 static void configure_dirty_replay(const struct world_state *world)
 {
     int index;
     if (!displayed_world_valid || displayed_scene != world->scene ||
+        displayed_visual_revision != world->visual_revision ||
         displayed_camera_x != prepared_camera_x ||
         displayed_camera_y != prepared_camera_y)
         return;

@@ -8,10 +8,19 @@
     "maps/redwyne_inn.tmj"
   ],
   "entities": ["entities/core.jsonc"],
-  "dialogue": ["dialogue/talan_intro.jsonc"],
+  "schedules": ["schedules/npc_routes.jsonc"],
+  "audio": ["audio/music.jsonc"],
+  "dialogue": [
+    "dialogue/talan_intro.jsonc",
+    "dialogue/talan_start.jsonc",
+    "dialogue/tristan_start.jsonc"
+  ],
   "scripts": [
     "scripts/talk_to_talan.jsonc",
     "scripts/open_inn_door.jsonc",
-    "scripts/enter_inn.jsonc"
+    "scripts/enter_inn.jsonc",
+    "scripts/enter_redwyne_inn.jsonc",
+    "scripts/leave_redwyne_inn.jsonc",
+    "scripts/talk_to_tristan.jsonc"
   ]
 }

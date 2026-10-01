@@ -1,0 +1,22 @@
+# Reproducible host and ROM build output.
+/build/
+/generated/
+**/__pycache__/
+
+# Optional read-only research material; never a project build input.
+/reference/
+
+# Tiled keeps each developer's open files and view state beside the project.
+*.tiled-session
+
+CMakeCache.txt
+CMakeFiles/
+Makefile
+
+*.o
+*.vtex
+*.vsnd
+*.vbin
+*.wasm
+*.asm
+*.v32

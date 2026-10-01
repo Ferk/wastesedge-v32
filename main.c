@@ -44,6 +44,7 @@ int main(void)
              * edges must only be consumed once. */
             consume_action_edges(&actions);
         }
+        platform_update_audio(&world);
         platform_render_world(&world);
         platform_present();
     }

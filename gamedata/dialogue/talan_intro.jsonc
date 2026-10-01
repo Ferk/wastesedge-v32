@@ -1,6 +1,7 @@
 {
   "id": "talan_intro",
   "start": "n1",
+  "on_end": "enter_inn",
   "speakers": [
     {
       "id": "player",

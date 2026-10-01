@@ -1,0 +1,14 @@
+{
+  "tracks": [
+    {
+      "id": "redwyne_theme",
+      "source": "assets/audio/redwyne_theme.ogg",
+      // Vircon32 stores decoded stereo samples in the ROM. A quarter-rate
+      // source played at quarter speed preserves duration and pitch while
+      // keeping enough audio-ROM capacity for the rest of the soundtrack.
+      "sample_rate": 11025,
+      "volume": 0.5,
+      "loop": true
+    }
+  ]
+}

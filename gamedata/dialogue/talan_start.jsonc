@@ -1,0 +1,256 @@
+{
+  "id": "talan_start",
+  "start": [
+    {
+      "node": "repeat_greeting",
+      "when": { "flag": "talan_apologised", "equals": 1 }
+    },
+    { "node": "gate_apology" }
+  ],
+  "speakers": [
+    {
+      "id": "player",
+      "name": "Banec",
+      "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    },
+    {
+      "id": "talan",
+      "name": "Talan Wendth",
+      "role": "npc",
+      "entity": "talan",
+      "portrait": "assets/ui/portraits/talan.png"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "gate_apology",
+      "speaker": "talan",
+      "text": "Listen, I really am sorry about that fuss at the gate. I hope you will not hold it against me.",
+      "choices": [{
+        "text": "Please do not mention it again. I assure you that I hold no grudge against you.",
+        "actions": [{ "op": "set", "flag": "talan_apologised", "value": 1 }],
+        "next": "player_forgives"
+      }]
+    },
+    {
+      "id": "player_forgives",
+      "speaker": "player",
+      "text": "Please do not mention it again. I assure you that I hold no grudge against you.",
+      "next": "talan_introduces"
+    },
+    {
+      "id": "talan_introduces",
+      "speaker": "talan",
+      "text": "Thank you sir. By the way, I am Talan.",
+      "next": "player_introduces"
+    },
+    {
+      "id": "player_introduces",
+      "speaker": "player",
+      "text": "I am Banec, and I'd like to learn a little more about the theft.",
+      "next": "talan_rounds"
+    },
+    {
+      "id": "talan_rounds",
+      "speaker": "talan",
+      "text": "Sure, but there is not much to tell. I was out here, making my rounds, walking around the yard like every other night.",
+      "next": "talan_heard_news"
+    },
+    {
+      "id": "talan_heard_news",
+      "speaker": "talan",
+      "text": "In the morning, of course, I heard that Master Fingolson's gems had been stolen and that Lady Silverhair was suspected of the theft.",
+      "choices": [
+        {
+          "text": "And why was Lady Silverhair accused?",
+          "next": "player_asks_accusation"
+        },
+        {
+          "text": "So you did not see or hear anything out of place that night?",
+          "next": "player_asks_night"
+        }
+      ]
+    },
+    {
+      "id": "repeat_greeting",
+      "speaker": "talan",
+      "text": "Oh, hullo again, Banec.",
+      "choices": [{
+        "text": "Hello, Talan. Look, I have a couple more questions about the theft.",
+        "next": "player_more_questions"
+      }]
+    },
+    {
+      "id": "player_more_questions",
+      "speaker": "player",
+      "text": "Hello, Talan. Look, I have a couple more questions about the theft.",
+      "next": "talan_offers_help"
+    },
+    {
+      "id": "talan_offers_help",
+      "speaker": "talan",
+      "text": "Oh... that. Yes, how may I help you?",
+      "choices": [
+        {
+          "text": "Why was the Lady Silverhair accused?",
+          "next": "player_asks_accusation"
+        },
+        {
+          "text": "Are you sure you haven't noticed anything out of place that night?",
+          "next": "player_asks_night_again"
+        }
+      ]
+    },
+    {
+      "id": "player_asks_night",
+      "speaker": "player",
+      "text": "So you did not see or hear anything out of place that night?",
+      "next": "talan_heard_nothing"
+    },
+    {
+      "id": "player_asks_night_again",
+      "speaker": "player",
+      "text": "Are you sure you haven't noticed anything out of place that night?",
+      "next": "talan_heard_nothing"
+    },
+    {
+      "id": "talan_heard_nothing",
+      "speaker": "talan",
+      "text": "No... no, not at all.",
+      "next": "talan_more_questions"
+    },
+    {
+      "id": "talan_more_questions",
+      "speaker": "talan",
+      "text": "If you do not have any more questions ...",
+      "choices": [
+        {
+          "text": "And why was Lady Silverhair accused?",
+          "actions": [{ "op": "set", "flag": "talan_heard_nothing", "value": 1 }],
+          "next": "player_asks_accusation"
+        },
+        {
+          "text": "No, thank you, I have a lot of work to do. You have been most helpful.",
+          "actions": [{ "op": "set", "flag": "talan_heard_nothing", "value": 1 }],
+          "next": "player_goodbye"
+        }
+      ]
+    },
+    {
+      "id": "player_asks_accusation",
+      "speaker": "player",
+      "text": "And why was Lady Silverhair accused?",
+      "next": "talan_accusation_reason"
+    },
+    {
+      "id": "talan_accusation_reason",
+      "speaker": "talan",
+      "text": "Well, the most obvious reason is of course that she was interested in the gems, and made a trip here just to buy them.",
+      "choices": [{
+        "text": "True, but practically anyone at the Inn could have thrown an eye on the stones.",
+        "next": "player_anyone"
+      }]
+    },
+    {
+      "id": "player_anyone",
+      "speaker": "player",
+      "text": "True, but practically anyone at the Inn could have thrown an eye on the stones.",
+      "next": "talan_jelom_certain"
+    },
+    {
+      "id": "talan_jelom_certain",
+      "speaker": "talan",
+      "text": "According to Jelom there is no doubt that Lady Silverhair is the thief.",
+      "choices": [{
+        "text": "Who is Jelom? Your superiour?",
+        "actions": [{ "op": "set", "flag": "know_jelom", "value": 1 }],
+        "next": "player_asks_jelom"
+      }]
+    },
+    {
+      "id": "player_asks_jelom",
+      "speaker": "player",
+      "text": "Who is Jelom? Your superiour?",
+      "next": "talan_explains_jelom"
+    },
+    {
+      "id": "talan_explains_jelom",
+      "speaker": "talan",
+      "text": "He is the other guard here. He is not exactly my superiour, but he is older than me and has been here much longer, so he is kind of in charge.",
+      "next": "talan_suspicion"
+    },
+    {
+      "id": "talan_suspicion",
+      "speaker": "talan",
+      "text": "He found her behaviour suspicious. I mean, she is all high and mighty, acting above the rest of us, and she obviously doesn't like dwarves ...",
+      "next": "player_asks_dwarves"
+    },
+    {
+      "id": "player_asks_dwarves",
+      "speaker": "player",
+      "text": "Wait! Why does everybody believe that she has an aversion to dwarves?",
+      "next": "talan_argument"
+    },
+    {
+      "id": "talan_argument",
+      "speaker": "talan",
+      "text": "Well, as I heard it told, she had quite an argument with Master Fingolson in which she insulted the quality of his gems and then the dwarven race!",
+      "choices": [{
+        "text": "You think this argument is enough to prove Lady Silverhair's guilt?",
+        "next": "player_challenges_argument"
+      }]
+    },
+    {
+      "id": "player_challenges_argument",
+      "speaker": "player",
+      "text": "You think this argument is enough to prove Lady Silverhair's guilt?",
+      "next": "talan_unsure"
+    },
+    {
+      "id": "talan_unsure",
+      "speaker": "talan",
+      "text": "I ... I don't know.",
+      "next": "talan_suggests_jelom"
+    },
+    {
+      "id": "talan_suggests_jelom",
+      "speaker": "talan",
+      "text": "Maybe you should speak to Jelom. He knows more about the theft and his reasons for suspecting her than I do...",
+      "choices": [
+        {
+          "text": "And so I shall. Where is he?",
+          "next": "player_asks_location"
+        },
+        {
+          "text": "Well, I shall go and talk to him, then. Thank you and good day.",
+          "next": "player_goodbye_jelom"
+        }
+      ]
+    },
+    {
+      "id": "player_asks_location",
+      "speaker": "player",
+      "text": "And so I shall. Where is he?",
+      "next": "talan_jelom_location"
+    },
+    {
+      "id": "talan_jelom_location",
+      "speaker": "talan",
+      "text": "He is guarding the hallway leading to Lady Silverhair's room.",
+      "next": "player_goodbye_jelom"
+    },
+    {
+      "id": "player_goodbye_jelom",
+      "speaker": "player",
+      "text": "Well, I shall go and talk to him, then. Thank you and good day.",
+      "end": true
+    },
+    {
+      "id": "player_goodbye",
+      "speaker": "player",
+      "text": "No, thank you, I have a lot of work to do. You have been most helpful.",
+      "end": true
+    }
+  ]
+}

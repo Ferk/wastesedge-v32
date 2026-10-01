@@ -3,6 +3,11 @@
   "entities": [
     { "id": "player", "kind": "actor", "player_controlled": true },
     { "id": "talan", "kind": "actor" },
-    { "id": "redwyne_inn_door", "kind": "object" }
+    { "id": "tristan", "kind": "actor" },
+    { "id": "intro_gate_back", "kind": "object",
+      "states": ["closed", "opening_1", "opening_2", "opening_3", "open"] },
+    { "id": "intro_gate_fore", "kind": "object",
+      "states": ["closed", "opening_1", "opening_2", "opening_3", "open"] },
+    { "id": "redwyne_inn_door", "kind": "object", "states": ["closed", "open"] }
   ]
 }

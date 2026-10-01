@@ -1,0 +1,6 @@
+{
+  "id": "leave_redwyne_inn",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_exterior", "spawn": "inn_return" }
+  ]
+}

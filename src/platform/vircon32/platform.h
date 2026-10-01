@@ -6,6 +6,7 @@
 void platform_initialize(void);
 void platform_poll_actions(struct world_actions *actions);
 int platform_frame_counter(void);
+void platform_update_audio(const struct world_state *world);
 void platform_render_world(const struct world_state *world);
 void platform_present(void);
 

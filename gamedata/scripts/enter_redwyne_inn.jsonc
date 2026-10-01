@@ -1,0 +1,7 @@
+{
+  "id": "enter_redwyne_inn",
+  "actions": [
+    { "op": "set_entity_state", "entity": "redwyne_inn_door", "state": "closed" },
+    { "op": "change_scene", "scene": "redwyne_inn", "spawn": "front_door" }
+  ]
+}
