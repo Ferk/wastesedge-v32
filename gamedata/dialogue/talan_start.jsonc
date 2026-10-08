@@ -162,11 +162,19 @@
       "id": "talan_jelom_certain",
       "speaker": "talan",
       "text": "According to Jelom there is no doubt that Lady Silverhair is the thief.",
-      "choices": [{
-        "text": "Who is Jelom? Your superiour?",
-        "actions": [{ "op": "set", "flag": "know_jelom", "value": 1 }],
-        "next": "player_asks_jelom"
-      }]
+      "choices": [
+        {
+          "text": "Who is Jelom? Your superiour?",
+          "when": { "flag": "know_jelom", "equals": 0 },
+          "actions": [{ "op": "set", "flag": "know_jelom", "value": 1 }],
+          "next": "player_asks_jelom"
+        },
+        {
+          "text": "Ah, Jelom said that, did he? What else did he say?",
+          "when": { "flag": "know_jelom", "equals": 1 },
+          "next": "talan_suspicion"
+        }
+      ]
     },
     {
       "id": "player_asks_jelom",

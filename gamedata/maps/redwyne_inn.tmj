@@ -1436,6 +1436,57 @@
           "width": 20,
           "x": 80,
           "y": 140
+        },
+        {
+          "gid": 114,
+          "height": 30,
+          "id": 75,
+          "name": "orloth",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "orloth" },
+            { "name": "facing", "type": "string", "value": "south" },
+            { "name": "id", "type": "string", "value": "orloth" },
+            { "name": "interaction", "type": "string", "value": "talk_to_orloth" },
+            { "name": "kind", "type": "string", "value": "entity" }
+          ],
+          "type": "actor",
+          "width": 20,
+          "x": 40,
+          "y": 60
+        },
+        {
+          "gid": 134,
+          "height": 30,
+          "id": 76,
+          "name": "alek",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "alek" },
+            { "name": "facing", "type": "string", "value": "south" },
+            { "name": "id", "type": "string", "value": "alek" },
+            { "name": "interaction", "type": "string", "value": "talk_to_alek" },
+            { "name": "kind", "type": "string", "value": "entity" }
+          ],
+          "type": "actor",
+          "width": 20,
+          "x": 20,
+          "y": 80
+        },
+        {
+          "gid": 153,
+          "height": 30,
+          "id": 77,
+          "name": "erek",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "erek" },
+            { "name": "facing", "type": "string", "value": "north" },
+            { "name": "id", "type": "string", "value": "erek" },
+            { "name": "interaction", "type": "string", "value": "talk_to_erek" },
+            { "name": "kind", "type": "string", "value": "entity" }
+          ],
+          "type": "actor",
+          "width": 20,
+          "x": 100,
+          "y": 120
         }
       ],
       "opacity": 1,
@@ -1473,6 +1524,31 @@
           "width": 20,
           "x": 260,
           "y": 160
+        },
+        {
+          "id": 78,
+          "name": "parlour_door",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "parlour_door" },
+            { "name": "facing", "type": "string", "value": "west" }
+          ],
+          "x": 260,
+          "y": 80
+        },
+        {
+          "height": 20,
+          "id": 79,
+          "name": "enter_parlour",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_parlour" },
+            { "name": "script", "type": "string", "value": "enter_redwyne_parlour" }
+          ],
+          "width": 20,
+          "x": 280,
+          "y": 80
         }
       ],
       "opacity": 1,
@@ -1916,7 +1992,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 75,
+  "nextobjectid": 80,
   "orientation": "orthogonal",
   "properties": [
     {
@@ -1949,6 +2025,18 @@
     {
       "firstgid": 93,
       "source": "../tilesets/redwyne_inn_characters.tsj"
+    },
+    {
+      "firstgid": 113,
+      "source": "../tilesets/redwyne_inn_orloth.tsj"
+    },
+    {
+      "firstgid": 133,
+      "source": "../tilesets/redwyne_inn_alek.tsj"
+    },
+    {
+      "firstgid": 153,
+      "source": "../tilesets/redwyne_inn_erek.tsj"
     }
   ],
   "tilewidth": 20,

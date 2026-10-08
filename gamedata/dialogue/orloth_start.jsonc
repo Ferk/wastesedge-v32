@@ -1,0 +1,353 @@
+{
+  "id": "orloth_start",
+  "start": [
+    {
+      "node": "repeat_greeting",
+      "when": { "flag": "orloth_talked", "equals": 1 }
+    },
+    { "node": "first_narration" }
+  ],
+  "speakers": [
+    {
+      "id": "player",
+      "name": "Banec",
+      "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    },
+    {
+      "id": "orloth",
+      "name": "Orloth Redwyne",
+      "role": "npc",
+      "entity": "orloth",
+      "portrait": "assets/ui/portraits/orloth.png"
+    },
+    {
+      "id": "narrator",
+      "name": "Narrator",
+      "role": "narrator"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "first_narration",
+      "speaker": "narrator",
+      "text": "This appears to be the Innkeeper and owner of the place. He seems lost in thought and it looks as if he hasn't slept much lately. His worried face brightens up as you approach though, and his voice is warm and friendly:",
+      "next": "welcome"
+    },
+    {
+      "id": "welcome",
+      "speaker": "orloth",
+      "text": "Welcome to Waste's Edge, traveller. Here you shall find the pleasures of a hot meal and bath if you desire. And safe and comfortable lodging.",
+      "next": "troublesome_times"
+    },
+    {
+      "id": "troublesome_times",
+      "speaker": "orloth",
+      "text": "Although, I fear latter is no longer granted for sure. You've chosen troublesome times for your visit, as you have probably noticed.",
+      "next": "introduction"
+    },
+    {
+      "id": "introduction",
+      "speaker": "orloth",
+      "text": "But excuse me sir, I talk and talk and haven't even introduced myself. Orloth's the name, sir. Orloth Redwyne, I'm the landlord here at Waste's Edge. Just speak your wishes and I'll see to it.",
+      "choices": [{
+        "text": "What are those troubles you talked about. The guard said something about a theft, but it made not much sense.",
+        "actions": [{ "op": "set", "flag": "orloth_talked", "value": 1 }],
+        "next": "road_danger"
+      }]
+    },
+    {
+      "id": "road_danger",
+      "speaker": "orloth",
+      "text": "'Tis a shame, really. You'd think you were in danger on the road, with all those bandits about. But no, right here, despite the guards, a mans belongings aren't safe from filthy thieves.",
+      "next": "elvish_lady"
+    },
+    {
+      "id": "elvish_lady",
+      "speaker": "orloth",
+      "text": "And do you know what bothers me the most? It's no obvious bad types doing this, but people like you and me, if I may say so. An elvish Lady even! Where to will this lead, I ask!",
+      "choices": [
+        {
+          "text": "Hold on! That Talan told me the same nonsense. But I know the Lady Silverhair and to suspect her of all is simply absurd.",
+          "actions": [{ "op": "set", "flag": "orloth_told_about_silverhair", "value": 1 }],
+          "next": "orloth_apology"
+        },
+        {
+          "text": "Do not worry, Master Redwyne. I believe things would turn out quite different if only someone would commence a proper investigation.",
+          "next": "needs_investigator"
+        }
+      ]
+    },
+    {
+      "id": "orloth_apology",
+      "speaker": "orloth",
+      "text": "My apologies, sir. To tell the truth, when they first accused her I could hardly believe it myself. But the evidence is too strong to put aside.",
+      "next": "confess_request"
+    },
+    {
+      "id": "confess_request",
+      "speaker": "orloth",
+      "text": "Since you know her, sir, would you mind talking some sense into her? It'd be much easier for all parties if she would finally confess.",
+      "choices": [
+        {
+          "text": "Certainly not! I don't know what is going on, but I assure you that Lady Silverhair has no part in it.",
+          "next": "more_than_word"
+        },
+        {
+          "text": "I'll speak with her, but I doubt that Lady Silverhair will confess to a crime she hasn't committed.",
+          "next": "more_than_word"
+        }
+      ]
+    },
+    {
+      "id": "more_than_word",
+      "speaker": "orloth",
+      "text": "No offence meant sir, but I fear it will take more than your word to clear her Ladyship from suspicion.",
+      "choices": [{
+        "text": "Do not worry, Master Redwyne. I will unmask the culprit. Then you'll see that it isn't the Lady Silverhair.",
+        "next": "support"
+      }]
+    },
+    {
+      "id": "needs_investigator",
+      "speaker": "orloth",
+      "text": "I couldn't agree more, sir. But who could possibly do that? Don't get me wrong, Talan is a good lad, and Jelom is surely doing his duty, but they are clearly overtaxed with the situation. And it will be days before a senior officer arrives.",
+      "choices": [{
+        "text": "Well, actually I'd be glad to lend a hand.",
+        "next": "relief"
+      }]
+    },
+    {
+      "id": "relief",
+      "speaker": "orloth",
+      "text": "Really? Now that's a relief to hear. The sooner everything returns to normal, the better I say! So I for one shall help you as good as I can.",
+      "choices": [
+        { "text": "Thank you, Master Redwyne. I will come back to you when I need some help.", "next": "ask_name" },
+        { "text": "First of all I'd like to know what exactly happened.", "next": "events_intro" },
+        { "text": "Could you tell me something about your guests then?", "next": "frostbloom" }
+      ]
+    },
+    {
+      "id": "support",
+      "speaker": "orloth",
+      "text": "That may be as it will. I for one will be glad if only this business gets sorted out, either way. So I shall do my best to support your efforts.",
+      "choices": [
+        { "text": "Thank you, Master Redwyne. I will come back to you when I need some help.", "next": "ask_name" },
+        { "text": "First of all I'd like to know what exactly happened.", "next": "events_intro" },
+        { "text": "Could you tell me something about your guests then?", "next": "frostbloom" }
+      ]
+    },
+    {
+      "id": "ask_name",
+      "speaker": "orloth",
+      "text": "I wish you luck with your inquiries then, uh ... I didn't catch your name, sir?",
+      "choices": [
+        { "text": "I am Banec, Lady Silverhair's clerk.", "next": "room_offer" },
+        { "text": "Banec, from Cirdanth.", "next": "room_offer" }
+      ]
+    },
+    {
+      "id": "room_offer",
+      "speaker": "orloth",
+      "text": "Well then, Banec, now we've got to find you a room. We're practically full up to the roof. What room remains is small, but comfortable, you'll see.",
+      "next": "oliver_called"
+    },
+    {
+      "id": "oliver_called",
+      "speaker": "narrator",
+      "text": "The landlord calls for Oliver, the boy you met outside, and shortly afterwards he enters the common room to show you to your chamber.",
+      "end": true
+    },
+    {
+      "id": "repeat_greeting",
+      "speaker": "orloth",
+      "text": "Ah, any news about the thief, Banec?",
+      "choices": [
+        { "text": "I'm making progress, but I still need more information.", "next": "help_menu" },
+        { "text": "I fear there aren't. I'm still at the beginning of my investigations.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "help_menu",
+      "speaker": "orloth",
+      "text": "Well, I'll do my best to be of some help. Just ask your questions.",
+      "choices": [
+        { "text": "I'd like to hear about the theft again, Master Redwyne.", "next": "events_intro" },
+        { "text": "Could you tell me something about your guests?", "next": "frostbloom" },
+        { "text": "That's all for now, Master Redwyne. I don't want to keep you off your work any longer.", "next": "goodbye" }
+      ]
+    },
+    {
+      "id": "goodbye",
+      "speaker": "player",
+      "text": "That's all for now, Master Redwyne. I don't want to keep you off your work any longer.",
+      "end": true
+    },
+    {
+      "id": "events_intro",
+      "speaker": "orloth",
+      "text": "All right. So lets see: you know about Lady Silverhair's business here?",
+      "choices": [
+        { "text": "Yes I do.", "next": "negotiations" },
+        { "text": "No, not yet.", "next": "gem_business" }
+      ]
+    },
+    {
+      "id": "gem_business",
+      "speaker": "orloth",
+      "text": "She had an appointment with Bjarn Fingolson, a merchant from Uzdun'Kal. She wanted to buy some gems off the Dwarf. I guess they were pretty important to her if she came all the way from Cirdanth herself.",
+      "next": "negotiations"
+    },
+    {
+      "id": "negotiations",
+      "speaker": "orloth",
+      "text": "Well, the evening of her arrival, she and Master Fingolson sat together in the little parlour next to the common room to complete the bargain. But it wasn't long when we heard them arguing.",
+      "next": "erek_hint"
+    },
+    {
+      "id": "erek_hint",
+      "speaker": "orloth",
+      "text": "I cannot tell what happened before the shouting started. Perhaps you can learn more from Fingolson's apprentice, Erek, who was in there with them.",
+      "next": "silverhair_disapproval"
+    },
+    {
+      "id": "silverhair_disapproval",
+      "speaker": "orloth",
+      "text": "However, all of us could hear that Lady Silverhair did not approve of Master Fingolson's offer.",
+      "choices": [{
+        "text": "And because of that argument, Lady Silverhair was blamed after the gems had been stolen?",
+        "next": "not_argument_alone"
+      }]
+    },
+    {
+      "id": "not_argument_alone",
+      "speaker": "orloth",
+      "text": "It wasn't the argument alone. She and the Dwarf did not get along very well from the beginning. And there were other reasons of course.",
+      "choices": [
+        { "text": "They didn't get along well, you say? How come?", "next": "fingolson_jest" },
+        { "text": "Tell me about the other reasons.", "next": "night_theft" },
+        { "text": "But the gems were not found on her, right?", "next": "search_refusal" }
+      ]
+    },
+    {
+      "id": "fingolson_jest",
+      "speaker": "orloth",
+      "text": "I guess it's partly Fingolson's fault. When Lady Silverhair arrived he made some remark about her, a harmless jest about Elves, if I recall. But it seems she didn't take well to this kind of humour.",
+      "choices": [{
+        "text": "She certainly wouldn't like a Dwarf to make fun of her.",
+        "next": "night_theft"
+      }]
+    },
+    {
+      "id": "night_theft",
+      "speaker": "orloth",
+      "text": "Well, for one, the theft must have happened during the night as Master Fingolson assured us. And who if not an Elf could sneak into a room without two people inside noticing?",
+      "next": "nobody_left"
+    },
+    {
+      "id": "nobody_left",
+      "speaker": "orloth",
+      "text": "Then nobody has left the inn. Any of the others could have been long gone in the morning, but for someone known to the victim, this wouldn't be an option.",
+      "next": "search_refusal"
+    },
+    {
+      "id": "search_refusal",
+      "speaker": "orloth",
+      "text": "And finally, after she had been accused, she could have easily proved that she did not hide the gems. Instead she allowed nobody even to enter her room.",
+      "next": "search_threat"
+    },
+    {
+      "id": "search_threat",
+      "speaker": "orloth",
+      "text": "And you should have heard with what she threatened the first person to touch her luggage. She made quite an impression on the poor guards, and who is to argue with an elvish noble?",
+      "next": "inn_locked"
+    },
+    {
+      "id": "inn_locked",
+      "speaker": "orloth",
+      "text": "That turned out to be a bit of a dilemma though. As long as the gems are not found, there is uncertainty about her guilt. So to prevent the thief from smuggling them outside, nobody must leave the Inn.",
+      "next": "senior_officer"
+    },
+    {
+      "id": "senior_officer",
+      "speaker": "orloth",
+      "text": "Lady Silverhair has been confined to her room, and Bregon of the guard has been sent to fetch a senior officer from the garrison at Erinsford to take over the investigations.",
+      "choices": [
+        { "text": "In that case I'll better hurry and make sure that his presence won't be necessary. Thank you Master Redwyne.", "next": "ask_name" },
+        { "text": "Now I see a lot clearer. But I would know a little more about the people here.", "next": "frostbloom" }
+      ]
+    },
+    {
+      "id": "frostbloom",
+      "speaker": "orloth",
+      "text": "Of course. Well, you may have met Lady Frostbloom in the yard already. She's an artist with a fancy to yetis. She says the wilderness and the nearby mountains inspire her, so she's a regular visitor.",
+      "next": "frostbloom_more"
+    },
+    {
+      "id": "frostbloom_more",
+      "speaker": "orloth",
+      "text": "She is probably the only person around not bothered by the theft. She's never paying much attention to anything but her work.",
+      "next": "alek"
+    },
+    {
+      "id": "alek",
+      "speaker": "orloth",
+      "text": "Still she's a nice person if you get to know her better, unlike the rough fellow over there. Alek Endhelm, a mercenary from the north. That's all I know about him, but I would say where he goes, trouble follows afoot.",
+      "next": "alek_warning"
+    },
+    {
+      "id": "alek_warning",
+      "speaker": "orloth",
+      "text": "But what can I do about it? He's paying for his room, although he insisted on a cheap one down the cellar. And as long as he's behaving, I can but keep an eye on him. You should beware of him as well, if I may advice you, sir.",
+      "choices": [
+        { "text": "No worries. I've dealt with his likes before. So who else is here, then?", "next": "dwarves" },
+        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "dwarves",
+      "speaker": "orloth",
+      "text": "There is Master Fingolson of course, and young Erek, his apprentice. They mostly keep to themselves, as Fingolson does not approve of non-dwarvish company.",
+      "next": "dwarf_surprise"
+    },
+    {
+      "id": "dwarf_surprise",
+      "speaker": "orloth",
+      "text": "I still wonder why he became a tradesman, what with that aversion to other people. However, he is as honourable as a Dwarf can be. That's why I'm still a bit surprised about his behaviour towards Lady Silverhair.",
+      "choices": [
+        { "text": "An impolite Dwarf isn't the most pressing problem right now. So please go on.", "next": "other_guests" },
+        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "other_guests",
+      "speaker": "orloth",
+      "text": "There was the lot I've already mentioned plus Tristan Illig and, not to forget, that nosy Fellnir Kezular, asking me questions about everyone else. I really hadn't much time to follow the conversations.",
+      "choices": [{
+        "text": "Please tell me more about the last two.",
+        "next": "tristan_guest"
+      }]
+    },
+    {
+      "id": "tristan_guest",
+      "speaker": "orloth",
+      "text": "Certainly. Tristan Illig, a merchant from Cirdanth sits over there. He was waiting at the inn to meet his caravan. But when it moved by in the morning, he wasn't allowed to join it.",
+      "next": "fellnir_guest"
+    },
+    {
+      "id": "fellnir_guest",
+      "speaker": "orloth",
+      "text": "And finally there is Fellnir Kezular, a healer of some sorts. He's trading in medicine and gossip, as it seems. From what I've heard, he must have had a confrontation with the mercenary. Now he hardly leaves his room.",
+      "next": "guest_summary"
+    },
+    {
+      "id": "guest_summary",
+      "speaker": "orloth",
+      "text": "I hope I've given you an idea of the people at Waste's Edge. A colourful crowd for sure, but if you'd ask me to point out the thief, I couldn't. I'll support your efforts as good as I can, though.",
+      "choices": [
+        { "text": "I'd like to know what exactly happened.", "next": "events_intro" },
+        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
+      ]
+    }
+  ]
+}

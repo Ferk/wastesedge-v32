@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_orloth",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "orloth_start" }
+  ]
+}

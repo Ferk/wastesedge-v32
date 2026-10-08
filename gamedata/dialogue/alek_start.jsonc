@@ -1,0 +1,137 @@
+{
+  "id": "alek_start",
+  "start": [
+    { "node": "repeat_narration", "when": { "flag": "alek_talked", "equals": 1 } },
+    { "node": "first_narration" }
+  ],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "alek", "name": "Alek Endhelm", "role": "npc", "entity": "alek",
+      "portrait": "assets/ui/portraits/alek.png" },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    {
+      "id": "first_narration", "speaker": "narrator",
+      "text": "The muscular fellow in front of you has the air of a troublemaker about him. Scars all over his body are evidence of his readiness to use the sword he is carrying. He eyes you with undisguised distaste as you approach.",
+      "next": "first_insult"
+    },
+    {
+      "id": "first_insult", "speaker": "alek",
+      "text": "And who do we have here? A damn freak Half-Elf I say!",
+      "choices": [
+        { "text": "That's Banec, you ass! I'm working for Lady Silverhair.",
+          "actions": [{ "op": "set", "flag": "alek_talked", "value": 1 }],
+          "next": "dismiss_employer" },
+        { "text": "I don't like you either, friend. But unfortunately, I need to talk to you.",
+          "actions": [{ "op": "set", "flag": "alek_talked", "value": 1 }],
+          "next": "what_want" }
+      ]
+    },
+    {
+      "id": "dismiss_employer", "speaker": "alek",
+      "text": "For Lady Silverhair, eh? Now that scares the shit out of me, Half-Elf. Go and bother somebody else!",
+      "end": true
+    },
+    {
+      "id": "what_want", "speaker": "alek",
+      "text": "You? Tell me, what would one of your sort want from Alek Endhelm?",
+      "choices": [
+        { "text": "I need some questions answered, concerning the theft.", "next": "not_so_quick" },
+        { "text": "I'm just wondering what someone like you is doing at Waste's Edge.", "next": "none_business" }
+      ]
+    },
+    {
+      "id": "none_business", "speaker": "alek",
+      "text": "That's none of your business Half-Elf. Don't waste my time, will ya!?",
+      "next": "valuables"
+    },
+    {
+      "id": "valuables", "speaker": "player",
+      "text": "So it's none of my business if valuables disappear around here and my mistress is held responsible?",
+      "next": "dislikes_implication"
+    },
+    {
+      "id": "dislikes_implication", "speaker": "alek",
+      "text": "I don't like the implication. It's not wise going around, calling other people thieves.",
+      "next": "need_answers"
+    },
+    {
+      "id": "need_answers", "speaker": "player",
+      "text": "So far, I've called you nothing. But if you don't help me with a few answers, I might change my mind.",
+      "next": "question_menu"
+    },
+    {
+      "id": "not_so_quick", "speaker": "alek",
+      "text": "Not so quick! Who do you think you are, walking around pestering other people?",
+      "choices": [
+        { "text": "If you must know, I'm working for Lady Silverhair.", "next": "answer_questions" },
+        { "text": "I'm here to get to the bottom of the matter. So if you don't want to share Silverhair's fate, you had better answer my questions.", "next": "answer_questions" }
+      ]
+    },
+    {
+      "id": "answer_questions", "speaker": "alek",
+      "text": "To hell with you, Half-Elf. What do you want to know?",
+      "next": "question_menu"
+    },
+    {
+      "id": "repeat_narration", "speaker": "narrator",
+      "text": "Endhelm puts a threatening grin on his face as he sees you walking towards him.",
+      "next": "repeat_player"
+    },
+    {
+      "id": "repeat_player", "speaker": "player",
+      "text": "Listen! Need we really go through all this crap again?",
+      "next": "repeat_reply"
+    },
+    {
+      "id": "repeat_reply", "speaker": "alek",
+      "text": "You're getting on my nerves, Half-Elf. Go ahead then, ask your stupid questions.",
+      "next": "question_menu"
+    },
+    {
+      "id": "question_menu", "speaker": "alek",
+      "text": "Now do you have any dumb questions left, or can I go back to my drink?",
+      "choices": [
+        { "text": "So what is your business here, then?", "next": "business_answer" },
+        { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?", "next": "not_spying" },
+        { "text": "Perhaps it's just me, but I'd ask myself why the thief hasn't left Waste's Edge.", "next": "good_question" },
+        { "text": "Actually, there is nothing you could possibly tell me.", "next": "leave" }
+      ]
+    },
+    {
+      "id": "business_answer", "speaker": "alek",
+      "text": "If it makes you happy; I made camp here on my way back from Limebruck where I had an ... appointment, which is absolutely none of your concern. I'm just an innocent traveller caught in this bloody mess.",
+      "next": "question_menu"
+    },
+    {
+      "id": "not_spying", "speaker": "alek",
+      "text": "Why should I \"spy\" on a conversation that could be heard up to Erinsford. Nah, I was about to look whether my skills might be needed.",
+      "choices": [
+        { "text": "For what would they have needed your skills?", "next": "skills_answer" },
+        { "text": "Don't tell me you thought Fingolson would enrol you as his guard?", "next": "guard_answer" }
+      ]
+    },
+    {
+      "id": "skills_answer", "speaker": "alek",
+      "text": "You disappoint me, Half-Elf. The poor Dwarfs were practically attacked by that furious woman. How should I know she wasn't about to turn them into toads or something?",
+      "next": "question_menu"
+    },
+    {
+      "id": "guard_answer", "speaker": "alek",
+      "text": "So what? You think I stole his gems because he didn't accept my offer?",
+      "next": "question_menu"
+    },
+    {
+      "id": "good_question", "speaker": "alek",
+      "text": "Good question, isn't it! Now if I were you, Half-Elf, I'd be off to a quiet corner and made some use of what brain I had.",
+      "next": "question_menu"
+    },
+    {
+      "id": "leave", "speaker": "player",
+      "text": "Perhaps you are right. Any further conversation would be useless anyway. So I'll leave you ... for now!",
+      "end": true
+    }
+  ]
+}

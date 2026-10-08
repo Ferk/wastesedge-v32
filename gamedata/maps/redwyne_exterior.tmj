@@ -4233,6 +4233,40 @@
                  "width":20,
                  "x":240,
                  "y":380
+                },
+                {
+                 "gid":150,
+                 "height":30,
+                 "id":892,
+                 "name":"oliver",
+                 "properties":[
+                        { "name":"entity_def", "type":"string", "value":"oliver" },
+                        { "name":"facing", "type":"string", "value":"south" },
+                        { "name":"id", "type":"string", "value":"oliver" },
+                        { "name":"interaction", "type":"string", "value":"talk_to_oliver" },
+                        { "name":"kind", "type":"string", "value":"entity" }
+                       ],
+                 "type":"actor",
+                 "width":20,
+                 "x":500,
+                 "y":320
+                },
+                {
+                 "gid":171,
+                 "height":30,
+                 "id":893,
+                 "name":"frostbloom",
+                 "properties":[
+                        { "name":"entity_def", "type":"string", "value":"frostbloom" },
+                        { "name":"facing", "type":"string", "value":"south" },
+                        { "name":"id", "type":"string", "value":"frostbloom" },
+                        { "name":"interaction", "type":"string", "value":"talk_to_frostbloom" },
+                        { "name":"kind", "type":"string", "value":"entity" }
+                       ],
+                 "type":"actor",
+                 "width":20,
+                 "x":360,
+                 "y":460
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5777,7 +5811,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":892,
+ "nextobjectid":894,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -5814,6 +5848,14 @@
         {
          "firstgid":130,
          "source":"..\/tilesets\/redwyne_inn_characters.tsj"
+        },
+        {
+         "firstgid":150,
+         "source":"..\/tilesets\/redwyne_exterior_oliver.tsj"
+        },
+        {
+         "firstgid":170,
+         "source":"..\/tilesets\/redwyne_exterior_frostbloom.tsj"
         }],
  "tilewidth":20,
  "type":"map",

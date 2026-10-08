@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_frostbloom",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "frostbloom_start" }
+  ]
+}

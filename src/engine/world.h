@@ -30,6 +30,9 @@ struct world_actor_state {
     int schedule;
     int schedule_step;
     int schedule_wait;
+    int speech_line;
+    int speech_wait;
+    int speech_frames;
     int dialogue;
 };
 
@@ -61,6 +64,7 @@ struct world_state {
     int music_revision;
     int visual_revision;
     int schedule_random;
+    int speech_random;
 };
 
 void world_initialize(struct world_state *world);
@@ -85,5 +89,7 @@ int world_dialogue_choice_selected(const struct world_state *world);
 const struct generated_runtime_dialogue_speaker *world_dialogue_speaker(const struct world_state *world);
 const struct generated_runtime_text *world_dialogue_display(const struct world_state *world);
 const struct generated_runtime_text *world_dialogue_choice_display(const struct world_state *world, int index);
+const struct generated_runtime_text *world_entity_speech(
+    const struct world_state *world, int entity_index);
 
 #endif

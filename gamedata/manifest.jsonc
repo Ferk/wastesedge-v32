@@ -5,7 +5,8 @@
   "maps": [
     "maps/intro_exterior.tmj",
     "maps/redwyne_exterior.tmj",
-    "maps/redwyne_inn.tmj"
+    "maps/redwyne_inn.tmj",
+    "maps/redwyne_parlour.tmj"
   ],
   "entities": ["entities/core.jsonc"],
   "schedules": ["schedules/npc_routes.jsonc"],
@@ -13,7 +14,12 @@
   "dialogue": [
     "dialogue/talan_intro.jsonc",
     "dialogue/talan_start.jsonc",
-    "dialogue/tristan_start.jsonc"
+    "dialogue/tristan_start.jsonc",
+    "dialogue/orloth_start.jsonc",
+    "dialogue/alek_start.jsonc",
+    "dialogue/erek_start.jsonc",
+    "dialogue/oliver_start.jsonc",
+    "dialogue/frostbloom_start.jsonc"
   ],
   "scripts": [
     "scripts/talk_to_talan.jsonc",
@@ -21,6 +27,13 @@
     "scripts/enter_inn.jsonc",
     "scripts/enter_redwyne_inn.jsonc",
     "scripts/leave_redwyne_inn.jsonc",
-    "scripts/talk_to_tristan.jsonc"
+    "scripts/enter_redwyne_parlour.jsonc",
+    "scripts/leave_redwyne_parlour.jsonc",
+    "scripts/talk_to_tristan.jsonc",
+    "scripts/talk_to_orloth.jsonc",
+    "scripts/talk_to_alek.jsonc",
+    "scripts/talk_to_erek.jsonc",
+    "scripts/talk_to_oliver.jsonc",
+    "scripts/talk_to_frostbloom.jsonc"
   ]
 }

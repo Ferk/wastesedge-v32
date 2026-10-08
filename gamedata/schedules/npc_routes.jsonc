@@ -4,6 +4,16 @@
       "id": "talan_gate_patrol",
       "entity": "talan",
       "loop": true,
+      "speech": {
+        "lines": [
+          "Halt! Who goes there?",
+          "\"Ai! laurie lantar lassi surinen ...\"",
+          "Nobody may pass through the gate!"
+        ],
+        "delay_min_frames": 900,
+        "delay_max_frames": 1800,
+        "duration_frames": 180
+      },
       "steps": [
         { "op": "move", "scene": "redwyne_exterior", "x": 7, "y": 19, "facing": "south" },
         { "op": "move", "scene": "redwyne_exterior", "x": 11, "y": 19, "facing": "north",
@@ -16,8 +26,21 @@
       "id": "tristan_inn_and_gate",
       "entity": "tristan",
       "loop": true,
+      "speech": {
+        "lines": [
+          "Don't they know that I am losing money by the hour!?",
+          "What a fuss about a few worthless gems!",
+          "Ye gods! It cannot be that hard to find the thief!"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1650,
+        "duration_frames": 180
+      },
       "steps": [
         { "op": "move", "scene": "redwyne_inn", "x": 4, "y": 5, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 4, "y": 6, "facing": "south" },
+        { "op": "move", "scene": "redwyne_inn", "x": 6, "y": 6, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 6, "y": 5, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 5, "facing": "east" },
         { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 6, "facing": "south" },
         { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 6, "facing": "east" },
@@ -35,6 +58,155 @@
         { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 6, "facing": "south" },
         { "op": "move", "scene": "redwyne_inn", "x": 4, "y": 6, "facing": "west",
           "delay_min_frames": 270, "delay_max_frames": 540 }
+      ]
+    },
+    {
+      "id": "orloth_common_room",
+      "entity": "orloth",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "I gotta clean this mug!",
+          "That barrel is leaking.",
+          "I hope they'll find the thief!"
+        ],
+        "delay_min_frames": 750,
+        "delay_max_frames": 1800,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 3, "facing": "north",
+          "delay_min_frames": 180, "delay_max_frames": 360 },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 2, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south",
+          "delay_min_frames": 960, "delay_max_frames": 2880 },
+        { "op": "move", "scene": "redwyne_inn", "x": 3, "y": 5, "facing": "south",
+          "delay_min_frames": 180, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_inn", "x": 3, "y": 2, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south",
+          "delay_min_frames": 960, "delay_max_frames": 2880 },
+        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 6, "facing": "east",
+          "delay_min_frames": 180, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 2, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south",
+          "delay_min_frames": 960, "delay_max_frames": 2880 },
+        { "op": "move", "scene": "redwyne_inn", "x": 12, "y": 3, "facing": "south",
+          "delay_min_frames": 180, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_inn", "x": 12, "y": 2, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south",
+          "delay_min_frames": 960, "delay_max_frames": 2880 },
+        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 4, "facing": "west",
+          "delay_min_frames": 180, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 2, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south",
+          "delay_min_frames": 960, "delay_max_frames": 2880 }
+      ]
+    },
+    {
+      "id": "alek_bar_and_table",
+      "entity": "alek",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "More Ale!",
+          "I'll cut 'em open like ripe fruits.",
+          "They should sort out this business like real men!"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1200,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 3, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 5, "facing": "south" },
+        { "op": "move", "scene": "redwyne_inn", "x": 12, "y": 5, "facing": "north",
+          "delay_min_frames": 1950, "delay_max_frames": 2700 },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 5, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 3, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 1, "y": 3, "facing": "south",
+          "delay_min_frames": 1950, "delay_max_frames": 2700 }
+      ]
+    },
+    {
+      "id": "frostbloom_yard",
+      "entity": "frostbloom",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "This tree is so inspiring.",
+          "I wonder why everybody seems so excited.",
+          "Do you know a creature more lovely than the yeti?"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1650,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "move", "scene": "redwyne_exterior", "x": 24, "y": 22, "facing": "east",
+          "delay_min_frames": 600, "delay_max_frames": 1500 },
+        { "op": "move", "scene": "redwyne_exterior", "x": 24, "y": 28, "facing": "south",
+          "delay_min_frames": 600, "delay_max_frames": 1500 },
+        { "op": "move", "scene": "redwyne_exterior", "x": 16, "y": 28, "facing": "west",
+          "delay_min_frames": 600, "delay_max_frames": 1500 },
+        { "op": "move", "scene": "redwyne_exterior", "x": 16, "y": 22, "facing": "north",
+          "delay_min_frames": 600, "delay_max_frames": 1500 }
+      ]
+    },
+    {
+      "id": "erek_common_room",
+      "entity": "erek",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "How could they do that to the Master?",
+          "This place is so much different from home.",
+          "Who could have taken the gems?"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1200,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 5, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 3, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 3, "facing": "east" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 4, "facing": "south" },
+        { "op": "move", "scene": "redwyne_inn", "x": 14, "y": 4, "facing": "east" },
+        { "op": "place", "scene": "redwyne_parlour", "x": 1, "y": 4, "facing": "east" },
+        { "op": "move", "scene": "redwyne_parlour", "x": 1, "y": 3, "facing": "north" },
+        { "op": "move", "scene": "redwyne_parlour", "x": 5, "y": 3, "facing": "north",
+          "delay_min_frames": 600, "delay_max_frames": 1800 },
+        { "op": "move", "scene": "redwyne_parlour", "x": 5, "y": 5, "facing": "south" },
+        { "op": "move", "scene": "redwyne_parlour", "x": 4, "y": 5, "facing": "south",
+          "delay_min_frames": 600, "delay_max_frames": 1800 },
+        { "op": "move", "scene": "redwyne_parlour", "x": 1, "y": 4, "facing": "west" },
+        { "op": "place", "scene": "redwyne_inn", "x": 13, "y": 4, "facing": "west" },
+        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 3, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 3, "facing": "west" },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 6, "facing": "west",
+          "delay_min_frames": 1080, "delay_max_frames": 3240 },
+        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 5, "facing": "north" },
+        { "op": "move", "scene": "redwyne_inn", "x": 5, "y": 5, "facing": "north",
+          "delay_min_frames": 1080, "delay_max_frames": 3240 }
+      ]
+    },
+    {
+      "id": "oliver_yard",
+      "entity": "oliver",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "It's so exciting. An Elven Lady, here at Waste's Edge!",
+          "I gotta hurry before mother complains again.",
+          "Why can't I have a little dog!?"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1200,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "place", "scene": "redwyne_exterior", "x": 25, "y": 15, "facing": "south",
+          "delay_frames": 3600 }
       ]
     }
   ]

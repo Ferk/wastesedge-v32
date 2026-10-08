@@ -14,6 +14,10 @@
 #define DIALOG_WIDTH (VIEW_WIDTH - 24)
 #define DIALOG_HEIGHT 260
 #define DIALOG_LINE_HEIGHT 19
+#define SPEECH_MAX_TEXT_WIDTH 300
+#define SPEECH_PADDING_X 6
+#define SPEECH_PADDING_Y 3
+#define SPEECH_SPRITE_GAP 4
 #define MAX_DRAW_COMMANDS 4096
 #define FIRST_GLYPH_REGION 512
 #define LAST_GLYPH_REGION 4095
@@ -40,6 +44,11 @@ static int draw_command_y[MAX_DRAW_COMMANDS];
 static int draw_command_color[MAX_DRAW_COMMANDS];
 static float draw_command_scale_x[MAX_DRAW_COMMANDS];
 static float draw_command_scale_y[MAX_DRAW_COMMANDS];
+static int ambient_overlay_count;
+static int ambient_overlay_left[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
+static int ambient_overlay_top[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
+static int ambient_overlay_right[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
+static int ambient_overlay_bottom[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
 
 static int prepared_dialogue = -1;
 static int prepared_node;
@@ -129,10 +138,11 @@ static int view_y(int y)
     return (y * 3) / 2;
 }
 
-static void record_texture(int texture, int width, int height, int x, int y)
+static void record_texture(int texture, int texture_x, int texture_y,
+                           int width, int height, int x, int y)
 {
-    int source_x = 0;
-    int source_y = 0;
+    int source_x = texture_x;
+    int source_y = texture_y;
     int visible_width = width;
     int visible_height = height;
 
@@ -144,13 +154,15 @@ static void record_texture(int texture, int width, int height, int x, int y)
      * when most of it lies outside the screen. Change the texture region so
      * large scenery at a viewport edge only consumes pixels that can appear. */
     if (x < 0) {
-        source_x = -x;
-        visible_width -= source_x;
+        int clipped = -x;
+        source_x += clipped;
+        visible_width -= clipped;
         x = 0;
     }
     if (y < 0) {
-        source_y = -y;
-        visible_height -= source_y;
+        int clipped = -y;
+        source_y += clipped;
+        visible_height -= clipped;
         y = 0;
     }
     if (x + visible_width > GAME_WIDTH)
@@ -165,7 +177,8 @@ static void record_texture(int texture, int width, int height, int x, int y)
 
 static void record_frame(const struct generated_runtime_frame *frame, int x, int y)
 {
-    record_texture(frame->texture, frame->width, frame->height, x, y);
+    record_texture(frame->texture, frame->source_x, frame->source_y,
+                   frame->width, frame->height, x, y);
 }
 
 static void record_solid_rect(int x, int y, int width, int height, int color)
@@ -179,7 +192,8 @@ static void record_ui_frame(const struct generated_runtime_frame *frame,
 {
     if (frame == 0 || frame->texture < 0)
         return;
-    record_draw(frame->texture, 0, 0, 0, frame->width, frame->height,
+    record_draw(frame->texture, 0, frame->source_x, frame->source_y,
+                frame->width, frame->height,
                 x, y, scale, scale, 0xFFFFFFFF);
 }
 
@@ -218,6 +232,46 @@ static int record_runtime_text(int x, int y, int width, int bottom,
         cursor_x += glyph->advance;
     }
     return cursor_y + DIALOG_LINE_HEIGHT;
+}
+
+static void measure_runtime_text(const struct generated_runtime_text *text,
+                                 int maximum_width, int *width, int *height)
+{
+    int cursor_x = 0;
+    int used_width = 0;
+    int lines = 1;
+    int index;
+    if (text == 0 || text->glyph_count <= 0) {
+        *width = 0;
+        *height = DIALOG_LINE_HEIGHT;
+        return;
+    }
+    for (index = 0; index < text->glyph_count; ++index) {
+        int glyph_index = text->glyphs[index];
+        if (glyph_index < 0) {
+            cursor_x += generated_runtime_space_advance;
+            continue;
+        }
+        if (index == 0 || text->glyphs[index - 1] < 0) {
+            int scan = index;
+            int word_width = 0;
+            while (scan < text->glyph_count && text->glyphs[scan] >= 0) {
+                word_width += generated_runtime_glyphs[text->glyphs[scan]].advance;
+                ++scan;
+            }
+            if (cursor_x > 0 && cursor_x + word_width > maximum_width) {
+                if (cursor_x > used_width)
+                    used_width = cursor_x;
+                cursor_x = 0;
+                ++lines;
+            }
+        }
+        cursor_x += generated_runtime_glyphs[glyph_index].advance;
+        if (cursor_x > used_width)
+            used_width = cursor_x;
+    }
+    *width = used_width;
+    *height = lines * DIALOG_LINE_HEIGHT;
 }
 
 static void record_dialogue_panel(const struct world_state *world)
@@ -416,6 +470,77 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
     }
 }
 
+static void record_ambient_speech(const struct world_state *world, int camera_x, int camera_y)
+{
+    int entity_index;
+    for (entity_index = 0; entity_index < world->scene->entity_count; ++entity_index) {
+        const struct generated_runtime_text *speech =
+            world_entity_speech(world, entity_index);
+        const struct generated_runtime_entity *entity = &world->scene->entities[entity_index];
+        const struct generated_runtime_actor_visual *visual;
+        const struct generated_runtime_frame *frame;
+        int anchor_x;
+        int sprite_top;
+        int sprite_bottom;
+        int text_width;
+        int text_height;
+        int bubble_width;
+        int bubble_height;
+        int bubble_x;
+        int bubble_y;
+        int tail_x;
+        if (speech == 0 || !world_entity_is_present(world, entity_index))
+            continue;
+        visual = &generated_runtime_actor_visuals[entity->visual];
+        frame = entity_frame(world, entity_index);
+        anchor_x = view_x(world_entity_pixel_x(world, entity_index) -
+                          visual->base_x * world->scene->tile_size + frame->offset_x -
+                          camera_x + frame->width / 2);
+        sprite_top = view_y(world_entity_pixel_y(world, entity_index) -
+                            visual->base_y * world->scene->tile_size + frame->offset_y -
+                            camera_y);
+        sprite_bottom = sprite_top + (frame->height * 3) / 2;
+        measure_runtime_text(speech, SPEECH_MAX_TEXT_WIDTH, &text_width, &text_height);
+        bubble_width = text_width + SPEECH_PADDING_X * 2;
+        bubble_height = text_height + SPEECH_PADDING_Y * 2;
+        bubble_x = anchor_x - bubble_width / 2;
+        if (bubble_x < 6) bubble_x = 6;
+        if (bubble_x + bubble_width > DISPLAY_WIDTH - 6)
+            bubble_x = DISPLAY_WIDTH - 6 - bubble_width;
+        bubble_y = sprite_top - bubble_height - SPEECH_SPRITE_GAP;
+        if (bubble_y < 6)
+            bubble_y = sprite_bottom + SPEECH_SPRITE_GAP;
+        tail_x = anchor_x;
+        if (tail_x < bubble_x + 4) tail_x = bubble_x + 4;
+        if (tail_x > bubble_x + bubble_width - 4)
+            tail_x = bubble_x + bubble_width - 4;
+
+        if (ambient_overlay_count < GENERATED_RUNTIME_ENTITY_STORAGE_COUNT) {
+            int overlay = ambient_overlay_count++;
+            ambient_overlay_left[overlay] = bubble_x - 1;
+            ambient_overlay_top[overlay] = bubble_y - SPEECH_SPRITE_GAP - 1;
+            ambient_overlay_right[overlay] = bubble_x + bubble_width + 1;
+            ambient_overlay_bottom[overlay] =
+                bubble_y + bubble_height + SPEECH_SPRITE_GAP + 1;
+        }
+
+        record_solid_rect(bubble_x - 1, bubble_y - 1,
+                          bubble_width + 2, bubble_height + 2, 0x908A642C);
+        record_solid_rect(bubble_x, bubble_y,
+                          bubble_width, bubble_height, 0x78101820);
+        record_runtime_text(bubble_x + SPEECH_PADDING_X,
+                            bubble_y + SPEECH_PADDING_Y, text_width,
+                            bubble_y + bubble_height - SPEECH_PADDING_Y,
+                            speech, 0xFFFFFFFF);
+        if (bubble_y < sprite_top)
+            record_solid_rect(tail_x - 2, bubble_y + bubble_height,
+                              4, SPEECH_SPRITE_GAP, 0x908A642C);
+        else
+            record_solid_rect(tail_x - 2, bubble_y - SPEECH_SPRITE_GAP,
+                              4, SPEECH_SPRITE_GAP, 0x908A642C);
+    }
+}
+
 void platform_poll_actions(struct world_actions *actions)
 {
     static int interaction_was_held;
@@ -496,6 +621,7 @@ static void prepare_world_frame(const struct world_state *world)
     int camera_x;
     int camera_y;
     draw_command_count = 0;
+    ambient_overlay_count = 0;
     prepared_dirty_valid = 0;
     prepared_replay_commands = 0;
     camera_for_player(world, &camera_x, &camera_y);
@@ -508,6 +634,8 @@ static void prepare_world_frame(const struct world_state *world)
     draw_depth_sorted_objects(world, camera_x, camera_y);
     if (world_dialogue_is_open(world))
         record_dialogue_panel(world);
+    else
+        record_ambient_speech(world, camera_x, camera_y);
 }
 
 static int command_intersects_rectangle(int index, int left, int top, int right, int bottom)
@@ -518,6 +646,16 @@ static int command_intersects_rectangle(int index, int left, int top, int right,
     int y = draw_command_y[index];
     return width > 0 && height > 0 && x < right && y < bottom &&
            x + width > left && y + height > top;
+}
+
+static int ambient_overlay_intersects_rectangle(int left, int top, int right, int bottom)
+{
+    int index;
+    for (index = 0; index < ambient_overlay_count; ++index)
+        if (ambient_overlay_left[index] < right && ambient_overlay_top[index] < bottom &&
+            ambient_overlay_right[index] > left && ambient_overlay_bottom[index] > top)
+            return 1;
+    return 0;
 }
 
 static void draw_dirty_backdrop(void)
@@ -730,6 +868,17 @@ static void configure_dirty_replay(const struct world_state *world)
         prepared_dirty_bottom = DISPLAY_HEIGHT;
     if (prepared_dirty_right <= prepared_dirty_left ||
         prepared_dirty_bottom <= prepared_dirty_top)
+        return;
+
+    /* Ambient panels are screen-space command groups: translucent rectangles,
+     * a tail, and several independently recorded glyphs. The world-texture
+     * clipper cannot safely replay only a fragment of that group; its backdrop
+     * would erase the panel while non-intersecting glyphs remained omitted.
+     * Use the coherent full-frame path only when a player's dirty rectangle
+     * actually touches a bubble. Ordinary movement keeps partial replay. */
+    if (ambient_overlay_intersects_rectangle(
+            prepared_dirty_left, prepared_dirty_top,
+            prepared_dirty_right, prepared_dirty_bottom))
         return;
 
     prepared_dirty_valid = 1;

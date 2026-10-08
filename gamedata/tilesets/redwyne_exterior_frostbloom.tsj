@@ -1,0 +1,1313 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_exterior_frostbloom",
+  "tilecount": 24,
+  "tiledversion": "1.11.0",
+  "tileheight": 30,
+  "tilewidth": 20,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_stand_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 1,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_stand_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 2,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_stand_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 3,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_stand_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 4,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 5,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_north_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 6,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_north_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 7,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_north_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 8,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_north_i4.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 9,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 10,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_south_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 11,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_south_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 12,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_south_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 13,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_south_i4.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 14,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 15,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_west_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 16,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_west_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 17,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_west_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 18,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_west_i4.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 19,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 20,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_east_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 21,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_east_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 22,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_east_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 23,
+      "image": "../assets/tiles/redwyne_exterior_frostbloom/frostbloom_walk_east_i4.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "frostbloom.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

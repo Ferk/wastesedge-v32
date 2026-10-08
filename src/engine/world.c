@@ -149,6 +149,43 @@ static void apply_dialogue_choice(struct world_state *world,
     world->dialogue_node = choice->next_node;
 }
 
+static int dialogue_choice_is_visible(
+    const struct world_state *world,
+    const struct generated_runtime_dialogue_choice *choice)
+{
+    return choice->condition_flag < 0 ||
+           (choice->condition_flag < GENERATED_RUNTIME_FLAG_COUNT &&
+            world->flags[choice->condition_flag] == choice->condition_value);
+}
+
+static const struct generated_runtime_dialogue_choice *dialogue_visible_choice(
+    const struct world_state *world,
+    const struct generated_runtime_dialogue_node *node,
+    int visible_index)
+{
+    int index;
+    for (index = 0; index < node->choice_count; ++index) {
+        if (!dialogue_choice_is_visible(world, &node->choices[index]))
+            continue;
+        if (visible_index == 0)
+            return &node->choices[index];
+        --visible_index;
+    }
+    return 0;
+}
+
+static int dialogue_visible_choice_count(
+    const struct world_state *world,
+    const struct generated_runtime_dialogue_node *node)
+{
+    int count = 0;
+    int index;
+    for (index = 0; index < node->choice_count; ++index)
+        if (dialogue_choice_is_visible(world, &node->choices[index]))
+            ++count;
+    return count;
+}
+
 static void start_script(struct world_state *world, int script)
 {
     if (script < 0 || script >= generated_runtime_script_count)
@@ -278,6 +315,14 @@ static int schedule_random_delay(struct world_state *world, int minimum, int max
     return range > 1 ? minimum + world->schedule_random % range : minimum;
 }
 
+static int speech_random_value(struct world_state *world, int minimum, int maximum)
+{
+    int range;
+    world->speech_random = (world->speech_random * 25173 + 13849) % 65536;
+    range = maximum - minimum + 1;
+    return range > 1 ? minimum + world->speech_random % range : minimum;
+}
+
 static int actor_anchor_blocked(const struct world_state *world, int definition,
                                 int scene_index, int x, int y)
 {
@@ -392,11 +437,42 @@ static void update_actor_schedule(struct world_state *world, int definition)
     ++world->visual_revision;
 }
 
+static void update_actor_speech(struct world_state *world, int definition)
+{
+    struct world_actor_state *actor = &world->actors[definition];
+    const struct generated_runtime_schedule *schedule;
+    if (actor->schedule < 0 || actor->schedule >= generated_runtime_schedule_count ||
+        world->dialogue >= 0)
+        return;
+    schedule = &generated_runtime_schedules[actor->schedule];
+    if (schedule->speech_count <= 0)
+        return;
+    if (actor->speech_frames > 0) {
+        --actor->speech_frames;
+        if (actor->speech_frames == 0) {
+            actor->speech_line = -1;
+            actor->speech_wait = speech_random_value(
+                world, schedule->speech_delay_min, schedule->speech_delay_max);
+            ++world->visual_revision;
+        }
+        return;
+    }
+    if (actor->speech_wait > 0) {
+        --actor->speech_wait;
+        return;
+    }
+    actor->speech_line = speech_random_value(world, 0, schedule->speech_count - 1);
+    actor->speech_frames = schedule->speech_duration;
+    ++world->visual_revision;
+}
+
 static void update_schedules(struct world_state *world)
 {
     int definition;
-    for (definition = 0; definition < GENERATED_RUNTIME_ENTITY_COUNT; ++definition)
+    for (definition = 0; definition < GENERATED_RUNTIME_ENTITY_COUNT; ++definition) {
         update_actor_schedule(world, definition);
+        update_actor_speech(world, definition);
+    }
 }
 
 static void start_actor_schedule(struct world_state *world, int definition,
@@ -408,9 +484,19 @@ static void start_actor_schedule(struct world_state *world, int definition,
         generated_runtime_schedules[schedule].entity != definition)
         return;
     actor = &world->actors[definition];
+    if (actor->speech_line >= 0)
+        ++world->visual_revision;
     actor->schedule = schedule;
     actor->schedule_step = 0;
     actor->schedule_wait = delay;
+    actor->speech_line = -1;
+    actor->speech_frames = 0;
+    if (generated_runtime_schedules[schedule].speech_count > 0)
+        actor->speech_wait = speech_random_value(
+            world, generated_runtime_schedules[schedule].speech_delay_min,
+            generated_runtime_schedules[schedule].speech_delay_max);
+    else
+        actor->speech_wait = 0;
 }
 
 static void set_entity_state(struct world_state *world, int definition, int state)
@@ -517,9 +603,15 @@ static void update_script(struct world_state *world)
         }
         if (action->op == GENERATED_SCRIPT_STOP_SCHEDULE) {
             if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT) {
+                if (world->actors[action->a].moving ||
+                    world->actors[action->a].speech_line >= 0)
+                    ++world->visual_revision;
                 world->actors[action->a].schedule = -1;
                 world->actors[action->a].moving = 0;
                 world->actors[action->a].move_progress = 0;
+                world->actors[action->a].speech_line = -1;
+                world->actors[action->a].speech_wait = 0;
+                world->actors[action->a].speech_frames = 0;
             }
             ++world->script_action;
             continue;
@@ -592,6 +684,9 @@ void world_initialize(struct world_state *world)
         world->actors[index].schedule = -1;
         world->actors[index].schedule_step = 0;
         world->actors[index].schedule_wait = 0;
+        world->actors[index].speech_line = -1;
+        world->actors[index].speech_wait = 0;
+        world->actors[index].speech_frames = 0;
         world->actors[index].dialogue = -1;
     }
     for (scene_index = 0; scene_index < generated_runtime_scene_count; ++scene_index) {
@@ -622,6 +717,7 @@ void world_initialize(struct world_state *world)
     world->music_revision = 0;
     world->visual_revision = 0;
     world->schedule_random = 1;
+    world->speech_random = 17;
     if (select_player_entity(world)) {
         const struct generated_runtime_entity *entity = &world->scene->entities[world->player_entity];
         world->player_x = entity->tile_x;
@@ -642,16 +738,21 @@ void world_update(struct world_state *world, const struct world_actions *actions
     if (world->dialogue >= 0) {
         const struct generated_runtime_dialogue *dialogue = &generated_runtime_dialogues[world->dialogue];
         const struct generated_runtime_dialogue_node *node = &dialogue->nodes[world->dialogue_node];
-        if (node->choice_count > 0 && actions->choice_move != 0) {
+        int choice_count = dialogue_visible_choice_count(world, node);
+        if (choice_count > 0 && actions->choice_move != 0) {
             world->dialogue_choice += actions->choice_move;
             if (world->dialogue_choice < 0)
-                world->dialogue_choice = node->choice_count - 1;
-            if (world->dialogue_choice >= node->choice_count)
+                world->dialogue_choice = choice_count - 1;
+            if (world->dialogue_choice >= choice_count)
                 world->dialogue_choice = 0;
         }
         if (actions->interact_pressed) {
-            if (node->choice_count > 0) {
-                apply_dialogue_choice(world, &node->choices[world->dialogue_choice]);
+            if (choice_count > 0) {
+                const struct generated_runtime_dialogue_choice *choice =
+                    dialogue_visible_choice(world, node, world->dialogue_choice);
+                if (choice == 0)
+                    return;
+                apply_dialogue_choice(world, choice);
                 world->dialogue_choice = 0;
                 advance_past_player_lines(world);
             } else if (node->next_node >= 0) {
@@ -835,17 +936,22 @@ const char *world_dialogue_choice_text(const struct world_state *world)
 const char *world_dialogue_choice_at(const struct world_state *world, int index)
 {
     const struct generated_runtime_dialogue_node *node;
+    const struct generated_runtime_dialogue_choice *choice;
     if (world->dialogue < 0)
         return "";
     node = &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node];
-    return index >= 0 && index < node->choice_count ? node->choices[index].text : "";
+    if (index < 0)
+        return "";
+    choice = dialogue_visible_choice(world, node, index);
+    return choice != 0 ? choice->text : "";
 }
 
 int world_dialogue_choice_count(const struct world_state *world)
 {
     if (world->dialogue < 0)
         return 0;
-    return generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node].choice_count;
+    return dialogue_visible_choice_count(
+        world, &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node]);
 }
 
 int world_dialogue_choice_selected(const struct world_state *world)
@@ -874,10 +980,26 @@ const struct generated_runtime_text *world_dialogue_display(const struct world_s
 const struct generated_runtime_text *world_dialogue_choice_display(const struct world_state *world, int index)
 {
     const struct generated_runtime_dialogue_node *node;
+    const struct generated_runtime_dialogue_choice *choice;
     if (world->dialogue < 0)
         return 0;
     node = &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node];
-    if (index < 0 || index >= node->choice_count)
+    if (index < 0)
         return 0;
-    return &node->choices[index].display;
+    choice = dialogue_visible_choice(world, node, index);
+    return choice != 0 ? &choice->display : 0;
+}
+
+const struct generated_runtime_text *world_entity_speech(
+    const struct world_state *world, int entity_index)
+{
+    const struct world_actor_state *actor = const_actor_state_for_entity(world, entity_index);
+    const struct generated_runtime_schedule *schedule;
+    if (actor == 0 || actor->schedule < 0 ||
+        actor->schedule >= generated_runtime_schedule_count || actor->speech_line < 0)
+        return 0;
+    schedule = &generated_runtime_schedules[actor->schedule];
+    if (actor->speech_line >= schedule->speech_count)
+        return 0;
+    return &schedule->speech[actor->speech_line];
 }

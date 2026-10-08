@@ -1,0 +1,107 @@
+{
+  "id": "oliver_start",
+  "start": [
+    { "node": "repeat_narration", "when": { "flag": "oliver_talked", "equals": 1 } },
+    { "node": "first_narration" }
+  ],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "oliver", "name": "Oliver Redwyne", "role": "npc", "entity": "oliver",
+      "portrait": "assets/ui/portraits/oliver.png" },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    {
+      "id": "first_narration", "speaker": "narrator",
+      "text": "As he notices you, the boy stops whatever he's been doing. With a cheerful grin on his face, he turns towards you.",
+      "next": "welcome"
+    },
+    {
+      "id": "welcome", "speaker": "oliver",
+      "text": "Hello sir! Welcome to Waste's Edge.",
+      "choices": [
+        { "text": "And who would you be?",
+          "actions": [{ "op": "set", "flag": "oliver_talked", "value": 1 }],
+          "next": "introduction" }
+      ]
+    },
+    {
+      "id": "introduction", "speaker": "oliver",
+      "text": "Oh! I am Oliver, sir. I help Mum and Dad with the Inn. Looking after the stables and such.",
+      "next": "question_menu"
+    },
+    {
+      "id": "repeat_narration", "speaker": "narrator",
+      "text": "Oliver looks pleased as he sees you nearing.",
+      "next": "repeat_greeting"
+    },
+    {
+      "id": "repeat_greeting", "speaker": "oliver",
+      "text": "Uh, hello again sir. Do you have more questions?",
+      "next": "question_menu"
+    },
+    {
+      "id": "question_menu", "speaker": "oliver",
+      "text": "What would you like to know, sir?",
+      "choices": [
+        { "text": "You can surely tell me something about Waste's Edge, then.", "next": "lady_guest" },
+        { "text": "Did something unusual happen here lately, Oliver?", "next": "theft" },
+        { "text": "Then I don't want to keep you off your work any longer.", "next": "goodbye" }
+      ]
+    },
+    {
+      "id": "lady_guest", "speaker": "oliver",
+      "text": "Why yes! Would you believe that we have an actual Elven Lady staying at the Inn?",
+      "choices": [
+        { "text": "Really? An Elven Lady?", "next": "lady_details" },
+        { "text": "Are there other guests too?", "next": "other_guests" }
+      ]
+    },
+    {
+      "id": "lady_details", "speaker": "oliver",
+      "text": "Yes, sir. Lady Silverbeard. From Cirdanth. And her two servants! She frightened me a bit, but now she's locked up in her room.",
+      "choices": [
+        { "text": "Why would anyone want to lock her up?", "next": "theft" },
+        { "text": "Then you better tell me about the Elven Lady, Oliver.", "next": "theft_story" }
+      ]
+    },
+    {
+      "id": "other_guests", "speaker": "oliver",
+      "text": "Yes, but they are just ordinary people. Merchants and such.",
+      "next": "question_menu"
+    },
+    {
+      "id": "theft", "speaker": "oliver",
+      "text": "Have you heard about the theft, sir? Everybody speaks about it.",
+      "choices": [
+        { "text": "What can you tell me about that?", "next": "theft_story" }
+      ]
+    },
+    {
+      "id": "theft_story", "speaker": "oliver",
+      "text": "Can you imagine, sir? The Elven Lady robbed Master Fingolson in his sleep. And none of the adults noticed anything.",
+      "choices": [
+        { "text": "Who is Master Fingolson?", "next": "fingolson" },
+        { "text": "But you heard something that night?", "next": "stable_noise" }
+      ]
+    },
+    {
+      "id": "fingolson", "speaker": "oliver",
+      "text": "Just another Dwarf from Uzdun'kal. He sells jewels and such. We get a lot of them here, but none of them got robbed so far.",
+      "choices": [
+        { "text": "Speaking of that, you say you noticed something that night?", "next": "stable_noise" }
+      ]
+    },
+    {
+      "id": "stable_noise", "speaker": "oliver",
+      "text": "Yeah. Someone must have been in the stables. But when I went and had a look, they were gone.",
+      "next": "question_menu"
+    },
+    {
+      "id": "goodbye", "speaker": "player",
+      "text": "I see. Thank you for your help, Oliver. Until later.",
+      "end": true
+    }
+  ]
+}

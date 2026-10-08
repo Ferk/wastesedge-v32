@@ -20,6 +20,7 @@ DIALOGUE_TEXT_FONT_SIZE = 15
 DIALOGUE_TEXT_LINE_HEIGHT = 19
 DIALOGUE_ATLAS_WIDTH = 512
 DIALOGUE_ATLAS_HEIGHT = 512
+CHARACTER_SHEET_WIDTHS = (256, 512, 1024)
 
 
 class ContentError(Exception):
@@ -176,6 +177,35 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
             loop = schedule.get("loop", True)
             if not isinstance(loop, bool):
                 raise ContentError(f"{path}: schedule {schedule_id!r} loop must be a bool")
+            speech = None
+            raw_speech = schedule.get("speech")
+            if raw_speech is not None:
+                raw_speech = expect(raw_speech, dict, f"{path} schedule {schedule_id} speech")
+                speech_lines: list[str] = []
+                for line_number, raw_line in enumerate(expect(
+                        raw_speech.get("lines"), list,
+                        f"{path} schedule {schedule_id} speech lines")):
+                    line = expect(raw_line, str,
+                                  f"{path} schedule {schedule_id} speech line {line_number}")
+                    if not line:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} has an empty speech line")
+                    speech_lines.append(line)
+                if not speech_lines:
+                    raise ContentError(
+                        f"{path}: schedule {schedule_id!r} speech needs at least one line")
+                speech_delay_min = integer(raw_speech.get("delay_min_frames"),
+                                           f"{path} schedule {schedule_id} speech minimum delay")
+                speech_delay_max = integer(raw_speech.get("delay_max_frames"),
+                                           f"{path} schedule {schedule_id} speech maximum delay")
+                speech_duration = integer(raw_speech.get("duration_frames", 180),
+                                          f"{path} schedule {schedule_id} speech duration")
+                if (speech_delay_min < 1 or speech_delay_max < speech_delay_min or
+                        speech_duration < 1):
+                    raise ContentError(
+                        f"{path}: schedule {schedule_id!r} has invalid speech timing")
+                speech = {"lines": speech_lines, "delay_min": speech_delay_min,
+                          "delay_max": speech_delay_max, "duration": speech_duration}
             steps: list[dict[str, object]] = []
             for index, raw_step in enumerate(expect(schedule.get("steps"), list,
                                                      f"{path} schedule {schedule_id} steps")):
@@ -202,7 +232,7 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
             if not steps:
                 raise ContentError(f"{path}: schedule {schedule_id!r} must contain at least one step")
             result[schedule_id] = {"id": schedule_id, "entity": entity_id,
-                                   "loop": loop, "steps": steps}
+                                   "loop": loop, "steps": steps, "speech": speech}
     return result
 
 
@@ -328,6 +358,11 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                 if "next" in choice and identifier(choice["next"], f"{path} choice next") not in node_ids:
                     raise ContentError(f"{path}: choice refers to an unknown next node")
                 expect(choice.get("text"), str, f"{path} choice text")
+                when = choice.get("when")
+                if when is not None:
+                    condition = expect(when, dict, f"{path} choice condition")
+                    identifier(condition.get("flag"), f"{path} choice condition flag")
+                    integer(condition.get("equals"), f"{path} choice condition equals")
                 for action in expect(choice.get("actions", []), list, f"{path} choice actions"):
                     action = expect(action, dict, f"{path} choice action")
                     if identifier(action.get("op"), f"{path} choice action op") != "set":
@@ -738,9 +773,99 @@ def materialize_scenery_strips(scenes: list[dict[str, object]], game_root: Path,
                 existing.unlink()
 
 
-def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]], game_root: Path,
+def materialize_character_sheets(visuals: list[dict[str, object]], game_root: Path,
+                                 output_root: Path) -> None:
+    """Pack each actor's authored frame PNGs into one runtime texture."""
+    try:
+        from PIL import Image
+    except ImportError as error:
+        raise ContentError("Pillow is required to build character sheets") from error
+
+    used_outputs: set[Path] = set()
+    for visual in visuals:
+        source_character = expect(visual["source_character"], str, "runtime actor source_character")
+        frame_groups = expect(visual["frames"], list, "runtime actor frames")
+        frames = [frame for group in frame_groups for frame in expect(group, list, "runtime actor frame group")
+                  if frame is not None]
+        unique_frames: dict[str, dict[str, object]] = {}
+        for frame_value in frames:
+            frame = expect(frame_value, dict, "runtime actor frame")
+            image = expect(frame["image"], str, "runtime actor image")
+            unique_frames.setdefault(image, frame)
+
+        loaded: dict[str, object] = {}
+        for image, frame in unique_frames.items():
+            source_path = game_root / image
+            try:
+                with Image.open(source_path) as source:
+                    loaded[image] = source.convert("RGBA")
+            except OSError as error:
+                raise ContentError(f"cannot read actor frame {source_path}: {error}") from error
+            expected_size = (integer(frame["width"], "runtime actor frame width"),
+                             integer(frame["height"], "runtime actor frame height"))
+            if loaded[image].size != expected_size:
+                raise ContentError(
+                    f"actor frame {source_path} is {loaded[image].width}x{loaded[image].height}, "
+                    f"expected {expected_size[0]}x{expected_size[1]}"
+                )
+            if loaded[image].width > 1024 or loaded[image].height > 1024:
+                raise ContentError(f"actor frame {source_path} exceeds Vircon32's 1024x1024 texture limit")
+
+        placements: dict[str, tuple[int, int]] | None = None
+        sheet_width = 0
+        sheet_height = 0
+        for candidate_width in CHARACTER_SHEET_WIDTHS:
+            candidate: dict[str, tuple[int, int]] = {}
+            cursor_x = 0
+            cursor_y = 0
+            row_height = 0
+            used_width = 0
+            for image, source in loaded.items():
+                if cursor_x and cursor_x + source.width > candidate_width:
+                    cursor_x = 0
+                    cursor_y += row_height
+                    row_height = 0
+                candidate[image] = (cursor_x, cursor_y)
+                cursor_x += source.width
+                row_height = max(row_height, source.height)
+                used_width = max(used_width, cursor_x)
+            candidate_height = cursor_y + row_height
+            if candidate_height <= 1024:
+                placements = candidate
+                sheet_width = used_width
+                sheet_height = candidate_height
+                break
+        if placements is None or sheet_width <= 0 or sheet_height <= 0:
+            raise ContentError(
+                f"actor tileset {source_character!r} cannot fit in one Vircon32 1024x1024 texture"
+            )
+
+        sheet = Image.new("RGBA", (sheet_width, sheet_height), (0, 0, 0, 0))
+        for image, source in loaded.items():
+            sheet.alpha_composite(source, placements[image])
+        source_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", Path(source_character).stem)
+        source_hash = hashlib.sha256(source_character.encode("utf-8")).hexdigest()[:8]
+        relative_output = Path("characters") / f"{source_stem}-{source_hash}.png"
+        write_generated_png(output_root / relative_output, sheet)
+        used_outputs.add(relative_output)
+        runtime_image = GENERATED_RESOURCE_PREFIX + relative_output.as_posix()
+        for frame_value in frames:
+            frame = expect(frame_value, dict, "runtime actor frame")
+            authored_image = expect(frame["image"], str, "runtime actor image")
+            frame["image"] = runtime_image
+            frame["source_x"], frame["source_y"] = placements[authored_image]
+
+    character_root = output_root / "characters"
+    if character_root.is_dir():
+        for existing in character_root.glob("*.png"):
+            if existing.relative_to(output_root) not in used_outputs:
+                existing.unlink()
+
+
+def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
+                                     schedules: list[dict[str, object]], game_root: Path,
                                      output_root: Path) -> tuple[list[dict[str, object]], int]:
-    """Render each distinct dialogue glyph once and encode text as glyph indices."""
+    """Render each distinct UI glyph once and encode dialogue and ambient speech."""
     try:
         from PIL import Image, ImageDraw, ImageFont
     except ImportError as error:
@@ -768,6 +893,11 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]], game_ro
             character_set.update(expect(node["text"], str, "dialogue node text"))
             for choice in expect(node["choices"], list, "runtime dialogue choices"):
                 character_set.update(expect(choice["text"], str, "dialogue choice text"))
+    for schedule in schedules:
+        speech = schedule.get("speech")
+        if speech is not None:
+            for line in expect(speech["lines"], list, "runtime schedule speech lines"):
+                character_set.update(expect(line, str, "runtime schedule speech line"))
     character_set.discard(" ")
     character_set.discard("\n")
     character_set.discard("\r")
@@ -847,6 +977,10 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]], game_ro
             node["text_glyphs"] = encode(str(node["text"]))
             for choice in node["choices"]:
                 choice["text_glyphs"] = encode(str(choice["text"]))
+    for schedule in schedules:
+        speech = schedule.get("speech")
+        if speech is not None:
+            speech["line_glyphs"] = [encode(str(line)) for line in speech["lines"]]
     return entries, max(1, int(font.getlength(" ") + 0.5))
 
 
@@ -934,6 +1068,17 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
             choices: list[dict[str, object]] = []
             for raw_choice in expect(node.get("choices", []), list, f"{path} choices"):
                 choice = expect(raw_choice, dict, f"{path} choice")
+                raw_condition = choice.get("when")
+                if raw_condition is None:
+                    condition_flag = None
+                    condition_value = 0
+                else:
+                    condition = expect(raw_condition, dict, f"{path} choice condition")
+                    condition_flag = identifier(
+                        condition.get("flag"), f"{path} choice condition flag")
+                    condition_value = integer(
+                        condition.get("equals"), f"{path} choice condition equals")
+                    flags.add(condition_flag)
                 actions: list[dict[str, int]] = []
                 for raw_action in expect(choice.get("actions", []), list, f"{path} choice actions"):
                     action = expect(raw_action, dict, f"{path} choice action")
@@ -944,6 +1089,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                     "text": expect(choice.get("text"), str, f"{path} choice text"),
                     "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
                     "actions": actions,
+                    "condition_flag": condition_flag,
+                    "condition_value": condition_value,
                 })
             explicit_next = node.get("next")
             if explicit_next is not None:
@@ -992,6 +1139,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 start["flag"] = flag_index[str(start["flag"])]
         for node in dialogue["nodes"]:
             for choice in node["choices"]:
+                if choice["condition_flag"] is not None:
+                    choice["condition_flag"] = flag_index[str(choice["condition_flag"])]
                 for action in choice["actions"]:
                     action["flag"] = flag_index[str(action["flag"])]
     return dialogues, script_dialogues, sorted(flags)
@@ -1026,7 +1175,8 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
         result.append({"id": schedule_id,
                        "entity": entity_index[str(schedule["entity"])],
                        "loop": int(bool(schedule["loop"])),
-                       "steps": steps})
+                       "steps": steps,
+                       "speech": schedule["speech"]})
     return result
 
 
@@ -1479,7 +1629,7 @@ def runtime_header(flag_count: int, max_stateful_scenery: int, entity_count: int
 #ifndef WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 #define WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 
-struct generated_runtime_frame { int texture, width, height, offset_x, offset_y; };
+struct generated_runtime_frame { int texture, source_x, source_y, width, height, offset_x, offset_y; };
 struct generated_runtime_actor_visual {
     int base_x, base_y;
     struct generated_runtime_frame standing[4];
@@ -1497,7 +1647,11 @@ struct generated_runtime_music { int sound, loop; float speed, volume; };
 struct generated_runtime_script_action { int op, a, b, c, d; };
 struct generated_runtime_script { const struct generated_runtime_script_action *actions; int action_count; };
 struct generated_runtime_schedule_step { int op, scene, x, y, facing, delay_min, delay_max; };
-struct generated_runtime_schedule { const struct generated_runtime_schedule_step *steps; int step_count, entity, loop; };
+struct generated_runtime_schedule {
+    const struct generated_runtime_schedule_step *steps;
+    const struct generated_runtime_text *speech;
+    int step_count, entity, loop, speech_count, speech_delay_min, speech_delay_max, speech_duration;
+};
 struct generated_runtime_dialogue_action { int flag, value; };
 struct generated_runtime_glyph { int texture, min_x, min_y, max_x, max_y, hotspot_x, advance; };
 struct generated_runtime_text { const int *glyphs; int glyph_count; };
@@ -1511,7 +1665,7 @@ struct generated_runtime_dialogue_choice {
     const char *text;
     struct generated_runtime_text display;
     const struct generated_runtime_dialogue_action *actions;
-    int action_count, next_node;
+    int action_count, next_node, condition_flag, condition_value;
 };
 struct generated_runtime_dialogue_node {
     const char *text;
@@ -1581,10 +1735,12 @@ extern const int generated_runtime_space_advance;
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
     if frame is None:
-        return "{ -1, 0, 0, 0, 0 }"
+        return "{ -1, 0, 0, 0, 0, 0, 0 }"
     frame = expect(frame, dict, "runtime frame")
-    return "{ %d, %d, %d, %d, %d }" % (
-        resource_index[str(frame["image"])], integer(frame["width"], "runtime frame width"),
+    return "{ %d, %d, %d, %d, %d, %d, %d }" % (
+        resource_index[str(frame["image"])], integer(frame.get("source_x", 0), "runtime frame source_x"),
+        integer(frame.get("source_y", 0), "runtime frame source_y"),
+        integer(frame["width"], "runtime frame width"),
         integer(frame["height"], "runtime frame height"), integer(frame["offset_x"], "runtime frame offset_x"),
         integer(frame["offset_y"], "runtime frame offset_y"),
     )
@@ -1675,9 +1831,29 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append(f"static const struct generated_runtime_schedule_step generated_runtime_schedule_steps_{index}[] = {{")
         lines.extend("    { %d, %d, %d, %d, %d, %d, %d }," % step for step in schedule["steps"])
         lines.append("};")
+        speech = schedule.get("speech")
+        if speech is not None:
+            for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
+                lines.append(
+                    f"static const int generated_runtime_schedule_speech_glyphs_{index}_{line_index}[] = {{ " +
+                    ", ".join(str(glyph) for glyph in line_glyphs) + " };")
+            lines.append(f"static const struct generated_runtime_text generated_runtime_schedule_speech_{index}[] = {{")
+            for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
+                lines.append(
+                    f"    {{ generated_runtime_schedule_speech_glyphs_{index}_{line_index}, {len(line_glyphs)} }},")
+            lines.append("};")
     lines.append("const struct generated_runtime_schedule generated_runtime_schedules[] = {")
     for index, schedule in enumerate(schedules):
-        lines.append(f"    {{ generated_runtime_schedule_steps_{index}, {len(schedule['steps'])}, {schedule['entity']}, {schedule['loop']} }},")
+        speech = schedule.get("speech")
+        speech_name = f"generated_runtime_schedule_speech_{index}" if speech is not None else "0"
+        speech_count = len(speech["lines"]) if speech is not None else 0
+        delay_min = speech["delay_min"] if speech is not None else 0
+        delay_max = speech["delay_max"] if speech is not None else 0
+        duration = speech["duration"] if speech is not None else 0
+        lines.append(
+            f"    {{ generated_runtime_schedule_steps_{index}, {speech_name}, "
+            f"{len(schedule['steps'])}, {schedule['entity']}, {schedule['loop']}, "
+            f"{speech_count}, {delay_min}, {delay_max}, {duration} }},")
     lines.append("};")
     lines.append(f"const int generated_runtime_schedule_count = {len(schedules)};\n")
     lines.append("const struct generated_runtime_glyph generated_runtime_glyphs[] = {")
@@ -1735,9 +1911,12 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                     actions = choice["actions"]
                     action_name = (f"generated_runtime_dialogue_actions_{dialogue_index}_{node_index}_{choice_index}"
                                    if actions else "0")
-                    lines.append("    { %s, { generated_runtime_dialogue_choice_glyphs_%d_%d_%d, %d }, %s, %d, %d }," % (
+                    condition_flag = (-1 if choice["condition_flag"] is None
+                                      else choice["condition_flag"])
+                    lines.append("    { %s, { generated_runtime_dialogue_choice_glyphs_%d_%d_%d, %d }, %s, %d, %d, %d, %d }," % (
                         json.dumps(choice["text"]), dialogue_index, node_index, choice_index,
-                        len(choice["text_glyphs"]), action_name, len(actions), choice["next"]))
+                        len(choice["text_glyphs"]), action_name, len(actions), choice["next"],
+                        condition_flag, choice["condition_value"]))
                 lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_node generated_runtime_dialogue_nodes_{dialogue_index}[] = {{")
         for node_index, node in enumerate(dialogue["nodes"]):
@@ -1811,8 +1990,9 @@ def compile_content(project_root: Path) -> None:
     materialize_audio(music, game_root, output_root)
     materialize_background_chunks(runtime_scenes, game_root, output_root)
     materialize_scenery_strips(runtime_scenes, game_root, output_root)
+    materialize_character_sheets(runtime_visuals, game_root, output_root)
     runtime_glyphs, runtime_space_advance = materialize_dialogue_glyph_atlas(
-        runtime_dialogue, game_root, output_root)
+        runtime_dialogue, runtime_schedule_data, game_root, output_root)
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
                                                   runtime_dialogue, runtime_glyphs)
