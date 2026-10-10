@@ -207,18 +207,15 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
                 speech = {"lines": speech_lines, "delay_min": speech_delay_min,
                           "delay_max": speech_delay_max, "duration": speech_duration}
             steps: list[dict[str, object]] = []
+            step_labels: set[str] = set()
             for index, raw_step in enumerate(expect(schedule.get("steps"), list,
                                                      f"{path} schedule {schedule_id} steps")):
                 step = expect(raw_step, dict, f"{path} schedule {schedule_id} step {index}")
                 operation = identifier(step.get("op"), f"{path} schedule {schedule_id} step {index} op")
-                if operation not in {"move", "place"}:
+                if operation not in {"move", "place", "wait", "speak",
+                                     "set_object_state", "toggle_object_state",
+                                     "jump", "random_jump"}:
                     raise ContentError(f"{path}: unsupported schedule operation {operation!r}")
-                scene = identifier(step.get("scene"), f"{path} schedule {schedule_id} step {index} scene")
-                x = integer(step.get("x"), f"{path} schedule {schedule_id} step {index} x")
-                y = integer(step.get("y"), f"{path} schedule {schedule_id} step {index} y")
-                facing = identifier(step.get("facing"), f"{path} schedule {schedule_id} step {index} facing")
-                if facing not in facing_names:
-                    raise ContentError(f"{path}: unsupported schedule facing {facing!r}")
                 delay_min = integer(step.get("delay_min_frames", step.get("delay_frames", 0)),
                                     f"{path} schedule {schedule_id} step {index} minimum delay")
                 delay_max = integer(step.get("delay_max_frames", delay_min),
@@ -226,13 +223,100 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
                 if delay_min < 0 or delay_max < delay_min:
                     raise ContentError(
                         f"{path}: schedule {schedule_id!r} step {index} has an invalid delay range")
-                steps.append({"op": operation, "scene": scene, "x": x, "y": y,
-                              "facing": facing, "delay_min": delay_min,
-                              "delay_max": delay_max})
+                compiled_step: dict[str, object] = {
+                    "op": operation, "delay_min": delay_min, "delay_max": delay_max,
+                }
+                if "label" in step:
+                    label = identifier(step.get("label"),
+                                       f"{path} schedule {schedule_id} step {index} label")
+                    if label in step_labels:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} duplicates label {label!r}")
+                    step_labels.add(label)
+                    compiled_step["label"] = label
+                if operation in {"move", "place"}:
+                    scene = identifier(step.get("scene"),
+                                       f"{path} schedule {schedule_id} step {index} scene")
+                    x = integer(step.get("x"), f"{path} schedule {schedule_id} step {index} x")
+                    y = integer(step.get("y"), f"{path} schedule {schedule_id} step {index} y")
+                    facing = identifier(step.get("facing"),
+                                        f"{path} schedule {schedule_id} step {index} facing")
+                    if facing not in facing_names:
+                        raise ContentError(f"{path}: unsupported schedule facing {facing!r}")
+                    compiled_step.update({"scene": scene, "x": x, "y": y,
+                                          "facing": facing})
+                elif operation == "speak":
+                    text = expect(step.get("text"), str,
+                                  f"{path} schedule {schedule_id} step {index} text")
+                    if not text:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} speak step {index} needs text")
+                    duration = integer(step.get("duration_frames", 180),
+                                       f"{path} schedule {schedule_id} step {index} duration")
+                    if duration < 1:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} speak step {index} "
+                            "needs a positive duration")
+                    compiled_step.update({"text": text, "duration": duration})
+                elif operation in {"set_object_state", "toggle_object_state"}:
+                    compiled_step["scene"] = identifier(
+                        step.get("scene"), f"{path} schedule {schedule_id} step {index} scene")
+                    compiled_step["object"] = identifier(
+                        step.get("object"), f"{path} schedule {schedule_id} step {index} object")
+                    if operation == "set_object_state":
+                        compiled_step["state"] = identifier(
+                            step.get("state"), f"{path} schedule {schedule_id} step {index} state")
+                elif operation == "jump":
+                    compiled_step["target"] = identifier(
+                        step.get("target"), f"{path} schedule {schedule_id} step {index} target")
+                elif operation == "random_jump":
+                    targets: list[str] = []
+                    for target_number, raw_target in enumerate(expect(
+                            step.get("targets"), list,
+                            f"{path} schedule {schedule_id} step {index} targets")):
+                        target = identifier(
+                            raw_target,
+                            f"{path} schedule {schedule_id} step {index} target {target_number}")
+                        if target in targets:
+                            raise ContentError(
+                                f"{path}: schedule {schedule_id!r} random jump step {index} "
+                                f"duplicates target {target!r}")
+                        targets.append(target)
+                    if not targets:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} random jump step {index} "
+                            "needs at least one target")
+                    compiled_step["targets"] = targets
+                elif delay_min == 0:
+                    raise ContentError(
+                        f"{path}: schedule {schedule_id!r} wait step {index} needs a positive delay")
+                steps.append(compiled_step)
             if not steps:
                 raise ContentError(f"{path}: schedule {schedule_id!r} must contain at least one step")
+            for index, step in enumerate(steps):
+                targets = ([step["target"]] if step["op"] == "jump" else
+                           step.get("targets", []))
+                for target in targets:
+                    if target not in step_labels:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} step {index} refers to "
+                            f"unknown label {target!r}")
+            next_schedule = schedule.get("next")
+            if next_schedule is not None:
+                next_schedule = identifier(next_schedule, f"{path} schedule {schedule_id} next")
             result[schedule_id] = {"id": schedule_id, "entity": entity_id,
-                                   "loop": loop, "steps": steps, "speech": speech}
+                                   "loop": loop, "next": next_schedule,
+                                   "steps": steps, "speech": speech}
+    for schedule_id, schedule in result.items():
+        next_schedule = schedule["next"]
+        if next_schedule is None:
+            continue
+        if next_schedule not in result:
+            raise ContentError(
+                f"schedule {schedule_id!r} refers to unknown next schedule {next_schedule!r}")
+        if result[str(next_schedule)]["entity"] != schedule["entity"]:
+            raise ContentError(
+                f"schedule {schedule_id!r} cannot chain to {next_schedule!r} for another entity")
     return result
 
 
@@ -349,6 +433,8 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
         for node in nodes:
             node_id = identifier(node.get("id"), f"{path} node id")
             speaker_id = identifier(node.get("speaker"), f"{path} node {node_id} speaker")
+            if "on_end" in node:
+                identifier(node["on_end"], f"{path} node {node_id} on_end")
             if "next" in node and identifier(node["next"], f"{path} node next") not in node_ids:
                 raise ContentError(f"{path}: node {node_id!r} refers to an unknown next node")
             if speaker_roles[speaker_id] == "player" and node.get("choices"):
@@ -1105,6 +1191,9 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 "speaker": speaker_index[speaker_id],
                 "choices": choices,
                 "next": next_node,
+                "on_end": (-1 if node.get("on_end") is None else
+                           script_index[identifier(node.get("on_end"),
+                                                   f"{path} node on_end")]),
             })
         dialogues.append({
             "id": dialogue_id,
@@ -1151,32 +1240,110 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
                       scenes: list[dict[str, object]]) -> list[dict[str, object]]:
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
     scene_index = {str(scene["id"]): index for index, scene in enumerate(scenes)}
+    object_index = {
+        (str(scene["id"]), str(item["id"])): item
+        for scene in scenes for item in scene["scenery"] if "id" in item
+    }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
+    operation_index = {"move": 0, "place": 1, "wait": 2,
+                       "set_object_state": 3, "toggle_object_state": 4,
+                       "speak": 5, "jump": 6, "random_jump": 7}
+    schedule_index = {schedule_id: index for index, schedule_id in enumerate(sorted(schedules))}
     result: list[dict[str, object]] = []
     for schedule_id in sorted(schedules):
         schedule = schedules[schedule_id]
-        steps: list[tuple[int, int, int, int, int, int, int]] = []
+        authored_speech = schedule["speech"]
+        ambient_lines = ([] if authored_speech is None else
+                         list(authored_speech["lines"]))
+        speech_lines = list(ambient_lines)
+        labels = {
+            str(step["label"]): index
+            for index, step in enumerate(schedule["steps"])
+            if "label" in step
+        }
+        branches: list[int] = []
+        steps: list[tuple[int, int, int, int, int, int, int, int, int]] = []
         for step_number, step in enumerate(schedule["steps"]):
+            operation = str(step["op"])
+            delay_min = int(step["delay_min"])
+            delay_max = int(step["delay_max"])
+            if operation == "wait":
+                steps.append((operation_index[operation], -1, 0, 0, 0,
+                              delay_min, delay_max, -1, -1))
+                continue
+            if operation == "speak":
+                text = str(step["text"])
+                if text not in speech_lines:
+                    speech_lines.append(text)
+                steps.append((operation_index[operation], -1, 0, 0, 0,
+                              delay_min, delay_max, speech_lines.index(text),
+                              int(step["duration"])))
+                continue
+            if operation == "jump":
+                steps.append((operation_index[operation], -1, 0, 0, 0,
+                              delay_min, delay_max, labels[str(step["target"])], 0))
+                continue
+            if operation == "random_jump":
+                first_branch = len(branches)
+                branches.extend(labels[str(target)] for target in step["targets"])
+                steps.append((operation_index[operation], -1, 0, 0, 0,
+                              delay_min, delay_max, first_branch,
+                              len(step["targets"])))
+                continue
             scene_id = str(step["scene"])
             if scene_id not in scene_index:
                 raise ContentError(
                     f"schedule {schedule_id!r} step {step_number} refers to unknown scene {scene_id!r}")
-            scene = scenes[scene_index[scene_id]]
-            x = int(step["x"])
-            y = int(step["y"])
-            if x < 0 or y < 0 or x >= int(scene["width"]) or y >= int(scene["height"]):
+            if operation in {"move", "place"}:
+                scene = scenes[scene_index[scene_id]]
+                x = int(step["x"])
+                y = int(step["y"])
+                if x < 0 or y < 0 or x >= int(scene["width"]) or y >= int(scene["height"]):
+                    raise ContentError(
+                        f"schedule {schedule_id!r} step {step_number} position ({x}, {y}) "
+                        f"is outside scene {scene_id!r}")
+                steps.append((operation_index[operation], scene_index[scene_id], x, y,
+                              facing_index[str(step["facing"])], delay_min, delay_max,
+                              -1, -1))
+                continue
+            object_id = str(step["object"])
+            target = object_index.get((scene_id, object_id))
+            if target is None:
                 raise ContentError(
-                    f"schedule {schedule_id!r} step {step_number} position ({x}, {y}) "
-                    f"is outside scene {scene_id!r}")
-            steps.append((0 if step["op"] == "move" else 1,
-                          scene_index[scene_id], x, y,
-                          facing_index[str(step["facing"])],
-                          int(step["delay_min"]), int(step["delay_max"])))
+                    f"schedule {schedule_id!r} step {step_number} refers to unknown stateful "
+                    f"object {object_id!r} in scene {scene_id!r}")
+            states = list(target["states"])
+            value = -1
+            if operation == "set_object_state":
+                state = str(step["state"])
+                if state not in states:
+                    raise ContentError(
+                        f"schedule {schedule_id!r} step {step_number} gives object "
+                        f"{object_id!r} unknown state {state!r}")
+                value = states.index(state)
+            elif len(states) != 2:
+                raise ContentError(
+                    f"schedule {schedule_id!r} step {step_number} can only toggle a "
+                    f"two-state object; {object_id!r} has {len(states)} states")
+            steps.append((operation_index[operation], scene_index[scene_id], 0, 0, 0,
+                          delay_min, delay_max, int(target["state_slot"]), value))
+        speech = None
+        if speech_lines:
+            speech = {
+                "lines": speech_lines,
+                "ambient_count": len(ambient_lines),
+                "delay_min": 0 if authored_speech is None else authored_speech["delay_min"],
+                "delay_max": 0 if authored_speech is None else authored_speech["delay_max"],
+                "duration": 0 if authored_speech is None else authored_speech["duration"],
+            }
         result.append({"id": schedule_id,
                        "entity": entity_index[str(schedule["entity"])],
                        "loop": int(bool(schedule["loop"])),
+                       "next": (-1 if schedule["next"] is None else
+                                schedule_index[str(schedule["next"])]),
                        "steps": steps,
-                       "speech": schedule["speech"]})
+                       "branches": branches,
+                       "speech": speech})
     return result
 
 
@@ -1415,6 +1582,10 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         )
                     columns = area_width // tile_size
                     rows = area_height // tile_size
+                    alpha = integer(values.get("alpha", 255),
+                                    f"{map_path} tiled occluder alpha")
+                    if alpha < 0 or alpha > 255:
+                        raise ContentError(f"{map_path}: scenery alpha must be between 0 and 255")
                     for row in range(rows):
                         visual_y = area_y + row * tile_size
                         scenery.append({
@@ -1429,6 +1600,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                             # using it here makes fringe art cover scenery one
                             # row closer to the camera.
                             "depth": visual_y + image_height + 1,
+                            "alpha": alpha,
                             "repeat_count": columns,
                             "repeat_key": f"{object_id}-{row:03d}",
                         })
@@ -1446,6 +1618,9 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 offset_x = integer(tile_properties.get("offset_x", 0), f"{map_path} object offset_x")
                 offset_y = integer(tile_properties.get("offset_y", 0), f"{map_path} object offset_y")
                 if kind != "entity":
+                    alpha = integer(values.get("alpha", 255), f"{map_path} scenery alpha")
+                    if alpha < 0 or alpha > 255:
+                        raise ContentError(f"{map_path}: scenery alpha must be between 0 and 255")
                     # Tiled tile objects use x at the left edge and y at the
                     # image's baseline. The one-time importer has already
                     # folded source animation/frame offsets into those object
@@ -1461,6 +1636,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         "y": integer(obj.get("y"), f"{map_path} scenery y") - image_height,
                         "depth": integer(values.get("sort_y", obj.get("y")),
                                          f"{map_path} scenery sort_y"),
+                        "alpha": alpha,
                     })
                     resources.add(image)
                     continue
@@ -1475,10 +1651,22 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 if not isinstance(source_character, str):
                     if entity_definitions[entity_def]["kind"] != "object":
                         raise ContentError(f"{map_path}: actor entity {entity_def!r} has no character visual")
+                    alpha = integer(values.get("alpha", 255), f"{map_path} scenery alpha")
+                    if alpha < 0 or alpha > 255:
+                        raise ContentError(f"{map_path}: scenery alpha must be between 0 and 255")
                     source_object = tile_properties.get("source_object")
                     source_animation = tile_properties.get("source_animation", 0)
                     if not isinstance(source_object, str):
                         raise ContentError(f"{map_path}: object entity {entity_def!r} has no source_object")
+                    object_id = identifier(values.get("id"), f"{map_path} object entity id")
+                    state_names = list(entity_definitions[entity_def]["states"])
+                    initial_state_name = identifier(
+                        values.get("initial_state", state_names[0]),
+                        f"{map_path} object entity {object_id} initial_state")
+                    if initial_state_name not in state_names:
+                        raise ContentError(
+                            f"{map_path}: object entity {object_id!r} has unknown initial state "
+                            f"{initial_state_name!r}")
                     visual_key = f"{source_object}#{source_animation}"
                     if visual_key not in raw_object_visuals:
                         frames: list[dict[str, object]] = []
@@ -1521,6 +1709,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         frames.extend([None] * (state_count - len(frames)))
                         raw_object_visuals[visual_key] = {"frames": frames}
                     scenery.append({
+                        "id": object_id,
                         "image": image,
                         "width": image_width,
                         "height": image_height,
@@ -1528,8 +1717,11 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         "y": integer(obj.get("y"), f"{map_path} scenery y") - image_height,
                         "depth": integer(values.get("sort_y", obj.get("y")),
                                          f"{map_path} scenery sort_y"),
+                        "alpha": alpha,
                         "definition": entity_index[entity_def],
                         "state_slot": stateful_scenery_count,
+                        "initial_state": state_names.index(initial_state_name),
+                        "states": state_names,
                         "visual_key": visual_key,
                     })
                     stateful_scenery_count += 1
@@ -1592,6 +1784,28 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                            "spawns": spawns, "triggers": triggers,
                            "stateful_scenery_count": stateful_scenery_count})
 
+    # Runtime indices must match the alphabetical IDs emitted in content_ids.h.
+    # Keeping this independent of manifest order also makes reordering inputs a
+    # no-op for scripts and schedules that reference scenes by stable name.
+    raw_scenes.sort(key=lambda item: str(item["id"]))
+
+    # Object state belongs to the world, not to the currently displayed scene.
+    # Assign stable global slots so off-screen schedules can change scenery and
+    # the result remains visible after a later scene transition.
+    global_state_slot = 0
+    for scene in raw_scenes:
+        object_ids: set[str] = set()
+        for item in scene["scenery"]:
+            if int(item.get("state_slot", -1)) < 0:
+                continue
+            object_id = str(item["id"])
+            if object_id in object_ids:
+                raise ContentError(
+                    f"scene {scene['id']!r} duplicates stateful object id {object_id!r}")
+            object_ids.add(object_id)
+            item["state_slot"] = global_state_slot
+            global_state_slot += 1
+
     initial_actor_placements: dict[int, str] = {}
     for scene in raw_scenes:
         for entity in scene["entities"]:
@@ -1624,7 +1838,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     return raw_scenes, visuals, object_visuals, sorted(resources)
 
 
-def runtime_header(flag_count: int, max_stateful_scenery: int, entity_count: int) -> str:
+def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: int) -> str:
     return """/* Generated by tools/content_compiler/compile_content.py; do not edit. */
 #ifndef WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 #define WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
@@ -1639,18 +1853,21 @@ struct generated_runtime_actor_visual {
 struct generated_runtime_collision { int x, y, width, height, walkability; };
 struct generated_runtime_background { struct generated_runtime_frame frame; int x, y; };
 struct generated_runtime_object_visual { const struct generated_runtime_frame *frames; int frame_count; };
-struct generated_runtime_scenery { struct generated_runtime_frame frame; int x, y, depth, definition, state_slot, visual; };
+struct generated_runtime_scenery { struct generated_runtime_frame frame; int x, y, depth, alpha, definition, state_slot, initial_state, visual; };
 struct generated_runtime_entity { int visual, tile_x, tile_y, facing, blocks_movement, player_controlled, interaction_dialogue, definition, initially_present; };
 struct generated_runtime_spawn { int tile_x, tile_y, facing; };
 struct generated_runtime_trigger { int x, y, width, height, script, when, facing; };
 struct generated_runtime_music { int sound, loop; float speed, volume; };
 struct generated_runtime_script_action { int op, a, b, c, d; };
 struct generated_runtime_script { const struct generated_runtime_script_action *actions; int action_count; };
-struct generated_runtime_schedule_step { int op, scene, x, y, facing, delay_min, delay_max; };
+struct generated_runtime_schedule_step { int op, scene, x, y, facing, delay_min, delay_max, target, value; };
 struct generated_runtime_schedule {
     const struct generated_runtime_schedule_step *steps;
+    const int *branches;
     const struct generated_runtime_text *speech;
-    int step_count, entity, loop, speech_count, speech_delay_min, speech_delay_max, speech_duration;
+    int step_count, branch_count, entity, loop, next_schedule;
+    int speech_count, ambient_speech_count;
+    int speech_delay_min, speech_delay_max, speech_duration;
 };
 struct generated_runtime_dialogue_action { int flag, value; };
 struct generated_runtime_glyph { int texture, min_x, min_y, max_x, max_y, hotspot_x, advance; };
@@ -1671,7 +1888,7 @@ struct generated_runtime_dialogue_node {
     const char *text;
     struct generated_runtime_text display;
     const struct generated_runtime_dialogue_choice *choices;
-    int choice_count, next_node, speaker;
+    int choice_count, next_node, speaker, end_script;
 };
 struct generated_runtime_dialogue_start { int node, flag, value; };
 struct generated_runtime_dialogue {
@@ -1711,8 +1928,8 @@ extern const int generated_runtime_glyph_count;
 extern const int generated_runtime_space_advance;
 #define GENERATED_RUNTIME_FLAG_COUNT %d
 #define GENERATED_RUNTIME_FLAG_STORAGE_COUNT (GENERATED_RUNTIME_FLAG_COUNT > 0 ? GENERATED_RUNTIME_FLAG_COUNT : 1)
-#define GENERATED_RUNTIME_MAX_STATEFUL_SCENERY %d
-#define GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT (GENERATED_RUNTIME_MAX_STATEFUL_SCENERY > 0 ? GENERATED_RUNTIME_MAX_STATEFUL_SCENERY : 1)
+#define GENERATED_RUNTIME_STATEFUL_SCENERY_COUNT %d
+#define GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT (GENERATED_RUNTIME_STATEFUL_SCENERY_COUNT > 0 ? GENERATED_RUNTIME_STATEFUL_SCENERY_COUNT : 1)
 #define GENERATED_RUNTIME_ENTITY_COUNT %d
 #define GENERATED_RUNTIME_ENTITY_STORAGE_COUNT (GENERATED_RUNTIME_ENTITY_COUNT > 0 ? GENERATED_RUNTIME_ENTITY_COUNT : 1)
 #define GENERATED_SCRIPT_SET_CONTROL 0
@@ -1727,10 +1944,16 @@ extern const int generated_runtime_space_advance;
 #define GENERATED_SCRIPT_SET_ENTITY_DIALOGUE 9
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
+#define GENERATED_SCHEDULE_WAIT 2
+#define GENERATED_SCHEDULE_SET_OBJECT_STATE 3
+#define GENERATED_SCHEDULE_TOGGLE_OBJECT_STATE 4
+#define GENERATED_SCHEDULE_SPEAK 5
+#define GENERATED_SCHEDULE_JUMP 6
+#define GENERATED_SCHEDULE_RANDOM_JUMP 7
 #define GENERATED_TRIGGER_ENTER 0
 #define GENERATED_TRIGGER_LEAVE 1
 #endif
-""" % (flag_count, max_stateful_scenery, entity_count)
+""" % (flag_count, stateful_scenery_count, entity_count)
 
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
@@ -1772,11 +1995,13 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append(f"static const struct generated_runtime_scenery generated_runtime_scenery_{index}[] = {{")
         for item in scene["scenery"]:
             frame = {"image": item["image"], "width": item["width"], "height": item["height"], "offset_x": 0, "offset_y": 0}
-            lines.append("    { %s, %d, %d, %d, %d, %d, %d }," % (
+            lines.append("    { %s, %d, %d, %d, %d, %d, %d, %d, %d }," % (
                 frame_initializer(frame, resource_index), integer(item["x"], "runtime scenery x"),
                 integer(item["y"], "runtime scenery y"), integer(item["depth"], "runtime scenery depth"),
+                integer(item.get("alpha", 255), "runtime scenery alpha"),
                 integer(item.get("definition", -1), "runtime scenery definition"),
                 integer(item.get("state_slot", -1), "runtime scenery state slot"),
+                integer(item.get("initial_state", 0), "runtime scenery initial state"),
                 integer(item.get("visual", -1), "runtime scenery visual")))
         lines.append("};")
         lines.append(f"static const struct generated_runtime_entity generated_runtime_entities_{index}[] = {{")
@@ -1829,8 +2054,12 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_script_count = {len(scripts)};\n")
     for index, schedule in enumerate(schedules):
         lines.append(f"static const struct generated_runtime_schedule_step generated_runtime_schedule_steps_{index}[] = {{")
-        lines.extend("    { %d, %d, %d, %d, %d, %d, %d }," % step for step in schedule["steps"])
+        lines.extend("    { %d, %d, %d, %d, %d, %d, %d, %d, %d }," % step
+                     for step in schedule["steps"])
         lines.append("};")
+        if schedule["branches"]:
+            lines.append(f"static const int generated_runtime_schedule_branches_{index}[] = {{ " +
+                         ", ".join(str(branch) for branch in schedule["branches"]) + " };")
         speech = schedule.get("speech")
         if speech is not None:
             for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
@@ -1845,15 +2074,19 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append("const struct generated_runtime_schedule generated_runtime_schedules[] = {")
     for index, schedule in enumerate(schedules):
         speech = schedule.get("speech")
+        branches_name = (f"generated_runtime_schedule_branches_{index}"
+                         if schedule["branches"] else "0")
         speech_name = f"generated_runtime_schedule_speech_{index}" if speech is not None else "0"
         speech_count = len(speech["lines"]) if speech is not None else 0
+        ambient_count = speech["ambient_count"] if speech is not None else 0
         delay_min = speech["delay_min"] if speech is not None else 0
         delay_max = speech["delay_max"] if speech is not None else 0
         duration = speech["duration"] if speech is not None else 0
         lines.append(
-            f"    {{ generated_runtime_schedule_steps_{index}, {speech_name}, "
-            f"{len(schedule['steps'])}, {schedule['entity']}, {schedule['loop']}, "
-            f"{speech_count}, {delay_min}, {delay_max}, {duration} }},")
+            f"    {{ generated_runtime_schedule_steps_{index}, {branches_name}, {speech_name}, "
+            f"{len(schedule['steps'])}, {len(schedule['branches'])}, "
+            f"{schedule['entity']}, {schedule['loop']}, {schedule['next']}, "
+            f"{speech_count}, {ambient_count}, {delay_min}, {delay_max}, {duration} }},")
     lines.append("};")
     lines.append(f"const int generated_runtime_schedule_count = {len(schedules)};\n")
     lines.append("const struct generated_runtime_glyph generated_runtime_glyphs[] = {")
@@ -1922,9 +2155,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         for node_index, node in enumerate(dialogue["nodes"]):
             choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node_index}"
                             if node["choices"] else "0")
-            lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d }, %s, %d, %d, %d }," % (
+            lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d }, %s, %d, %d, %d, %d }," % (
                 json.dumps(node["text"]), dialogue_index, node_index, len(node["text_glyphs"]),
-                choices_name, len(node["choices"]), node["next"], node["speaker"]))
+                choices_name, len(node["choices"]), node["next"], node["speaker"],
+                node["on_end"]))
         lines.append("};")
     lines.append("const struct generated_runtime_dialogue generated_runtime_dialogues[] = {")
     for index, dialogue in enumerate(dialogues):
@@ -1965,6 +2199,14 @@ def compile_content(project_root: Path) -> None:
             on_end = identifier(document["on_end"], f"{path} on_end")
             if on_end not in scripts:
                 raise ContentError(f"{path}: unknown on_end script {on_end!r}")
+        for raw_node in expect(document.get("nodes"), list, f"{path}.nodes"):
+            node = expect(raw_node, dict, f"{path}.nodes entry")
+            if "on_end" not in node:
+                continue
+            node_id = identifier(node.get("id"), f"{path} node id")
+            on_end = identifier(node["on_end"], f"{path} node {node_id} on_end")
+            if on_end not in scripts:
+                raise ContentError(f"{path}: node {node_id!r} has unknown on_end script {on_end!r}")
     scenes, tilesets = collect_scenes(inputs["maps"], entities, scripts, game_root)
     initial_scene = identifier(manifest.get("initial_scene"), "manifest initial_scene")
     if initial_scene not in scenes:
@@ -2021,9 +2263,10 @@ def compile_content(project_root: Path) -> None:
     write_output(output_root / "content_manifest.json", manifest_output)
     write_output(output_root / "content_ids.h", "\n".join(header_lines))
     write_output(output_root / "content_data.c", "\n".join(c_lines))
-    max_stateful_scenery = max((int(scene["stateful_scenery_count"]) for scene in runtime_scenes), default=0)
+    stateful_scenery_count = sum(int(scene["stateful_scenery_count"])
+                                 for scene in runtime_scenes)
     write_output(output_root / "content_scene_data.h", runtime_header(
-        len(runtime_flags), max_stateful_scenery, len(entities)))
+        len(runtime_flags), stateful_scenery_count, len(entities)))
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_resources,
         initial_scene, runtime_dialogue, runtime_script_data,

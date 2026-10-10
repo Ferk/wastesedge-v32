@@ -156,6 +156,7 @@
       "id": "oliver_called",
       "speaker": "narrator",
       "text": "The landlord calls for Oliver, the boy you met outside, and shortly afterwards he enters the common room to show you to your chamber.",
+      "on_end": "escort_to_player_room",
       "end": true
     },
     {

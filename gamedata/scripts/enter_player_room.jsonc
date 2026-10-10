@@ -1,0 +1,6 @@
+{
+  "id": "enter_player_room",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_player_room", "spawn": "first_floor_door" }
+  ]
+}

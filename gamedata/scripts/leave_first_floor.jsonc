@@ -1,0 +1,6 @@
+{
+  "id": "leave_first_floor",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_inn", "spawn": "first_floor_stairs" }
+  ]
+}

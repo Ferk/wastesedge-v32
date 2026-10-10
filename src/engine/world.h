@@ -68,6 +68,7 @@ struct world_state {
 };
 
 void world_initialize(struct world_state *world);
+void world_seed_random(struct world_state *world, int seed);
 void world_update(struct world_state *world, const struct world_actions *actions);
 int world_entity_x(const struct world_state *world, int entity_index);
 int world_entity_y(const struct world_state *world, int entity_index);

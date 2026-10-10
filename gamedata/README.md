@@ -14,15 +14,27 @@ contract-testing fixtures. `maps/redwyne_exterior.tmj` is the first converted
 scene: `background_terrain` is a Tile Layer for static stone/grass/road
 surfaces, while `map_objects` retains depth-capable art. It also has an editable
 directional collision layer and separate terrain/object tilesets. The converted
-Redwyne inn and parlour, portrait dialogue UI, and reciprocal room transitions
-are also present. The exterior includes Player and Talan as `entity`
+Redwyne inn, parlour, first-floor landing, and player's bedroom, portrait
+dialogue UI, and room transitions are also present. Their translucent front
+walls, door frames, and windows use
+the per-object integer `alpha` property (`0` transparent, `255` opaque). The
+exterior includes Player and Talan as `entity`
 objects in `map_objects`, so Tiled's top-down ordering can sort them with the
 depth-capable scenery. Their collection tilesets store all standing and walking
 frames. NPC routes are authored separately in `schedules/`; scene-local actor
 objects provide the visual/interaction template for every scene a route visits.
-All NPCs whose default positions belong to the converted exterior and common
-room are present: Talan, Tristan, Orloth, Alek, Erek, Oliver, and Rhayne. Their
-interaction dialogue is compiled from JSONC. All seven have data-authored
-schedules and autonomous floating remarks. Talan, Tristan, Orloth, Alek, and
-Rhayne move along converted routes; Erek now crosses between the common room
-and parlour. Oliver remains in the yard until a script summons him.
+All NPCs whose default positions belong to the converted exterior, common
+room, and landing are present: Talan, Tristan, Orloth, Alek, Erek, Oliver,
+Rhayne, and Jelom. Their interaction dialogue is compiled from JSONC when
+available. All eight have data-authored schedules and autonomous floating
+remarks. Talan, Tristan, Orloth, Alek, Jelom, and Rhayne move along converted
+routes; Erek now crosses between the common room and parlour. Orloth's room
+offer summons Oliver, switches both characters to the player's bedroom, and
+starts Oliver's room-specific conversation. On leaving, Oliver follows a
+finite route through the landing and common room; that route then chains back
+to his ordinary yard schedule. Orloth's common-room route also demonstrates
+timed schedule events: his clock remark occurs only at the clock, and stable-ID
+stateful mug objects change in two stages at each table even when the inn is
+off screen. Labeled schedule branches select Orloth's next job, Erek's room
+position, and Rhayne's next safe yard point at runtime using engine randomness
+seeded by Vircon32's hardware generator.

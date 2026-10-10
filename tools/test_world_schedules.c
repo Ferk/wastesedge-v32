@@ -12,6 +12,23 @@ static void tick(struct world_state *world, int frames)
         world_update(world, &actions);
 }
 
+static int count_object_state(const struct world_state *world, int definition, int state)
+{
+    int count = 0;
+    int scene_index;
+    for (scene_index = 0; scene_index < generated_runtime_scene_count; ++scene_index) {
+        const struct generated_runtime_scene *scene = &generated_runtime_scenes[scene_index];
+        int scenery_index;
+        for (scenery_index = 0; scenery_index < scene->scenery_count; ++scenery_index) {
+            const struct generated_runtime_scenery *scenery = &scene->scenery[scenery_index];
+            if (scenery->definition == definition && scenery->state_slot >= 0 &&
+                world->object_states[scenery->state_slot] == state)
+                ++count;
+        }
+    }
+    return count;
+}
+
 int main(void)
 {
     struct world_state world;
@@ -22,6 +39,7 @@ int main(void)
     struct world_actor_state *erek;
     struct world_actor_state *oliver;
     struct world_actor_state *frostbloom;
+    struct world_actor_state *jelom;
     const struct generated_runtime_dialogue *talan_dialogue;
     const struct generated_runtime_dialogue_node *jelom_node = 0;
     struct world_actions interact = { 0, 0, 1, 0 };
@@ -31,10 +49,16 @@ int main(void)
     int frame;
     int node_index;
     int visual_index;
+    int scene_index;
+    int scenery_index;
+    int branch_index;
+    int first_random_step;
+    int translucent_scenery = 0;
     int direction;
     int animation;
 
     world_initialize(&world);
+    assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 1) == 8);
 
     /* Authored character frames remain separate PNGs, but every runtime actor
      * visual must occupy one generated texture and address distinct regions. */
@@ -53,6 +77,21 @@ int main(void)
         assert(visual->standing[0].width > 0 && visual->standing[0].height > 0);
     }
 
+    /* Authored scenery opacity survives content compilation. These are the
+     * front-facing indoor pieces that reveal actors standing behind them. */
+    for (scene_index = 0; scene_index < generated_runtime_scene_count; ++scene_index) {
+        const struct generated_runtime_scene *scene = &generated_runtime_scenes[scene_index];
+        for (scenery_index = 0; scenery_index < scene->scenery_count; ++scenery_index) {
+            int alpha = scene->scenery[scenery_index].alpha;
+            assert(alpha >= 0 && alpha <= 255);
+            if (alpha < 255) {
+                assert(alpha == 128);
+                ++translucent_scenery;
+            }
+        }
+    }
+    assert(translucent_scenery == 24);
+
     world.dialogue = -1;
     world.active_script = GENERATED_SCRIPT_ENTER_INN;
     world.script_action = 0;
@@ -66,6 +105,7 @@ int main(void)
     erek = &world.actors[GENERATED_ENTITY_EREK];
     oliver = &world.actors[GENERATED_ENTITY_OLIVER];
     frostbloom = &world.actors[GENERATED_ENTITY_FROSTBLOOM];
+    jelom = &world.actors[GENERATED_ENTITY_JELOM];
     assert(talan->schedule == GENERATED_SCHEDULE_TALAN_GATE_PATROL);
     assert(tristan->schedule == GENERATED_SCHEDULE_TRISTAN_INN_AND_GATE);
     assert(orloth->schedule == GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM);
@@ -73,6 +113,11 @@ int main(void)
     assert(frostbloom->schedule == GENERATED_SCHEDULE_FROSTBLOOM_YARD);
     assert(erek->schedule == GENERATED_SCHEDULE_EREK_COMMON_ROOM);
     assert(oliver->schedule == GENERATED_SCHEDULE_OLIVER_YARD);
+    assert(jelom->schedule == GENERATED_SCHEDULE_JELOM_FIRST_FLOOR);
+    if (orloth->scene != GENERATED_SCENE_REDWYNE_INN)
+        fprintf(stderr, "Orloth initialization mismatch: scene=%d x=%d y=%d schedule=%d step=%d\n",
+                orloth->scene, orloth->x, orloth->y,
+                orloth->schedule, orloth->schedule_step);
     assert(orloth->scene == GENERATED_SCENE_REDWYNE_INN);
     assert(orloth->x == 2 && orloth->y == 2);
     assert(alek->scene == GENERATED_SCENE_REDWYNE_INN);
@@ -82,6 +127,8 @@ int main(void)
     assert(oliver->scene == GENERATED_SCENE_REDWYNE_EXTERIOR);
     assert(oliver->x == 25 && oliver->y == 15);
     assert(frostbloom->scene == GENERATED_SCENE_REDWYNE_EXTERIOR);
+    assert(jelom->scene == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(jelom->x == 2 && jelom->y == 6);
     assert(talan->dialogue == GENERATED_DIALOGUE_TALAN_START);
     assert(talan->x == 11);
     assert(talan->y == 17 || talan->y == 18 || talan->y == 19);
@@ -199,6 +246,10 @@ int main(void)
     talan->schedule = -1;
     tristan->schedule = -1;
     alek->schedule = -1;
+    erek->schedule = -1;
+    oliver->schedule = -1;
+    frostbloom->schedule = -1;
+    jelom->schedule = -1;
     world.player_x = 14;
     world.player_y = 8;
     orloth->scene = GENERATED_SCENE_REDWYNE_INN;
@@ -206,29 +257,97 @@ int main(void)
     orloth->y = 2;
     orloth->moving = 0;
     orloth->move_progress = 0;
-    orloth->schedule_step = 0;
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM]
+               .branch_count == 5);
+    orloth->schedule_step = 1;
     orloth->schedule_wait = 0;
+    world.schedule_random = 1;
+    tick(&world, 1);
+    first_random_step = orloth->schedule_step;
+    orloth->schedule_step = 1;
+    orloth->schedule_wait = 0;
+    world.schedule_random = 2;
+    tick(&world, 1);
+    assert(orloth->schedule_step != first_random_step);
+    orloth->schedule_step =
+        generated_runtime_schedules[GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM].branches[0];
+    orloth->schedule_wait = 0;
+    orloth->speech_line = -1;
+    orloth->speech_frames = 0;
+    orloth->speech_wait = 999999;
     for (frame = 0; frame < 2000; ++frame) {
         tick(&world, 1);
         if (orloth->x == 10 && orloth->y == 3 && !orloth->moving)
             break;
     }
     assert(frame < 2000);
+    tick(&world, 2);
+    assert(orloth->speech_line ==
+           generated_runtime_schedules[GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM]
+               .ambient_speech_count);
+    assert(orloth->speech_frames > 0);
+    /* Orloth changes each table in two stages after one- and two-tick waits.
+     * The mug slots begin hidden and retain their state even while their scene
+     * is not the one currently displayed. */
+    orloth->x = 2;
+    orloth->y = 2;
+    orloth->moving = 0;
+    orloth->schedule_step =
+        generated_runtime_schedules[GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM].branches[1];
     orloth->schedule_wait = 0;
     for (frame = 0; frame < 2000; ++frame) {
         tick(&world, 1);
-        if (orloth->x == 2 && orloth->y == 2 && !orloth->moving)
+        if (orloth->x == 3 && orloth->y == 5 && !orloth->moving)
             break;
     }
     assert(frame < 2000);
-    for (frame = 0; frame < 10000; ++frame) {
+    tick(&world, 1);  /* finish move */
+    tick(&world, 1);  /* start first one-tick wait */
+    tick(&world, 60);
+    assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 0) == 0);
+    tick(&world, 1);
+    assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 0) == 1);
+    tick(&world, 1);  /* start second one-tick wait */
+    tick(&world, 60);
+    tick(&world, 1);
+    assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 0) == 2);
+
+    for (frame = 0; frame < 3000; ++frame) {
         orloth->schedule_wait = 0;
         tick(&world, 1);
         if (orloth->schedule_step == 0 && orloth->x == 2 && orloth->y == 2 &&
             !orloth->moving)
             break;
     }
-    assert(frame < 10000);
+    assert(frame < 3000);
+    for (branch_index = 2; branch_index < 5; ++branch_index) {
+        orloth->schedule_step =
+            generated_runtime_schedules[GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM]
+                .branches[branch_index];
+        for (frame = 0; frame < 3000; ++frame) {
+            orloth->schedule_wait = 0;
+            tick(&world, 1);
+            if (orloth->schedule_step == 0 && orloth->x == 2 && orloth->y == 2 &&
+                !orloth->moving)
+                break;
+        }
+        assert(frame < 3000);
+    }
+    assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 0) == 8);
+    for (branch_index = 1; branch_index < 5; ++branch_index) {
+        orloth->schedule_step =
+            generated_runtime_schedules[GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM]
+                .branches[branch_index];
+        for (frame = 0; frame < 3000; ++frame) {
+            orloth->schedule_wait = 0;
+            tick(&world, 1);
+            if (orloth->schedule_step == 0 && orloth->x == 2 && orloth->y == 2 &&
+                !orloth->moving)
+                break;
+        }
+        assert(frame < 3000);
+    }
+    assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 1) == 8);
 
     /* Alek traverses the original bar/table route in both directions. */
     orloth->scene = GENERATED_SCENE_REDWYNE_EXTERIOR;
@@ -267,8 +386,8 @@ int main(void)
     orloth->scene = GENERATED_SCENE_REDWYNE_INN;
     erek->scene = GENERATED_SCENE_REDWYNE_INN;
 
-    /* Rhayne's deterministic authored circuit stays within the same yard
-     * bounds as the reference random walk and clears the central tree. */
+    /* Rhayne randomly chooses among collision-safe points inside the same yard
+     * bounds as the reference random walk. */
     frostbloom->scene = GENERATED_SCENE_REDWYNE_EXTERIOR;
     frostbloom->x = 18;
     frostbloom->y = 22;
@@ -277,11 +396,14 @@ int main(void)
     frostbloom->schedule = GENERATED_SCHEDULE_FROSTBLOOM_YARD;
     frostbloom->schedule_step = 0;
     frostbloom->schedule_wait = 0;
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_FROSTBLOOM_YARD]
+               .branch_count == 4);
     for (frame = 0; frame < 5000; ++frame) {
         frostbloom->schedule_wait = 0;
         tick(&world, 1);
-        if (frostbloom->x == 16 && frostbloom->y == 22 && !frostbloom->moving &&
-            frostbloom->schedule_step == 3)
+        if (frame > 0 && !frostbloom->moving && frostbloom->schedule_step == 0 &&
+            ((frostbloom->x == 24 || frostbloom->x == 16) &&
+             (frostbloom->y == 22 || frostbloom->y == 28)))
             break;
     }
     if (frame >= 5000)
@@ -321,8 +443,8 @@ int main(void)
         erek->schedule_wait = 0;
         tick(&world, 1);
         if (erek->scene == GENERATED_SCENE_REDWYNE_INN &&
-            erek->x == 5 && erek->y == 5 && !erek->moving &&
-            erek->schedule_step == 0)
+            ((erek->x == 5 && erek->y == 5) ||
+             (erek->x == 10 && erek->y == 6)) && !erek->moving)
             break;
     }
     if (frame >= 10000)
@@ -414,6 +536,98 @@ int main(void)
                   "he turns towards you.") == 0);
     assert(strcmp(generated_runtime_dialogues[GENERATED_DIALOGUE_FROSTBLOOM_START].nodes[0].text,
                   "Hm? What do you want?") == 0);
+
+    /* Only Orloth's room-offer endpoint launches the escort. The reference
+     * switches Banec and Oliver directly into the room, then begins Oliver's
+     * room-specific conversation. */
+    world.dialogue = GENERATED_DIALOGUE_ORLOTH_START;
+    world.dialogue_choice = 0;
+    for (node_index = 0;
+         node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_ORLOTH_START].node_count;
+         ++node_index) {
+        if (strcmp(generated_runtime_dialogues[GENERATED_DIALOGUE_ORLOTH_START]
+                       .nodes[node_index].text,
+                   "The landlord calls for Oliver, the boy you met outside, and shortly "
+                   "afterwards he enters the common room to show you to your chamber.") == 0)
+            break;
+    }
+    assert(node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_ORLOTH_START].node_count);
+    world.dialogue_node = node_index;
+    world_update(&world, &interact);
+    assert(world.active_script == GENERATED_SCRIPT_ESCORT_TO_PLAYER_ROOM);
+    tick(&world, 3);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_PLAYER_ROOM);
+    assert(world.player_x == 5 && world.player_y == 3 && world.player_facing == WORLD_SOUTH);
+    assert(oliver->scene == GENERATED_SCENE_REDWYNE_PLAYER_ROOM);
+    assert(oliver->x == 5 && oliver->y == 4 && oliver->facing == WORLD_NORTH);
+    assert(world.dialogue == GENERATED_DIALOGUE_OLIVER_ROOM);
+    assert(strcmp(world_dialogue_text(&world),
+                  "Oliver leads you to a room on the first floor.") == 0);
+
+    /* Finishing Oliver's short room conversation restores his ordinary
+     * dialogue and sends him through the bedroom, landing, common room and
+     * yard. The one-shot route then chains back to his normal yard job. */
+    for (node_index = 0;
+         node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_OLIVER_ROOM].node_count;
+         ++node_index) {
+        if (strcmp(generated_runtime_dialogues[GENERATED_DIALOGUE_OLIVER_ROOM]
+                       .nodes[node_index].text,
+                   "Don't worry Oliver. This one is fine.") == 0)
+            break;
+    }
+    assert(node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_OLIVER_ROOM].node_count);
+    world.dialogue_node = node_index;
+    world_update(&world, &interact);
+    assert(world.active_script == GENERATED_SCRIPT_OLIVER_RETURN_TO_YARD);
+    tick(&world, 2);
+    assert(oliver->schedule == GENERATED_SCHEDULE_OLIVER_RETURN_TO_YARD);
+    for (frame = 0; frame < 1000; ++frame) {
+        tick(&world, 1);
+        if (oliver->schedule == GENERATED_SCHEDULE_OLIVER_YARD)
+            break;
+    }
+    if (frame >= 1000)
+        fprintf(stderr, "Oliver return stuck: scene=%d x=%d y=%d step=%d moving=%d\n",
+                oliver->scene, oliver->x, oliver->y,
+                oliver->schedule_step, oliver->moving);
+    assert(frame < 1000);
+    assert(oliver->scene == GENERATED_SCENE_REDWYNE_EXTERIOR);
+    assert(oliver->x == 25 && oliver->y == 15);
+    assert(oliver->dialogue == GENERATED_DIALOGUE_OLIVER_START);
+
+    /* The converted landing connects the common room and player bedroom in
+     * both directions through named Tiled spawn points. */
+    world.active_script = GENERATED_SCRIPT_LEAVE_PLAYER_ROOM;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.player_x == 7 && world.player_y == 3);
+    assert(world.player_facing == WORLD_NORTH);
+
+    world.active_script = GENERATED_SCRIPT_ENTER_PLAYER_ROOM;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_PLAYER_ROOM);
+    assert(world.player_x == 5 && world.player_y == 2);
+    assert(world.player_facing == WORLD_SOUTH);
+
+    world.active_script = GENERATED_SCRIPT_ENTER_FIRST_FLOOR;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.player_x == 8 && world.player_y == 2);
+    assert(world.player_facing == WORLD_SOUTH);
+
+    world.active_script = GENERATED_SCRIPT_LEAVE_FIRST_FLOOR;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_INN);
+    assert(world.player_x == 12 && world.player_y == 2);
+    assert(world.player_facing == WORLD_SOUTH);
 
     puts("world schedule checks passed");
     return 0;

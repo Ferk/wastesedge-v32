@@ -1,0 +1,6 @@
+{
+  "id": "enter_first_floor",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_first_floor", "spawn": "common_room_stairs" }
+  ]
+}

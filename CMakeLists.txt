@@ -72,7 +72,7 @@ set(runtime_sources
   "${generated_dir}/content_data.c"
   "${generated_dir}/content_scene_data.c")
 set(runtime_headers
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/vircon.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/vircon.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/platform.h"
   "${generated_dir}/content_ids.h"
@@ -95,7 +95,6 @@ foreach(source IN LISTS runtime_sources)
     OUTPUT "${object}"
     COMMAND "${CLANG_EXECUTABLE}" --target=wasm32-unknown-unknown -O2
             -fno-jump-tables -ffreestanding -fno-builtin -nostdlib
-            -I "${CMAKE_CURRENT_SOURCE_DIR}/include"
             -I "${CMAKE_CURRENT_SOURCE_DIR}/src"
             -I "${generated_dir}"
             -c "${source}" -o "${object}"

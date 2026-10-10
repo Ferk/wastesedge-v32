@@ -1,4 +1,4 @@
-#include <vircon.h>
+#include "platform/vircon32/vircon.h"
 
 #include "platform/vircon32/platform.h"
 
@@ -25,7 +25,12 @@
 #define DRAW_FIXED_CYCLES 12000
 #define DRAW_CYCLES_PER_COMMAND 160
 #define DRAW_SAFETY_CYCLES 20000
-#define DIRTY_PADDING 2
+/* Partial replays convert between the 427x240 game grid and the 640x360
+ * display grid. The 1.5x rasterizer and integer source clipping can touch a
+ * few pixels beyond the mathematical sprite rectangle. Keep a conservative
+ * display-space halo so no edge sample from the previous player frame can be
+ * left behind as movement advances the dirty region. */
+#define DIRTY_PADDING 6
 #define MUSIC_CHANNEL 0
 
 /* Vircon32 has no writable framebuffer or display lists. Keep a small display
@@ -138,8 +143,8 @@ static int view_y(int y)
     return (y * 3) / 2;
 }
 
-static void record_texture(int texture, int texture_x, int texture_y,
-                           int width, int height, int x, int y)
+static void record_texture_color(int texture, int texture_x, int texture_y,
+                                 int width, int height, int x, int y, int color)
 {
     int source_x = texture_x;
     int source_y = texture_y;
@@ -172,13 +177,28 @@ static void record_texture(int texture, int texture_x, int texture_y,
 
     record_draw(texture, 0, source_x, source_y, visible_width, visible_height,
                 view_x(x), view_y(y),
-                GAME_SCALE, GAME_SCALE, 0xFFFFFFFF);
+                GAME_SCALE, GAME_SCALE, color);
+}
+
+static void record_texture(int texture, int texture_x, int texture_y,
+                           int width, int height, int x, int y)
+{
+    record_texture_color(texture, texture_x, texture_y, width, height,
+                         x, y, 0xFFFFFFFF);
 }
 
 static void record_frame(const struct generated_runtime_frame *frame, int x, int y)
 {
     record_texture(frame->texture, frame->source_x, frame->source_y,
                    frame->width, frame->height, x, y);
+}
+
+static void record_scenery_frame(const struct generated_runtime_frame *frame,
+                                 int x, int y, int alpha)
+{
+    int color = (int)(((unsigned int)alpha << 24) | 0x00FFFFFFu);
+    record_texture_color(frame->texture, frame->source_x, frame->source_y,
+                         frame->width, frame->height, x, y, color);
 }
 
 static void record_solid_rect(int x, int y, int width, int height, int color)
@@ -455,8 +475,9 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
         while (scenery_index < scene->scenery_count &&
                scene->scenery[scenery_index].depth <= selected_y) {
             const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
-            record_frame(world_scenery_frame(world, item),
-                         item->x - camera_x, item->y - camera_y);
+            record_scenery_frame(world_scenery_frame(world, item),
+                                 item->x - camera_x, item->y - camera_y,
+                                 item->alpha);
         }
         draw_entity(world, selected, camera_x, camera_y);
         last_y = selected_y;
@@ -465,8 +486,9 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
     }
     while (scenery_index < scene->scenery_count) {
         const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
-        record_frame(world_scenery_frame(world, item),
-                     item->x - camera_x, item->y - camera_y);
+        record_scenery_frame(world_scenery_frame(world, item),
+                             item->x - camera_x, item->y - camera_y,
+                             item->alpha);
     }
 }
 
@@ -598,6 +620,15 @@ void platform_initialize(void)
     }
 }
 
+int platform_random_seed(void)
+{
+    int seed = get_time();
+    if (seed == 0)
+        seed = 1;
+    srand(seed);
+    return rand();
+}
+
 void platform_update_audio(const struct world_state *world)
 {
     const struct generated_runtime_music *track;
@@ -640,12 +671,76 @@ static void prepare_world_frame(const struct world_state *world)
 
 static int command_intersects_rectangle(int index, int left, int top, int right, int bottom)
 {
-    int width = (int)(draw_command_region_width[index] * draw_command_scale_x[index]);
-    int height = (int)(draw_command_region_height[index] * draw_command_scale_y[index]);
+    float scaled_width = draw_command_region_width[index] * draw_command_scale_x[index];
+    float scaled_height = draw_command_region_height[index] * draw_command_scale_y[index];
+    int width = (int)scaled_width;
+    int height = (int)scaled_height;
     int x = draw_command_x[index];
     int y = draw_command_y[index];
+    if ((float)width < scaled_width) ++width;
+    if ((float)height < scaled_height) ++height;
     return width > 0 && height > 0 && x < right && y < bottom &&
            x + width > left && y + height > top;
+}
+
+static void expand_dirty_for_translucent_commands(void)
+{
+    int changed;
+    do {
+        int index;
+        changed = 0;
+        for (index = 0; index < draw_command_count; ++index) {
+            unsigned int alpha = (unsigned int)draw_command_color[index] >> 24;
+            float scaled_width;
+            float scaled_height;
+            int width;
+            int height;
+            int left;
+            int top;
+            int right;
+            int bottom;
+            if (alpha >= 255 || draw_command_region_width[index] <= 0 ||
+                draw_command_region_height[index] <= 0 ||
+                !command_intersects_rectangle(index,
+                                              prepared_dirty_left, prepared_dirty_top,
+                                              prepared_dirty_right, prepared_dirty_bottom))
+                continue;
+
+            /* Partial texture clipping rounds outward so opaque images never
+             * leave a seam. Doing that to an alpha-blended command can touch
+             * an uncleared pixel outside the dirty rectangle and blend the
+             * same wall over it once more on every movement frame. Include
+             * the complete translucent draw (plus its raster halo) instead,
+             * so it is always replayed onto freshly restored pixels. Repeat
+             * because expanding to one overlapping object may reach another. */
+            scaled_width = draw_command_region_width[index] * draw_command_scale_x[index];
+            scaled_height = draw_command_region_height[index] * draw_command_scale_y[index];
+            width = (int)scaled_width;
+            height = (int)scaled_height;
+            if ((float)width < scaled_width) ++width;
+            if ((float)height < scaled_height) ++height;
+            left = draw_command_x[index] - DIRTY_PADDING;
+            top = draw_command_y[index] - DIRTY_PADDING;
+            right = draw_command_x[index] + width + DIRTY_PADDING;
+            bottom = draw_command_y[index] + height + DIRTY_PADDING;
+            if (left < prepared_dirty_left) {
+                prepared_dirty_left = left;
+                changed = 1;
+            }
+            if (top < prepared_dirty_top) {
+                prepared_dirty_top = top;
+                changed = 1;
+            }
+            if (right > prepared_dirty_right) {
+                prepared_dirty_right = right;
+                changed = 1;
+            }
+            if (bottom > prepared_dirty_bottom) {
+                prepared_dirty_bottom = bottom;
+                changed = 1;
+            }
+        }
+    } while (changed);
 }
 
 static int ambient_overlay_intersects_rectangle(int left, int top, int right, int bottom)
@@ -713,8 +808,8 @@ static void flush_prepared_frame(void)
                                               prepared_dirty_right, prepared_dirty_bottom))
                 continue;
 
-            output_right = command_draw_x + (command_width * 3) / 2;
-            output_bottom = command_draw_y + (command_height * 3) / 2;
+            output_right = command_draw_x + (command_width * 3 + 1) / 2;
+            output_bottom = command_draw_y + (command_height * 3 + 1) / 2;
             if (command_draw_x < prepared_dirty_left)
                 source_left = ((prepared_dirty_left - command_draw_x) * 2) / 3;
             if (command_draw_y < prepared_dirty_top)
@@ -860,6 +955,9 @@ static void configure_dirty_replay(const struct world_state *world)
     prepared_dirty_top -= DIRTY_PADDING;
     prepared_dirty_right += DIRTY_PADDING;
     prepared_dirty_bottom += DIRTY_PADDING;
+
+    expand_dirty_for_translucent_commands();
+
     if (prepared_dirty_left < VIEW_X) prepared_dirty_left = VIEW_X;
     if (prepared_dirty_top < 0) prepared_dirty_top = 0;
     if (prepared_dirty_right > VIEW_X + VIEW_WIDTH)

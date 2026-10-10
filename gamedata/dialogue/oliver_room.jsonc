@@ -1,0 +1,50 @@
+{
+  "id": "oliver_room",
+  "start": "arrival",
+  "on_end": "oliver_return_to_yard",
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "oliver", "name": "Oliver Redwyne", "role": "npc", "entity": "oliver",
+      "portrait": "assets/ui/portraits/oliver.png" },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    {
+      "id": "arrival", "speaker": "narrator",
+      "text": "Oliver leads you to a room on the first floor.",
+      "next": "hope_you_like_it"
+    },
+    {
+      "id": "hope_you_like_it", "speaker": "oliver",
+      "text": "I hope you like it, sir. All the other rooms are occupied.",
+      "choices": [
+        { "text": "You have a lot of guests here at the moment, then?",
+          "next": "nobody_can_leave" },
+        { "text": "Don't worry Oliver. This one is fine.", "next": "goodbye" }
+      ]
+    },
+    {
+      "id": "nobody_can_leave", "speaker": "oliver",
+      "text": "Yes sir. And with that theft, nobody can leave.",
+      "choices": [
+        { "text": "Nobody can leave?", "next": "guards" }
+      ]
+    },
+    {
+      "id": "guards", "speaker": "oliver",
+      "text": "No. As long as Master Fingolson's jewels are not found, the guards don't allow it.",
+      "next": "thanks"
+    },
+    {
+      "id": "thanks", "speaker": "player",
+      "text": "I see. Thank you Oliver. Until later.",
+      "end": true
+    },
+    {
+      "id": "goodbye", "speaker": "player",
+      "text": "Don't worry Oliver. This one is fine.",
+      "end": true
+    }
+  ]
+}

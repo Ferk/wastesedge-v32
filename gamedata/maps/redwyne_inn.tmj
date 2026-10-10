@@ -851,6 +851,11 @@
           "name": "wall-face-front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/inside/wall-face-front.mobj"
@@ -872,6 +877,11 @@
           "id": 26,
           "name": "wall-face-front",
           "properties": [
+            {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
             {
               "name": "source_object",
               "type": "string",
@@ -895,6 +905,11 @@
           "name": "wall-face-front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/inside/wall-face-front.mobj"
@@ -916,6 +931,11 @@
           "id": 28,
           "name": "wall-face-front",
           "properties": [
+            {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
             {
               "name": "source_object",
               "type": "string",
@@ -939,6 +959,11 @@
           "name": "wall-face-front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/inside/wall-face-front.mobj"
@@ -961,6 +986,11 @@
           "name": "doorframe",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/inside/doorframe.mobj"
@@ -982,6 +1012,11 @@
           "id": 31,
           "name": "doorframe",
           "properties": [
+            {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
             {
               "name": "source_object",
               "type": "string",
@@ -1301,6 +1336,11 @@
           "name": "window_front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/window_front.mobj"
@@ -1323,6 +1363,11 @@
           "name": "window_front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/window_front.mobj"
@@ -1344,6 +1389,11 @@
           "id": 47,
           "name": "window_front",
           "properties": [
+            {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
             {
               "name": "source_object",
               "type": "string",
@@ -1487,6 +1537,142 @@
           "width": 20,
           "x": 100,
           "y": 120
+        },
+        {
+          "gid": 173,
+          "height": 20,
+          "id": 82,
+          "name": "table_1_mug_1",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_1_mug_1" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 160 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 45,
+          "y": 132
+        },
+        {
+          "gid": 174,
+          "height": 20,
+          "id": 83,
+          "name": "table_1_mug_2",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_1_mug_2" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 160 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 65,
+          "y": 132
+        },
+        {
+          "gid": 173,
+          "height": 20,
+          "id": 84,
+          "name": "table_2_mug_1",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_2_mug_1" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 160 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 165,
+          "y": 132
+        },
+        {
+          "gid": 174,
+          "height": 20,
+          "id": 85,
+          "name": "table_2_mug_2",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_2_mug_2" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 160 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 185,
+          "y": 132
+        },
+        {
+          "gid": 173,
+          "height": 20,
+          "id": 86,
+          "name": "table_3_mug_1",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_3_mug_1" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 120 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 225,
+          "y": 92
+        },
+        {
+          "gid": 174,
+          "height": 20,
+          "id": 87,
+          "name": "table_3_mug_2",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_3_mug_2" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 120 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 245,
+          "y": 92
+        },
+        {
+          "gid": 173,
+          "height": 20,
+          "id": 88,
+          "name": "table_4_mug_1",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_4_mug_1" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 120 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 105,
+          "y": 92
+        },
+        {
+          "gid": 174,
+          "height": 20,
+          "id": 89,
+          "name": "table_4_mug_2",
+          "properties": [
+            { "name": "entity_def", "type": "string", "value": "table_mug" },
+            { "name": "id", "type": "string", "value": "table_4_mug_2" },
+            { "name": "initial_state", "type": "string", "value": "hidden" },
+            { "name": "kind", "type": "string", "value": "entity" },
+            { "name": "sort_y", "type": "int", "value": 120 }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 125,
+          "y": 92
         }
       ],
       "opacity": 1,
@@ -1549,6 +1735,31 @@
           "width": 20,
           "x": 280,
           "y": 80
+        },
+        {
+          "id": 80,
+          "name": "first_floor_stairs",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "first_floor_stairs" },
+            { "name": "facing", "type": "string", "value": "south" }
+          ],
+          "x": 240,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 81,
+          "name": "enter_first_floor",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_first_floor" },
+            { "name": "script", "type": "string", "value": "enter_first_floor" }
+          ],
+          "width": 20,
+          "x": 240,
+          "y": 20
         }
       ],
       "opacity": 1,
@@ -1992,7 +2203,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 80,
+  "nextobjectid": 90,
   "orientation": "orthogonal",
   "properties": [
     {
@@ -2037,6 +2248,10 @@
     {
       "firstgid": 153,
       "source": "../tilesets/redwyne_inn_erek.tsj"
+    },
+    {
+      "firstgid": 173,
+      "source": "../tilesets/redwyne_inn_mugs.tsj"
     }
   ],
   "tilewidth": 20,

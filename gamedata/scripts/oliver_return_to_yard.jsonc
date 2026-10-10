@@ -1,0 +1,7 @@
+{
+  "id": "oliver_return_to_yard",
+  "actions": [
+    { "op": "set_entity_dialogue", "entity": "oliver", "dialogue": "oliver_start" },
+    { "op": "start_schedule", "entity": "oliver", "schedule": "oliver_return_to_yard" }
+  ]
+}

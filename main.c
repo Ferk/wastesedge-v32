@@ -21,6 +21,7 @@ int main(void)
 
     world_initialize(&world);
     platform_initialize();
+    world_seed_random(&world, platform_random_seed());
     simulation_frame = platform_frame_counter();
 
     for (;;) {

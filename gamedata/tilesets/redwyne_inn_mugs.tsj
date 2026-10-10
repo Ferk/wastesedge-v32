@@ -1,0 +1,125 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_inn_mugs",
+  "tilecount": 2,
+  "tiledversion": "1.11.0",
+  "tileheight": 20,
+  "tilewidth": 20,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_inn_mugs/furnitures__mug_on_table_1_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/mug_on_table-1.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 12
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 1,
+      "image": "../assets/tiles/redwyne_inn_mugs/furnitures__mug_on_table_2_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/mug_on_table-2.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 25
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 12
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

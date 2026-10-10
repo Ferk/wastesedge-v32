@@ -575,6 +575,11 @@
           "name": "wall-face-front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/inside/wall-face-front.mobj"
@@ -685,6 +690,11 @@
           "name": "window_front",
           "properties": [
             {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
+            {
               "name": "source_object",
               "type": "string",
               "value": "walls/window_front.mobj"
@@ -706,6 +716,11 @@
           "id": 25,
           "name": "window_front",
           "properties": [
+            {
+              "name": "alpha",
+              "type": "int",
+              "value": 128
+            },
             {
               "name": "source_object",
               "type": "string",

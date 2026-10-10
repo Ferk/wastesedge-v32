@@ -23,6 +23,7 @@
     { "op": "start_schedule", "entity": "frostbloom", "schedule": "frostbloom_yard", "delay_frames": 600 },
     { "op": "start_schedule", "entity": "erek", "schedule": "erek_common_room", "delay_frames": 3600 },
     { "op": "start_schedule", "entity": "oliver", "schedule": "oliver_yard", "delay_frames": 3600 },
+    { "op": "start_schedule", "entity": "jelom", "schedule": "jelom_first_floor", "delay_frames": 900 },
     { "op": "set_entity_state", "entity": "intro_gate_back", "state": "opening_3" },
     { "op": "set_entity_state", "entity": "intro_gate_fore", "state": "opening_3" },
     { "op": "wait", "frames": 4 },

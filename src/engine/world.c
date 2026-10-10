@@ -212,7 +212,6 @@ static void change_scene(struct world_state *world, int scene_index, int spawn_i
 {
     const struct generated_runtime_scene *scene;
     const struct generated_runtime_spawn *spawn;
-    int index;
     if (scene_index < 0 || scene_index >= generated_runtime_scene_count)
         return;
     scene = &generated_runtime_scenes[scene_index];
@@ -232,8 +231,6 @@ static void change_scene(struct world_state *world, int scene_index, int spawn_i
     world->move_progress = 0;
     world->animation_frame = 0;
     world->trigger_latch = -1;
-    for (index = 0; index < GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT; ++index)
-        world->object_states[index] = 0;
     ++world->visual_revision;
 }
 
@@ -260,8 +257,14 @@ static int start_position_trigger(struct world_state *world, int when)
 static void close_dialogue(struct world_state *world)
 {
     int end_script = -1;
-    if (world->dialogue >= 0)
-        end_script = generated_runtime_dialogues[world->dialogue].end_script;
+    if (world->dialogue >= 0) {
+        const struct generated_runtime_dialogue *dialogue =
+            &generated_runtime_dialogues[world->dialogue];
+        if (world->dialogue_node >= 0 && world->dialogue_node < dialogue->node_count)
+            end_script = dialogue->nodes[world->dialogue_node].end_script;
+        if (end_script < 0)
+            end_script = dialogue->end_script;
+    }
     world->dialogue = -1;
     world->dialogue_node = 0;
     world->dialogue_choice = 0;
@@ -356,6 +359,9 @@ static int scheduled_actor_can_move(const struct world_state *world, int definit
                                  actor->x + move_x, actor->y + move_y);
 }
 
+static void start_actor_schedule(struct world_state *world, int definition,
+                                 int schedule, int delay);
+
 static void finish_schedule_step(struct world_state *world, int definition,
                                  const struct generated_runtime_schedule_step *step)
 {
@@ -367,6 +373,8 @@ static void finish_schedule_step(struct world_state *world, int definition,
     if (actor->schedule_step >= schedule->step_count) {
         if (schedule->loop)
             actor->schedule_step = 0;
+        else if (schedule->next_schedule >= 0)
+            start_actor_schedule(world, definition, schedule->next_schedule, 0);
         else
             actor->schedule = -1;
     }
@@ -403,6 +411,54 @@ static void update_actor_schedule(struct world_state *world, int definition)
             actor->move_progress = 0;
         }
         ++world->visual_revision;
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_WAIT) {
+        finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_SET_OBJECT_STATE ||
+        step->op == GENERATED_SCHEDULE_TOGGLE_OBJECT_STATE) {
+        if (step->target >= 0 &&
+            step->target < GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT) {
+            int state = step->value;
+            if (step->op == GENERATED_SCHEDULE_TOGGLE_OBJECT_STATE)
+                state = world->object_states[step->target] == 0 ? 1 : 0;
+            if (world->object_states[step->target] != state) {
+                world->object_states[step->target] = state;
+                if (step->scene == world->scene_index)
+                    ++world->visual_revision;
+            }
+        }
+        finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_SPEAK) {
+        if (step->target >= 0 && step->target < schedule->speech_count) {
+            actor->speech_line = step->target;
+            actor->speech_frames = step->value;
+            ++world->visual_revision;
+        }
+        finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_JUMP) {
+        actor->schedule_step = step->target;
+        actor->schedule_wait = schedule_random_delay(
+            world, step->delay_min, step->delay_max);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_RANDOM_JUMP) {
+        int branch;
+        if (step->target < 0 || step->value <= 0 ||
+            step->target + step->value > schedule->branch_count) {
+            actor->schedule = -1;
+            return;
+        }
+        branch = schedule_random_delay(world, 0, step->value - 1);
+        actor->schedule_step = schedule->branches[step->target + branch];
+        actor->schedule_wait = schedule_random_delay(
+            world, step->delay_min, step->delay_max);
         return;
     }
     if (step->op == GENERATED_SCHEDULE_PLACE) {
@@ -445,23 +501,25 @@ static void update_actor_speech(struct world_state *world, int definition)
         world->dialogue >= 0)
         return;
     schedule = &generated_runtime_schedules[actor->schedule];
-    if (schedule->speech_count <= 0)
-        return;
     if (actor->speech_frames > 0) {
         --actor->speech_frames;
         if (actor->speech_frames == 0) {
             actor->speech_line = -1;
-            actor->speech_wait = speech_random_value(
-                world, schedule->speech_delay_min, schedule->speech_delay_max);
+            if (schedule->ambient_speech_count > 0)
+                actor->speech_wait = speech_random_value(
+                    world, schedule->speech_delay_min, schedule->speech_delay_max);
             ++world->visual_revision;
         }
         return;
     }
+    if (schedule->ambient_speech_count <= 0)
+        return;
     if (actor->speech_wait > 0) {
         --actor->speech_wait;
         return;
     }
-    actor->speech_line = speech_random_value(world, 0, schedule->speech_count - 1);
+    actor->speech_line = speech_random_value(
+        world, 0, schedule->ambient_speech_count - 1);
     actor->speech_frames = schedule->speech_duration;
     ++world->visual_revision;
 }
@@ -491,7 +549,7 @@ static void start_actor_schedule(struct world_state *world, int definition,
     actor->schedule_wait = delay;
     actor->speech_line = -1;
     actor->speech_frames = 0;
-    if (generated_runtime_schedules[schedule].speech_count > 0)
+    if (generated_runtime_schedules[schedule].ambient_speech_count > 0)
         actor->speech_wait = speech_random_value(
             world, generated_runtime_schedules[schedule].speech_delay_min,
             generated_runtime_schedules[schedule].speech_delay_max);
@@ -708,6 +766,15 @@ void world_initialize(struct world_state *world)
         world->flags[index] = 0;
     for (index = 0; index < GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT; ++index)
         world->object_states[index] = 0;
+    for (scene_index = 0; scene_index < generated_runtime_scene_count; ++scene_index) {
+        const struct generated_runtime_scene *scene = &generated_runtime_scenes[scene_index];
+        for (entity_index = 0; entity_index < scene->scenery_count; ++entity_index) {
+            const struct generated_runtime_scenery *scenery = &scene->scenery[entity_index];
+            if (scenery->state_slot >= 0 &&
+                scenery->state_slot < GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT)
+                world->object_states[scenery->state_slot] = scenery->initial_state;
+        }
+    }
     world->active_script = -1;
     world->script_action = 0;
     world->script_wait = 0;
@@ -726,6 +793,15 @@ void world_initialize(struct world_state *world)
         if (world->scene->entry_dialogue >= 0)
             start_dialogue(world, world->scene->entry_dialogue);
     }
+}
+
+void world_seed_random(struct world_state *world, int seed)
+{
+    unsigned int value = (unsigned int)seed;
+    if (value == 0)
+        value = 1;
+    world->schedule_random = (int)(value & 0xFFFFu);
+    world->speech_random = (int)(((value >> 16) ^ value ^ 0x5A17u) & 0xFFFFu);
 }
 
 void world_update(struct world_state *world, const struct world_actions *actions)
