@@ -9,7 +9,8 @@
     "maps/redwyne_parlour.tmj",
     "maps/redwyne_player_room.tmj",
     "maps/redwyne_first_floor.tmj",
-    "maps/redwyne_kitchen.tmj"
+    "maps/redwyne_kitchen.tmj",
+    "maps/redwyne_silverhair_room.tmj"
   ],
   "entities": ["entities/core.jsonc"],
   "schedules": ["schedules/npc_routes.jsonc"],
@@ -25,7 +26,8 @@
     "dialogue/oliver_room.jsonc",
     "dialogue/frostbloom_start.jsonc",
     "dialogue/jelom_start.jsonc",
-    "dialogue/lucia_start.jsonc"
+    "dialogue/lucia_start.jsonc",
+    "dialogue/silverhair_start.jsonc"
   ],
   "scripts": [
     "scripts/talk_to_talan.jsonc",
@@ -63,6 +65,10 @@
     "scripts/leave_redwyne_kitchen.jsonc",
     "scripts/enter_redwyne_kitchen_yard.jsonc",
     "scripts/leave_redwyne_kitchen_yard.jsonc",
-    "scripts/talk_to_lucia.jsonc"
+    "scripts/talk_to_lucia.jsonc",
+    "scripts/enter_silverhair_room.jsonc",
+    "scripts/leave_silverhair_room.jsonc",
+    "scripts/talk_to_silverhair.jsonc",
+    "scripts/examine_silverhair_belongings.jsonc"
   ]
 }

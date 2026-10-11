@@ -716,6 +716,17 @@ def collect_scenes(paths: list[Path], entities: set[str], scripts: dict[str, lis
                     if object_id in object_ids:
                         raise ContentError(f"{path}: duplicate object id {object_id}")
                     object_ids.add(object_id)
+                    has_condition_flag = "condition_flag" in values
+                    has_condition_value = "condition_equals" in values
+                    if has_condition_flag != has_condition_value:
+                        raise ContentError(
+                            f"{path}: trigger condition requires both condition_flag "
+                            "and condition_equals")
+                    if has_condition_flag:
+                        identifier(values["condition_flag"],
+                                   f"{path} trigger condition flag")
+                        integer(values["condition_equals"],
+                                f"{path} trigger condition equals")
                 elif kind == "tiled_occluder":
                     object_id = identifier(values.get("id"), f"{path} object id")
                     if object_id in object_ids:
@@ -1504,7 +1515,8 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
 
 def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict[str, object]], game_root: Path,
                        script_dialogues: dict[str, str], dialogue_index: dict[str, int],
-                       script_index: dict[str, int]) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]], list[str]]:
+                       script_index: dict[str, int],
+                       flag_index: dict[str, int]) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]], list[str]]:
     """Compile the small initial scene runtime representation.
 
     This deliberately covers authored ground tiles, static depth-capable map
@@ -1615,6 +1627,19 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         facing = {"north": 0, "south": 1, "west": 2, "east": 3}.get(facing_name, -2)
                         if facing == -2:
                             raise ContentError(f"{map_path}: unsupported trigger facing {facing_name!r}")
+                    condition_name = values.get("condition_flag")
+                    condition_flag = -1
+                    condition_value = 0
+                    if condition_name is not None:
+                        condition_name = identifier(
+                            condition_name, f"{map_path} trigger condition flag")
+                        if condition_name not in flag_index:
+                            raise ContentError(
+                                f"{map_path}: trigger refers to unknown flag {condition_name!r}")
+                        condition_flag = flag_index[condition_name]
+                        condition_value = integer(
+                            values.get("condition_equals"),
+                            f"{map_path} trigger condition equals")
                     triggers.append({
                         "x": trigger_x // tile_size,
                         "y": trigger_y // tile_size,
@@ -1623,6 +1648,8 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         "script": script_index[identifier(values.get("script"), f"{map_path} trigger script")],
                         "when": when,
                         "facing": facing,
+                        "condition_flag": condition_flag,
+                        "condition_value": condition_value,
                     })
                     continue
                 if kind == "hotspot":
@@ -2001,7 +2028,7 @@ struct generated_runtime_object_visual { const struct generated_runtime_frame *f
 struct generated_runtime_scenery { struct generated_runtime_frame frame; int x, y, depth, alpha, definition, state_slot, initial_state, visual; };
 struct generated_runtime_entity { int visual, tile_x, tile_y, facing, blocks_movement, player_controlled, interaction_dialogue, definition, initially_present; };
 struct generated_runtime_spawn { int tile_x, tile_y, facing; };
-struct generated_runtime_trigger { int x, y, width, height, script, when, facing; };
+struct generated_runtime_trigger { int x, y, width, height, script, when, facing, condition_flag, condition_value; };
 struct generated_runtime_hotspot { int x, y, width, height, script, facing, priority; };
 struct generated_runtime_music { int sound, loop; float speed, volume; };
 struct generated_runtime_text { const int *glyphs; int glyph_count; };
@@ -2181,9 +2208,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append("};")
         lines.append(f"static const struct generated_runtime_trigger generated_runtime_triggers_{index}[] = {{")
         for trigger in scene["triggers"]:
-            lines.append("    { %d, %d, %d, %d, %d, %d, %d }," % (
+            lines.append("    { %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
                 trigger["x"], trigger["y"], trigger["width"], trigger["height"],
-                trigger["script"], trigger["when"], trigger["facing"]))
+                trigger["script"], trigger["when"], trigger["facing"],
+                trigger["condition_flag"], trigger["condition_value"]))
         lines.append("};\n")
         lines.append(f"static const struct generated_runtime_hotspot generated_runtime_hotspots_{index}[] = {{")
         for hotspot in scene["hotspots"]:
@@ -2408,7 +2436,8 @@ def compile_content(project_root: Path) -> None:
         inputs["dialogue"], inputs["scripts"], entities, game_root, script_index)
     dialogue_index = {str(item["id"]): index for index, item in enumerate(runtime_dialogue)}
     runtime_scenes, runtime_visuals, runtime_object_visuals, _ = runtime_scene_data(
-        inputs["maps"], entities, game_root, script_dialogues, dialogue_index, script_index)
+        inputs["maps"], entities, game_root, script_dialogues, dialogue_index,
+        script_index, {flag: index for index, flag in enumerate(runtime_flags)})
     runtime_schedule_data = runtime_schedules(schedules, entities, runtime_scenes)
     schedule_index = {str(item["id"]): index for index, item in enumerate(runtime_schedule_data)}
     music_index = {str(track["id"]): index for index, track in enumerate(music)}

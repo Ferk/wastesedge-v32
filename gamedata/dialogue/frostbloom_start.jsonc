@@ -18,7 +18,10 @@
       "text": "Hm? What do you want?",
       "choices": [
         { "text": "I am a servant of Lady Imoen Silverhair, and I'd like to ask ...",
-          "actions": [{ "op": "set", "flag": "frostbloom_talked", "value": 1 }],
+          "actions": [
+            { "op": "set", "flag": "frostbloom_talked", "value": 1 },
+            { "op": "set", "flag": "know_frostbloom", "value": 1 }
+          ],
           "next": "first_dismissal" }
       ]
     },

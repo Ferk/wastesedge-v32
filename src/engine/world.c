@@ -327,6 +327,10 @@ static int start_position_trigger(struct world_state *world, int when)
             continue;
         if (trigger->facing >= 0 && trigger->facing != world->player_facing)
             continue;
+        if (trigger->condition_flag >= 0 &&
+            (trigger->condition_flag >= GENERATED_RUNTIME_FLAG_COUNT ||
+             world->flags[trigger->condition_flag] != trigger->condition_value))
+            continue;
         if (world->player_x < trigger->x || world->player_y < trigger->y ||
             world->player_x >= trigger->x + trigger->width ||
             world->player_y >= trigger->y + trigger->height)

@@ -41,6 +41,46 @@ static int single_condition_value(const struct generated_runtime_dialogue_choice
     return choice->conditions[0].value;
 }
 
+static const struct generated_runtime_dialogue_node *find_dialogue_node(
+    const struct generated_runtime_dialogue *dialogue, const char *text)
+{
+    int index;
+    for (index = 0; index < dialogue->node_count; ++index)
+        if (strcmp(dialogue->nodes[index].text, text) == 0)
+            return &dialogue->nodes[index];
+    return 0;
+}
+
+static const struct generated_runtime_dialogue_choice *find_dialogue_choice(
+    const struct generated_runtime_dialogue_node *node, const char *text)
+{
+    int index;
+    for (index = 0; index < node->choice_count; ++index)
+        if (strcmp(node->choices[index].text, text) == 0)
+            return &node->choices[index];
+    return 0;
+}
+
+static int choice_has_action(const struct generated_runtime_dialogue_choice *choice,
+                             int flag, int value)
+{
+    int index;
+    for (index = 0; index < choice->action_count; ++index)
+        if (choice->actions[index].flag == flag && choice->actions[index].value == value)
+            return 1;
+    return 0;
+}
+
+static int choice_has_condition(const struct generated_runtime_dialogue_choice *choice,
+                                int flag, int value)
+{
+    int index;
+    for (index = 0; index < choice->condition_count; ++index)
+        if (choice->conditions[index].flag == flag && choice->conditions[index].value == value)
+            return 1;
+    return 0;
+}
+
 int main(void)
 {
     struct world_state world;
@@ -53,6 +93,9 @@ int main(void)
     struct world_actor_state *frostbloom;
     struct world_actor_state *jelom;
     struct world_actor_state *lucia;
+    struct world_actor_state *silverhair;
+    struct world_actor_state *sarin;
+    struct world_actor_state *janesta;
     const struct generated_runtime_dialogue *talan_dialogue;
     const struct generated_runtime_dialogue *oliver_dialogue;
     const struct generated_runtime_dialogue *jelom_dialogue;
@@ -99,6 +142,8 @@ int main(void)
                .hotspot_count == 4);
     assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_PLAYER_ROOM]
                .hotspot_count == 2);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM]
+               .hotspot_count == 1);
     /* Walkable kitchen flooring is a Tiled Tile Layer. It must never enter
      * the actor/scenery depth merge, where a lower row could cover feet. */
     /* The compiler packs those 24 authored tiles into one static background
@@ -148,6 +193,66 @@ int main(void)
     world_update(&world, &interact);
     assert(strcmp(world_dialogue_text(&world),
                   "You again, Half-Elf? What do you want this time?") == 0);
+
+    /* The Silverhair doorway uses two overlapping data-authored triggers.
+     * Before Jelom releases her it opens his warning; afterwards the same
+     * step changes to the original room and its reciprocal doorway. */
+    assert(world.scene->trigger_count == 4);
+    assert(world.scene->triggers[2].x == 1 && world.scene->triggers[2].y == 7);
+    assert(world.scene->triggers[2].condition_flag >= 0);
+    assert(world.scene->triggers[2].condition_value == 1);
+    assert(world.scene->triggers[3].condition_flag ==
+           world.scene->triggers[2].condition_flag);
+    assert(world.scene->triggers[3].condition_value == 0);
+    world.dialogue = -1;
+    world.dialogue_actor = -1;
+    world.flags[world.scene->triggers[2].condition_flag] = 0;
+    world.player_x = 1;
+    world.player_y = 6;
+    world.player_facing = WORLD_SOUTH;
+    world.moving = 0;
+    world.trigger_latch = -1;
+    world_update(&world, &move_south);
+    tick(&world, 11);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.dialogue == GENERATED_DIALOGUE_JELOM_START);
+
+    world.dialogue = -1;
+    world.dialogue_actor = -1;
+    world.active_script = -1;
+    world.flags[world.scene->triggers[2].condition_flag] = 1;
+    world.player_x = 1;
+    world.player_y = 6;
+    world.player_facing = WORLD_SOUTH;
+    world.moving = 0;
+    world.trigger_latch = -1;
+    world_update(&world, &move_south);
+    tick(&world, 11);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
+    assert(world.player_x == 5 && world.player_y == 2);
+    assert(world.scene->entity_count == 4);
+    assert(world.scene->trigger_count == 1);
+
+    /* Submap 13 has one original positional event: from (1,6), facing north,
+     * Banec refuses to touch his mistress' belongings. The chest-search event
+     * is in another submap and must not be attached to this room's chest. */
+    world.dialogue = -1;
+    world.dialogue_actor = -1;
+    world.active_script = -1;
+    world.control_enabled = 1;
+    world.player_x = 1;
+    world.player_y = 6;
+    world.player_facing = WORLD_SOUTH;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_line = -1;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_frames = 0;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_override = 0;
+    world_update(&world, &interact);
+    assert(world_entity_speech(&world, world.player_entity) == 0);
+    world.player_facing = WORLD_NORTH;
+    world_update(&world, &interact);
+    assert(world_entity_speech(&world, world.player_entity) ==
+           &generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_SILVERHAIR_BELONGINGS]
+                .speech[0]);
 
     /* Restore pristine schedules, flags and introductory script state. */
     world_initialize(&world);
@@ -280,6 +385,9 @@ int main(void)
     frostbloom = &world.actors[GENERATED_ENTITY_FROSTBLOOM];
     jelom = &world.actors[GENERATED_ENTITY_JELOM];
     lucia = &world.actors[GENERATED_ENTITY_LUCIA];
+    silverhair = &world.actors[GENERATED_ENTITY_SILVERHAIR];
+    sarin = &world.actors[GENERATED_ENTITY_SARIN];
+    janesta = &world.actors[GENERATED_ENTITY_JANESTA];
     assert(talan->schedule == GENERATED_SCHEDULE_TALAN_GATE_PATROL);
     assert(tristan->schedule == GENERATED_SCHEDULE_TRISTAN_INN_AND_GATE);
     assert(orloth->schedule == GENERATED_SCHEDULE_ORLOTH_COMMON_ROOM);
@@ -289,6 +397,9 @@ int main(void)
     assert(oliver->schedule == GENERATED_SCHEDULE_OLIVER_YARD);
     assert(jelom->schedule == GENERATED_SCHEDULE_JELOM_FIRST_FLOOR);
     assert(lucia->schedule == GENERATED_SCHEDULE_LUCIA_KITCHEN);
+    assert(silverhair->schedule == GENERATED_SCHEDULE_SILVERHAIR_ROOM);
+    assert(sarin->schedule == GENERATED_SCHEDULE_SARIN_ROOM);
+    assert(janesta->schedule == GENERATED_SCHEDULE_JANESTA_ROOM);
     if (orloth->scene != GENERATED_SCENE_REDWYNE_INN)
         fprintf(stderr, "Orloth initialization mismatch: scene=%d x=%d y=%d schedule=%d step=%d\n",
                 orloth->scene, orloth->x, orloth->y,
@@ -306,6 +417,9 @@ int main(void)
     assert(jelom->x == 2 && jelom->y == 6);
     assert(lucia->scene == GENERATED_SCENE_REDWYNE_KITCHEN);
     assert(lucia->x == 4 && lucia->y == 3);
+    assert(silverhair->scene == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
+    assert(sarin->scene == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
+    assert(janesta->scene == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
     assert(talan->dialogue == GENERATED_DIALOGUE_TALAN_START);
     if (talan->x != 11)
         fprintf(stderr, "Talan gate patrol mismatch: x=%d y=%d step=%d wait=%d moving=%d\n",
@@ -313,6 +427,86 @@ int main(void)
                 talan->schedule_wait, talan->moving);
     assert(talan->x == 11);
     assert(talan->y == 17 || talan->y == 18 || talan->y == 19);
+
+    /* The three prisoners retain their distinct reference routines: Imoen
+     * alternates between her place and the window, Sarin chooses a room edge,
+     * and Janesta chooses among her four housekeeping points. */
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_SILVERHAIR_ROOM]
+               .ambient_speech_count == 4);
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_SILVERHAIR_ROOM]
+               .step_count == 3);
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_SARIN_ROOM]
+               .branch_count == 4);
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_JANESTA_ROOM]
+               .branch_count == 4);
+
+    world.scene_index = GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM;
+    world.scene = &generated_runtime_scenes[world.scene_index];
+    world.player_entity = 0;
+    world.player_x = 5;
+    world.player_y = 2;
+    sarin->schedule = -1;
+    janesta->schedule = -1;
+    silverhair->x = 4;
+    silverhair->y = 4;
+    silverhair->moving = 0;
+    silverhair->schedule = GENERATED_SCHEDULE_SILVERHAIR_ROOM;
+    silverhair->schedule_step = 0;
+    silverhair->schedule_wait = 0;
+    for (frame = 0; frame < 200; ++frame) {
+        tick(&world, 1);
+        if (silverhair->x == 6 && silverhair->y == 4 &&
+            silverhair->speech_line >= 0)
+            break;
+    }
+    assert(frame < 200);
+    assert(silverhair->facing == WORLD_EAST);
+    silverhair->schedule = -1;
+    silverhair->scene = -1;
+
+    janesta->scene = GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM;
+    janesta->x = 6;
+    janesta->y = 3;
+    janesta->moving = 0;
+    janesta->schedule = GENERATED_SCHEDULE_JANESTA_ROOM;
+    janesta->schedule_step =
+        generated_runtime_schedules[GENERATED_SCHEDULE_JANESTA_ROOM].branches[0];
+    janesta->schedule_wait = 0;
+    for (frame = 0; frame < 300; ++frame) {
+        tick(&world, 1);
+        if (janesta->x == 1 && janesta->y == 3 && !janesta->moving)
+            break;
+    }
+    assert(frame < 300);
+    tick(&world, 1);
+    assert(janesta->facing == WORLD_NORTH);
+    janesta->schedule = -1;
+    janesta->scene = -1;
+
+    world.player_x = 7;
+    world.player_y = 7;
+    sarin->scene = GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM;
+    sarin->x = 5;
+    sarin->y = 3;
+    sarin->moving = 0;
+    sarin->schedule = GENERATED_SCHEDULE_SARIN_ROOM;
+    sarin->schedule_step =
+        generated_runtime_schedules[GENERATED_SCHEDULE_SARIN_ROOM].branches[0];
+    sarin->schedule_wait = 0;
+    for (frame = 0; frame < 120; ++frame) {
+        tick(&world, 1);
+        if (sarin->x == 5 && sarin->y == 2 && !sarin->moving)
+            break;
+    }
+    assert(frame < 120);
+    tick(&world, 1);
+    assert(sarin->facing == WORLD_SOUTH);
+    sarin->schedule = -1;
+    sarin->scene = -1;
+
+    world.scene_index = GENERATED_SCENE_REDWYNE_EXTERIOR;
+    world.scene = &generated_runtime_scenes[world.scene_index];
+    world.player_entity = 0;
 
     /* Ambient remarks are schedule data, appear without entering modal
      * dialogue, and expire independently of the NPC's movement route. */
@@ -899,6 +1093,63 @@ int main(void)
     world.dialogue_actor = -1;
     assert(strcmp(generated_runtime_dialogues[GENERATED_DIALOGUE_FROSTBLOOM_START].nodes[0].text,
                   "Hm? What do you want?") == 0);
+
+    /* Later Silverhair questions are unlocked by the same authored evidence
+     * flags that the source conversations establish. This guards the complete
+     * content chain rather than merely checking that the lines compiled. */
+    {
+        const struct generated_runtime_dialogue *frostbloom_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_FROSTBLOOM_START];
+        const struct generated_runtime_dialogue *erek_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_EREK_START];
+        const struct generated_runtime_dialogue *silverhair_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_SILVERHAIR_START];
+        const struct generated_runtime_dialogue_node *frostbloom_first =
+            find_dialogue_node(frostbloom_dialogue, "Hm? What do you want?");
+        const struct generated_runtime_dialogue_node *erek_menu =
+            find_dialogue_node(erek_dialogue, "Ho there, Banec. What is it this time?");
+        const struct generated_runtime_dialogue_node *silverhair_menu =
+            find_dialogue_node(silverhair_dialogue,
+                               "I have little choice. Do you have news? Or questions?");
+        const struct generated_runtime_dialogue_choice *meet_frostbloom;
+        const struct generated_runtime_dialogue_choice *erek_argument;
+        const struct generated_runtime_dialogue_choice *silverhair_yeti;
+        const struct generated_runtime_dialogue_choice *silverhair_argument;
+        const struct generated_runtime_dialogue_choice *silverhair_noise;
+        int know_frostbloom_flag;
+        int know_argument_flag;
+
+        assert(frostbloom_first != 0 && erek_menu != 0 && silverhair_menu != 0);
+        meet_frostbloom = find_dialogue_choice(
+            frostbloom_first,
+            "I am a servant of Lady Imoen Silverhair, and I'd like to ask ...");
+        erek_argument = find_dialogue_choice(
+            erek_menu,
+            "Could you please repeat what you told me about the argument between your master and Lady Silverhair?");
+        silverhair_yeti = find_dialogue_choice(
+            silverhair_menu,
+            "I am curious, Lady. What of that figurine there? I do not recall it.");
+        silverhair_argument = find_dialogue_choice(
+            silverhair_menu,
+            "Lady, could you tell me more about the argument you had with the Dwarf? It may be helpful.");
+        silverhair_noise = find_dialogue_choice(
+            silverhair_menu,
+            "I have spoken with the artist, Frostbloom. She mentioned that she had heard some strange sounds in the night, when the theft must have taken place. Did you hear anything?");
+        assert(meet_frostbloom != 0 && meet_frostbloom->action_count == 2);
+        assert(erek_argument != 0 && erek_argument->action_count == 2);
+        assert(silverhair_yeti != 0 && silverhair_yeti->condition_count == 2);
+        assert(silverhair_argument != 0 && silverhair_argument->condition_count == 1);
+        assert(silverhair_noise != 0 && silverhair_noise->condition_count == 2);
+
+        know_frostbloom_flag = meet_frostbloom->actions[1].flag;
+        know_argument_flag = silverhair_argument->conditions[0].flag;
+        assert(choice_has_condition(silverhair_yeti, know_frostbloom_flag, 1));
+        assert(choice_has_action(erek_argument, know_argument_flag, 1));
+        assert(find_dialogue_node(silverhair_dialogue,
+                                  "The lady looks anxiously at the door.") != 0);
+        assert(find_dialogue_node(silverhair_dialogue,
+                                  "Silverhair's eyes flash with remembered anger, but a scuffing sound by the door distracts her and her anger drains as suddenly as it rose.") != 0);
+    }
 
     /* Only Orloth's room-offer endpoint launches the escort. The reference
      * switches Banec and Oliver directly into the room, then begins Oliver's

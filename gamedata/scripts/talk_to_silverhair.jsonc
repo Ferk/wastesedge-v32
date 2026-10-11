@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_silverhair",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "silverhair_start" }
+  ]
+}

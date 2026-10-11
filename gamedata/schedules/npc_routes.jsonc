@@ -348,6 +348,142 @@
         { "op": "speak", "text": "Ah, some fresh air!", "duration_frames": 180 },
         { "op": "jump", "target": "choose_task" }
       ]
+    },
+    {
+      "id": "silverhair_room",
+      "entity": "silverhair",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "In truth, Sarin, it is no bother. I am not offended.",
+          "Janesta, dear, worry not. I am content here.",
+          "Janesta, please bring my figurine. I wish to see it more closely.",
+          "It truly is a lovely day. I expect we will have time yet to enjoy it."
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 2160,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 6, "y": 4,
+          "facing": "east" },
+        { "op": "speak",
+          "text": "It truly is a lovely day. I expect we will have time yet to enjoy it.",
+          "duration_frames": 180, "delay_min_frames": 450, "delay_max_frames": 660 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 4, "y": 4,
+          "facing": "south", "delay_min_frames": 450, "delay_max_frames": 660 }
+      ]
+    },
+    {
+      "id": "sarin_room",
+      "entity": "sarin",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "Ruffians, the lot of them!",
+          "How dare they imprison one better than they?",
+          "This is an insult to all of the High Born.",
+          "I cannot believe such disrespect. Barbarians!"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1200,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "random_jump", "label": "choose_direction",
+          "targets": ["north_first", "south_first", "west_first", "east_first"] },
+
+        { "op": "move", "label": "north_first",
+          "scene": "redwyne_silverhair_room", "x": 5, "y": 2, "facing": "south",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "jump", "target": "vertical_south_1" },
+        { "op": "move", "label": "south_first",
+          "scene": "redwyne_silverhair_room", "x": 5, "y": 6, "facing": "north",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "jump", "target": "vertical_north_1" },
+        { "op": "move", "label": "west_first",
+          "scene": "redwyne_silverhair_room", "x": 1, "y": 3, "facing": "east",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "jump", "target": "horizontal_east_1" },
+        { "op": "move", "label": "east_first",
+          "scene": "redwyne_silverhair_room", "x": 6, "y": 3, "facing": "west",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "jump", "target": "horizontal_west_1" },
+
+        { "op": "move", "label": "vertical_south_1",
+          "scene": "redwyne_silverhair_room", "x": 5, "y": 6, "facing": "north",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "label": "vertical_north_1",
+          "scene": "redwyne_silverhair_room", "x": 5, "y": 2, "facing": "south",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 5, "y": 6,
+          "facing": "north", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 5, "y": 2,
+          "facing": "south", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 5, "y": 6,
+          "facing": "north", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 5, "y": 2,
+          "facing": "south", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 5, "y": 6,
+          "facing": "north", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 5, "y": 2,
+          "facing": "south", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "jump", "target": "choose_direction" },
+
+        { "op": "move", "label": "horizontal_east_1",
+          "scene": "redwyne_silverhair_room", "x": 6, "y": 3, "facing": "west",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "label": "horizontal_west_1",
+          "scene": "redwyne_silverhair_room", "x": 1, "y": 3, "facing": "east",
+          "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 6, "y": 3,
+          "facing": "west", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 1, "y": 3,
+          "facing": "east", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 6, "y": 3,
+          "facing": "west", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 1, "y": 3,
+          "facing": "east", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 6, "y": 3,
+          "facing": "west", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "move", "scene": "redwyne_silverhair_room", "x": 1, "y": 3,
+          "facing": "east", "delay_min_frames": 90, "delay_max_frames": 180 },
+        { "op": "jump", "target": "choose_direction" }
+      ]
+    },
+    {
+      "id": "janesta_room",
+      "entity": "janesta",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "Oh, dear. Oh, dear.",
+          "What will happen to us if they take the Mistress?",
+          "I must do something about this awful room.",
+          "Oh, how do they expect us to live decently in a place like this?"
+        ],
+        "delay_min_frames": 750,
+        "delay_max_frames": 1350,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "wait", "label": "choose_work",
+          "delay_min_frames": 300, "delay_max_frames": 900 },
+        { "op": "random_jump",
+          "targets": ["north_west", "north_east", "south_west", "cupboard"] },
+        { "op": "move", "label": "north_west",
+          "scene": "redwyne_silverhair_room", "x": 1, "y": 3, "facing": "north" },
+        { "op": "jump", "target": "choose_work" },
+        { "op": "move", "label": "north_east",
+          "scene": "redwyne_silverhair_room", "x": 6, "y": 3, "facing": "north" },
+        { "op": "jump", "target": "choose_work" },
+        { "op": "move", "label": "south_west",
+          "scene": "redwyne_silverhair_room", "x": 1, "y": 5, "facing": "south" },
+        { "op": "jump", "target": "choose_work" },
+        { "op": "move", "label": "cupboard",
+          "scene": "redwyne_silverhair_room", "x": 4, "y": 2, "facing": "west" },
+        { "op": "jump", "target": "choose_work" }
+      ]
     }
   ]
 }

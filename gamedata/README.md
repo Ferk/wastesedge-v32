@@ -33,11 +33,20 @@ authored in `dialogue/jelom_start.jsonc`, and its Oliver/Alek evidence choices
 are unlocked by flags written in those characters' dialogue data. Once Oliver
 has made Jelom doubt Talan and Talan admits leaving his post, the original
 compound rebuttal becomes available and sets the persistent Silverhair-release
-state. The
+state. That state selects the guarded first-floor doorway's room transition;
+before it is set, the same tile automatically opens Jelom's warning. The
+converted room contains Silverhair, Sarin, and Janesta at their reference
+anchors, with Silverhair's initial and repeat dialogue. Silverhair alternates
+between her place and the window, Janesta randomly visits her four original
+work points, and Sarin paces the room before randomly changing direction;
+their source remarks and timing ranges are schedule data. The room's original
+directional examine event is an `interactions` hotspot at `(1,6)`, and later
+questions about the Yeti, the night noise, and the argument are unlocked by
+facts written by Frostbloom's and Erek's dialogue. The
 Orloth-to-Alek-to-Erek packed-gems lead likewise uses one staged authored flag,
 so Jelom only offers the accusation before Banec checks it with Erek. Rhayne's
 account of a noise also unlocks Lucia's confidence about Talan's singing; after
-Talan admits leaving his post, the evidence can be reported to Jelom. All nine have data-authored schedules and autonomous floating
+Talan admits leaving his post, the evidence can be reported to Jelom. All twelve have data-authored schedules and autonomous floating
 remarks. Talan, Tristan, Orloth, Alek, Jelom, and Rhayne move along converted
 routes; Erek now crosses between the common room and parlour. Orloth's room
 offer summons Oliver, switches both characters to the player's bedroom, and

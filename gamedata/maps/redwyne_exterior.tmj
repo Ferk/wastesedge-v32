@@ -52,7 +52,7 @@
          "width":42,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -103,7 +103,7 @@
          "width":42,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "color":"#6080b040",
          "draworder":"topdown",
@@ -120,12 +120,12 @@
                          "name":"id",
                          "type":"string",
                          "value":"grass_front_north"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"tiled_occluder"
-                        },
+                        }, 
                         {
                          "name":"tile_gid",
                          "type":"int",
@@ -137,7 +137,7 @@
                  "width":680,
                  "x":0,
                  "y":60
-                },
+                }, 
                 {
                  "height":200,
                  "id":884,
@@ -148,12 +148,12 @@
                          "name":"id",
                          "type":"string",
                          "value":"grass_front_west_north"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"tiled_occluder"
-                        },
+                        }, 
                         {
                          "name":"tile_gid",
                          "type":"int",
@@ -165,9 +165,9 @@
                  "width":120,
                  "x":0,
                  "y":140
-                },
+                }, 
                 {
-                 "height":500,
+                 "height":530,
                  "id":885,
                  "name":"grass_medium_height_front",
                  "opacity":1,
@@ -176,12 +176,12 @@
                          "name":"id",
                          "type":"string",
                          "value":"grass_front_east"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"tiled_occluder"
-                        },
+                        }, 
                         {
                          "name":"tile_gid",
                          "type":"int",
@@ -193,9 +193,9 @@
                  "width":100,
                  "x":580,
                  "y":140
-                },
+                }, 
                 {
-                 "height":240,
+                 "height":270,
                  "id":886,
                  "name":"grass_medium_height_front",
                  "opacity":1,
@@ -204,12 +204,12 @@
                          "name":"id",
                          "type":"string",
                          "value":"grass_front_west_south"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"tiled_occluder"
-                        },
+                        }, 
                         {
                          "name":"tile_gid",
                          "type":"int",
@@ -221,9 +221,9 @@
                  "width":120,
                  "x":0,
                  "y":400
-                },
+                }, 
                 {
-                 "height":120,
+                 "height":90,
                  "id":887,
                  "name":"grass_medium_height_front",
                  "opacity":1,
@@ -232,12 +232,12 @@
                          "name":"id",
                          "type":"string",
                          "value":"grass_front_south"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"tiled_occluder"
-                        },
+                        }, 
                         {
                          "name":"tile_gid",
                          "type":"int",
@@ -248,14 +248,14 @@
                  "visible":true,
                  "width":680,
                  "x":0,
-                 "y":640
+                 "y":670
                 }],
          "opacity":0.6,
          "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "draworder":"topdown",
          "id":2,
@@ -272,22 +272,22 @@
                          "name":"entity_def",
                          "type":"string",
                          "value":"redwyne_inn_door"
-                        },
+                        }, 
                         {
                          "name":"id",
                          "type":"string",
                          "value":"redwyne_inn_door"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"entity"
-                        },
+                        }, 
                         {
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -299,7 +299,7 @@
                  "width":20,
                  "x":360,
                  "y":292
-                },
+                }, 
                 {
                  "gid":22,
                  "height":320,
@@ -311,7 +311,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -323,7 +323,7 @@
                  "width":160,
                  "x":100,
                  "y":360
-                },
+                }, 
                 {
                  "gid":23,
                  "height":60,
@@ -335,7 +335,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -347,7 +347,7 @@
                  "width":40,
                  "x":240,
                  "y":320
-                },
+                }, 
                 {
                  "gid":24,
                  "height":60,
@@ -359,7 +359,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -371,7 +371,7 @@
                  "width":40,
                  "x":280,
                  "y":320
-                },
+                }, 
                 {
                  "gid":24,
                  "height":60,
@@ -383,7 +383,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -395,7 +395,7 @@
                  "width":40,
                  "x":320,
                  "y":320
-                },
+                }, 
                 {
                  "gid":24,
                  "height":60,
@@ -407,7 +407,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -419,7 +419,7 @@
                  "width":40,
                  "x":380,
                  "y":320
-                },
+                }, 
                 {
                  "gid":24,
                  "height":60,
@@ -431,7 +431,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -443,7 +443,7 @@
                  "width":40,
                  "x":420,
                  "y":320
-                },
+                }, 
                 {
                  "gid":25,
                  "height":120,
@@ -452,15 +452,15 @@
                  "opacity":1,
                  "properties":[
                         {
-                         "name":"source_animation",
-                         "type":"int",
-                         "value":0
-                        },
-                        {
                          "name":"sort_y",
                          "type":"int",
                          "value":280
-                        },
+                        }, 
+                        {
+                         "name":"source_animation",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -472,7 +472,7 @@
                  "width":20,
                  "x":360,
                  "y":320
-                },
+                }, 
                 {
                  "gid":25,
                  "height":120,
@@ -481,15 +481,15 @@
                  "opacity":1,
                  "properties":[
                         {
-                         "name":"source_animation",
-                         "type":"int",
-                         "value":0
-                        },
-                        {
                          "name":"sort_y",
                          "type":"int",
                          "value":280
-                        },
+                        }, 
+                        {
+                         "name":"source_animation",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -501,7 +501,7 @@
                  "width":20,
                  "x":360,
                  "y":320
-                },
+                }, 
                 {
                  "gid":26,
                  "height":60,
@@ -513,7 +513,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -525,7 +525,7 @@
                  "width":20,
                  "x":460,
                  "y":320
-                },
+                }, 
                 {
                  "gid":27,
                  "height":120,
@@ -537,7 +537,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -549,7 +549,7 @@
                  "width":40,
                  "x":260,
                  "y":200
-                },
+                }, 
                 {
                  "gid":27,
                  "height":120,
@@ -561,7 +561,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -573,7 +573,7 @@
                  "width":40,
                  "x":300,
                  "y":200
-                },
+                }, 
                 {
                  "gid":27,
                  "height":120,
@@ -585,7 +585,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -597,7 +597,7 @@
                  "width":40,
                  "x":340,
                  "y":200
-                },
+                }, 
                 {
                  "gid":27,
                  "height":120,
@@ -609,7 +609,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -621,7 +621,7 @@
                  "width":40,
                  "x":380,
                  "y":200
-                },
+                }, 
                 {
                  "gid":27,
                  "height":120,
@@ -633,7 +633,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -645,7 +645,7 @@
                  "width":40,
                  "x":420,
                  "y":200
-                },
+                }, 
                 {
                  "gid":28,
                  "height":120,
@@ -657,7 +657,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -669,7 +669,7 @@
                  "width":100,
                  "x":480,
                  "y":200
-                },
+                }, 
                 {
                  "gid":29,
                  "height":20,
@@ -681,7 +681,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -693,7 +693,7 @@
                  "width":100,
                  "x":460,
                  "y":340
-                },
+                }, 
                 {
                  "gid":30,
                  "height":60,
@@ -705,7 +705,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -717,7 +717,7 @@
                  "width":60,
                  "x":340,
                  "y":320
-                },
+                }, 
                 {
                  "gid":31,
                  "height":35,
@@ -729,7 +729,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -741,7 +741,7 @@
                  "width":20,
                  "x":360,
                  "y":275
-                },
+                }, 
                 {
                  "gid":32,
                  "height":60,
@@ -753,7 +753,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -765,7 +765,7 @@
                  "width":20,
                  "x":240,
                  "y":320
-                },
+                }, 
                 {
                  "gid":33,
                  "height":60,
@@ -777,7 +777,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -789,7 +789,7 @@
                  "width":20,
                  "x":460,
                  "y":320
-                },
+                }, 
                 {
                  "gid":34,
                  "height":40,
@@ -801,7 +801,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -813,7 +813,7 @@
                  "width":20,
                  "x":280,
                  "y":300
-                },
+                }, 
                 {
                  "gid":34,
                  "height":40,
@@ -825,7 +825,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -837,7 +837,7 @@
                  "width":20,
                  "x":320,
                  "y":300
-                },
+                }, 
                 {
                  "gid":34,
                  "height":40,
@@ -849,7 +849,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -861,7 +861,7 @@
                  "width":20,
                  "x":380,
                  "y":300
-                },
+                }, 
                 {
                  "gid":34,
                  "height":40,
@@ -873,7 +873,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -885,7 +885,7 @@
                  "width":20,
                  "x":420,
                  "y":300
-                },
+                }, 
                 {
                  "gid":34,
                  "height":40,
@@ -897,7 +897,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -909,7 +909,7 @@
                  "width":20,
                  "x":460,
                  "y":300
-                },
+                }, 
                 {
                  "gid":35,
                  "height":40,
@@ -921,7 +921,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -933,7 +933,7 @@
                  "width":20,
                  "x":260,
                  "y":300
-                },
+                }, 
                 {
                  "gid":35,
                  "height":40,
@@ -945,7 +945,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -957,7 +957,7 @@
                  "width":20,
                  "x":300,
                  "y":300
-                },
+                }, 
                 {
                  "gid":35,
                  "height":40,
@@ -969,7 +969,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -981,7 +981,7 @@
                  "width":20,
                  "x":340,
                  "y":300
-                },
+                }, 
                 {
                  "gid":35,
                  "height":40,
@@ -993,7 +993,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1005,7 +1005,7 @@
                  "width":20,
                  "x":400,
                  "y":300
-                },
+                }, 
                 {
                  "gid":35,
                  "height":40,
@@ -1017,7 +1017,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1029,7 +1029,7 @@
                  "width":20,
                  "x":440,
                  "y":300
-                },
+                }, 
                 {
                  "gid":36,
                  "height":80,
@@ -1041,7 +1041,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1053,7 +1053,7 @@
                  "width":40,
                  "x":480,
                  "y":320
-                },
+                }, 
                 {
                  "gid":36,
                  "height":80,
@@ -1065,7 +1065,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1077,7 +1077,7 @@
                  "width":40,
                  "x":520,
                  "y":320
-                },
+                }, 
                 {
                  "gid":37,
                  "height":20,
@@ -1089,7 +1089,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1101,7 +1101,7 @@
                  "width":40,
                  "x":480,
                  "y":340
-                },
+                }, 
                 {
                  "gid":37,
                  "height":20,
@@ -1113,7 +1113,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1125,7 +1125,7 @@
                  "width":40,
                  "x":520,
                  "y":340
-                },
+                }, 
                 {
                  "gid":39,
                  "height":60,
@@ -1137,7 +1137,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1149,7 +1149,7 @@
                  "width":20,
                  "x":560,
                  "y":200
-                },
+                }, 
                 {
                  "gid":40,
                  "height":60,
@@ -1161,7 +1161,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1173,7 +1173,7 @@
                  "width":20,
                  "x":120,
                  "y":680
-                },
+                }, 
                 {
                  "gid":41,
                  "height":60,
@@ -1185,7 +1185,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1197,7 +1197,7 @@
                  "width":20,
                  "x":560,
                  "y":680
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1209,7 +1209,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1221,7 +1221,7 @@
                  "width":60,
                  "x":460,
                  "y":200
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1233,7 +1233,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1245,7 +1245,7 @@
                  "width":60,
                  "x":500,
                  "y":200
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1257,7 +1257,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1269,7 +1269,7 @@
                  "width":60,
                  "x":140,
                  "y":680
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1281,7 +1281,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1294,7 +1294,7 @@
                  "x":200,
                  "y":680
                 },
-
+            
                 {
                  "gid":42,
                  "height":60,
@@ -1306,7 +1306,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1318,7 +1318,7 @@
                  "width":60,
                  "x":260,
                  "y":680
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1330,7 +1330,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1342,7 +1342,7 @@
                  "width":60,
                  "x":320,
                  "y":680
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1354,7 +1354,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1366,7 +1366,7 @@
                  "width":60,
                  "x":380,
                  "y":680
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1378,7 +1378,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1390,7 +1390,7 @@
                  "width":60,
                  "x":440,
                  "y":680
-                },
+                }, 
                 {
                  "gid":42,
                  "height":60,
@@ -1402,7 +1402,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1414,7 +1414,7 @@
                  "width":60,
                  "x":500,
                  "y":680
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1426,7 +1426,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1438,7 +1438,7 @@
                  "width":20,
                  "x":560,
                  "y":220
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1450,7 +1450,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1462,7 +1462,7 @@
                  "width":20,
                  "x":560,
                  "y":240
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1474,7 +1474,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1486,7 +1486,7 @@
                  "width":20,
                  "x":560,
                  "y":260
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1498,7 +1498,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1510,7 +1510,7 @@
                  "width":20,
                  "x":560,
                  "y":280
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1522,7 +1522,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1534,7 +1534,7 @@
                  "width":20,
                  "x":560,
                  "y":300
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1546,7 +1546,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1558,7 +1558,7 @@
                  "width":20,
                  "x":560,
                  "y":320
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1570,7 +1570,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1582,7 +1582,7 @@
                  "width":20,
                  "x":560,
                  "y":340
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1594,7 +1594,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1606,7 +1606,7 @@
                  "width":20,
                  "x":560,
                  "y":360
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1618,7 +1618,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1630,7 +1630,7 @@
                  "width":20,
                  "x":560,
                  "y":380
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1642,7 +1642,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1654,7 +1654,7 @@
                  "width":20,
                  "x":560,
                  "y":400
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1666,7 +1666,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1678,7 +1678,7 @@
                  "width":20,
                  "x":560,
                  "y":420
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1690,7 +1690,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1702,7 +1702,7 @@
                  "width":20,
                  "x":560,
                  "y":440
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1714,7 +1714,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1726,7 +1726,7 @@
                  "width":20,
                  "x":560,
                  "y":460
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1738,7 +1738,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1750,7 +1750,7 @@
                  "width":20,
                  "x":560,
                  "y":480
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1762,7 +1762,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1774,7 +1774,7 @@
                  "width":20,
                  "x":560,
                  "y":500
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1786,7 +1786,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1798,7 +1798,7 @@
                  "width":20,
                  "x":560,
                  "y":520
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1810,7 +1810,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1822,7 +1822,7 @@
                  "width":20,
                  "x":560,
                  "y":540
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1834,7 +1834,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1846,7 +1846,7 @@
                  "width":20,
                  "x":560,
                  "y":560
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1858,7 +1858,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1870,7 +1870,7 @@
                  "width":20,
                  "x":560,
                  "y":580
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1882,7 +1882,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1894,7 +1894,7 @@
                  "width":20,
                  "x":560,
                  "y":600
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1906,7 +1906,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1918,7 +1918,7 @@
                  "width":20,
                  "x":120,
                  "y":620
-                },
+                }, 
                 {
                  "gid":43,
                  "height":20,
@@ -1930,7 +1930,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1942,7 +1942,7 @@
                  "width":20,
                  "x":560,
                  "y":620
-                },
+                }, 
                 {
                  "gid":45,
                  "height":100,
@@ -1954,7 +1954,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1966,7 +1966,7 @@
                  "width":80,
                  "x":360,
                  "y":520
-                },
+                }, 
                 {
                  "gid":46,
                  "height":80,
@@ -1978,7 +1978,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -1990,7 +1990,7 @@
                  "width":80,
                  "x":360,
                  "y":500
-                },
+                }, 
                 {
                  "gid":48,
                  "height":20,
@@ -2002,7 +2002,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2014,7 +2014,7 @@
                  "width":20,
                  "x":240,
                  "y":460
-                },
+                }, 
                 {
                  "gid":49,
                  "height":300,
@@ -2026,7 +2026,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2038,7 +2038,7 @@
                  "width":160,
                  "x":100,
                  "y":620
-                },
+                }, 
                 {
                  "gid":50,
                  "height":120,
@@ -2050,7 +2050,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2062,7 +2062,7 @@
                  "width":40,
                  "x":240,
                  "y":500
-                },
+                }, 
                 {
                  "gid":51,
                  "height":80,
@@ -2074,22 +2074,22 @@
                          "name":"entity_def",
                          "type":"string",
                          "value":"intro_gate_back"
-                        },
+                        }, 
                         {
                          "name":"id",
                          "type":"string",
                          "value":"intro_gate_back"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"entity"
-                        },
+                        }, 
                         {
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2101,7 +2101,7 @@
                  "width":40,
                  "x":120,
                  "y":420
-                },
+                }, 
                 {
                  "gid":56,
                  "height":80,
@@ -2113,22 +2113,22 @@
                          "name":"entity_def",
                          "type":"string",
                          "value":"intro_gate_fore"
-                        },
+                        }, 
                         {
                          "name":"id",
                          "type":"string",
                          "value":"intro_gate_fore"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
                          "value":"entity"
-                        },
+                        }, 
                         {
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2140,7 +2140,7 @@
                  "width":40,
                  "x":120,
                  "y":397
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2152,7 +2152,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2164,7 +2164,7 @@
                  "width":20,
                  "x":170,
                  "y":240
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2176,7 +2176,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2188,7 +2188,7 @@
                  "width":20,
                  "x":250,
                  "y":240
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2200,7 +2200,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2212,7 +2212,7 @@
                  "width":20,
                  "x":290,
                  "y":240
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2224,7 +2224,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2236,7 +2236,7 @@
                  "width":20,
                  "x":330,
                  "y":240
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2248,7 +2248,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2260,7 +2260,7 @@
                  "width":20,
                  "x":390,
                  "y":240
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2272,7 +2272,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2284,8 +2284,7 @@
                  "width":20,
                  "x":430,
                  "y":240
-                },
-
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2297,7 +2296,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2309,7 +2308,7 @@
                  "width":20,
                  "x":250,
                  "y":280
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2321,7 +2320,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2334,6 +2333,7 @@
                  "x":290,
                  "y":280
                 },
+            
                 {
                  "gid":61,
                  "height":20,
@@ -2345,7 +2345,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2357,7 +2357,7 @@
                  "width":20,
                  "x":330,
                  "y":280
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2369,7 +2369,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2381,7 +2381,7 @@
                  "width":20,
                  "x":390,
                  "y":280
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2393,7 +2393,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2405,7 +2405,7 @@
                  "width":20,
                  "x":430,
                  "y":280
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2417,7 +2417,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2429,7 +2429,7 @@
                  "width":20,
                  "x":170,
                  "y":500
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2441,7 +2441,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2453,7 +2453,7 @@
                  "width":20,
                  "x":150,
                  "y":560
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2465,7 +2465,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2477,7 +2477,7 @@
                  "width":20,
                  "x":170,
                  "y":560
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2489,7 +2489,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2501,7 +2501,7 @@
                  "width":20,
                  "x":190,
                  "y":560
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2513,7 +2513,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2525,7 +2525,7 @@
                  "width":20,
                  "x":210,
                  "y":560
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2537,7 +2537,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2549,7 +2549,7 @@
                  "width":20,
                  "x":150,
                  "y":600
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2561,7 +2561,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2573,7 +2573,7 @@
                  "width":20,
                  "x":170,
                  "y":600
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2585,7 +2585,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2597,7 +2597,7 @@
                  "width":20,
                  "x":190,
                  "y":600
-                },
+                }, 
                 {
                  "gid":61,
                  "height":20,
@@ -2609,7 +2609,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2621,7 +2621,7 @@
                  "width":20,
                  "x":210,
                  "y":600
-                },
+                }, 
                 {
                  "gid":68,
                  "height":100,
@@ -2633,7 +2633,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2645,7 +2645,7 @@
                  "width":140,
                  "x":0,
                  "y":100
-                },
+                }, 
                 {
                  "gid":68,
                  "height":100,
@@ -2657,7 +2657,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2669,7 +2669,7 @@
                  "width":140,
                  "x":140,
                  "y":100
-                },
+                }, 
                 {
                  "gid":68,
                  "height":100,
@@ -2681,7 +2681,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2693,7 +2693,7 @@
                  "width":140,
                  "x":280,
                  "y":100
-                },
+                }, 
                 {
                  "gid":68,
                  "height":100,
@@ -2705,7 +2705,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2717,7 +2717,7 @@
                  "width":140,
                  "x":420,
                  "y":100
-                },
+                }, 
                 {
                  "gid":68,
                  "height":100,
@@ -2729,7 +2729,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2741,7 +2741,7 @@
                  "width":140,
                  "x":560,
                  "y":100
-                },
+                }, 
                 {
                  "gid":69,
                  "height":100,
@@ -2753,7 +2753,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2765,7 +2765,7 @@
                  "width":140,
                  "x":0,
                  "y":100
-                },
+                }, 
                 {
                  "gid":69,
                  "height":100,
@@ -2777,7 +2777,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2789,7 +2789,7 @@
                  "width":140,
                  "x":140,
                  "y":100
-                },
+                }, 
                 {
                  "gid":69,
                  "height":100,
@@ -2801,7 +2801,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2813,7 +2813,7 @@
                  "width":140,
                  "x":280,
                  "y":100
-                },
+                }, 
                 {
                  "gid":69,
                  "height":100,
@@ -2825,7 +2825,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2837,7 +2837,7 @@
                  "width":140,
                  "x":420,
                  "y":100
-                },
+                }, 
                 {
                  "gid":69,
                  "height":100,
@@ -2849,7 +2849,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2861,7 +2861,7 @@
                  "width":140,
                  "x":560,
                  "y":100
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -2873,7 +2873,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2885,7 +2885,7 @@
                  "width":80,
                  "x":620,
                  "y":100
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -2897,7 +2897,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2909,7 +2909,7 @@
                  "width":80,
                  "x":620,
                  "y":200
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -2921,7 +2921,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2933,7 +2933,7 @@
                  "width":80,
                  "x":620,
                  "y":300
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -2945,7 +2945,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2957,7 +2957,7 @@
                  "width":80,
                  "x":620,
                  "y":400
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -2969,7 +2969,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -2981,7 +2981,7 @@
                  "width":80,
                  "x":620,
                  "y":500
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -2993,7 +2993,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3005,7 +3005,7 @@
                  "width":80,
                  "x":620,
                  "y":600
-                },
+                }, 
                 {
                  "gid":70,
                  "height":100,
@@ -3017,7 +3017,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3029,7 +3029,7 @@
                  "width":80,
                  "x":620,
                  "y":700
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3041,7 +3041,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3053,7 +3053,7 @@
                  "width":80,
                  "x":620,
                  "y":100
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3065,7 +3065,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3077,7 +3077,7 @@
                  "width":80,
                  "x":620,
                  "y":200
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3089,7 +3089,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3101,7 +3101,7 @@
                  "width":80,
                  "x":620,
                  "y":300
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3113,7 +3113,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3125,7 +3125,7 @@
                  "width":80,
                  "x":620,
                  "y":400
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3137,7 +3137,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3149,7 +3149,7 @@
                  "width":80,
                  "x":620,
                  "y":500
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3161,7 +3161,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3173,7 +3173,7 @@
                  "width":80,
                  "x":620,
                  "y":600
-                },
+                }, 
                 {
                  "gid":71,
                  "height":100,
@@ -3185,7 +3185,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3197,7 +3197,7 @@
                  "width":80,
                  "x":620,
                  "y":700
-                },
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3209,7 +3209,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3221,7 +3221,7 @@
                  "width":140,
                  "x":700,
                  "y":100
-                },
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3233,7 +3233,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3245,7 +3245,7 @@
                  "width":140,
                  "x":700,
                  "y":200
-                },
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3257,7 +3257,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3269,7 +3269,7 @@
                  "width":140,
                  "x":700,
                  "y":300
-                },
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3281,7 +3281,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3293,8 +3293,7 @@
                  "width":140,
                  "x":700,
                  "y":400
-                },
-
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3306,7 +3305,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3318,7 +3317,7 @@
                  "width":140,
                  "x":700,
                  "y":500
-                },
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3330,7 +3329,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3343,6 +3342,7 @@
                  "x":700,
                  "y":600
                 },
+            
                 {
                  "gid":72,
                  "height":100,
@@ -3354,7 +3354,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3366,7 +3366,7 @@
                  "width":140,
                  "x":700,
                  "y":700
-                },
+                }, 
                 {
                  "gid":72,
                  "height":100,
@@ -3378,7 +3378,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3390,7 +3390,7 @@
                  "width":140,
                  "x":700,
                  "y":800
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3402,7 +3402,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3414,7 +3414,7 @@
                  "width":140,
                  "x":700,
                  "y":100
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3426,7 +3426,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3438,7 +3438,7 @@
                  "width":140,
                  "x":700,
                  "y":200
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3450,7 +3450,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3462,7 +3462,7 @@
                  "width":140,
                  "x":700,
                  "y":300
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3474,7 +3474,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3486,7 +3486,7 @@
                  "width":140,
                  "x":700,
                  "y":400
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3498,7 +3498,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3510,7 +3510,7 @@
                  "width":140,
                  "x":700,
                  "y":500
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3522,7 +3522,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3534,7 +3534,7 @@
                  "width":140,
                  "x":700,
                  "y":600
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3546,7 +3546,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3558,7 +3558,7 @@
                  "width":140,
                  "x":700,
                  "y":700
-                },
+                }, 
                 {
                  "gid":73,
                  "height":100,
@@ -3570,7 +3570,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3582,7 +3582,7 @@
                  "width":140,
                  "x":700,
                  "y":800
-                },
+                }, 
                 {
                  "gid":74,
                  "height":200,
@@ -3594,7 +3594,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3606,7 +3606,7 @@
                  "width":140,
                  "x":560,
                  "y":800
-                },
+                }, 
                 {
                  "gid":75,
                  "height":200,
@@ -3618,7 +3618,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3630,7 +3630,7 @@
                  "width":140,
                  "x":560,
                  "y":800
-                },
+                }, 
                 {
                  "gid":78,
                  "height":120,
@@ -3642,7 +3642,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3654,7 +3654,7 @@
                  "width":140,
                  "x":0,
                  "y":800
-                },
+                }, 
                 {
                  "gid":78,
                  "height":120,
@@ -3666,7 +3666,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3678,7 +3678,7 @@
                  "width":140,
                  "x":140,
                  "y":800
-                },
+                }, 
                 {
                  "gid":78,
                  "height":120,
@@ -3690,7 +3690,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3702,7 +3702,7 @@
                  "width":140,
                  "x":280,
                  "y":800
-                },
+                }, 
                 {
                  "gid":78,
                  "height":120,
@@ -3714,7 +3714,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3726,7 +3726,7 @@
                  "width":140,
                  "x":420,
                  "y":800
-                },
+                }, 
                 {
                  "gid":79,
                  "height":120,
@@ -3738,7 +3738,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3750,7 +3750,7 @@
                  "width":140,
                  "x":0,
                  "y":800
-                },
+                }, 
                 {
                  "gid":79,
                  "height":120,
@@ -3762,7 +3762,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3774,7 +3774,7 @@
                  "width":140,
                  "x":140,
                  "y":800
-                },
+                }, 
                 {
                  "gid":79,
                  "height":120,
@@ -3786,7 +3786,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3798,7 +3798,7 @@
                  "width":140,
                  "x":280,
                  "y":800
-                },
+                }, 
                 {
                  "gid":79,
                  "height":120,
@@ -3810,7 +3810,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3822,7 +3822,7 @@
                  "width":140,
                  "x":420,
                  "y":800
-                },
+                }, 
                 {
                  "gid":80,
                  "height":60,
@@ -3834,7 +3834,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3846,7 +3846,7 @@
                  "width":20,
                  "x":117,
                  "y":372
-                },
+                }, 
                 {
                  "gid":81,
                  "height":20,
@@ -3858,12 +3858,12 @@
                          "name":"sort_y",
                          "type":"int",
                          "value":340
-                        },
+                        }, 
                         {
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3875,7 +3875,7 @@
                  "width":20,
                  "x":200,
                  "y":360
-                },
+                }, 
                 {
                  "gid":82,
                  "height":60,
@@ -3887,12 +3887,12 @@
                          "name":"sort_y",
                          "type":"int",
                          "value":340
-                        },
+                        }, 
                         {
                          "name":"source_animation",
                          "type":"int",
                          "value":1
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3904,7 +3904,7 @@
                  "width":60,
                  "x":180,
                  "y":340
-                },
+                }, 
                 {
                  "gid":83,
                  "height":60,
@@ -3916,12 +3916,12 @@
                          "name":"sort_y",
                          "type":"int",
                          "value":340
-                        },
+                        }, 
                         {
                          "name":"source_animation",
                          "type":"int",
                          "value":2
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3933,7 +3933,7 @@
                  "width":60,
                  "x":160,
                  "y":280
-                },
+                }, 
                 {
                  "gid":84,
                  "height":40,
@@ -3945,7 +3945,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3957,7 +3957,7 @@
                  "width":60,
                  "x":480,
                  "y":400
-                },
+                }, 
                 {
                  "gid":85,
                  "height":60,
@@ -3969,7 +3969,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -3981,7 +3981,7 @@
                  "width":40,
                  "x":280,
                  "y":260
-                },
+                }, 
                 {
                  "gid":85,
                  "height":60,
@@ -3993,7 +3993,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4005,7 +4005,7 @@
                  "width":40,
                  "x":320,
                  "y":260
-                },
+                }, 
                 {
                  "gid":85,
                  "height":60,
@@ -4017,7 +4017,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4029,7 +4029,7 @@
                  "width":40,
                  "x":380,
                  "y":260
-                },
+                }, 
                 {
                  "gid":85,
                  "height":60,
@@ -4041,7 +4041,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4053,7 +4053,7 @@
                  "width":40,
                  "x":420,
                  "y":260
-                },
+                }, 
                 {
                  "gid":86,
                  "height":60,
@@ -4065,7 +4065,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4077,7 +4077,7 @@
                  "width":40,
                  "x":240,
                  "y":260
-                },
+                }, 
                 {
                  "gid":87,
                  "height":180,
@@ -4089,7 +4089,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4101,7 +4101,7 @@
                  "width":20,
                  "x":460,
                  "y":260
-                },
+                }, 
                 {
                  "gid":88,
                  "height":140,
@@ -4113,7 +4113,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4125,7 +4125,7 @@
                  "width":100,
                  "x":480,
                  "y":340
-                },
+                }, 
                 {
                  "gid":89,
                  "height":40,
@@ -4137,7 +4137,7 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
-                        },
+                        }, 
                         {
                          "name":"source_object",
                          "type":"string",
@@ -4149,7 +4149,7 @@
                  "width":20,
                  "x":480,
                  "y":260
-                },
+                }, 
                 {
                  "gid":93,
                  "height":30,
@@ -4161,17 +4161,17 @@
                          "name":"entity_def",
                          "type":"string",
                          "value":"player"
-                        },
+                        }, 
                         {
                          "name":"facing",
                          "type":"string",
                          "value":"east"
-                        },
+                        }, 
                         {
                          "name":"id",
                          "type":"string",
                          "value":"player"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
@@ -4183,7 +4183,7 @@
                  "width":20,
                  "x":80,
                  "y":380
-                },
+                }, 
                 {
                  "gid":112,
                  "height":30,
@@ -4195,22 +4195,22 @@
                          "name":"entity_def",
                          "type":"string",
                          "value":"talan"
-                        },
+                        }, 
                         {
                          "name":"facing",
                          "type":"string",
                          "value":"west"
-                        },
+                        }, 
                         {
                          "name":"id",
                          "type":"string",
                          "value":"talan"
-                        },
+                        }, 
                         {
                          "name":"interaction",
                          "type":"string",
                          "value":"talk_to_talan"
-                        },
+                        }, 
                         {
                          "name":"kind",
                          "type":"string",
@@ -4222,7 +4222,7 @@
                  "width":20,
                  "x":140,
                  "y":360
-                },
+                }, 
                 {
                  "gid":132,
                  "height":30,
@@ -4230,50 +4230,117 @@
                  "name":"tristan_route",
                  "opacity":1,
                  "properties":[
-                        { "name":"entity_def", "type":"string", "value":"tristan" },
-                        { "name":"facing", "type":"string", "value":"west" },
-                        { "name":"id", "type":"string", "value":"tristan_route" },
-                        { "name":"initially_present", "type":"bool", "value":false },
-                        { "name":"interaction", "type":"string", "value":"talk_to_tristan" },
-                        { "name":"kind", "type":"string", "value":"entity" }
-                       ],
+                        {
+                         "name":"entity_def",
+                         "type":"string",
+                         "value":"tristan"
+                        }, 
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"west"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"tristan_route"
+                        }, 
+                        {
+                         "name":"initially_present",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"talk_to_tristan"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"entity"
+                        }],
                  "rotation":0,
                  "type":"actor",
                  "visible":true,
                  "width":20,
                  "x":240,
                  "y":380
-                },
+                }, 
                 {
                  "gid":150,
                  "height":30,
                  "id":892,
                  "name":"oliver",
+                 "opacity":1,
                  "properties":[
-                        { "name":"entity_def", "type":"string", "value":"oliver" },
-                        { "name":"facing", "type":"string", "value":"south" },
-                        { "name":"id", "type":"string", "value":"oliver" },
-                        { "name":"interaction", "type":"string", "value":"talk_to_oliver" },
-                        { "name":"kind", "type":"string", "value":"entity" }
-                       ],
+                        {
+                         "name":"entity_def",
+                         "type":"string",
+                         "value":"oliver"
+                        }, 
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"south"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"oliver"
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"talk_to_oliver"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"entity"
+                        }],
+                 "rotation":0,
                  "type":"actor",
+                 "visible":true,
                  "width":20,
                  "x":500,
                  "y":320
-                },
+                }, 
                 {
                  "gid":171,
                  "height":30,
                  "id":893,
                  "name":"frostbloom",
+                 "opacity":1,
                  "properties":[
-                        { "name":"entity_def", "type":"string", "value":"frostbloom" },
-                        { "name":"facing", "type":"string", "value":"south" },
-                        { "name":"id", "type":"string", "value":"frostbloom" },
-                        { "name":"interaction", "type":"string", "value":"talk_to_frostbloom" },
-                        { "name":"kind", "type":"string", "value":"entity" }
-                       ],
+                        {
+                         "name":"entity_def",
+                         "type":"string",
+                         "value":"frostbloom"
+                        }, 
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"south"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"frostbloom"
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"talk_to_frostbloom"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"entity"
+                        }],
+                 "rotation":0,
                  "type":"actor",
+                 "visible":true,
                  "width":20,
                  "x":360,
                  "y":460
@@ -4283,117 +4350,232 @@
          "visible":true,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "draworder":"topdown",
          "id":6,
          "name":"navigation",
          "objects":[
                 {
+                 "height":0,
                  "id":888,
                  "name":"inn_return",
+                 "opacity":1,
                  "point":true,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"spawn" },
-                        { "name":"id", "type":"string", "value":"inn_return" },
-                        { "name":"facing", "type":"string", "value":"south" }
-                       ],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"south"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"inn_return"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"spawn"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
                  "x":360,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":889,
                  "name":"open_inn_door",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"trigger" },
-                        { "name":"id", "type":"string", "value":"open_inn_door" },
-                        { "name":"script", "type":"string", "value":"open_inn_door" },
-                        { "name":"when", "type":"string", "value":"leave" },
-                        { "name":"facing", "type":"string", "value":"north" }
-                       ],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"north"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"open_inn_door"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"trigger"
+                        }, 
+                        {
+                         "name":"script",
+                         "type":"string",
+                         "value":"open_inn_door"
+                        }, 
+                        {
+                         "name":"when",
+                         "type":"string",
+                         "value":"leave"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":20,
                  "x":360,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":890,
                  "name":"enter_inn",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"exit" },
-                        { "name":"id", "type":"string", "value":"enter_inn" },
-                        { "name":"script", "type":"string", "value":"enter_redwyne_inn" }
-                       ],
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"enter_inn"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"exit"
+                        }, 
+                        {
+                         "name":"script",
+                         "type":"string",
+                         "value":"enter_redwyne_inn"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":20,
                  "x":360,
                  "y":260
-                },
+                }, 
                 {
                  "height":20,
                  "id":894,
                  "name":"legacy_pathfinding_exclusion",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
-                       ],
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"navigation_blocker"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":20,
                  "x":360,
                  "y":260
-                },
+                }, 
                 {
                  "height":20,
                  "id":895,
                  "name":"legacy_pathfinding_exclusion",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
-                       ],
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"navigation_blocker"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":80,
                  "x":480,
                  "y":260
-                },
+                }, 
                 {
                  "height":20,
                  "id":896,
                  "name":"legacy_pathfinding_exclusion",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
-                       ],
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"navigation_blocker"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":20,
                  "x":220,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":897,
                  "name":"legacy_pathfinding_exclusion",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
-                       ],
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"navigation_blocker"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":20,
                  "x":240,
                  "y":460
-                },
+                }, 
                 {
+                 "height":0,
                  "id":909,
                  "name":"kitchen_yard_door",
+                 "opacity":1,
                  "point":true,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"spawn" },
-                        { "name":"id", "type":"string", "value":"kitchen_yard_door" },
-                        { "name":"facing", "type":"string", "value":"east" }
-                       ],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"east"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"kitchen_yard_door"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"spawn"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
                  "x":240,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":910,
                  "name":"enter_kitchen_yard",
+                 "opacity":1,
                  "properties":[
-                        { "name":"kind", "type":"string", "value":"exit" },
-                        { "name":"id", "type":"string", "value":"enter_kitchen_yard" },
-                        { "name":"script", "type":"string", "value":"enter_redwyne_kitchen_yard" }
-                       ],
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"enter_kitchen_yard"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"exit"
+                        }, 
+                        {
+                         "name":"script",
+                         "type":"string",
+                         "value":"enter_redwyne_kitchen_yard"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":20,
                  "x":220,
                  "y":280
@@ -4403,7 +4585,7 @@
          "visible":true,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "color":"#80ff0000",
          "draworder":"topdown",
@@ -4420,7 +4602,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4432,7 +4614,7 @@
                  "width":20,
                  "x":660,
                  "y":0
-                },
+                }, 
                 {
                  "height":20,
                  "id":818,
@@ -4443,7 +4625,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4455,7 +4637,7 @@
                  "width":20,
                  "x":680,
                  "y":0
-                },
+                }, 
                 {
                  "height":20,
                  "id":819,
@@ -4466,7 +4648,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4478,7 +4660,7 @@
                  "width":660,
                  "x":0,
                  "y":60
-                },
+                }, 
                 {
                  "height":20,
                  "id":820,
@@ -4489,7 +4671,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4501,7 +4683,7 @@
                  "width":20,
                  "x":660,
                  "y":60
-                },
+                }, 
                 {
                  "height":40,
                  "id":821,
@@ -4512,7 +4694,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4524,7 +4706,7 @@
                  "width":20,
                  "x":680,
                  "y":60
-                },
+                }, 
                 {
                  "height":660,
                  "id":822,
@@ -4535,7 +4717,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4547,7 +4729,7 @@
                  "width":20,
                  "x":660,
                  "y":80
-                },
+                }, 
                 {
                  "height":20,
                  "id":823,
@@ -4558,7 +4740,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4570,7 +4752,7 @@
                  "width":200,
                  "x":260,
                  "y":100
-                },
+                }, 
                 {
                  "height":20,
                  "id":824,
@@ -4581,7 +4763,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4593,7 +4775,7 @@
                  "width":20,
                  "x":680,
                  "y":100
-                },
+                }, 
                 {
                  "height":20,
                  "id":825,
@@ -4604,7 +4786,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4616,7 +4798,7 @@
                  "width":20,
                  "x":120,
                  "y":120
-                },
+                }, 
                 {
                  "height":20,
                  "id":826,
@@ -4627,7 +4809,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4639,7 +4821,7 @@
                  "width":120,
                  "x":140,
                  "y":120
-                },
+                }, 
                 {
                  "height":60,
                  "id":827,
@@ -4650,7 +4832,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4662,7 +4844,7 @@
                  "width":20,
                  "x":480,
                  "y":120
-                },
+                }, 
                 {
                  "height":180,
                  "id":828,
@@ -4673,7 +4855,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4685,7 +4867,7 @@
                  "width":20,
                  "x":120,
                  "y":140
-                },
+                }, 
                 {
                  "height":20,
                  "id":829,
@@ -4696,7 +4878,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4708,7 +4890,7 @@
                  "width":20,
                  "x":460,
                  "y":180
-                },
+                }, 
                 {
                  "height":20,
                  "id":830,
@@ -4719,7 +4901,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4731,7 +4913,7 @@
                  "width":20,
                  "x":480,
                  "y":180
-                },
+                }, 
                 {
                  "height":20,
                  "id":831,
@@ -4742,7 +4924,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4754,7 +4936,7 @@
                  "width":60,
                  "x":500,
                  "y":180
-                },
+                }, 
                 {
                  "height":20,
                  "id":832,
@@ -4765,7 +4947,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4777,7 +4959,7 @@
                  "width":20,
                  "x":560,
                  "y":180
-                },
+                }, 
                 {
                  "height":20,
                  "id":833,
@@ -4788,7 +4970,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4800,7 +4982,7 @@
                  "width":20,
                  "x":680,
                  "y":180
-                },
+                }, 
                 {
                  "height":20,
                  "id":834,
@@ -4811,7 +4993,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4823,7 +5005,7 @@
                  "width":40,
                  "x":500,
                  "y":200
-                },
+                }, 
                 {
                  "height":20,
                  "id":835,
@@ -4834,7 +5016,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4846,7 +5028,7 @@
                  "width":20,
                  "x":540,
                  "y":200
-                },
+                }, 
                 {
                  "height":460,
                  "id":836,
@@ -4857,7 +5039,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4869,7 +5051,7 @@
                  "width":20,
                  "x":560,
                  "y":200
-                },
+                }, 
                 {
                  "height":20,
                  "id":837,
@@ -4880,7 +5062,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4892,7 +5074,7 @@
                  "width":20,
                  "x":680,
                  "y":200
-                },
+                }, 
                 {
                  "height":100,
                  "id":838,
@@ -4903,7 +5085,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4915,7 +5097,7 @@
                  "width":20,
                  "x":540,
                  "y":220
-                },
+                }, 
                 {
                  "height":20,
                  "id":839,
@@ -4926,7 +5108,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4938,7 +5120,7 @@
                  "width":240,
                  "x":240,
                  "y":240
-                },
+                }, 
                 {
                  "height":20,
                  "id":840,
@@ -4949,7 +5131,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4961,7 +5143,7 @@
                  "width":120,
                  "x":240,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":841,
@@ -4972,7 +5154,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -4984,7 +5166,7 @@
                  "width":100,
                  "x":380,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":842,
@@ -4995,7 +5177,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5007,7 +5189,7 @@
                  "width":20,
                  "x":680,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":843,
@@ -5018,7 +5200,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5030,7 +5212,7 @@
                  "width":20,
                  "x":220,
                  "y":300
-                },
+                }, 
                 {
                  "height":20,
                  "id":844,
@@ -5041,7 +5223,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5053,7 +5235,7 @@
                  "width":20,
                  "x":480,
                  "y":300
-                },
+                }, 
                 {
                  "height":20,
                  "id":845,
@@ -5064,7 +5246,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5076,7 +5258,7 @@
                  "width":20,
                  "x":680,
                  "y":300
-                },
+                }, 
                 {
                  "height":20,
                  "id":846,
@@ -5087,7 +5269,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5099,7 +5281,7 @@
                  "width":20,
                  "x":120,
                  "y":320
-                },
+                }, 
                 {
                  "height":20,
                  "id":847,
@@ -5110,7 +5292,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5122,7 +5304,7 @@
                  "width":80,
                  "x":140,
                  "y":320
-                },
+                }, 
                 {
                  "height":20,
                  "id":848,
@@ -5133,7 +5315,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5145,7 +5327,7 @@
                  "width":20,
                  "x":220,
                  "y":320
-                },
+                }, 
                 {
                  "height":20,
                  "id":849,
@@ -5156,7 +5338,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5168,7 +5350,7 @@
                  "width":80,
                  "x":480,
                  "y":320
-                },
+                }, 
                 {
                  "height":20,
                  "id":850,
@@ -5179,7 +5361,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5191,7 +5373,7 @@
                  "width":20,
                  "x":120,
                  "y":340
-                },
+                }, 
                 {
                  "height":40,
                  "id":851,
@@ -5202,7 +5384,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5214,7 +5396,7 @@
                  "width":20,
                  "x":120,
                  "y":360
-                },
+                }, 
                 {
                  "height":20,
                  "id":852,
@@ -5225,7 +5407,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5237,7 +5419,7 @@
                  "width":40,
                  "x":500,
                  "y":360
-                },
+                }, 
                 {
                  "height":20,
                  "id":853,
@@ -5248,7 +5430,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5260,7 +5442,7 @@
                  "width":20,
                  "x":680,
                  "y":380
-                },
+                }, 
                 {
                  "height":20,
                  "id":854,
@@ -5271,7 +5453,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5283,7 +5465,7 @@
                  "width":20,
                  "x":120,
                  "y":400
-                },
+                }, 
                 {
                  "height":20,
                  "id":855,
@@ -5294,7 +5476,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5306,7 +5488,7 @@
                  "width":80,
                  "x":140,
                  "y":400
-                },
+                }, 
                 {
                  "height":20,
                  "id":856,
@@ -5317,7 +5499,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5329,7 +5511,7 @@
                  "width":20,
                  "x":220,
                  "y":400
-                },
+                }, 
                 {
                  "height":20,
                  "id":857,
@@ -5340,7 +5522,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5352,7 +5534,7 @@
                  "width":20,
                  "x":680,
                  "y":400
-                },
+                }, 
                 {
                  "height":160,
                  "id":858,
@@ -5363,7 +5545,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5376,7 +5558,7 @@
                  "x":120,
                  "y":420
                 },
-
+            
                 {
                  "height":160,
                  "id":859,
@@ -5387,7 +5569,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5399,7 +5581,7 @@
                  "width":20,
                  "x":220,
                  "y":420
-                },
+                }, 
                 {
                  "height":20,
                  "id":860,
@@ -5410,7 +5592,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5422,7 +5604,7 @@
                  "width":20,
                  "x":240,
                  "y":420
-                },
+                }, 
                 {
                  "height":20,
                  "id":861,
@@ -5433,7 +5615,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5445,7 +5627,7 @@
                  "width":20,
                  "x":240,
                  "y":440
-                },
+                }, 
                 {
                  "height":20,
                  "id":862,
@@ -5456,7 +5638,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5468,7 +5650,7 @@
                  "width":20,
                  "x":240,
                  "y":460
-                },
+                }, 
                 {
                  "height":20,
                  "id":863,
@@ -5479,7 +5661,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5491,7 +5673,7 @@
                  "width":60,
                  "x":360,
                  "y":480
-                },
+                }, 
                 {
                  "height":20,
                  "id":864,
@@ -5502,7 +5684,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5514,7 +5696,7 @@
                  "width":20,
                  "x":680,
                  "y":480
-                },
+                }, 
                 {
                  "height":20,
                  "id":865,
@@ -5525,7 +5707,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5537,7 +5719,7 @@
                  "width":60,
                  "x":360,
                  "y":500
-                },
+                }, 
                 {
                  "height":20,
                  "id":866,
@@ -5548,7 +5730,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5560,7 +5742,7 @@
                  "width":20,
                  "x":680,
                  "y":500
-                },
+                }, 
                 {
                  "height":20,
                  "id":867,
@@ -5571,7 +5753,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5583,7 +5765,7 @@
                  "width":20,
                  "x":120,
                  "y":580
-                },
+                }, 
                 {
                  "height":20,
                  "id":868,
@@ -5594,7 +5776,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5606,7 +5788,7 @@
                  "width":80,
                  "x":140,
                  "y":580
-                },
+                }, 
                 {
                  "height":20,
                  "id":869,
@@ -5617,7 +5799,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5629,7 +5811,7 @@
                  "width":20,
                  "x":220,
                  "y":580
-                },
+                }, 
                 {
                  "height":20,
                  "id":870,
@@ -5640,7 +5822,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5652,7 +5834,7 @@
                  "width":20,
                  "x":680,
                  "y":580
-                },
+                }, 
                 {
                  "height":60,
                  "id":871,
@@ -5663,7 +5845,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5675,7 +5857,7 @@
                  "width":20,
                  "x":120,
                  "y":600
-                },
+                }, 
                 {
                  "height":20,
                  "id":872,
@@ -5686,7 +5868,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5698,7 +5880,7 @@
                  "width":20,
                  "x":680,
                  "y":600
-                },
+                }, 
                 {
                  "height":20,
                  "id":873,
@@ -5709,7 +5891,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5721,7 +5903,7 @@
                  "width":460,
                  "x":120,
                  "y":660
-                },
+                }, 
                 {
                  "height":20,
                  "id":874,
@@ -5732,7 +5914,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5744,7 +5926,7 @@
                  "width":20,
                  "x":680,
                  "y":680
-                },
+                }, 
                 {
                  "height":20,
                  "id":875,
@@ -5755,7 +5937,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5767,7 +5949,7 @@
                  "width":120,
                  "x":0,
                  "y":740
-                },
+                }, 
                 {
                  "height":20,
                  "id":876,
@@ -5778,7 +5960,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5790,7 +5972,7 @@
                  "width":120,
                  "x":140,
                  "y":740
-                },
+                }, 
                 {
                  "height":20,
                  "id":877,
@@ -5801,7 +5983,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5813,7 +5995,7 @@
                  "width":120,
                  "x":280,
                  "y":740
-                },
+                }, 
                 {
                  "height":20,
                  "id":878,
@@ -5824,7 +6006,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5836,7 +6018,7 @@
                  "width":120,
                  "x":420,
                  "y":740
-                },
+                }, 
                 {
                  "height":20,
                  "id":879,
@@ -5847,7 +6029,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5859,7 +6041,7 @@
                  "width":100,
                  "x":560,
                  "y":740
-                },
+                }, 
                 {
                  "height":20,
                  "id":880,
@@ -5870,7 +6052,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5882,7 +6064,7 @@
                  "width":20,
                  "x":660,
                  "y":740
-                },
+                }, 
                 {
                  "height":40,
                  "id":898,
@@ -5893,7 +6075,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5905,7 +6087,7 @@
                  "width":20,
                  "x":120,
                  "y":80
-                },
+                }, 
                 {
                  "height":140,
                  "id":899,
@@ -5916,7 +6098,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5928,7 +6110,7 @@
                  "width":20,
                  "x":120,
                  "y":660
-                },
+                }, 
                 {
                  "height":20,
                  "id":900,
@@ -5939,7 +6121,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5951,7 +6133,7 @@
                  "width":20,
                  "x":220,
                  "y":240
-                },
+                }, 
                 {
                  "height":20,
                  "id":902,
@@ -5962,7 +6144,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5974,7 +6156,7 @@
                  "width":20,
                  "x":240,
                  "y":460
-                },
+                }, 
                 {
                  "height":20,
                  "id":903,
@@ -5985,7 +6167,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -5997,7 +6179,7 @@
                  "width":20,
                  "x":480,
                  "y":240
-                },
+                }, 
                 {
                  "height":20,
                  "id":904,
@@ -6008,7 +6190,7 @@
                          "name":"kind",
                          "type":"string",
                          "value":"collision"
-                        },
+                        }, 
                         {
                          "name":"walkability",
                          "type":"int",
@@ -6026,7 +6208,7 @@
          "visible":true,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "draworder":"topdown",
          "id":7,
@@ -6036,59 +6218,127 @@
                  "height":60,
                  "id":905,
                  "name":"closed_gate_examine",
+                 "opacity":1,
                  "properties":[
-                        {"name":"kind","type":"string","value":"hotspot"},
-                        {"name":"id","type":"string","value":"closed_gate_examine"},
-                        {"name":"interaction","type":"string","value":"examine_closed_gate"},
-                        {"name":"facing","type":"string","value":"west"}],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"west"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"closed_gate_examine"
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"examine_closed_gate"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"hotspot"
+                        }],
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
                  "width":20,
                  "x":120,
                  "y":340
-                },
+                }, 
                 {
                  "height":20,
                  "id":906,
                  "name":"ladder_examine",
+                 "opacity":1,
                  "properties":[
-                        {"name":"kind","type":"string","value":"hotspot"},
-                        {"name":"id","type":"string","value":"ladder_examine"},
-                        {"name":"interaction","type":"string","value":"examine_ladder"},
-                        {"name":"facing","type":"string","value":"north"}],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"north"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"ladder_examine"
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"examine_ladder"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"hotspot"
+                        }],
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
                  "width":20,
                  "x":200,
                  "y":340
-                },
+                }, 
                 {
                  "height":20,
                  "id":907,
                  "name":"inn_entrance_examine",
+                 "opacity":1,
                  "properties":[
-                        {"name":"kind","type":"string","value":"hotspot"},
-                        {"name":"id","type":"string","value":"inn_entrance_examine"},
-                        {"name":"interaction","type":"string","value":"examine_inn_entrance"},
-                        {"name":"facing","type":"string","value":"north"}],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"north"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"inn_entrance_examine"
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"examine_inn_entrance"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"hotspot"
+                        }],
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
                  "width":20,
                  "x":360,
                  "y":280
-                },
+                }, 
                 {
                  "height":20,
                  "id":908,
                  "name":"guardhouse_examine",
+                 "opacity":1,
                  "properties":[
-                        {"name":"kind","type":"string","value":"hotspot"},
-                        {"name":"id","type":"string","value":"guardhouse_examine"},
-                        {"name":"interaction","type":"string","value":"examine_guardhouse"},
-                        {"name":"facing","type":"string","value":"west"}],
+                        {
+                         "name":"facing",
+                         "type":"string",
+                         "value":"west"
+                        }, 
+                        {
+                         "name":"id",
+                         "type":"string",
+                         "value":"guardhouse_examine"
+                        }, 
+                        {
+                         "name":"interaction",
+                         "type":"string",
+                         "value":"examine_guardhouse"
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"hotspot"
+                        }],
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
@@ -6110,12 +6360,12 @@
          "name":"id",
          "type":"string",
          "value":"redwyne_exterior"
-        },
+        }, 
         {
          "name":"on_enter",
          "type":"string",
          "value":"talk_to_talan"
-        },
+        }, 
         {
          "name":"tile_size",
          "type":"int",
@@ -6128,23 +6378,23 @@
         {
          "firstgid":1,
          "source":"..\/tilesets\/redwyne_exterior_background.tsj"
-        },
+        }, 
         {
          "firstgid":21,
          "source":"..\/tilesets\/redwyne_exterior.tsj"
-        },
+        }, 
         {
          "firstgid":90,
          "source":"..\/tilesets\/redwyne_exterior_characters.tsj"
-        },
+        }, 
         {
          "firstgid":130,
          "source":"..\/tilesets\/redwyne_inn_characters.tsj"
-        },
+        }, 
         {
          "firstgid":150,
          "source":"..\/tilesets\/redwyne_exterior_oliver.tsj"
-        },
+        }, 
         {
          "firstgid":170,
          "source":"..\/tilesets\/redwyne_exterior_frostbloom.tsj"

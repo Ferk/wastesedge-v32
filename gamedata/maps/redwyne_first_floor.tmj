@@ -1037,6 +1037,48 @@
           "width": 20,
           "x": 160,
           "y": 20
+        },
+        {
+          "id": 46,
+          "name": "silverhair_door",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "silverhair_door" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "x": 20,
+          "y": 120
+        },
+        {
+          "height": 20,
+          "id": 47,
+          "name": "enter_silverhair_room",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_silverhair_room" },
+            { "name": "script", "type": "string", "value": "enter_silverhair_room" },
+            { "name": "condition_flag", "type": "string", "value": "silverhair_free" },
+            { "name": "condition_equals", "type": "int", "value": 1 }
+          ],
+          "width": 20,
+          "x": 20,
+          "y": 140
+        },
+        {
+          "height": 20,
+          "id": 48,
+          "name": "silverhair_room_refused",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "trigger" },
+            { "name": "id", "type": "string", "value": "silverhair_room_refused" },
+            { "name": "script", "type": "string", "value": "talk_to_jelom" },
+            { "name": "condition_flag", "type": "string", "value": "silverhair_free" },
+            { "name": "condition_equals", "type": "int", "value": 0 }
+          ],
+          "width": 20,
+          "x": 20,
+          "y": 140
         }
       ],
       "opacity": 1,
@@ -1220,7 +1262,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 46,
+  "nextobjectid": 49,
   "orientation": "orthogonal",
   "properties": [
     {

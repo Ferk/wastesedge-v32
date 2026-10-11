@@ -1,0 +1,2825 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_silverhair_characters",
+  "tilecount": 52,
+  "tiledversion": "1.11.0",
+  "tileheight": 30,
+  "tilewidth": 20,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_stand_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 1,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_stand_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 2,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_stand_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 3,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_stand_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 4,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 5,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_north_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 6,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_north_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 7,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_north_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 8,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 9,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_south_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 10,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_south_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 11,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_south_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 12,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 13,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_west_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 14,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_west_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 15,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_west_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 16,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 17,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_east_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 18,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_east_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 19,
+      "image": "../assets/tiles/redwyne_silverhair_characters/silverhair_walk_east_i3.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "silverhair.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 20,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_stand_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 21,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_stand_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 22,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_stand_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 23,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_stand_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 24,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 25,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_north_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 26,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_north_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 27,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 28,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_south_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 29,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_south_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 30,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 31,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_west_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 32,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_west_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 33,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 34,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_east_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 35,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant2_walk_east_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant2.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 36,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_stand_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 37,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_stand_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 38,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_stand_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 39,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_stand_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "stand_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 40,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_north_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 41,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_north_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 42,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_north_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_north"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 43,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_south_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 44,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_south_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 45,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_south_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_south"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 46,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_west_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 47,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_west_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 48,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_west_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_west"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 49,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_east_i0.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 50,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_east_i1.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    },
+    {
+      "id": 51,
+      "image": "../assets/tiles/redwyne_silverhair_characters/servant1_walk_east_i2.png",
+      "imagewidth": 20,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_character",
+          "type": "string",
+          "value": "servant1.mchar"
+        },
+        {
+          "name": "source_move",
+          "type": "string",
+          "value": "walk_east"
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "character_frame"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}
