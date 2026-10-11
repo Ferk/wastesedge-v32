@@ -1,0 +1,10 @@
+{
+  "id": "examine_there_and_back_book",
+  "actions": [
+    {
+      "op": "speak",
+      "entity": "player",
+      "text": "\"There and back again\", how unimaginative!"
+    }
+  ]
+}

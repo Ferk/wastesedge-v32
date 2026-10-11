@@ -1,0 +1,10 @@
+{
+  "id": "examine_adonthell_painting",
+  "actions": [
+    {
+      "op": "speak",
+      "entity": "player",
+      "text": "Hey, that looks like Adonthell!"
+    }
+  ]
+}

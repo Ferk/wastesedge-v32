@@ -10,6 +10,15 @@ enum world_facing {
     WORLD_EAST = 3
 };
 
+#define WORLD_COLLISION_OVERRIDE_CAPACITY 16
+
+struct world_collision_override {
+    int scene;
+    int x;
+    int y;
+    int walkability;
+};
+
 struct world_actions {
     int move_x;
     int move_y;
@@ -30,9 +39,16 @@ struct world_actor_state {
     int schedule;
     int schedule_step;
     int schedule_wait;
+    int path_schedule_step;
+    int path_scene;
+    int path_target_x;
+    int path_target_y;
+    int path_length;
+    int path_index;
     int speech_line;
     int speech_wait;
     int speech_frames;
+    const struct generated_runtime_text *speech_override;
     int dialogue;
 };
 
@@ -52,12 +68,18 @@ struct world_state {
     int dialogue_node;
     int dialogue_choice;
     int dialogue_actor;
+    unsigned char dialogue_used[GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT];
     struct world_actor_state actors[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
     int flags[GENERATED_RUNTIME_FLAG_STORAGE_COUNT];
     int object_states[GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT];
     int active_script;
     int script_action;
     int script_wait;
+    int script_path_action;
+    int script_path_length;
+    int script_path_index;
+    struct world_collision_override collision_overrides[WORLD_COLLISION_OVERRIDE_CAPACITY];
+    int collision_override_count;
     int trigger_latch;
     int control_enabled;
     int music_track;

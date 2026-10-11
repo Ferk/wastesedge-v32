@@ -408,6 +408,40 @@ def dialogue_start_cases(document: dict[str, object], path: Path,
     return cases
 
 
+def dialogue_conditions(raw_when: object, description: str) -> list[dict[str, object]]:
+    """Return the equality comparisons in a dialogue `when` clause.
+
+    The compact form remains `{ "flag": ..., "equals": ... }`. Content that
+    needs several facts at once uses `{ "all": [compact-condition, ...] }`.
+    Keeping this deliberately conjunctive matches the first compound condition
+    required by Waste's Edge without introducing an expression evaluator.
+    """
+    if raw_when is None:
+        return []
+    condition = expect(raw_when, dict, description)
+    if "all" in condition:
+        if set(condition) != {"all"}:
+            raise ContentError(f"{description}: 'all' cannot be combined with other keys")
+        raw_conditions = expect(condition["all"], list, f"{description} all")
+        if not raw_conditions:
+            raise ContentError(f"{description}: 'all' must contain at least one condition")
+    else:
+        raw_conditions = [condition]
+    result: list[dict[str, object]] = []
+    for index, raw_condition in enumerate(raw_conditions):
+        item_description = (description if len(raw_conditions) == 1 else
+                            f"{description} all entry {index}")
+        item = expect(raw_condition, dict, item_description)
+        if set(item) != {"flag", "equals"}:
+            raise ContentError(
+                f"{item_description}: condition must contain only 'flag' and 'equals'")
+        result.append({
+            "flag": identifier(item.get("flag"), f"{item_description} flag"),
+            "value": integer(item.get("equals"), f"{item_description} equals"),
+        })
+    return result
+
+
 def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> set[str]:
     result: set[str] = set()
     for path in paths:
@@ -444,11 +478,10 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                 if "next" in choice and identifier(choice["next"], f"{path} choice next") not in node_ids:
                     raise ContentError(f"{path}: choice refers to an unknown next node")
                 expect(choice.get("text"), str, f"{path} choice text")
+                if not isinstance(choice.get("repeatable", False), bool):
+                    raise ContentError(f"{path}: choice repeatable must be a bool")
                 when = choice.get("when")
-                if when is not None:
-                    condition = expect(when, dict, f"{path} choice condition")
-                    identifier(condition.get("flag"), f"{path} choice condition flag")
-                    integer(condition.get("equals"), f"{path} choice condition equals")
+                dialogue_conditions(when, f"{path} choice condition")
                 for action in expect(choice.get("actions", []), list, f"{path} choice actions"):
                     action = expect(action, dict, f"{path} choice action")
                     if identifier(action.get("op"), f"{path} choice action op") != "set":
@@ -506,7 +539,7 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     dialogue: set[str], music: set[str],
                     schedules: dict[str, dict[str, object]]) -> dict[str, list[dict[str, object]]]:
     scripts: dict[str, list[dict[str, object]]] = {}
-    allowed = {"set", "set_control", "set_entity_state", "show_dialogue",
+    allowed = {"set", "set_control", "set_entity_state", "set_walkability", "show_dialogue", "speak",
                "change_scene", "move_entity", "wait", "play_music",
                "start_schedule", "stop_schedule", "set_entity_dialogue"}
     for path in paths:
@@ -558,6 +591,23 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                         raise ContentError(f"{path}: start_schedule delay_frames cannot be negative")
             if operation == "set_control" and not isinstance(action.get("enabled"), bool):
                 raise ContentError(f"{path}: set_control enabled must be a bool")
+            if operation == "speak":
+                entity_id = identifier(action.get("entity"), f"{path} speaking entity")
+                if entity_id not in entities or entities[entity_id]["kind"] != "actor":
+                    raise ContentError(f"{path}: speak requires a known actor entity")
+                text = expect(action.get("text"), str, f"{path} speech text")
+                if not text:
+                    raise ContentError(f"{path}: speak text cannot be empty")
+                if integer(action.get("duration_frames", 180),
+                           f"{path} speech duration") < 1:
+                    raise ContentError(f"{path}: speak duration must be positive")
+            if operation == "set_walkability":
+                identifier(action.get("scene"), f"{path} walkability scene")
+                integer(action.get("x"), f"{path} walkability x")
+                integer(action.get("y"), f"{path} walkability y")
+                mask = integer(action.get("mask"), f"{path} walkability mask")
+                if mask < 0 or mask > 15:
+                    raise ContentError(f"{path}: walkability mask must be between 0 and 15")
             if operation == "wait" and integer(action.get("frames"), f"{path} wait frames") < 1:
                 raise ContentError(f"{path}: wait frames must be positive")
             checked.append(action)
@@ -674,7 +724,7 @@ def collect_scenes(paths: list[Path], entities: set[str], scripts: dict[str, lis
                     tile_gid = expect(values.get("tile_gid"), int, f"{path} tiled occluder tile_gid")
                     if tile_gid not in valid_gids:
                         raise ContentError(f"{path}: tiled occluder uses unknown tile gid {tile_gid}")
-                elif kind != "collision":
+                elif kind not in {"collision", "navigation_blocker"}:
                     raise ContentError(f"{path}: unsupported object kind {kind!r}")
                 for field in ("interaction", "script"):
                     if field in values and identifier(values[field], f"{path} object {field}") not in scripts:
@@ -949,7 +999,8 @@ def materialize_character_sheets(visuals: list[dict[str, object]], game_root: Pa
 
 
 def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
-                                     schedules: list[dict[str, object]], game_root: Path,
+                                     schedules: list[dict[str, object]],
+                                     scripts: list[dict[str, object]], game_root: Path,
                                      output_root: Path) -> tuple[list[dict[str, object]], int]:
     """Render each distinct UI glyph once and encode dialogue and ambient speech."""
     try:
@@ -984,6 +1035,11 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
         if speech is not None:
             for line in expect(speech["lines"], list, "runtime schedule speech lines"):
                 character_set.update(expect(line, str, "runtime schedule speech line"))
+    for script in scripts:
+        speech = script.get("speech")
+        if speech is not None:
+            for line in expect(speech["lines"], list, "runtime script speech lines"):
+                character_set.update(expect(line, str, "runtime script speech line"))
     character_set.discard(" ")
     character_set.discard("\n")
     character_set.discard("\r")
@@ -1065,6 +1121,10 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                 choice["text_glyphs"] = encode(str(choice["text"]))
     for schedule in schedules:
         speech = schedule.get("speech")
+        if speech is not None:
+            speech["line_glyphs"] = [encode(str(line)) for line in speech["lines"]]
+    for script in scripts:
+        speech = script.get("speech")
         if speech is not None:
             speech["line_glyphs"] = [encode(str(line)) for line in speech["lines"]]
     return entries, max(1, int(font.getlength(" ") + 0.5))
@@ -1154,17 +1214,10 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
             choices: list[dict[str, object]] = []
             for raw_choice in expect(node.get("choices", []), list, f"{path} choices"):
                 choice = expect(raw_choice, dict, f"{path} choice")
-                raw_condition = choice.get("when")
-                if raw_condition is None:
-                    condition_flag = None
-                    condition_value = 0
-                else:
-                    condition = expect(raw_condition, dict, f"{path} choice condition")
-                    condition_flag = identifier(
-                        condition.get("flag"), f"{path} choice condition flag")
-                    condition_value = integer(
-                        condition.get("equals"), f"{path} choice condition equals")
-                    flags.add(condition_flag)
+                conditions = dialogue_conditions(
+                    choice.get("when"), f"{path} choice condition")
+                for condition in conditions:
+                    flags.add(str(condition["flag"]))
                 actions: list[dict[str, int]] = []
                 for raw_action in expect(choice.get("actions", []), list, f"{path} choice actions"):
                     action = expect(raw_action, dict, f"{path} choice action")
@@ -1175,8 +1228,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                     "text": expect(choice.get("text"), str, f"{path} choice text"),
                     "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
                     "actions": actions,
-                    "condition_flag": condition_flag,
-                    "condition_value": condition_value,
+                    "conditions": conditions,
+                    "repeatable": bool(choice.get("repeatable", False)),
                 })
             explicit_next = node.get("next")
             if explicit_next is not None:
@@ -1228,8 +1281,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 start["flag"] = flag_index[str(start["flag"])]
         for node in dialogue["nodes"]:
             for choice in node["choices"]:
-                if choice["condition_flag"] is not None:
-                    choice["condition_flag"] = flag_index[str(choice["condition_flag"])]
+                for condition in choice["conditions"]:
+                    condition["flag"] = flag_index[str(condition["flag"])]
                 for action in choice["actions"]:
                     action["flag"] = flag_index[str(action["flag"])]
     return dialogues, script_dialogues, sorted(flags)
@@ -1362,6 +1415,8 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "start_schedule": 7,
         "stop_schedule": 8,
         "set_entity_dialogue": 9,
+        "set_walkability": 10,
+        "speak": 11,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -1375,6 +1430,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
         actions: list[tuple[int, int, int, int, int]] = []
+        speech_lines: list[str] = []
         for raw_action in expect(document.get("actions"), list, f"{path}.actions"):
             action = expect(raw_action, dict, f"{path} action")
             operation = identifier(action.get("op"), f"{path} action op")
@@ -1417,8 +1473,31 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
             elif operation == "set_entity_dialogue":
                 a = entity_index[identifier(action.get("entity"), f"{path} entity")]
                 b = dialogue_index[identifier(action.get("dialogue"), f"{path} dialogue")]
+            elif operation == "set_walkability":
+                scene_id = identifier(action.get("scene"), f"{path} walkability scene")
+                if scene_id not in scene_index:
+                    raise ContentError(f"{path}: unknown walkability scene {scene_id!r}")
+                a = scene_index[scene_id]
+                b = integer(action.get("x"), f"{path} walkability x")
+                c = integer(action.get("y"), f"{path} walkability y")
+                d = integer(action.get("mask"), f"{path} walkability mask")
+                scene = scenes[a]
+                if b < 0 or c < 0 or b >= int(scene["width"]) or c >= int(scene["height"]):
+                    raise ContentError(
+                        f"{path}: walkability square ({b}, {c}) is outside scene {scene_id!r}")
+            elif operation == "speak":
+                text = expect(action.get("text"), str, f"{path} speech text")
+                if text not in speech_lines:
+                    speech_lines.append(text)
+                a = entity_index[identifier(action.get("entity"), f"{path} speaking entity")]
+                b = speech_lines.index(text)
+                c = integer(action.get("duration_frames", 180), f"{path} speech duration")
             actions.append((opcodes[operation], a, b, c, d))
-        scripts.append({"id": script_id, "actions": actions})
+        scripts.append({
+            "id": script_id,
+            "actions": actions,
+            "speech": None if not speech_lines else {"lines": speech_lines},
+        })
     scripts.sort(key=lambda item: str(item["id"]))
     return scripts
 
@@ -1459,10 +1538,12 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
         tiles = scene_tiles(map_path, document, game_root)
         terrain: list[dict[str, object]] = []
         collisions: list[dict[str, int]] = []
+        navigation_blockers: list[dict[str, int]] = []
         entities: list[dict[str, int]] = []
         scenery: list[dict[str, int]] = []
         spawns: list[dict[str, object]] = []
         triggers: list[dict[str, int]] = []
+        hotspots: list[dict[str, int]] = []
         stateful_scenery_count = 0
 
         for layer in expect(document.get("layers"), list, f"{map_path}.layers"):
@@ -1544,6 +1625,35 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         "facing": facing,
                     })
                     continue
+                if kind == "hotspot":
+                    hotspot_x = integer(obj.get("x"), f"{map_path} hotspot x")
+                    hotspot_y = integer(obj.get("y"), f"{map_path} hotspot y")
+                    hotspot_width = integer(obj.get("width"), f"{map_path} hotspot width")
+                    hotspot_height = integer(obj.get("height"), f"{map_path} hotspot height")
+                    if (hotspot_x % tile_size or hotspot_y % tile_size or
+                        hotspot_width <= 0 or hotspot_height <= 0 or
+                        hotspot_width % tile_size or hotspot_height % tile_size):
+                        raise ContentError(
+                            f"{map_path}: hotspots must be positive {tile_size}-pixel-aligned rectangles")
+                    facing_name = values.get("facing")
+                    facing = -1
+                    if facing_name is not None:
+                        facing_name = identifier(facing_name, f"{map_path} hotspot facing")
+                        facing = {"north": 0, "south": 1, "west": 2, "east": 3}.get(facing_name, -2)
+                        if facing == -2:
+                            raise ContentError(f"{map_path}: unsupported hotspot facing {facing_name!r}")
+                    hotspots.append({
+                        "x": hotspot_x // tile_size,
+                        "y": hotspot_y // tile_size,
+                        "width": hotspot_width // tile_size,
+                        "height": hotspot_height // tile_size,
+                        "script": script_index[identifier(
+                            values.get("interaction"), f"{map_path} hotspot interaction")],
+                        "facing": facing,
+                        "priority": integer(values.get("priority", 0),
+                                            f"{map_path} hotspot priority"),
+                    })
+                    continue
                 if kind == "collision":
                     collisions.append({
                         "x": integer(obj.get("x"), f"{map_path} collision x"),
@@ -1551,6 +1661,24 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         "width": integer(obj.get("width"), f"{map_path} collision width"),
                         "height": integer(obj.get("height"), f"{map_path} collision height"),
                         "walkability": integer(values.get("walkability"), f"{map_path} collision walkability"),
+                    })
+                    continue
+                if kind == "navigation_blocker":
+                    blocker_x = integer(obj.get("x"), f"{map_path} navigation blocker x")
+                    blocker_y = integer(obj.get("y"), f"{map_path} navigation blocker y")
+                    blocker_width = integer(obj.get("width"), f"{map_path} navigation blocker width")
+                    blocker_height = integer(obj.get("height"), f"{map_path} navigation blocker height")
+                    if (blocker_x % tile_size or blocker_y % tile_size or
+                        blocker_width <= 0 or blocker_height <= 0 or
+                        blocker_width % tile_size or blocker_height % tile_size):
+                        raise ContentError(
+                            f"{map_path}: navigation blockers must be positive "
+                            f"{tile_size}-pixel-aligned rectangles")
+                    navigation_blockers.append({
+                        "x": blocker_x // tile_size,
+                        "y": blocker_y // tile_size,
+                        "width": blocker_width // tile_size,
+                        "height": blocker_height // tile_size,
                     })
                     continue
                 if kind == "tiled_occluder":
@@ -1622,19 +1750,27 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                     if alpha < 0 or alpha > 255:
                         raise ContentError(f"{map_path}: scenery alpha must be between 0 and 255")
                     # Tiled tile objects use x at the left edge and y at the
-                    # image's baseline. The one-time importer has already
-                    # folded source animation/frame offsets into those object
-                    # coordinates, so applying the tileset's provenance
-                    # offsets again would displace multi-part objects such as
-                    # the wall vine. Preserve the authored Tiled position and
-                    # compile its baseline as the stable runtime depth.
+                    # image's baseline. Legacy Adonthell objects, however,
+                    # sort on their logical base square rather than their
+                    # image bottom. The imported tiles retain enough base and
+                    # animation-offset metadata to recover that anchor. This
+                    # is deliberately only a depth calculation: the visible
+                    # position remains exactly where it was authored in Tiled.
+                    baseline = integer(obj.get("y"), f"{map_path} scenery y")
+                    source_depth = baseline
+                    if "base_y" in tile_properties:
+                        source_depth = (((baseline - image_height - offset_y) // tile_size +
+                                         integer(tile_properties["base_y"],
+                                                 f"{map_path} object base_y")) * tile_size)
                     scenery.append({
                         "image": image,
                         "width": image_width,
                         "height": image_height,
                         "x": integer(obj.get("x"), f"{map_path} scenery x"),
-                        "y": integer(obj.get("y"), f"{map_path} scenery y") - image_height,
-                        "depth": integer(values.get("sort_y", obj.get("y")),
+                        "y": baseline - image_height,
+                        # Explicit sort_y remains available for authored
+                        # exceptions and composite overlays.
+                        "depth": integer(values.get("sort_y", source_depth),
                                          f"{map_path} scenery sort_y"),
                         "alpha": alpha,
                     })
@@ -1708,14 +1844,20 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         # to an explicit empty runtime frame.
                         frames.extend([None] * (state_count - len(frames)))
                         raw_object_visuals[visual_key] = {"frames": frames}
+                    baseline = integer(obj.get("y"), f"{map_path} scenery y")
+                    source_depth = baseline
+                    if "base_y" in tile_properties:
+                        source_depth = (((baseline - image_height - offset_y) // tile_size +
+                                         integer(tile_properties["base_y"],
+                                                 f"{map_path} object base_y")) * tile_size)
                     scenery.append({
                         "id": object_id,
                         "image": image,
                         "width": image_width,
                         "height": image_height,
                         "x": integer(obj.get("x"), f"{map_path} scenery x"),
-                        "y": integer(obj.get("y"), f"{map_path} scenery y") - image_height,
-                        "depth": integer(values.get("sort_y", obj.get("y")),
+                        "y": baseline - image_height,
+                        "depth": integer(values.get("sort_y", source_depth),
                                          f"{map_path} scenery sort_y"),
                         "alpha": alpha,
                         "definition": entity_index[entity_def],
@@ -1780,8 +1922,9 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
         spawns.sort(key=lambda item: str(item["id"]))
         raw_scenes.append({"id": scene_id, "width": width, "height": height, "tile_size": tile_size,
                            "entry_dialogue": entry_dialogue, "terrain": terrain,
-                           "collisions": collisions, "scenery": scenery, "entities": entities,
-                           "spawns": spawns, "triggers": triggers,
+                           "collisions": collisions, "navigation_blockers": navigation_blockers,
+                           "scenery": scenery, "entities": entities,
+                           "spawns": spawns, "triggers": triggers, "hotspots": hotspots,
                            "stateful_scenery_count": stateful_scenery_count})
 
     # Runtime indices must match the alphabetical IDs emitted in content_ids.h.
@@ -1838,7 +1981,8 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     return raw_scenes, visuals, object_visuals, sorted(resources)
 
 
-def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: int) -> str:
+def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: int,
+                   maximum_dialogue_nodes: int) -> str:
     return """/* Generated by tools/content_compiler/compile_content.py; do not edit. */
 #ifndef WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 #define WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
@@ -1851,15 +1995,22 @@ struct generated_runtime_actor_visual {
     int walking_count[4];
 };
 struct generated_runtime_collision { int x, y, width, height, walkability; };
+struct generated_runtime_navigation_blocker { int x, y, width, height; };
 struct generated_runtime_background { struct generated_runtime_frame frame; int x, y; };
 struct generated_runtime_object_visual { const struct generated_runtime_frame *frames; int frame_count; };
 struct generated_runtime_scenery { struct generated_runtime_frame frame; int x, y, depth, alpha, definition, state_slot, initial_state, visual; };
 struct generated_runtime_entity { int visual, tile_x, tile_y, facing, blocks_movement, player_controlled, interaction_dialogue, definition, initially_present; };
 struct generated_runtime_spawn { int tile_x, tile_y, facing; };
 struct generated_runtime_trigger { int x, y, width, height, script, when, facing; };
+struct generated_runtime_hotspot { int x, y, width, height, script, facing, priority; };
 struct generated_runtime_music { int sound, loop; float speed, volume; };
+struct generated_runtime_text { const int *glyphs; int glyph_count; };
 struct generated_runtime_script_action { int op, a, b, c, d; };
-struct generated_runtime_script { const struct generated_runtime_script_action *actions; int action_count; };
+struct generated_runtime_script {
+    const struct generated_runtime_script_action *actions;
+    const struct generated_runtime_text *speech;
+    int action_count, speech_count;
+};
 struct generated_runtime_schedule_step { int op, scene, x, y, facing, delay_min, delay_max, target, value; };
 struct generated_runtime_schedule {
     const struct generated_runtime_schedule_step *steps;
@@ -1870,8 +2021,8 @@ struct generated_runtime_schedule {
     int speech_delay_min, speech_delay_max, speech_duration;
 };
 struct generated_runtime_dialogue_action { int flag, value; };
+struct generated_runtime_dialogue_condition { int flag, value; };
 struct generated_runtime_glyph { int texture, min_x, min_y, max_x, max_y, hotspot_x, advance; };
-struct generated_runtime_text { const int *glyphs; int glyph_count; };
 struct generated_runtime_dialogue_speaker {
     const char *name;
     struct generated_runtime_text name_text;
@@ -1882,7 +2033,8 @@ struct generated_runtime_dialogue_choice {
     const char *text;
     struct generated_runtime_text display;
     const struct generated_runtime_dialogue_action *actions;
-    int action_count, next_node, condition_flag, condition_value;
+    const struct generated_runtime_dialogue_condition *conditions;
+    int action_count, condition_count, next_node, repeatable;
 };
 struct generated_runtime_dialogue_node {
     const char *text;
@@ -1903,10 +2055,12 @@ struct generated_runtime_scene {
     int width, height, tile_size, entry_dialogue;
     const struct generated_runtime_background *background; int background_count;
     const struct generated_runtime_collision *collisions; int collision_count;
+    const struct generated_runtime_navigation_blocker *navigation_blockers; int navigation_blocker_count;
     const struct generated_runtime_scenery *scenery; int scenery_count, stateful_scenery_count;
     const struct generated_runtime_entity *entities; int entity_count;
     const struct generated_runtime_spawn *spawns; int spawn_count;
     const struct generated_runtime_trigger *triggers; int trigger_count;
+    const struct generated_runtime_hotspot *hotspots; int hotspot_count;
 };
 extern const struct generated_runtime_actor_visual generated_runtime_actor_visuals[];
 extern const int generated_runtime_actor_visual_count;
@@ -1932,6 +2086,8 @@ extern const int generated_runtime_space_advance;
 #define GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT (GENERATED_RUNTIME_STATEFUL_SCENERY_COUNT > 0 ? GENERATED_RUNTIME_STATEFUL_SCENERY_COUNT : 1)
 #define GENERATED_RUNTIME_ENTITY_COUNT %d
 #define GENERATED_RUNTIME_ENTITY_STORAGE_COUNT (GENERATED_RUNTIME_ENTITY_COUNT > 0 ? GENERATED_RUNTIME_ENTITY_COUNT : 1)
+#define GENERATED_RUNTIME_DIALOGUE_USED_COUNT %d
+#define GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT (GENERATED_RUNTIME_DIALOGUE_USED_COUNT > 0 ? GENERATED_RUNTIME_DIALOGUE_USED_COUNT : 1)
 #define GENERATED_SCRIPT_SET_CONTROL 0
 #define GENERATED_SCRIPT_SET_ENTITY_STATE 1
 #define GENERATED_SCRIPT_MOVE_ENTITY 2
@@ -1942,6 +2098,8 @@ extern const int generated_runtime_space_advance;
 #define GENERATED_SCRIPT_START_SCHEDULE 7
 #define GENERATED_SCRIPT_STOP_SCHEDULE 8
 #define GENERATED_SCRIPT_SET_ENTITY_DIALOGUE 9
+#define GENERATED_SCRIPT_SET_WALKABILITY 10
+#define GENERATED_SCRIPT_SPEAK 11
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -1953,7 +2111,7 @@ extern const int generated_runtime_space_advance;
 #define GENERATED_TRIGGER_ENTER 0
 #define GENERATED_TRIGGER_LEAVE 1
 #endif
-""" % (flag_count, stateful_scenery_count, entity_count)
+""" % (flag_count, stateful_scenery_count, entity_count, maximum_dialogue_nodes)
 
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
@@ -1992,6 +2150,11 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         for collision in scene["collisions"]:
             lines.append("    { %d, %d, %d, %d, %d }," % (collision["x"], collision["y"], collision["width"], collision["height"], collision["walkability"]))
         lines.append("};")
+        lines.append(f"static const struct generated_runtime_navigation_blocker generated_runtime_navigation_blockers_{index}[] = {{")
+        for blocker in scene["navigation_blockers"]:
+            lines.append("    { %d, %d, %d, %d }," % (
+                blocker["x"], blocker["y"], blocker["width"], blocker["height"]))
+        lines.append("};")
         lines.append(f"static const struct generated_runtime_scenery generated_runtime_scenery_{index}[] = {{")
         for item in scene["scenery"]:
             frame = {"image": item["image"], "width": item["width"], "height": item["height"], "offset_x": 0, "offset_y": 0}
@@ -2022,6 +2185,12 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                 trigger["x"], trigger["y"], trigger["width"], trigger["height"],
                 trigger["script"], trigger["when"], trigger["facing"]))
         lines.append("};\n")
+        lines.append(f"static const struct generated_runtime_hotspot generated_runtime_hotspots_{index}[] = {{")
+        for hotspot in scene["hotspots"]:
+            lines.append("    { %d, %d, %d, %d, %d, %d, %d }," % (
+                hotspot["x"], hotspot["y"], hotspot["width"], hotspot["height"],
+                hotspot["script"], hotspot["facing"], hotspot["priority"]))
+        lines.append("};\n")
     lines.append("const struct generated_runtime_actor_visual generated_runtime_actor_visuals[] = {")
     for visual in visuals:
         lines.append(f"    {{ {visual['base_x']}, {visual['base_y']},")
@@ -2044,12 +2213,28 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append("};")
     lines.append(f"const int generated_runtime_object_visual_count = {len(object_visuals)};\n")
     for index, script in enumerate(scripts):
+        speech = script.get("speech")
+        if speech is not None:
+            for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
+                lines.append(
+                    f"static const int generated_runtime_script_speech_glyphs_{index}_{line_index}[] = {{ " +
+                    ", ".join(str(glyph) for glyph in line_glyphs) + " };")
+            lines.append(f"static const struct generated_runtime_text generated_runtime_script_speech_{index}[] = {{")
+            for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
+                lines.append(
+                    f"    {{ generated_runtime_script_speech_glyphs_{index}_{line_index}, {len(line_glyphs)} }},")
+            lines.append("};")
         lines.append(f"static const struct generated_runtime_script_action generated_runtime_script_actions_{index}[] = {{")
         lines.extend("    { %d, %d, %d, %d, %d }," % action for action in script["actions"])
         lines.append("};")
     lines.append("const struct generated_runtime_script generated_runtime_scripts[] = {")
     for index, script in enumerate(scripts):
-        lines.append(f"    {{ generated_runtime_script_actions_{index}, {len(script['actions'])} }},")
+        speech = script.get("speech")
+        speech_name = f"generated_runtime_script_speech_{index}" if speech is not None else "0"
+        speech_count = len(speech["lines"]) if speech is not None else 0
+        lines.append(
+            f"    {{ generated_runtime_script_actions_{index}, {speech_name}, "
+            f"{len(script['actions'])}, {speech_count} }},")
     lines.append("};")
     lines.append(f"const int generated_runtime_script_count = {len(scripts)};\n")
     for index, schedule in enumerate(schedules):
@@ -2132,24 +2317,30 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             for choice_index, choice in enumerate(node["choices"]):
                 lines.append(f"static const int generated_runtime_dialogue_choice_glyphs_{dialogue_index}_{node_index}_{choice_index}[] = {{ " +
                              ", ".join(str(glyph) for glyph in choice["text_glyphs"]) + " };")
+                conditions = choice["conditions"]
+                if conditions:
+                    lines.append(f"static const struct generated_runtime_dialogue_condition generated_runtime_dialogue_conditions_{dialogue_index}_{node_index}_{choice_index}[] = {{")
+                    lines.extend("    { %d, %d }," % (condition["flag"], condition["value"])
+                                 for condition in conditions)
+                    lines.append("};")
                 actions = choice["actions"]
-                if not actions:
-                    continue
-                lines.append(f"static const struct generated_runtime_dialogue_action generated_runtime_dialogue_actions_{dialogue_index}_{node_index}_{choice_index}[] = {{")
-                lines.extend("    { %d, %d }," % (action["flag"], action["value"]) for action in actions)
-                lines.append("};")
+                if actions:
+                    lines.append(f"static const struct generated_runtime_dialogue_action generated_runtime_dialogue_actions_{dialogue_index}_{node_index}_{choice_index}[] = {{")
+                    lines.extend("    { %d, %d }," % (action["flag"], action["value"]) for action in actions)
+                    lines.append("};")
             if node["choices"]:
                 lines.append(f"static const struct generated_runtime_dialogue_choice generated_runtime_dialogue_choices_{dialogue_index}_{node_index}[] = {{")
                 for choice_index, choice in enumerate(node["choices"]):
                     actions = choice["actions"]
                     action_name = (f"generated_runtime_dialogue_actions_{dialogue_index}_{node_index}_{choice_index}"
                                    if actions else "0")
-                    condition_flag = (-1 if choice["condition_flag"] is None
-                                      else choice["condition_flag"])
-                    lines.append("    { %s, { generated_runtime_dialogue_choice_glyphs_%d_%d_%d, %d }, %s, %d, %d, %d, %d }," % (
+                    conditions = choice["conditions"]
+                    condition_name = (f"generated_runtime_dialogue_conditions_{dialogue_index}_{node_index}_{choice_index}"
+                                      if conditions else "0")
+                    lines.append("    { %s, { generated_runtime_dialogue_choice_glyphs_%d_%d_%d, %d }, %s, %s, %d, %d, %d, %d }," % (
                         json.dumps(choice["text"]), dialogue_index, node_index, choice_index,
-                        len(choice["text_glyphs"]), action_name, len(actions), choice["next"],
-                        condition_flag, choice["condition_value"]))
+                        len(choice["text_glyphs"]), action_name, condition_name, len(actions),
+                        len(conditions), choice["next"], int(choice["repeatable"])))
                 lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_node generated_runtime_dialogue_nodes_{dialogue_index}[] = {{")
         for node_index, node in enumerate(dialogue["nodes"]):
@@ -2167,12 +2358,13 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_dialogue_count = {len(dialogues)};\n")
     lines.append("const struct generated_runtime_scene generated_runtime_scenes[] = {")
     for index, scene in enumerate(scenes):
-        lines.append("    { %d, %d, %d, %d, generated_runtime_background_%d, %d, generated_runtime_collisions_%d, %d, generated_runtime_scenery_%d, %d, %d, generated_runtime_entities_%d, %d, generated_runtime_spawns_%d, %d, generated_runtime_triggers_%d, %d }," % (
+        lines.append("    { %d, %d, %d, %d, generated_runtime_background_%d, %d, generated_runtime_collisions_%d, %d, generated_runtime_navigation_blockers_%d, %d, generated_runtime_scenery_%d, %d, %d, generated_runtime_entities_%d, %d, generated_runtime_spawns_%d, %d, generated_runtime_triggers_%d, %d, generated_runtime_hotspots_%d, %d }," % (
             scene["width"], scene["height"], scene["tile_size"], scene["entry_dialogue"],
             index, len(scene["background"]), index, len(scene["collisions"]),
+            index, len(scene["navigation_blockers"]),
             index, len(scene["scenery"]), scene["stateful_scenery_count"],
             index, len(scene["entities"]), index, len(scene["spawns"]),
-            index, len(scene["triggers"])))
+            index, len(scene["triggers"]), index, len(scene["hotspots"])))
     lines.append("};")
     lines.append(f"const int generated_runtime_scene_count = {len(scenes)};")
     lines.append(f"const int generated_runtime_initial_scene = {[scene['id'] for scene in scenes].index(initial_scene)};")
@@ -2234,7 +2426,7 @@ def compile_content(project_root: Path) -> None:
     materialize_scenery_strips(runtime_scenes, game_root, output_root)
     materialize_character_sheets(runtime_visuals, game_root, output_root)
     runtime_glyphs, runtime_space_advance = materialize_dialogue_glyph_atlas(
-        runtime_dialogue, runtime_schedule_data, game_root, output_root)
+        runtime_dialogue, runtime_schedule_data, runtime_script_data, game_root, output_root)
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
                                                   runtime_dialogue, runtime_glyphs)
@@ -2265,8 +2457,10 @@ def compile_content(project_root: Path) -> None:
     write_output(output_root / "content_data.c", "\n".join(c_lines))
     stateful_scenery_count = sum(int(scene["stateful_scenery_count"])
                                  for scene in runtime_scenes)
+    maximum_dialogue_nodes = max((len(dialogue["nodes"]) for dialogue in runtime_dialogue),
+                                 default=0)
     write_output(output_root / "content_scene_data.h", runtime_header(
-        len(runtime_flags), stateful_scenery_count, len(entities)))
+        len(runtime_flags), stateful_scenery_count, len(entities), maximum_dialogue_nodes))
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_resources,
         initial_scene, runtime_dialogue, runtime_script_data,

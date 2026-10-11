@@ -987,10 +987,74 @@
       "visible": true,
       "x": 0,
       "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
+      "name": "interactions",
+      "objects": [
+        {
+          "height": 20,
+          "id": 38,
+          "name": "elvish_book_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "elvish_book_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_elvish_book" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0, "type": "hotspot", "visible": true,
+          "width": 20, "x": 20, "y": 40
+        },
+        {
+          "height": 20,
+          "id": 39,
+          "name": "there_and_back_book_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "there_and_back_book_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_there_and_back_book" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0, "type": "hotspot", "visible": true,
+          "width": 20, "x": 40, "y": 40
+        },
+        {
+          "height": 20,
+          "id": 40,
+          "name": "yeti_book_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "yeti_book_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_yeti_book" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0, "type": "hotspot", "visible": true,
+          "width": 20, "x": 80, "y": 40
+        },
+        {
+          "height": 20,
+          "id": 41,
+          "name": "parlour_books_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "parlour_books_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_parlour_books" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0, "type": "hotspot", "visible": true,
+          "width": 20, "x": 100, "y": 40
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 38,
+  "nextlayerid": 8,
+  "nextobjectid": 42,
   "orientation": "orthogonal",
   "properties": [
     {

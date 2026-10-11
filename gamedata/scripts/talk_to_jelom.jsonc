@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_jelom",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "jelom_start" }
+  ]
+}

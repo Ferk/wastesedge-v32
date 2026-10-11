@@ -1,0 +1,153 @@
+{
+  "id": "lucia_start",
+  "start": [
+    { "node": "question_menu", "when": { "flag": "lucia_talked", "equals": 1 } },
+    { "node": "first_meeting" }
+  ],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "lucia", "name": "Lucia Redwyne", "role": "npc", "entity": "lucia",
+      "portrait": "assets/ui/portraits/lucia.png" },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    {
+      "id": "first_meeting", "speaker": "narrator",
+      "text": "There is little doubt that this busy-looking woman is the unchallenged mistress of the Redwyne household. As she spots you, a look of resignation flashes across her face.",
+      "next": "young_people"
+    },
+    {
+      "id": "young_people", "speaker": "lucia",
+      "text": "You young people never learn to keep out of my kitchen, do you?",
+      "choices": [
+        {
+          "text": "Sorry madam, I did not mean to trespass, but I need to talk to you.",
+          "actions": [{ "op": "set", "flag": "lucia_talked", "value": 1 }],
+          "next": "too_busy"
+        },
+        {
+          "text": "Calm down, please. This is important. I'm investigating the theft.",
+          "actions": [{ "op": "set", "flag": "lucia_talked", "value": 1 }],
+          "next": "investigation"
+        },
+        {
+          "text": "My apologies. Must have been the wrong door ...",
+          "actions": [{ "op": "set", "flag": "lucia_talked", "value": 1 }],
+          "next": "goodbye"
+        }
+      ]
+    },
+    {
+      "id": "too_busy", "speaker": "lucia",
+      "text": "What questions? Don't you see I'm busy? Who's going to put the food on the table, if I'm going to chat with you? Now out of my sight with you!",
+      "choices": [
+        { "text": "Lunch can wait, but if you don't help with my investigation, the thief might get away!", "next": "investigation" },
+        { "text": "My apologies. Must have been the wrong door ...", "next": "goodbye" }
+      ]
+    },
+    {
+      "id": "investigation", "speaker": "lucia",
+      "text": "You are looking for the thief!? My apologies then, sir. It is about time that somebody takes an interest into this unlucky incident.",
+      "next": "question_menu"
+    },
+    {
+      "id": "question_menu", "speaker": "lucia",
+      "text": "Now don't keep me off my work. Ask what you want to know and then out with you!",
+      "choices": [
+        {
+          "text": "I know that Rhayne Frostbloom heard a noise outside the inn during that night.",
+          "when": { "flag": "know_noise", "equals": 2 },
+          "next": "talan_practising"
+        },
+        {
+          "text": "I was wondering whether you noticed anything unusual during the night of the theft.",
+          "repeatable": true,
+          "next": "rooms_apart"
+        },
+        {
+          "text": "You said Master Fingolson is a regular guest. What can you tell me about him?",
+          "repeatable": true,
+          "next": "fingolson_regular"
+        },
+        {
+          "text": "Well, you were very ... helpful, madam. But if you'll excuse me now, I've got a thief to catch.",
+          "repeatable": true,
+          "next": "goodbye"
+        }
+      ]
+    },
+    {
+      "id": "rooms_apart", "speaker": "lucia",
+      "text": "Something unusual? How should I? We're sleeping under the roof, whereas poor Master Fingolson has his room downstairs, in the cellar. Just as his kind likes it the most.",
+      "next": "ask_talan"
+    },
+    {
+      "id": "ask_talan", "speaker": "lucia",
+      "text": "But perhaps you should ask Talan, as he was on duty that night. If somebody noticed something, then it was him.",
+      "next": "question_menu"
+    },
+    {
+      "id": "fingolson_regular", "speaker": "lucia",
+      "text": "He stays here quite often, and has done that for many years. I wouldn't say that I know him well, though. He behaves quite reserved and formal, but he is a pleasant character.",
+      "next": "question_menu"
+    },
+    {
+      "id": "talan_practising", "speaker": "lucia",
+      "text": "Outside the inn you say? I don't know anything about this, but I suspect that was rather Talan practising than the thief.",
+      "next": "what_practising"
+    },
+    {
+      "id": "what_practising", "speaker": "player",
+      "text": "Talan practising what?",
+      "next": "lucia_confidence"
+    },
+    {
+      "id": "lucia_confidence", "speaker": "lucia",
+      "text": "I shouldn't have mentioned this at all! Telling on other people is not right. But if it helps to clear your mistress' guilt, I cannot keep it secret. But you mustn't tell anybody, do you understand!?",
+      "choices": [
+        {
+          "text": "You have my word, Lucia. Now what is it?",
+          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
+          "next": "singing_reveal"
+        },
+        {
+          "text": "I can't promise anything before I know what you are talking about.",
+          "next": "lucia_refuses"
+        },
+        {
+          "text": "Please Lucia. If it has anything to do with the theft, I need to know! Don't you want the real thief caught?",
+          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
+          "next": "only_reason"
+        }
+      ]
+    },
+    {
+      "id": "lucia_refuses", "speaker": "lucia",
+      "text": "I want no harm done to Talan, see. He is a good lad, and he deserves better than ending like Jelom. Don't destroy the chance to make something out of his life.",
+      "choices": [
+        {
+          "text": "Please Lucia. If it has anything to do with the theft, I need to know! Don't you want the real thief caught?",
+          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
+          "next": "only_reason"
+        },
+        { "text": "I don't want anybody harm, but I will do what I must to find the thief.", "next": "goodbye" }
+      ]
+    },
+    {
+      "id": "only_reason", "speaker": "lucia",
+      "text": "And that is the only reason why I'll tell you about Talan. But you'd better not disappoint me!",
+      "next": "singing_reveal"
+    },
+    {
+      "id": "singing_reveal", "speaker": "lucia",
+      "text": "He is singing. Talan sometimes leaves his post to practice his voice where nobody hears him. That's nothing bad, but he'd be more than embarrassed if you tell it around. And I fear Jelom won't take it very well.",
+      "end": true
+    },
+    {
+      "id": "goodbye", "speaker": "lucia",
+      "text": "But enough chatting. This food won't prepare itself, and you still have a thief to catch.",
+      "end": true
+    }
+  ]
+}

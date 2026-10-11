@@ -95,7 +95,12 @@
       "text": "Now do you have any dumb questions left, or can I go back to my drink?",
       "choices": [
         { "text": "So what is your business here, then?", "next": "business_answer" },
-        { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?", "next": "not_spying" },
+        { "text": "Master Orloth says your chamber is below ground, next to the Dwarf's. So did you hear anything unusual in the night of the theft?",
+          "when": { "flag": "know_aleks_room", "equals": 1 },
+          "next": "ask_about_cellar" },
+        { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
+          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "next": "not_spying" },
         { "text": "Perhaps it's just me, but I'd ask myself why the thief hasn't left Waste's Edge.", "next": "good_question" },
         { "text": "Actually, there is nothing you could possibly tell me.", "next": "leave" }
       ]
@@ -103,6 +108,81 @@
     {
       "id": "business_answer", "speaker": "alek",
       "text": "If it makes you happy; I made camp here on my way back from Limebruck where I had an ... appointment, which is absolutely none of your concern. I'm just an innocent traveller caught in this bloody mess.",
+      "next": "question_menu"
+    },
+    {
+      "id": "ask_about_cellar", "speaker": "player",
+      "text": "Master Orloth says your chamber is below ground, next to the Dwarf's. So did you hear anything unusual in the night of the theft?",
+      "next": "alek_heard_nothing"
+    },
+    {
+      "id": "alek_heard_nothing", "speaker": "alek",
+      "text": "No I didn't. But perhaps there wasn't anything unusual to hear that night.",
+      "next": "what_do_you_mean"
+    },
+    {
+      "id": "what_do_you_mean", "speaker": "player",
+      "text": "What do you mean?",
+      "next": "theft_before_bed"
+    },
+    {
+      "id": "theft_before_bed", "speaker": "alek",
+      "text": "You're a slow thinker, eh Half-Elf!? Hasn't it occurred to you that the theft might've already been committed by the time Fingolson went to bed?",
+      "choices": [
+        { "text": "Don't make me laugh. That's the most ridiculous thing I ever heard.", "next": "ridiculous" },
+        { "text": "Do you have any proof of this?", "next": "ask_for_proof" },
+        { "text": "That's impossible. Fingolson had the gems on him during the negotiations. And afterwards, either he or Erek were down in their room.", "next": "gems_guarded" }
+      ]
+    },
+    {
+      "id": "ridiculous", "speaker": "player",
+      "text": "Don't make me laugh. That's the most ridiculous thing I ever heard.",
+      "next": "different_company"
+    },
+    {
+      "id": "different_company", "speaker": "alek",
+      "text": "If you don't like what you hear from me, why don't you look for different company, Half-Elf?",
+      "next": "question_menu"
+    },
+    {
+      "id": "ask_for_proof", "speaker": "player",
+      "text": "Do you have any proof of this?",
+      "next": "no_proof"
+    },
+    {
+      "id": "no_proof", "speaker": "alek",
+      "text": "I don't. But since you are so good in finding stuff out, this shouldn't be a problem for you!",
+      "next": "question_menu"
+    },
+    {
+      "id": "gems_guarded", "speaker": "player",
+      "text": "That's impossible. Fingolson had the gems on him during the negotiations. And afterwards, either he or Erek were down in their room.",
+      "next": "rules_out_thieves"
+    },
+    {
+      "id": "rules_out_thieves", "speaker": "alek",
+      "text": "Well, that would rule out quite a few possible thieves, wouldn't it?",
+      "choices": [
+        { "text": "You want to tell me that Erek has taken the gems?", "next": "accuse_erek" }
+      ]
+    },
+    {
+      "id": "accuse_erek", "speaker": "player",
+      "text": "You want to tell me that Erek has taken the gems?",
+      "next": "ask_erek_who_packed"
+    },
+    {
+      "id": "ask_erek_who_packed", "speaker": "alek",
+      "text": "You don't believe me? Perhaps you should ask Erek who has packed them then!",
+      "choices": [
+        { "text": "I don't. But since you are so good in finding stuff out, this shouldn't be a problem for you!",
+          "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 1 }],
+          "next": "packed_gems_lead" }
+      ]
+    },
+    {
+      "id": "packed_gems_lead", "speaker": "player",
+      "text": "I don't. But since you are so good in finding stuff out, this shouldn't be a problem for you!",
       "next": "question_menu"
     },
     {

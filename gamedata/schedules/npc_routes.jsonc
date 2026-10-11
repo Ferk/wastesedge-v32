@@ -84,7 +84,6 @@
           "scene": "redwyne_inn", "x": 10, "y": 3, "facing": "north" },
         { "op": "speak", "text": "That clock is late again!", "duration_frames": 180 },
         { "op": "wait", "delay_min_frames": 180, "delay_max_frames": 300 },
-        { "op": "move", "scene": "redwyne_inn", "x": 10, "y": 2, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south" },
         { "op": "jump", "target": "choose_job" },
 
@@ -95,7 +94,6 @@
         { "op": "wait", "delay_frames": 60 },
         { "op": "toggle_object_state", "scene": "redwyne_inn", "object": "table_1_mug_2" },
         { "op": "wait", "delay_frames": 60 },
-        { "op": "move", "scene": "redwyne_inn", "x": 3, "y": 2, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south" },
         { "op": "jump", "target": "choose_job" },
 
@@ -106,7 +104,6 @@
         { "op": "wait", "delay_frames": 60 },
         { "op": "toggle_object_state", "scene": "redwyne_inn", "object": "table_2_mug_2" },
         { "op": "wait", "delay_frames": 60 },
-        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 2, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south" },
         { "op": "jump", "target": "choose_job" },
 
@@ -117,7 +114,6 @@
         { "op": "wait", "delay_frames": 60 },
         { "op": "toggle_object_state", "scene": "redwyne_inn", "object": "table_3_mug_2" },
         { "op": "wait", "delay_frames": 60 },
-        { "op": "move", "scene": "redwyne_inn", "x": 12, "y": 2, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south" },
         { "op": "jump", "target": "choose_job" },
 
@@ -128,7 +124,6 @@
         { "op": "wait", "delay_frames": 60 },
         { "op": "toggle_object_state", "scene": "redwyne_inn", "object": "table_4_mug_2" },
         { "op": "wait", "delay_frames": 60 },
-        { "op": "move", "scene": "redwyne_inn", "x": 7, "y": 2, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 2, "y": 2, "facing": "south" },
         { "op": "jump", "target": "choose_job" }
       ]
@@ -148,12 +143,8 @@
         "duration_frames": 180
       },
       "steps": [
-        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 3, "facing": "east" },
-        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 5, "facing": "south" },
         { "op": "move", "scene": "redwyne_inn", "x": 12, "y": 5, "facing": "north",
           "delay_min_frames": 1950, "delay_max_frames": 2700 },
-        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 5, "facing": "east" },
-        { "op": "move", "scene": "redwyne_inn", "x": 13, "y": 3, "facing": "north" },
         { "op": "move", "scene": "redwyne_inn", "x": 1, "y": 3, "facing": "south",
           "delay_min_frames": 1950, "delay_max_frames": 2700 }
       ]
@@ -329,6 +320,33 @@
       "steps": [
         { "op": "place", "scene": "redwyne_exterior", "x": 25, "y": 15, "facing": "south",
           "delay_frames": 3600 }
+      ]
+    },
+    {
+      "id": "lucia_kitchen",
+      "entity": "lucia",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "When can I finally rest a bit?",
+          "I told Orloth this place would bring us nothing but trouble!",
+          "This smoke! I'm dying!"
+        ],
+        "delay_min_frames": 900,
+        "delay_max_frames": 1800,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "wait", "label": "choose_task",
+          "delay_min_frames": 600, "delay_max_frames": 1500 },
+        { "op": "random_jump", "targets": ["work_at_stove", "fresh_air"] },
+        { "op": "move", "label": "work_at_stove",
+          "scene": "redwyne_kitchen", "x": 3, "y": 3, "facing": "north" },
+        { "op": "jump", "target": "choose_task" },
+        { "op": "move", "label": "fresh_air",
+          "scene": "redwyne_kitchen", "x": 6, "y": 3, "facing": "east" },
+        { "op": "speak", "text": "Ah, some fresh air!", "duration_frames": 180 },
+        { "op": "jump", "target": "choose_task" }
       ]
     }
   ]

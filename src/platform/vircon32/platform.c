@@ -391,11 +391,10 @@ static const struct generated_runtime_frame *entity_frame(const struct world_sta
 
 static int entity_depth(const struct world_state *world, int entity_index)
 {
-    const struct generated_runtime_entity *entity = &world->scene->entities[entity_index];
-    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
-    const struct generated_runtime_frame *frame = entity_frame(world, entity_index);
-    int y = world_entity_pixel_y(world, entity_index);
-    return y - visual->base_y * world->scene->tile_size + frame->offset_y + frame->height;
+    /* Order characters by their logical base square, not by the bottom edge of the current animation frame.
+       Frame bounds can extend below that square (the Waste's Edge actors do),
+       and using those bounds shifts every character one row toward the camera. */
+    return world_entity_pixel_y(world, entity_index);
 }
 
 static void draw_entity(const struct world_state *world, int entity_index, int camera_x, int camera_y)
@@ -632,15 +631,18 @@ int platform_random_seed(void)
 void platform_update_audio(const struct world_state *world)
 {
     const struct generated_runtime_music *track;
-    if (applied_music_revision == world->music_revision)
-        return;
-    applied_music_revision = world->music_revision;
     if (world->music_track < 0 || world->music_track >= generated_runtime_music_count)
         return;
+    if (applied_music_revision == world->music_revision &&
+        get_channel_state(MUSIC_CHANNEL) == channel_playing)
+        return;
+    applied_music_revision = world->music_revision;
     track = &generated_runtime_music[world->music_track];
+    stop_channel(MUSIC_CHANNEL);
     select_sound(track->sound);
     set_sound_loop(track->loop);
     assign_channel_sound(MUSIC_CHANNEL, track->sound);
+    set_channel_position(0);
     set_channel_volume(track->volume);
     set_channel_speed(track->speed);
     set_channel_loop(track->loop);

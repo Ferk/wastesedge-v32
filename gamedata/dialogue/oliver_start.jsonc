@@ -83,14 +83,18 @@
       "text": "Can you imagine, sir? The Elven Lady robbed Master Fingolson in his sleep. And none of the adults noticed anything.",
       "choices": [
         { "text": "Who is Master Fingolson?", "next": "fingolson" },
-        { "text": "But you heard something that night?", "next": "stable_noise" }
+        { "text": "But you heard something that night?",
+          "actions": [{ "op": "set", "flag": "know_olivers_noise", "value": 1 }],
+          "next": "stable_noise" }
       ]
     },
     {
       "id": "fingolson", "speaker": "oliver",
       "text": "Just another Dwarf from Uzdun'kal. He sells jewels and such. We get a lot of them here, but none of them got robbed so far.",
       "choices": [
-        { "text": "Speaking of that, you say you noticed something that night?", "next": "stable_noise" }
+        { "text": "Speaking of that, you say you noticed something that night?",
+          "actions": [{ "op": "set", "flag": "know_olivers_noise", "value": 1 }],
+          "next": "stable_noise" }
       ]
     },
     {

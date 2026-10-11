@@ -1,0 +1,6 @@
+{
+  "id": "leave_redwyne_kitchen_yard",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_exterior", "spawn": "kitchen_yard_door" }
+  ]
+}

@@ -73,7 +73,9 @@
       "id": "question_menu", "speaker": "frostbloom",
       "text": "Ask of me what you will.",
       "choices": [
-        { "text": "Did anything unusual happen last night?", "next": "warm_night" },
+        { "text": "Did anything unusual happen last night?",
+          "actions": [{ "op": "set", "flag": "know_noise", "value": 2 }],
+          "next": "warm_night" },
         { "text": "What do you know of the dwarf, Bjarn?", "next": "bjarn" },
         { "text": "Do you know anything of the people staying here at Waste's Edge?", "next": "guests" },
         { "text": "I must leave you to your inspiration.", "next": "goodbye" }

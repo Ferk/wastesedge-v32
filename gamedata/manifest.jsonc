@@ -8,7 +8,8 @@
     "maps/redwyne_inn.tmj",
     "maps/redwyne_parlour.tmj",
     "maps/redwyne_player_room.tmj",
-    "maps/redwyne_first_floor.tmj"
+    "maps/redwyne_first_floor.tmj",
+    "maps/redwyne_kitchen.tmj"
   ],
   "entities": ["entities/core.jsonc"],
   "schedules": ["schedules/npc_routes.jsonc"],
@@ -22,7 +23,9 @@
     "dialogue/erek_start.jsonc",
     "dialogue/oliver_start.jsonc",
     "dialogue/oliver_room.jsonc",
-    "dialogue/frostbloom_start.jsonc"
+    "dialogue/frostbloom_start.jsonc",
+    "dialogue/jelom_start.jsonc",
+    "dialogue/lucia_start.jsonc"
   ],
   "scripts": [
     "scripts/talk_to_talan.jsonc",
@@ -43,6 +46,23 @@
     "scripts/talk_to_oliver.jsonc",
     "scripts/escort_to_player_room.jsonc",
     "scripts/oliver_return_to_yard.jsonc",
-    "scripts/talk_to_frostbloom.jsonc"
+    "scripts/talk_to_frostbloom.jsonc",
+    "scripts/examine_closed_gate.jsonc",
+    "scripts/examine_ladder.jsonc",
+    "scripts/examine_inn_entrance.jsonc",
+    "scripts/examine_guardhouse.jsonc",
+    "scripts/examine_clock.jsonc",
+    "scripts/examine_elvish_book.jsonc",
+    "scripts/examine_there_and_back_book.jsonc",
+    "scripts/examine_yeti_book.jsonc",
+    "scripts/examine_parlour_books.jsonc",
+    "scripts/examine_adonthell_painting.jsonc",
+    "scripts/examine_player_bed.jsonc",
+    "scripts/talk_to_jelom.jsonc",
+    "scripts/enter_redwyne_kitchen.jsonc",
+    "scripts/leave_redwyne_kitchen.jsonc",
+    "scripts/enter_redwyne_kitchen_yard.jsonc",
+    "scripts/leave_redwyne_kitchen_yard.jsonc",
+    "scripts/talk_to_lucia.jsonc"
   ]
 }

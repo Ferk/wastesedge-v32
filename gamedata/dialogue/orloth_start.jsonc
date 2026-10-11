@@ -301,8 +301,12 @@
       "speaker": "orloth",
       "text": "But what can I do about it? He's paying for his room, although he insisted on a cheap one down the cellar. And as long as he's behaving, I can but keep an eye on him. You should beware of him as well, if I may advice you, sir.",
       "choices": [
-        { "text": "No worries. I've dealt with his likes before. So who else is here, then?", "next": "dwarves" },
-        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
+        { "text": "No worries. I've dealt with his likes before. So who else is here, then?",
+          "actions": [{ "op": "set", "flag": "know_aleks_room", "value": 1 }],
+          "next": "dwarves" },
+        { "text": "Thank you Master Redwyne. I think I have heard enough of this.",
+          "actions": [{ "op": "set", "flag": "know_aleks_room", "value": 1 }],
+          "next": "help_menu" }
       ]
     },
     {

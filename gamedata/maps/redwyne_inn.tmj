@@ -1250,7 +1250,7 @@
             {
               "name": "sort_y",
               "type": "int",
-              "value": 80
+              "value": 60
             }
           ],
           "type": "map_object",
@@ -1277,7 +1277,7 @@
             {
               "name": "sort_y",
               "type": "int",
-              "value": 80
+              "value": 60
             }
           ],
           "type": "map_object",
@@ -1760,6 +1760,31 @@
           "width": 20,
           "x": 240,
           "y": 20
+        },
+        {
+          "id": 91,
+          "name": "kitchen_door",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "kitchen_door" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "x": 20,
+          "y": 140
+        },
+        {
+          "height": 20,
+          "id": 92,
+          "name": "enter_kitchen",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_kitchen" },
+            { "name": "script", "type": "string", "value": "enter_redwyne_kitchen" }
+          ],
+          "width": 20,
+          "x": 20,
+          "y": 160
         }
       ],
       "opacity": 1,
@@ -2200,10 +2225,39 @@
       "visible": true,
       "x": 0,
       "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
+      "name": "interactions",
+      "objects": [
+        {
+          "height": 20,
+          "id": 90,
+          "name": "clock_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "clock_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_clock" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0,
+          "type": "hotspot",
+          "visible": true,
+          "width": 20,
+          "x": 200,
+          "y": 40
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 90,
+  "nextlayerid": 8,
+  "nextobjectid": 93,
   "orientation": "orthogonal",
   "properties": [
     {

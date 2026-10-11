@@ -93,6 +93,11 @@
       "text": "Oh... that. Yes, how may I help you?",
       "choices": [
         {
+          "text": "I wish you had not lied to me about the night of the theft.",
+          "when": { "flag": "know_talan_singing", "equals": 1 },
+          "next": "talan_confronted"
+        },
+        {
           "text": "Why was the Lady Silverhair accused?",
           "next": "player_asks_accusation"
         },
@@ -126,6 +131,11 @@
       "text": "If you do not have any more questions ...",
       "choices": [
         {
+          "text": "I wish you had not lied to me about the night of the theft.",
+          "when": { "flag": "know_talan_singing", "equals": 1 },
+          "next": "talan_confronted"
+        },
+        {
           "text": "And why was Lady Silverhair accused?",
           "actions": [{ "op": "set", "flag": "talan_heard_nothing", "value": 1 }],
           "next": "player_asks_accusation"
@@ -136,6 +146,44 @@
           "next": "player_goodbye"
         }
       ]
+    },
+    {
+      "id": "talan_confronted", "speaker": "talan",
+      "text": "Wh... what do you mean?",
+      "choices": [
+        { "text": "You were not, as you told me, manning your post the whole night.", "next": "talan_denies" }
+      ]
+    },
+    {
+      "id": "talan_denies", "speaker": "talan",
+      "text": "Now you look here! I was, and I do not appreciate you calling me a liar.",
+      "choices": [
+        {
+          "text": "Yes I do. And I believe you left your post that night, did you not, Talan?",
+          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 2 }],
+          "next": "talan_admits"
+        }
+      ]
+    },
+    {
+      "id": "talan_admits", "speaker": "talan",
+      "text": "Yes, I did. But please do not tell Jelom, sir! He will have my hide for sure if he finds out! Please, I beg you!",
+      "next": "player_names_singing"
+    },
+    {
+      "id": "player_names_singing", "speaker": "player",
+      "text": "No, you missed it. Because you were off singing, weren't you?",
+      "next": "talan_apologises"
+    },
+    {
+      "id": "talan_apologises", "speaker": "talan",
+      "text": "I'm afraid I was. Oh what terrible mistake! I am so sorry, Banec. I did not know about the noise! It is my fault that Lady Silverhair is being held in her room!",
+      "next": "player_calms_talan"
+    },
+    {
+      "id": "player_calms_talan", "speaker": "player",
+      "text": "Calm down, Talan. Now I can prove that something strange happened that night at least.",
+      "end": true
     },
     {
       "id": "player_asks_accusation",

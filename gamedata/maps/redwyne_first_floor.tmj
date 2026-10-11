@@ -968,6 +968,7 @@
             { "name": "entity_def", "type": "string", "value": "jelom" },
             { "name": "facing", "type": "string", "value": "north" },
             { "name": "id", "type": "string", "value": "jelom" },
+            { "name": "interaction", "type": "string", "value": "talk_to_jelom" },
             { "name": "kind", "type": "string", "value": "entity" }
           ],
           "type": "actor",

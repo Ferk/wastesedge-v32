@@ -895,10 +895,48 @@
       "visible": true,
       "x": 0,
       "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
+      "name": "interactions",
+      "objects": [
+        {
+          "height": 20,
+          "id": 34,
+          "name": "adonthell_painting_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "adonthell_painting_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_adonthell_painting" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0, "type": "hotspot", "visible": true,
+          "width": 20, "x": 60, "y": 40
+        },
+        {
+          "height": 20,
+          "id": 35,
+          "name": "player_bed_examine",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "hotspot" },
+            { "name": "id", "type": "string", "value": "player_bed_examine" },
+            { "name": "interaction", "type": "string", "value": "examine_player_bed" },
+            { "name": "facing", "type": "string", "value": "north" }
+          ],
+          "rotation": 0, "type": "hotspot", "visible": true,
+          "width": 40, "x": 20, "y": 60
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 34,
+  "nextlayerid": 8,
+  "nextobjectid": 36,
   "orientation": "orthogonal",
   "properties": [
     {

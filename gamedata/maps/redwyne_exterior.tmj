@@ -457,6 +457,11 @@
                          "value":0
                         },
                         {
+                         "name":"sort_y",
+                         "type":"int",
+                         "value":280
+                        },
+                        {
                          "name":"source_object",
                          "type":"string",
                          "value":"houses\/redwyne-inn\/entrance.mobj"
@@ -479,6 +484,11 @@
                          "name":"source_animation",
                          "type":"int",
                          "value":0
+                        },
+                        {
+                         "name":"sort_y",
+                         "type":"int",
+                         "value":280
                         },
                         {
                          "name":"source_object",
@@ -3847,7 +3857,7 @@
                         {
                          "name":"sort_y",
                          "type":"int",
-                         "value":360
+                         "value":340
                         },
                         {
                          "name":"source_animation",
@@ -3876,7 +3886,7 @@
                         {
                          "name":"sort_y",
                          "type":"int",
-                         "value":360
+                         "value":340
                         },
                         {
                          "name":"source_animation",
@@ -3905,7 +3915,7 @@
                         {
                          "name":"sort_y",
                          "type":"int",
-                         "value":360
+                         "value":340
                         },
                         {
                          "name":"source_animation",
@@ -4318,6 +4328,75 @@
                  "width":20,
                  "x":360,
                  "y":260
+                },
+                {
+                 "height":20,
+                 "id":894,
+                 "name":"legacy_pathfinding_exclusion",
+                 "properties":[
+                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
+                       ],
+                 "width":20,
+                 "x":360,
+                 "y":260
+                },
+                {
+                 "height":20,
+                 "id":895,
+                 "name":"legacy_pathfinding_exclusion",
+                 "properties":[
+                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
+                       ],
+                 "width":80,
+                 "x":480,
+                 "y":260
+                },
+                {
+                 "height":20,
+                 "id":896,
+                 "name":"legacy_pathfinding_exclusion",
+                 "properties":[
+                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
+                       ],
+                 "width":20,
+                 "x":220,
+                 "y":280
+                },
+                {
+                 "height":20,
+                 "id":897,
+                 "name":"legacy_pathfinding_exclusion",
+                 "properties":[
+                        { "name":"kind", "type":"string", "value":"navigation_blocker" }
+                       ],
+                 "width":20,
+                 "x":240,
+                 "y":460
+                },
+                {
+                 "id":909,
+                 "name":"kitchen_yard_door",
+                 "point":true,
+                 "properties":[
+                        { "name":"kind", "type":"string", "value":"spawn" },
+                        { "name":"id", "type":"string", "value":"kitchen_yard_door" },
+                        { "name":"facing", "type":"string", "value":"east" }
+                       ],
+                 "x":240,
+                 "y":280
+                },
+                {
+                 "height":20,
+                 "id":910,
+                 "name":"enter_kitchen_yard",
+                 "properties":[
+                        { "name":"kind", "type":"string", "value":"exit" },
+                        { "name":"id", "type":"string", "value":"enter_kitchen_yard" },
+                        { "name":"script", "type":"string", "value":"enter_redwyne_kitchen_yard" }
+                       ],
+                 "width":20,
+                 "x":220,
+                 "y":280
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -5803,15 +5882,228 @@
                  "width":20,
                  "x":660,
                  "y":740
+                },
+                {
+                 "height":40,
+                 "id":898,
+                 "name":"unported_transition_guard",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"collision"
+                        },
+                        {
+                         "name":"walkability",
+                         "type":"int",
+                         "value":7
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":120,
+                 "y":80
+                },
+                {
+                 "height":140,
+                 "id":899,
+                 "name":"unported_transition_guard",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"collision"
+                        },
+                        {
+                         "name":"walkability",
+                         "type":"int",
+                         "value":7
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":120,
+                 "y":660
+                },
+                {
+                 "height":20,
+                 "id":900,
+                 "name":"unported_silverhair_room",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"collision"
+                        },
+                        {
+                         "name":"walkability",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":220,
+                 "y":240
+                },
+                {
+                 "height":20,
+                 "id":902,
+                 "name":"unported_guardhouse",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"collision"
+                        },
+                        {
+                         "name":"walkability",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":240,
+                 "y":460
+                },
+                {
+                 "height":20,
+                 "id":903,
+                 "name":"unported_barn_loft",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"collision"
+                        },
+                        {
+                         "name":"walkability",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":480,
+                 "y":240
+                },
+                {
+                 "height":20,
+                 "id":904,
+                 "name":"unported_barn_ground",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"collision"
+                        },
+                        {
+                         "name":"walkability",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":80,
+                 "x":480,
+                 "y":260
                 }],
          "opacity":0.4,
          "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
+        },
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"interactions",
+         "objects":[
+                {
+                 "height":60,
+                 "id":905,
+                 "name":"closed_gate_examine",
+                 "properties":[
+                        {"name":"kind","type":"string","value":"hotspot"},
+                        {"name":"id","type":"string","value":"closed_gate_examine"},
+                        {"name":"interaction","type":"string","value":"examine_closed_gate"},
+                        {"name":"facing","type":"string","value":"west"}],
+                 "rotation":0,
+                 "type":"hotspot",
+                 "visible":true,
+                 "width":20,
+                 "x":120,
+                 "y":340
+                },
+                {
+                 "height":20,
+                 "id":906,
+                 "name":"ladder_examine",
+                 "properties":[
+                        {"name":"kind","type":"string","value":"hotspot"},
+                        {"name":"id","type":"string","value":"ladder_examine"},
+                        {"name":"interaction","type":"string","value":"examine_ladder"},
+                        {"name":"facing","type":"string","value":"north"}],
+                 "rotation":0,
+                 "type":"hotspot",
+                 "visible":true,
+                 "width":20,
+                 "x":200,
+                 "y":340
+                },
+                {
+                 "height":20,
+                 "id":907,
+                 "name":"inn_entrance_examine",
+                 "properties":[
+                        {"name":"kind","type":"string","value":"hotspot"},
+                        {"name":"id","type":"string","value":"inn_entrance_examine"},
+                        {"name":"interaction","type":"string","value":"examine_inn_entrance"},
+                        {"name":"facing","type":"string","value":"north"}],
+                 "rotation":0,
+                 "type":"hotspot",
+                 "visible":true,
+                 "width":20,
+                 "x":360,
+                 "y":280
+                },
+                {
+                 "height":20,
+                 "id":908,
+                 "name":"guardhouse_examine",
+                 "properties":[
+                        {"name":"kind","type":"string","value":"hotspot"},
+                        {"name":"id","type":"string","value":"guardhouse_examine"},
+                        {"name":"interaction","type":"string","value":"examine_guardhouse"},
+                        {"name":"facing","type":"string","value":"west"}],
+                 "rotation":0,
+                 "type":"hotspot",
+                 "visible":true,
+                 "width":20,
+                 "x":260,
+                 "y":460
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":894,
+ "nextlayerid":8,
+ "nextobjectid":911,
  "orientation":"orthogonal",
  "properties":[
         {

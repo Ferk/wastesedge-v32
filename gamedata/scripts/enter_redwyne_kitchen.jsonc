@@ -1,0 +1,6 @@
+{
+  "id": "enter_redwyne_kitchen",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_kitchen", "spawn": "common_room_door" }
+  ]
+}

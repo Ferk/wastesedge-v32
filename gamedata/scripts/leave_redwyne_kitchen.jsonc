@@ -1,0 +1,6 @@
+{
+  "id": "leave_redwyne_kitchen",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_inn", "spawn": "kitchen_door" }
+  ]
+}

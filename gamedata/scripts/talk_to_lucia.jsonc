@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_lucia",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "lucia_start" }
+  ]
+}
