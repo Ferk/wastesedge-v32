@@ -591,6 +591,9 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                         raise ContentError(f"{path}: start_schedule delay_frames cannot be negative")
             if operation == "set_control" and not isinstance(action.get("enabled"), bool):
                 raise ContentError(f"{path}: set_control enabled must be a bool")
+            if operation == "set":
+                identifier(action.get("flag"), f"{path} flag")
+                integer(action.get("value"), f"{path} flag value")
             if operation == "speak":
                 entity_id = identifier(action.get("entity"), f"{path} speaking entity")
                 if entity_id not in entities or entities[entity_id]["kind"] != "actor":
@@ -916,6 +919,103 @@ def materialize_scenery_strips(scenes: list[dict[str, object]], game_root: Path,
     scenery_root = output_root / "scenery"
     if scenery_root.is_dir():
         for existing in scenery_root.glob("*.png"):
+            if existing.relative_to(output_root) not in used_outputs:
+                existing.unlink()
+
+
+def materialize_scenery_sheets(scenes: list[dict[str, object]], game_root: Path,
+                               output_root: Path) -> None:
+    """Pack scene-exclusive static scenery without changing authored objects."""
+    try:
+        from PIL import Image
+    except ImportError as error:
+        raise ContentError("Pillow is required to build scenery sheets") from error
+
+    image_scenes: dict[str, set[str]] = {}
+    for scene in scenes:
+        scene_id = expect(scene["id"], str, "runtime scene id")
+        for item in expect(scene["scenery"], list, "runtime scenery"):
+            if integer(item.get("state_slot", -1), "runtime scenery state slot") >= 0:
+                continue
+            image = expect(item["image"], str, "runtime scenery image")
+            image_scenes.setdefault(image, set()).add(scene_id)
+
+    used_outputs: set[Path] = set()
+    for scene in scenes:
+        scene_id = expect(scene["id"], str, "runtime scene id")
+        scenery = expect(scene["scenery"], list, "runtime scenery")
+        images = sorted({
+            expect(item["image"], str, "runtime scenery image")
+            for item in scenery
+            if integer(item.get("state_slot", -1), "runtime scenery state slot") < 0 and
+            len(image_scenes[expect(item["image"], str, "runtime scenery image")]) == 1
+        })
+        if len(images) < 2:
+            continue
+
+        loaded: dict[str, object] = {}
+        for image in images:
+            if image.startswith(GENERATED_RESOURCE_PREFIX):
+                source_path = output_root / image.removeprefix(GENERATED_RESOURCE_PREFIX)
+            else:
+                source_path = game_root / image
+            try:
+                with Image.open(source_path) as source:
+                    loaded[image] = source.convert("RGBA")
+            except OSError as error:
+                raise ContentError(f"cannot read scenery image {source_path}: {error}") from error
+
+        placements: dict[str, tuple[int, int]] | None = None
+        sheet_width = 0
+        sheet_height = 0
+        for candidate_width in (256, 512, 1024):
+            candidate: dict[str, tuple[int, int]] = {}
+            cursor_x = 0
+            cursor_y = 0
+            row_height = 0
+            used_width = 0
+            fits = True
+            for image in images:
+                source = loaded[image]
+                if source.width > candidate_width or source.height > 1024:
+                    fits = False
+                    break
+                if cursor_x and cursor_x + source.width > candidate_width:
+                    cursor_x = 0
+                    cursor_y += row_height
+                    row_height = 0
+                if cursor_y + source.height > 1024:
+                    fits = False
+                    break
+                candidate[image] = (cursor_x, cursor_y)
+                cursor_x += source.width
+                row_height = max(row_height, source.height)
+                used_width = max(used_width, cursor_x)
+            if fits:
+                placements = candidate
+                sheet_width = used_width
+                sheet_height = cursor_y + row_height
+                break
+        if placements is None or sheet_width <= 0 or sheet_height <= 0:
+            continue
+
+        sheet = Image.new("RGBA", (sheet_width, sheet_height), (0, 0, 0, 0))
+        for image in images:
+            sheet.alpha_composite(loaded[image], placements[image])
+        relative_output = Path("scenery-sheets") / f"{scene_id}.png"
+        write_generated_png(output_root / relative_output, sheet)
+        used_outputs.add(relative_output)
+        runtime_image = GENERATED_RESOURCE_PREFIX + relative_output.as_posix()
+        for item in scenery:
+            authored_image = expect(item["image"], str, "runtime scenery image")
+            if authored_image not in placements:
+                continue
+            item["image"] = runtime_image
+            item["source_x"], item["source_y"] = placements[authored_image]
+
+    sheet_root = output_root / "scenery-sheets"
+    if sheet_root.is_dir():
+        for existing in sheet_root.glob("*.png"):
             if existing.relative_to(output_root) not in used_outputs:
                 existing.unlink()
 
@@ -1279,6 +1379,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
         script_id = identifier(document.get("id"), f"{path} script id")
         for action in expect(document.get("actions"), list, f"{path}.actions"):
             action = expect(action, dict, f"{path} action")
+            if action.get("op") == "set":
+                flags.add(identifier(action.get("flag"), f"{path} script flag"))
             if action.get("op") == "show_dialogue":
                 dialogue_id = identifier(action.get("dialogue"), f"{path} dialogue")
                 if dialogue_id not in dialogue_ids:
@@ -1413,7 +1515,8 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
 
 def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict[str, object]],
                     dialogue_index: dict[str, int], scenes: list[dict[str, object]],
-                    music_index: dict[str, int], schedule_index: dict[str, int]) -> list[dict[str, object]]:
+                    music_index: dict[str, int], schedule_index: dict[str, int],
+                    flag_index: dict[str, int]) -> list[dict[str, object]]:
     """Compile the cooperative action subset required by the introductory handoff."""
     opcodes = {
         "set_control": 0,
@@ -1428,6 +1531,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "set_entity_dialogue": 9,
         "set_walkability": 10,
         "speak": 11,
+        "set": 12,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -1503,6 +1607,9 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 a = entity_index[identifier(action.get("entity"), f"{path} speaking entity")]
                 b = speech_lines.index(text)
                 c = integer(action.get("duration_frames", 180), f"{path} speech duration")
+            elif operation == "set":
+                a = flag_index[identifier(action.get("flag"), f"{path} flag")]
+                b = integer(action.get("value"), f"{path} flag value")
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
             "id": script_id,
@@ -1718,12 +1825,16 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                     area_y = integer(obj.get("y"), f"{map_path} tiled occluder y")
                     area_width = integer(obj.get("width"), f"{map_path} tiled occluder width")
                     area_height = integer(obj.get("height"), f"{map_path} tiled occluder height")
-                    if (area_x % tile_size or area_y % tile_size or
-                        area_width <= 0 or area_height <= 0 or
-                        area_width % tile_size or area_height % tile_size):
+                    # A merged fringe may begin/end between map rows because
+                    # its source sprites project above their logical footing.
+                    # Only its repeated horizontal run must align to tiles;
+                    # complete vertical rows are selected by floor division
+                    # below, matching the authored legacy-object coverage.
+                    if (area_x % tile_size or area_width <= 0 or
+                        area_height < tile_size or area_width % tile_size):
                         raise ContentError(
-                            f"{map_path}: tiled occluder {object_id!r} must be a positive "
-                            f"{tile_size}-pixel-aligned rectangle"
+                            f"{map_path}: tiled occluder {object_id!r} must have a positive "
+                            f"height and a {tile_size}-pixel-aligned horizontal run"
                         )
                     image = str(tile["image"])
                     image_width = integer(tile["imagewidth"],
@@ -2127,6 +2238,7 @@ extern const int generated_runtime_space_advance;
 #define GENERATED_SCRIPT_SET_ENTITY_DIALOGUE 9
 #define GENERATED_SCRIPT_SET_WALKABILITY 10
 #define GENERATED_SCRIPT_SPEAK 11
+#define GENERATED_SCRIPT_SET_FLAG 12
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -2170,7 +2282,9 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     for index, scene in enumerate(scenes):
         lines.append(f"static const struct generated_runtime_background generated_runtime_background_{index}[] = {{")
         for item in scene["background"]:
-            frame = {"image": item["image"], "width": item["width"], "height": item["height"], "offset_x": 0, "offset_y": 0}
+            frame = {"image": item["image"], "source_x": item.get("source_x", 0),
+                     "source_y": item.get("source_y", 0), "width": item["width"],
+                     "height": item["height"], "offset_x": 0, "offset_y": 0}
             lines.append("    { %s, %d, %d }," % (frame_initializer(frame, resource_index), integer(item["x"], "runtime background x"), integer(item["y"], "runtime background y")))
         lines.append("};")
         lines.append(f"static const struct generated_runtime_collision generated_runtime_collisions_{index}[] = {{")
@@ -2184,7 +2298,9 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append("};")
         lines.append(f"static const struct generated_runtime_scenery generated_runtime_scenery_{index}[] = {{")
         for item in scene["scenery"]:
-            frame = {"image": item["image"], "width": item["width"], "height": item["height"], "offset_x": 0, "offset_y": 0}
+            frame = {"image": item["image"], "source_x": item.get("source_x", 0),
+                     "source_y": item.get("source_y", 0), "width": item["width"],
+                     "height": item["height"], "offset_x": 0, "offset_y": 0}
             lines.append("    { %s, %d, %d, %d, %d, %d, %d, %d, %d }," % (
                 frame_initializer(frame, resource_index), integer(item["x"], "runtime scenery x"),
                 integer(item["y"], "runtime scenery y"), integer(item["depth"], "runtime scenery depth"),
@@ -2442,7 +2558,8 @@ def compile_content(project_root: Path) -> None:
     schedule_index = {str(item["id"]): index for index, item in enumerate(runtime_schedule_data)}
     music_index = {str(track["id"]): index for index, track in enumerate(music)}
     runtime_script_data = runtime_scripts(
-        inputs["scripts"], entities, dialogue_index, runtime_scenes, music_index, schedule_index)
+        inputs["scripts"], entities, dialogue_index, runtime_scenes, music_index, schedule_index,
+        {flag: index for index, flag in enumerate(runtime_flags)})
     ordered = {"scenes": sorted(scenes), "tilesets": sorted(tilesets),
                "entities": sorted(entities), "music": sorted(music_ids),
                "dialogue": sorted(dialogue), "scripts": sorted(scripts),
@@ -2453,6 +2570,7 @@ def compile_content(project_root: Path) -> None:
     materialize_audio(music, game_root, output_root)
     materialize_background_chunks(runtime_scenes, game_root, output_root)
     materialize_scenery_strips(runtime_scenes, game_root, output_root)
+    materialize_scenery_sheets(runtime_scenes, game_root, output_root)
     materialize_character_sheets(runtime_visuals, game_root, output_root)
     runtime_glyphs, runtime_space_advance = materialize_dialogue_glyph_atlas(
         runtime_dialogue, runtime_schedule_data, runtime_script_data, game_root, output_root)

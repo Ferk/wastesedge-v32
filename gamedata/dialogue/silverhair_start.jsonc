@@ -1,6 +1,7 @@
 {
   "id": "silverhair_start",
   "start": [
+    { "node": "gem_returned", "when": { "flag": "silverhair_gem_pending", "equals": 1 } },
     { "node": "repeat_greeting", "when": { "flag": "silverhair_talked", "equals": 1 } },
     { "node": "janesta_surprised" }
   ],
@@ -247,6 +248,47 @@
     {
       "id": "argument_interrupted", "speaker": "narrator",
       "text": "Silverhair's eyes flash with remembered anger, but a scuffing sound by the door distracts her and her anger drains as suddenly as it rose.",
+      "end": true
+    },
+    {
+      "id": "gem_returned", "speaker": "silverhair",
+      "text": "Returned already? But what is this?",
+      "next": "player_shows_gem"
+    },
+    {
+      "id": "player_shows_gem", "speaker": "player",
+      "text": "A stone I found in the cellar, among your chests. I hate to think such a thing, but is this one of the jewels that the Dwarf has lost?",
+      "next": "silverhair_inspects_gem"
+    },
+    {
+      "id": "silverhair_inspects_gem", "speaker": "narrator",
+      "text": "You show the jewel to Lady Silverhair, who frowns upon seeing it. She inspects it more closely, but carefully avoids touching it. She straightens then, a puzzled look on her features.",
+      "next": "silverhair_disowns_gem"
+    },
+    {
+      "id": "silverhair_disowns_gem", "speaker": "silverhair",
+      "text": "You say this was found among my goods? But this is not a stone of mine, and neither is it the stone I was shown before. I have never seen this before.",
+      "next": "player_asks_catseye"
+    },
+    {
+      "id": "player_asks_catseye", "speaker": "player",
+      "text": "But is this not one of the Catseyes he claims to have lost?",
+      "next": "silverhair_calls_gem_worthless"
+    },
+    {
+      "id": "silverhair_calls_gem_worthless", "speaker": "silverhair",
+      "text": "It cannot be. For this is no Catseye at all, and in fact is hardly worth a fraction of the other stones.",
+      "next": "player_confused_by_gem"
+    },
+    {
+      "id": "player_confused_by_gem", "speaker": "player",
+      "text": "I do not understand this at all.",
+      "next": "silverhair_asks_belief"
+    },
+    {
+      "id": "silverhair_asks_belief", "speaker": "silverhair",
+      "text": "I admit he goaded me to rage earlier, to my shame. But I have done nothing more than voice my anger. You must believe that.",
+      "on_end": "record_silverhair_gem_assessment",
       "end": true
     }
   ]

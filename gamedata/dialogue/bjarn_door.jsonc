@@ -1,0 +1,23 @@
+{
+  "id": "bjarn_door",
+  "start": [{ "node": "locked" }],
+  "speakers": [
+    { "id": "narrator", "name": "Narrator", "role": "narrator" },
+    {
+      "id": "bjarn", "name": "Bjarn Fingolson", "role": "npc",
+      "portrait": "assets/ui/portraits/bjarn.png"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "locked", "speaker": "narrator",
+      "text": "You try the door, but find it locked. From within the room you hear a deep voice.",
+      "next": "refusal"
+    },
+    {
+      "id": "refusal", "speaker": "bjarn",
+      "text": "I do not wish to be disturbed right now, so please go away! First I am burgled, and now I can get no peace with all the busybodies running around, making my tragedy their business!",
+      "end": true
+    }
+  ]
+}

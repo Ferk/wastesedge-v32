@@ -484,6 +484,76 @@
           "scene": "redwyne_silverhair_room", "x": 4, "y": 2, "facing": "west" },
         { "op": "jump", "target": "choose_work" }
       ]
+    },
+    {
+      "id": "erek_fingolson_escort",
+      "entity": "erek",
+      "loop": false,
+      "steps": [
+        { "op": "place", "scene": "redwyne_fingolson_room", "x": 2, "y": 7,
+          "facing": "north" }
+      ]
+    },
+    {
+      "id": "erek_leave_fingolson",
+      "entity": "erek",
+      "loop": false,
+      "next": "erek_common_room",
+      "steps": [
+        { "op": "move", "scene": "redwyne_fingolson_room", "x": 1, "y": 7,
+          "facing": "west" },
+        { "op": "move", "scene": "redwyne_fingolson_room", "x": 0, "y": 7,
+          "facing": "west" },
+        { "op": "place", "scene": "redwyne_cellar", "x": 9, "y": 7,
+          "facing": "west" },
+        { "op": "move", "scene": "redwyne_cellar", "x": 6, "y": 2,
+          "facing": "north" },
+        { "op": "move", "scene": "redwyne_cellar", "x": 6, "y": 1,
+          "facing": "north" },
+        { "op": "place", "scene": "redwyne_inn", "x": 9, "y": 2,
+          "facing": "south" }
+      ]
+    },
+    {
+      "id": "bjarn_await_player",
+      "entity": "bjarn",
+      "loop": false,
+      "steps": [
+        { "op": "place", "scene": "redwyne_fingolson_room", "x": 7, "y": 3,
+          "facing": "west" }
+      ]
+    },
+    {
+      "id": "bjarn_room",
+      "entity": "bjarn",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "Ha! A tradesman is an honourable person, they say!",
+          "Why don't they just take that Silverhair woman to prison!?",
+          "Elves! The head in the sky and the mind full of clouds!"
+        ],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1200,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "wait", "label": "choose_place",
+          "delay_min_frames": 450, "delay_max_frames": 870 },
+        { "op": "random_jump", "targets": ["west_wall", "bed", "chest", "table"] },
+        { "op": "move", "label": "west_wall", "scene": "redwyne_fingolson_room",
+          "x": 7, "y": 5, "facing": "west" },
+        { "op": "jump", "target": "choose_place" },
+        { "op": "move", "label": "bed", "scene": "redwyne_fingolson_room",
+          "x": 2, "y": 4, "facing": "south" },
+        { "op": "jump", "target": "choose_place" },
+        { "op": "move", "label": "chest", "scene": "redwyne_fingolson_room",
+          "x": 7, "y": 3, "facing": "north" },
+        { "op": "jump", "target": "choose_place" },
+        { "op": "move", "label": "table", "scene": "redwyne_fingolson_room",
+          "x": 3, "y": 6, "facing": "west" },
+        { "op": "jump", "target": "choose_place" }
+      ]
     }
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "id": "enter_fingolson_room_upper",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_fingolson_room", "spawn": "cellar_upper" }
+  ]
+}

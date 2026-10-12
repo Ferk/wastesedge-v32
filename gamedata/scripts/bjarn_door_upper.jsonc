@@ -1,0 +1,8 @@
+{
+  "id": "bjarn_door_upper",
+  "actions": [
+    { "op": "set", "flag": "bjarn_door_open", "value": 1 },
+    { "op": "show_dialogue", "dialogue": "bjarn_door" },
+    { "op": "move_entity", "entity": "player", "x": 9, "y": 6, "facing": "west" }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "id": "leave_fingolson_room_lower",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_cellar", "spawn": "fingolson_lower" }
+  ]
+}

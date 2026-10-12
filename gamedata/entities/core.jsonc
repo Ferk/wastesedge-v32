@@ -14,6 +14,7 @@
     { "id": "silverhair", "kind": "actor" },
     { "id": "sarin", "kind": "actor" },
     { "id": "janesta", "kind": "actor" },
+    { "id": "bjarn", "kind": "actor" },
     { "id": "intro_gate_back", "kind": "object",
       "states": ["closed", "opening_1", "opening_2", "opening_3", "open"] },
     { "id": "intro_gate_fore", "kind": "object",

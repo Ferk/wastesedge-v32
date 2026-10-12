@@ -1,0 +1,6 @@
+{
+  "id": "examine_cellar_wine_sip",
+  "actions": [
+    { "op": "speak", "entity": "player", "text": "I'm sure Master Redwyne won't mind if I take a sip." }
+  ]
+}

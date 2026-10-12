@@ -56,6 +56,16 @@
       "text": "Now don't keep me off my work. Ask what you want to know and then out with you!",
       "choices": [
         {
+          "text": "I need to fetch something for my mistress, but the pantry is locked.",
+          "when": {
+            "all": [
+              { "flag": "get_item", "equals": 1 },
+              { "flag": "pantry_locked", "equals": 1 }
+            ]
+          },
+          "next": "lucia_heard_silverhair"
+        },
+        {
           "text": "I know that Rhayne Frostbloom heard a noise outside the inn during that night.",
           "when": { "flag": "know_noise", "equals": 2 },
           "next": "talan_practising"
@@ -76,6 +86,26 @@
           "next": "goodbye"
         }
       ]
+    },
+    {
+      "id": "lucia_heard_silverhair", "speaker": "lucia",
+      "text": "Then you have spoken to your Lady? I was afraid that Jelom wouldn't allow you to see her. Even I was refused entry when I brought her some breakfast this morning! Can you imagine that?",
+      "next": "player_reminds_key"
+    },
+    {
+      "id": "player_reminds_key", "speaker": "player",
+      "text": "The key, Mrs. Redwyne ...",
+      "next": "lucia_remembers_key"
+    },
+    {
+      "id": "lucia_remembers_key", "speaker": "lucia",
+      "text": "What? Ah ... the key. Sorry, Banec. I only hope it is not too uncomfortable for your mistress, being locked into that small chamber and all that.",
+      "next": "lucia_hands_key"
+    },
+    {
+      "id": "lucia_hands_key", "speaker": "narrator",
+      "text": "Lucia rambles on some more, but finally she reaches into her apron and hands you the key to the storeroom.",
+      "on_end": "grant_pantry_key", "end": true
     },
     {
       "id": "rooms_apart", "speaker": "lucia",

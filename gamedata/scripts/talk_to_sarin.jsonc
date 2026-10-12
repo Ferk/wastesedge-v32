@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_sarin",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "sarin_start" }
+  ]
+}

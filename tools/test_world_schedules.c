@@ -29,6 +29,16 @@ static int count_object_state(const struct world_state *world, int definition, i
     return count;
 }
 
+static int count_translucent_scenery(const struct generated_runtime_scene *scene)
+{
+    int count = 0;
+    int scenery_index;
+    for (scenery_index = 0; scenery_index < scene->scenery_count; ++scenery_index)
+        if (scene->scenery[scenery_index].alpha < 255)
+            ++count;
+    return count;
+}
+
 static int single_condition_flag(const struct generated_runtime_dialogue_choice *choice)
 {
     assert(choice->condition_count == 1);
@@ -126,6 +136,13 @@ int main(void)
     int entrance_threshold_pieces = 0;
     int barrel_pieces = 0;
     int vine_pieces = 0;
+    int packed_scenery_regions = 0;
+    int pantry_flag;
+    int bjarn_door_flag;
+    int get_item_flag;
+    int have_gem_flag;
+    int silverhair_gem_pending_flag;
+    int gem_worthless_flag;
     int direction;
     int animation;
 
@@ -144,6 +161,28 @@ int main(void)
                .hotspot_count == 2);
     assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM]
                .hotspot_count == 1);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_CELLAR]
+               .hotspot_count == 8);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_CELLAR]
+               .width == 16);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_CELLAR]
+               .height == 15);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_CELLAR]
+               .navigation_blocker_count == 11);
+    /* Legacy cellar walls are composites: their opaque back and translucent
+     * front animations must both survive the one-time Tiled import. */
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_CELLAR]
+               .scenery_count == 68);
+    assert(count_translucent_scenery(
+               &generated_runtime_scenes[GENERATED_SCENE_REDWYNE_CELLAR]) == 17);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM]
+               .scenery_count == 31);
+    assert(count_translucent_scenery(
+               &generated_runtime_scenes[GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM]) == 6);
+    assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_PANTRY]
+               .scenery_count == 63);
+    assert(count_translucent_scenery(
+               &generated_runtime_scenes[GENERATED_SCENE_REDWYNE_PANTRY]) == 6);
     /* Walkable kitchen flooring is a Tiled Tile Layer. It must never enter
      * the actor/scenery depth merge, where a lower row could cover feet. */
     /* The compiler packs those 24 authored tiles into one static background
@@ -281,6 +320,8 @@ int main(void)
         for (scenery_index = 0; scenery_index < scene->scenery_count; ++scenery_index) {
             const struct generated_runtime_scenery *scenery = &scene->scenery[scenery_index];
             int alpha = scenery->alpha;
+            if (scenery->frame.source_x != 0 || scenery->frame.source_y != 0)
+                ++packed_scenery_regions;
             assert(alpha >= 0 && alpha <= 255);
             if (alpha < 255) {
                 assert(alpha == 128 ||
@@ -321,6 +362,7 @@ int main(void)
     assert(entrance_threshold_pieces == 2);
     assert(barrel_pieces == 2);
     assert(vine_pieces == 3);
+    assert(packed_scenery_regions > 0);
 
     /* Exterior squares immediately change scene when their destination is
      * ported; the remaining unported entrances stay closed. The two west-wall checks
@@ -1116,8 +1158,16 @@ int main(void)
         const struct generated_runtime_dialogue_choice *silverhair_yeti;
         const struct generated_runtime_dialogue_choice *silverhair_argument;
         const struct generated_runtime_dialogue_choice *silverhair_noise;
+        const struct generated_runtime_dialogue_node *frostbloom_second;
+        const struct generated_runtime_dialogue_node *frostbloom_post_yeti;
+        const struct generated_runtime_dialogue_node *frostbloom_flattery;
+        const struct generated_runtime_dialogue_choice *frostbloom_yeti;
+        const struct generated_runtime_dialogue_choice *honest_flattery;
         int know_frostbloom_flag;
         int know_argument_flag;
+        int talked_about_yeti_flag;
+        int frostbloom_talked_flag;
+        int frostbloom_flattered_flag;
 
         assert(frostbloom_first != 0 && erek_menu != 0 && silverhair_menu != 0);
         meet_frostbloom = find_dialogue_choice(
@@ -1145,10 +1195,105 @@ int main(void)
         know_argument_flag = silverhair_argument->conditions[0].flag;
         assert(choice_has_condition(silverhair_yeti, know_frostbloom_flag, 1));
         assert(choice_has_action(erek_argument, know_argument_flag, 1));
+
+        /* Frostbloom cannot be praised for a figurine until Silverhair has
+         * actually identified it. Her later investigation menu is likewise
+         * behind the source dialogue's honesty test, not a visit counter. */
+        frostbloom_second = find_dialogue_node(
+            frostbloom_dialogue, "You again? I thought I told you to leave me alone.");
+        frostbloom_post_yeti = find_dialogue_node(
+            frostbloom_dialogue,
+            "Back again, eh? You do hunger for punishment, don't you.");
+        frostbloom_flattery = find_dialogue_node(
+            frostbloom_dialogue,
+            "False flattery, eh? I would wager my next commission you know nothing about the Yeti and their ways, yet would use this praise to loosen my tongue. Well, have I spoken truth?");
+        assert(frostbloom_second != 0 && frostbloom_post_yeti != 0 &&
+               frostbloom_flattery != 0);
+        assert(find_dialogue_choice(
+                   frostbloom_second,
+                   "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.") == 0);
+        frostbloom_yeti = find_dialogue_choice(
+            frostbloom_post_yeti,
+            "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.");
+        honest_flattery = find_dialogue_choice(
+            frostbloom_flattery,
+            "My lady, you have a keen eye and a keener wit. That is precisely why I gave you praise, although you truly do deserve it.");
+        assert(frostbloom_yeti != 0);
+        assert(honest_flattery != 0 && honest_flattery->action_count == 1);
+
+        talked_about_yeti_flag = silverhair_yeti->actions[0].flag;
+        frostbloom_talked_flag = meet_frostbloom->actions[0].flag;
+        frostbloom_flattered_flag = honest_flattery->actions[0].flag;
+        assert(frostbloom_dialogue->start_count == 5);
+        assert(frostbloom_dialogue->starts[0].flag == frostbloom_flattered_flag &&
+               frostbloom_dialogue->starts[0].value == 2);
+        assert(frostbloom_dialogue->starts[1].flag == frostbloom_flattered_flag &&
+               frostbloom_dialogue->starts[1].value == 1);
+        assert(frostbloom_dialogue->starts[2].flag == talked_about_yeti_flag &&
+               frostbloom_dialogue->starts[2].value == 1);
+        assert(frostbloom_dialogue->starts[3].flag == frostbloom_talked_flag &&
+               frostbloom_dialogue->starts[3].value == 1);
+        assert(frostbloom_dialogue->starts[4].flag == -1);
         assert(find_dialogue_node(silverhair_dialogue,
                                   "The lady looks anxiously at the door.") != 0);
         assert(find_dialogue_node(silverhair_dialogue,
                                   "Silverhair's eyes flash with remembered anger, but a scuffing sound by the door distracts her and her anger drains as suddenly as it rose.") != 0);
+    }
+
+    /* Sarin and Janesta were already scheduled room actors; their source
+     * conversations must also be reachable from those same map entities. */
+    {
+        const struct generated_runtime_scene *room =
+            &generated_runtime_scenes[GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM];
+        const struct generated_runtime_dialogue *sarin_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_SARIN_START];
+        const struct generated_runtime_dialogue *janesta_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_JANESTA_START];
+        const struct generated_runtime_dialogue_node *sarin_truth =
+            find_dialogue_node(
+                sarin_dialogue,
+                "The truth? The truth is that our Lady is innocent and that, that Dwarf ruffian, he's a liar.");
+        const struct generated_runtime_dialogue_node *sarin_artist =
+            find_dialogue_node(
+                sarin_dialogue,
+                "Nay, not a thing. An uncouth lot, save for the one. An artist, I think. Lady Silverhair had words with her when we arrived, but Janesta and I were too busy to learn her name.");
+        const struct generated_runtime_dialogue_choice *true_thief;
+        const struct generated_runtime_dialogue_choice *name_frostbloom;
+        const struct generated_runtime_dialogue_choice *seek_artist;
+        int sarin_interaction = -1;
+        int janesta_interaction = -1;
+        int entity_index;
+
+        for (entity_index = 0; entity_index < room->entity_count; ++entity_index) {
+            const struct generated_runtime_entity *entity = &room->entities[entity_index];
+            if (entity->definition == GENERATED_ENTITY_SARIN)
+                sarin_interaction = entity->interaction_dialogue;
+            if (entity->definition == GENERATED_ENTITY_JANESTA)
+                janesta_interaction = entity->interaction_dialogue;
+        }
+        assert(sarin_interaction == GENERATED_DIALOGUE_SARIN_START);
+        assert(janesta_interaction == GENERATED_DIALOGUE_JANESTA_START);
+        assert(strcmp(sarin_dialogue->nodes[0].text,
+                      "What insolence! Banec, do you believe the depths of what they have done to our Lady? To accuse her of common theft, as if she was a human! And to lock her away in this tiny, dirty room! I tell you, I cannot bear it.") == 0);
+        assert(sarin_truth != 0 && sarin_artist != 0);
+        true_thief = find_dialogue_choice(
+            sarin_truth,
+            "He seems to be telling the truth about the theft. But I cannot believe that our Lady did the deed. There must be a true thief about.");
+        name_frostbloom = find_dialogue_choice(
+            sarin_artist,
+            "Her name is Frostbloom. Not terribly friendly, but the Lady thinks highly of her talents. She went so far as to buy that figurine on the mantle.");
+        seek_artist = find_dialogue_choice(
+            sarin_artist,
+            "I'll have to speak to her. Perhaps she may know something. Thank you, Sarin. I'm glad you are here to watch over the Lady during this trouble.");
+        assert(true_thief != 0 && single_condition_value(true_thief) == 3);
+        assert(name_frostbloom != 0 && seek_artist != 0);
+        assert(single_condition_value(name_frostbloom) == 1);
+        assert(single_condition_value(seek_artist) == 0);
+        assert(single_condition_flag(name_frostbloom) ==
+               single_condition_flag(seek_artist));
+        assert(strcmp(janesta_dialogue->nodes[0].text,
+                      "Oh, Banec, we've been so worried for the Mistress. Can't you do something to set her free?") == 0);
+        assert(janesta_dialogue->nodes[0].choice_count == 2);
     }
 
     /* Only Orloth's room-offer endpoint launches the escort. The reference
@@ -1243,9 +1388,7 @@ int main(void)
     assert(world.player_x == 12 && world.player_y == 2);
     assert(world.player_facing == WORLD_SOUTH);
 
-    /* The kitchen retains both original door pairs and their exact spawn
-     * squares. Its pantry threshold remains collision-closed until that
-     * adjoining scene is converted. */
+    /* The kitchen retains its original doors and exact spawn squares. */
     world.active_script = GENERATED_SCRIPT_ENTER_REDWYNE_KITCHEN;
     world.script_action = 0;
     world.script_wait = 0;
@@ -1277,6 +1420,263 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
     assert(world.player_x == 12 && world.player_y == 14);
     assert(world.player_facing == WORLD_EAST);
+
+    /* The kitchen stairs now follow the reference submap-3/submap-4 pair.
+     * The cellar preserves all eight directional positional remarks, including
+     * the two labels inspected from opposite sides of the same square. */
+    world.active_script = GENERATED_SCRIPT_ENTER_REDWYNE_CELLAR;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 3 && world.player_y == 12);
+    assert(world.player_facing == WORLD_NORTH);
+    assert(world.scene->spawn_count == 6);
+    assert(world.scene->trigger_count == 16);
+    assert(world.scene->hotspots[3].x == 4 && world.scene->hotspots[3].y == 10);
+    assert(world.scene->hotspots[3].facing == WORLD_SOUTH);
+    assert(world.scene->hotspots[5].x == 4 && world.scene->hotspots[5].y == 10);
+    assert(world.scene->hotspots[5].facing == WORLD_NORTH);
+    assert(world.scene->hotspots[3].script == GENERATED_SCRIPT_EXAMINE_CELLAR_CIRDANTH);
+    assert(world.scene->hotspots[5].script == GENERATED_SCRIPT_EXAMINE_CELLAR_UZDUN);
+
+    /* The original common-room stair is a second reciprocal cellar route;
+     * it is distinct from the kitchen stair at the south end. */
+    world.active_script = -1;
+    world.player_x = 6;
+    world.player_y = 2;
+    world.trigger_latch = -1;
+    world_update(&world, &move_north);
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_INN);
+    assert(world.player_x == 9 && world.player_y == 2);
+    assert(world.player_facing == WORLD_SOUTH);
+    world.trigger_latch = -1;
+    world_update(&world, &move_north);
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 6 && world.player_y == 2);
+    assert(world.player_facing == WORLD_SOUTH);
+
+    world.player_x = 7;
+    world.player_y = 3;
+    world.player_facing = WORLD_SOUTH;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_line = -1;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_frames = 0;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_override = 0;
+    world_update(&world, &interact);
+    assert(world_entity_speech(&world, world.player_entity) ==
+           &generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_CELLAR_WINE_TASTY]
+                .speech[0]);
+
+    /* Both pantry thresholds retain their locked/open conditions. Trying the
+     * upper doorway records the failed attempt, speaks the original line and
+     * steps Banec back into the cellar. */
+    pantry_flag = world.scene->triggers[0].condition_flag;
+    assert(pantry_flag >= 0);
+    assert(world.scene->triggers[0].condition_value == 0);
+    assert(world.scene->triggers[1].condition_flag == pantry_flag);
+    assert(world.scene->triggers[1].condition_value == 1);
+    assert(world.scene->triggers[2].condition_flag == pantry_flag);
+    assert(world.scene->triggers[2].condition_value == 2);
+    world.player_x = 0;
+    world.player_y = 9;
+    world.player_facing = WORLD_WEST;
+    world.active_script = GENERATED_SCRIPT_PANTRY_LOCKED_UPPER;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 12);
+    assert(world.flags[pantry_flag] == 1);
+    assert(world.player_x == 1 && world.player_y == 9);
+    assert(world.player_facing == WORLD_EAST);
+    assert(world_entity_speech(&world, world.player_entity) ==
+           &generated_runtime_scripts[GENERATED_SCRIPT_PANTRY_LOCKED_UPPER].speech[0]);
+
+    /* The adjacent eastern doorway is Bjarn Fingolson's locked room. It opens
+     * the original narrator/deep-voice exchange and turns Banec back west. */
+    bjarn_door_flag = world.scene->triggers[6].condition_flag;
+    world.player_x = 10;
+    world.player_y = 6;
+    world.player_facing = WORLD_EAST;
+    world.active_script = GENERATED_SCRIPT_BJARN_DOOR_UPPER;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 1);
+    assert(world.flags[bjarn_door_flag] == 1);
+    assert(world.dialogue == GENERATED_DIALOGUE_BJARN_DOOR);
+    assert(strcmp(world_dialogue_text(&world),
+                  "You try the door, but find it locked. From within the room you hear a deep voice.") == 0);
+    world_update(&world, &interact);
+    assert(strcmp(world_dialogue_text(&world),
+                  "I do not wish to be disturbed right now, so please go away! First I am burgled, and now I can get no peace with all the busybodies running around, making my tragedy their business!") == 0);
+    world_update(&world, &interact);
+    tick(&world, 12);
+    assert(world.player_x == 9 && world.player_y == 6);
+    assert(world.player_facing == WORLD_WEST);
+
+    {
+        const struct generated_runtime_dialogue_node *erek_obeys =
+            find_dialogue_node(&generated_runtime_dialogues[GENERATED_DIALOGUE_EREK_START],
+                               "You surely do. But Master Fingolson made it clear that he wants to be on his own and who am I to disobey his wishes?");
+        const struct generated_runtime_dialogue_node *erek_beckons =
+            find_dialogue_node(&generated_runtime_dialogues[GENERATED_DIALOGUE_EREK_START],
+                               "Seemingly reluctant, Erek beckons you to follow him down into the cellar.");
+        const struct generated_runtime_dialogue_choice *insist;
+        assert(erek_obeys != 0 && erek_beckons != 0);
+        insist = find_dialogue_choice(erek_obeys, "I am trying to help here, Erek!");
+        assert(insist != 0);
+        assert(choice_has_action(insist, bjarn_door_flag, 2));
+        assert(erek_beckons->end_script == GENERATED_SCRIPT_ESCORT_TO_FINGOLSON_ROOM);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_BJARN_START]
+                   .starts[0].flag == bjarn_door_flag);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_BJARN_START]
+                   .starts[0].value == 3);
+    }
+
+    /* Once Erek has opened the door, both halves of the original two-cell
+     * threshold lead to Fingolson's room and return to their matching cellar
+     * rows. The room retains Bjarn, Erek's escort placement, and the original
+     * chest examination square. */
+    world.flags[bjarn_door_flag] = 3;
+    world.trigger_latch = -1;
+    world_update(&world, &move_east);
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
+    assert(world.player_x == 1 && world.player_y == 6);
+    assert(world.player_facing == WORLD_WEST);
+    assert(world.scene->spawn_count == 2);
+    assert(world.scene->trigger_count == 2);
+    assert(world.scene->hotspot_count == 1);
+    assert(world.scene->hotspots[0].x == 7 && world.scene->hotspots[0].y == 3);
+    assert(world.scene->hotspots[0].facing == WORLD_NORTH);
+    world.trigger_latch = -1;
+    world_update(&world, &move_west);
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 9 && world.player_y == 6);
+    assert(world.player_facing == WORLD_EAST);
+
+    /* Receiving Lucia's key selects the open pantry transition. The room has
+     * both original chest interactions and exact reciprocal doorway spawns. */
+    get_item_flag = generated_runtime_dialogues[GENERATED_DIALOGUE_SEARCH_SILVERHAIR_CHEST]
+                        .starts[0].flag;
+    {
+        const struct generated_runtime_dialogue_node *lucia_menu =
+            find_dialogue_node(&generated_runtime_dialogues[GENERATED_DIALOGUE_LUCIA_START],
+                               "Now don't keep me off my work. Ask what you want to know and then out with you!");
+        const struct generated_runtime_dialogue_choice *key_request;
+        assert(lucia_menu != 0);
+        key_request = find_dialogue_choice(
+            lucia_menu,
+            "I need to fetch something for my mistress, but the pantry is locked.");
+        assert(key_request != 0);
+        assert(choice_has_condition(key_request, get_item_flag, 1));
+        assert(choice_has_condition(key_request, pantry_flag, 1));
+    }
+    world.active_script = GENERATED_SCRIPT_GRANT_PANTRY_KEY;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 1);
+    assert(world.flags[pantry_flag] == 2);
+    world.active_script = GENERATED_SCRIPT_ENTER_REDWYNE_PANTRY_UPPER;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_PANTRY);
+    assert(world.player_x == 6 && world.player_y == 3);
+    assert(world.player_facing == WORLD_WEST);
+    assert(world.scene->spawn_count == 2);
+    assert(world.scene->trigger_count == 2);
+    assert(world.scene->hotspot_count == 2);
+
+    world.player_x = 3;
+    world.player_y = 5;
+    world.player_facing = WORLD_NORTH;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_frames = 0;
+    world.actors[GENERATED_ENTITY_PLAYER].speech_override = 0;
+    world_update(&world, &interact);
+    assert(world_entity_speech(&world, world.player_entity) ==
+           &generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_SILVERHAIR_LUGGAGE]
+                .speech[0]);
+
+    have_gem_flag = generated_runtime_scripts[GENERATED_SCRIPT_RECORD_FINGOLSON_GEM]
+                        .actions[1].a;
+    world.flags[get_item_flag] = 1;
+    world.player_x = 4;
+    world.player_y = 5;
+    world.player_facing = WORLD_NORTH;
+    world_update(&world, &interact);
+    assert(world.dialogue == GENERATED_DIALOGUE_SEARCH_SILVERHAIR_CHEST);
+    assert(strcmp(world_dialogue_text(&world),
+                  "Upon opening the chest, a small green something catches your attention ...") == 0);
+    world_update(&world, &interact);
+    assert(strcmp(world_dialogue_text(&world),
+                  "There, inmidst your mistress' luggage, lies one of Master Fingolson's gems.") == 0);
+    world_update(&world, &interact);
+    tick(&world, 1);
+    assert(world.flags[get_item_flag] == 2);
+    assert(world.flags[have_gem_flag] == 1);
+    silverhair_gem_pending_flag =
+        generated_runtime_scripts[GENERATED_SCRIPT_RECORD_FINGOLSON_GEM].actions[2].a;
+    assert(world.flags[silverhair_gem_pending_flag] == 1);
+
+    /* The recovered gem takes precedence over Silverhair's ordinary repeat
+     * greeting and reproduces the complete original assessment. Completing
+     * it records the evidence used by the later Fingolson conversations. */
+    {
+        static const char *const gem_lines[] = {
+            "Returned already? But what is this?",
+            "A stone I found in the cellar, among your chests. I hate to think such a thing, but is this one of the jewels that the Dwarf has lost?",
+            "You show the jewel to Lady Silverhair, who frowns upon seeing it. She inspects it more closely, but carefully avoids touching it. She straightens then, a puzzled look on her features.",
+            "You say this was found among my goods? But this is not a stone of mine, and neither is it the stone I was shown before. I have never seen this before.",
+            "But is this not one of the Catseyes he claims to have lost?",
+            "It cannot be. For this is no Catseye at all, and in fact is hardly worth a fraction of the other stones.",
+            "I do not understand this at all.",
+            "I admit he goaded me to rage earlier, to my shame. But I have done nothing more than voice my anger. You must believe that."
+        };
+        const struct generated_runtime_dialogue *silverhair_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_SILVERHAIR_START];
+        const struct generated_runtime_dialogue_node *gem_start =
+            find_dialogue_node(silverhair_dialogue, gem_lines[0]);
+
+        assert(gem_start != 0);
+        assert(silverhair_dialogue->starts[0].flag == silverhair_gem_pending_flag);
+        assert(silverhair_dialogue->starts[0].value == 1);
+        assert(&silverhair_dialogue->nodes[silverhair_dialogue->starts[0].node] == gem_start);
+        world.dialogue = GENERATED_DIALOGUE_SILVERHAIR_START;
+        world.dialogue_node = (int)(gem_start - silverhair_dialogue->nodes);
+        world.dialogue_choice = 0;
+        world.dialogue_actor = -1;
+        for (frame = 0; frame < 8; ++frame) {
+            assert(strcmp(world_dialogue_text(&world), gem_lines[frame]) == 0);
+            world_update(&world, &interact);
+        }
+        assert(world.dialogue < 0);
+        assert(world.active_script == GENERATED_SCRIPT_RECORD_SILVERHAIR_GEM_ASSESSMENT);
+        gem_worthless_flag = generated_runtime_scripts[
+                                 GENERATED_SCRIPT_RECORD_SILVERHAIR_GEM_ASSESSMENT]
+                                 .actions[0].a;
+        tick(&world, 1);
+        assert(world.flags[gem_worthless_flag] == 1);
+        assert(world.flags[have_gem_flag] == 1);
+        assert(world.flags[silverhair_gem_pending_flag] == 0);
+    }
+
+    world.active_script = GENERATED_SCRIPT_LEAVE_REDWYNE_PANTRY_UPPER;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 1 && world.player_y == 9);
+    assert(world.player_facing == WORLD_EAST);
+
+    world.active_script = GENERATED_SCRIPT_LEAVE_REDWYNE_CELLAR;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_KITCHEN);
+    assert(world.player_x == 6 && world.player_y == 5);
+    assert(world.player_facing == WORLD_NORTH);
 
     puts("world schedule checks passed");
     return 0;

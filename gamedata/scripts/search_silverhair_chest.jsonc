@@ -1,0 +1,6 @@
+{
+  "id": "search_silverhair_chest",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "search_silverhair_chest" }
+  ]
+}

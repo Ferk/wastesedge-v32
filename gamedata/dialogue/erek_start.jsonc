@@ -75,6 +75,9 @@
           "when": { "flag": "ask_packed_gems", "equals": 1 },
           "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 2 }],
           "next": "packed_answer" },
+        { "text": "I tried to talk with Master Fingolson, but he would not open the door. Could you have a word with him perhaps?",
+          "when": { "flag": "bjarn_door_open", "equals": 1 },
+          "next": "fingolson_refusal" },
         { "text": "Nothing really. Until later, Erek.", "next": "goodbye" }
       ]
     },
@@ -137,6 +140,44 @@
       "id": "packed_denial", "speaker": "erek",
       "text": "What do you mean? No ... they weren't. Of course not!",
       "next": "main_menu"
+    },
+    {
+      "id": "fingolson_refusal", "speaker": "erek",
+      "text": "I fear this is no good idea. He is still very upset about the theft and it is better not to bother him while he is in that mood.",
+      "choices": [
+        { "text": "Well, in that case I will leave him alone.", "next": "leave_fingolson_alone" },
+        { "text": "I am trying to find his gems and he is not even willing to see me!?", "next": "fingolson_stubborn" }
+      ]
+    },
+    {
+      "id": "leave_fingolson_alone", "speaker": "player",
+      "text": "Well, in that case I will leave him alone.",
+      "end": true
+    },
+    {
+      "id": "fingolson_stubborn", "speaker": "player",
+      "text": "I am trying to find his gems and he is not even willing to see me!?",
+      "next": "erek_obeys_master"
+    },
+    {
+      "id": "erek_obeys_master", "speaker": "erek",
+      "text": "You surely do. But Master Fingolson made it clear that he wants to be on his own and who am I to disobey his wishes?",
+      "choices": [
+        { "text": "I am trying to help here, Erek!",
+          "actions": [{ "op": "set", "flag": "bjarn_door_open", "value": 2 }],
+          "next": "erek_relents" }
+      ]
+    },
+    {
+      "id": "erek_relents", "speaker": "erek",
+      "text": "I ... I'll see what I can do. But should you talk with him, you will have to watch your words. I surely won't be able to change his mind a second time.",
+      "next": "erek_beckons"
+    },
+    {
+      "id": "erek_beckons", "speaker": "narrator",
+      "text": "Seemingly reluctant, Erek beckons you to follow him down into the cellar.",
+      "on_end": "escort_to_fingolson_room",
+      "end": true
     },
     {
       "id": "goodbye", "speaker": "player",

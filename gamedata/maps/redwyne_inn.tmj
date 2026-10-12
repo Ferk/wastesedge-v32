@@ -1785,6 +1785,31 @@
           "width": 20,
           "x": 20,
           "y": 160
+        },
+        {
+          "id": 93,
+          "name": "cellar_stairs",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "cellar_stairs" },
+            { "name": "facing", "type": "string", "value": "south" }
+          ],
+          "x": 180,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 94,
+          "name": "enter_cellar_from_common_room",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_cellar_from_common_room" },
+            { "name": "script", "type": "string", "value": "enter_cellar_from_common_room" }
+          ],
+          "width": 20,
+          "x": 180,
+          "y": 20
         }
       ],
       "opacity": 1,
@@ -2257,7 +2282,7 @@
     }
   ],
   "nextlayerid": 8,
-  "nextobjectid": 93,
+  "nextobjectid": 95,
   "orientation": "orthogonal",
   "properties": [
     {

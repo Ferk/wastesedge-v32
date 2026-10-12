@@ -1,0 +1,6 @@
+{
+  "id": "grant_pantry_key",
+  "actions": [
+    { "op": "set", "flag": "pantry_locked", "value": 2 }
+  ]
+}

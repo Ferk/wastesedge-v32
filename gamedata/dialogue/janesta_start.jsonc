@@ -1,0 +1,46 @@
+{
+  "id": "janesta_start",
+  "start": [{ "node": "opening" }],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "janesta", "name": "Janesta Skywind", "role": "npc", "entity": "janesta",
+      "portrait": "assets/ui/portraits/janesta.png" }
+  ],
+  "nodes": [
+    {
+      "id": "opening", "speaker": "janesta",
+      "text": "Oh, Banec, we've been so worried for the Mistress. Can't you do something to set her free?",
+      "choices": [
+        {
+          "text": "I will try, Janesta. But you must be brave. This is a difficult time for Lady Silverhair, and she needs us all to help her through.",
+          "next": "will_try"
+        },
+        {
+          "text": "Perhaps. Do you know anything about this dwarf, Fingolson?",
+          "next": "knows_nothing"
+        }
+      ]
+    },
+    {
+      "id": "will_try", "speaker": "janesta",
+      "text": "I will try. Thank you, Banec.",
+      "end": true
+    },
+    {
+      "id": "knows_nothing", "speaker": "janesta",
+      "text": "Nothing, I'm afraid. This is my first time here, and I was brought straight to the Mistress' room to make it ready. This room is so awful, I cannot see how they expect a High Born to stand it.",
+      "next": "thank_janesta"
+    },
+    {
+      "id": "thank_janesta", "speaker": "player",
+      "text": "I see. Thank you, Janesta. I'm glad you are here to care for our Lady.",
+      "next": "prayer"
+    },
+    {
+      "id": "prayer", "speaker": "janesta",
+      "text": "Oh, Banec. I pray that this will turn out right.",
+      "end": true
+    }
+  ]
+}

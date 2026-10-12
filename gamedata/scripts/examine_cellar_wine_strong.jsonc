@@ -1,0 +1,6 @@
+{
+  "id": "examine_cellar_wine_strong",
+  "actions": [
+    { "op": "speak", "entity": "player", "text": "Hic! Whoa, that's quite strong!" }
+  ]
+}

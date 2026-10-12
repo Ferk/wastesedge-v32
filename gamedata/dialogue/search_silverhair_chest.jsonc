@@ -1,0 +1,34 @@
+{
+  "id": "search_silverhair_chest",
+  "start": [
+    { "node": "gem_attention", "when": { "flag": "get_item", "equals": 1 } },
+    { "node": "familiar_chest" }
+  ],
+  "speakers": [
+    {
+      "id": "gem", "name": "Narrator", "role": "narrator",
+      "portrait": "assets/ui/portraits/fingolson_gem.png"
+    },
+    {
+      "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "gem_attention", "speaker": "gem",
+      "text": "Upon opening the chest, a small green something catches your attention ...",
+      "next": "gem_found"
+    },
+    {
+      "id": "gem_found", "speaker": "gem",
+      "text": "There, inmidst your mistress' luggage, lies one of Master Fingolson's gems.",
+      "on_end": "record_fingolson_gem", "end": true
+    },
+    {
+      "id": "familiar_chest", "speaker": "player",
+      "text": "I know this chest. The Lady uses it on her journeys.",
+      "end": true
+    }
+  ]
+}

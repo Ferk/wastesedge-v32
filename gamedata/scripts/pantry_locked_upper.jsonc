@@ -1,0 +1,8 @@
+{
+  "id": "pantry_locked_upper",
+  "actions": [
+    { "op": "set", "flag": "pantry_locked", "value": 1 },
+    { "op": "speak", "entity": "player", "text": "The door to the pantry is locked." },
+    { "op": "move_entity", "entity": "player", "x": 1, "y": 9, "facing": "east" }
+  ]
+}

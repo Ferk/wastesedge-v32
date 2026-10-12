@@ -1103,6 +1103,12 @@ static void update_script(struct world_state *world)
             ++world->script_action;
             continue;
         }
+        if (action->op == GENERATED_SCRIPT_SET_FLAG) {
+            if (action->a >= 0 && action->a < GENERATED_RUNTIME_FLAG_COUNT)
+                world->flags[action->a] = action->b;
+            ++world->script_action;
+            continue;
+        }
         ++world->script_action;
     }
     world->active_script = -1;

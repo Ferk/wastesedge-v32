@@ -1120,6 +1120,7 @@
             { "name": "entity_def", "type": "string", "value": "sarin" },
             { "name": "facing", "type": "string", "value": "west" },
             { "name": "id", "type": "string", "value": "sarin" },
+            { "name": "interaction", "type": "string", "value": "talk_to_sarin" },
             { "name": "kind", "type": "string", "value": "entity" }
           ],
           "type": "actor",
@@ -1136,6 +1137,7 @@
             { "name": "entity_def", "type": "string", "value": "janesta" },
             { "name": "facing", "type": "string", "value": "north" },
             { "name": "id", "type": "string", "value": "janesta" },
+            { "name": "interaction", "type": "string", "value": "talk_to_janesta" },
             { "name": "kind", "type": "string", "value": "entity" }
           ],
           "type": "actor",

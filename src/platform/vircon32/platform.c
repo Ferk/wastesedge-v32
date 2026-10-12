@@ -755,17 +755,6 @@ static int ambient_overlay_intersects_rectangle(int left, int top, int right, in
     return 0;
 }
 
-static void draw_dirty_backdrop(void)
-{
-    select_texture(-1);
-    select_region(256);
-    set_multiply_color(0xFF101820);
-    set_drawing_scale((float)(prepared_dirty_right - prepared_dirty_left),
-                      (float)(prepared_dirty_bottom - prepared_dirty_top));
-    set_drawing_point(prepared_dirty_left, prepared_dirty_top);
-    draw_region_zoomed();
-}
-
 static void flush_prepared_frame(void)
 {
     int selected_texture = -1000;
@@ -780,13 +769,11 @@ static void flush_prepared_frame(void)
     int index;
 
     set_blending_mode(0x20);
-    if (prepared_dirty_valid)
-        draw_dirty_backdrop();
-    else
+    if (!prepared_dirty_valid)
         clear_screen(0xFF101820);
-    /* 0xFFFFFFFF is -1 as a signed int, so -1 cannot serve as an unknown
-     * colour sentinel here. In particular, a dirty backdrop leaves the GPU
-     * multiply colour dark and the first ordinary white texture must reset it. */
+    /* Partial replay paints the opaque background first, directly over the
+     * retained frame. It must not clear a rectangle: rounding a 1.5x source
+     * crop to that rectangle can leave an uncovered scanline at its edge. */
     set_multiply_color(0xFFFFFFFF);
     color = 0xFFFFFFFF;
     for (index = 0; index < draw_command_count; ++index) {
@@ -812,14 +799,20 @@ static void flush_prepared_frame(void)
 
             output_right = command_draw_x + (command_width * 3 + 1) / 2;
             output_bottom = command_draw_y + (command_height * 3 + 1) / 2;
+            /* Round the source crop inward. The former outward rounding drew
+             * one scaled source row/column beyond the dirty rectangle. During
+             * vertical movement those writes accumulated as horizontal strips
+             * on static furniture and actors that did not need updating. The
+             * six-pixel dirty halo keeps all genuinely changed pixels well
+             * inside this conservative crop. */
             if (command_draw_x < prepared_dirty_left)
-                source_left = ((prepared_dirty_left - command_draw_x) * 2) / 3;
+                source_left = ((prepared_dirty_left - command_draw_x) * 2 + 2) / 3;
             if (command_draw_y < prepared_dirty_top)
-                source_top = ((prepared_dirty_top - command_draw_y) * 2) / 3;
+                source_top = ((prepared_dirty_top - command_draw_y) * 2 + 2) / 3;
             if (output_right > prepared_dirty_right)
-                source_right = ((prepared_dirty_right - command_draw_x) * 2 + 2) / 3;
+                source_right = ((prepared_dirty_right - command_draw_x) * 2) / 3;
             if (output_bottom > prepared_dirty_bottom)
-                source_bottom = ((prepared_dirty_bottom - command_draw_y) * 2 + 2) / 3;
+                source_bottom = ((prepared_dirty_bottom - command_draw_y) * 2) / 3;
             if (source_left < 0) source_left = 0;
             if (source_top < 0) source_top = 0;
             if (source_right > command_width) source_right = command_width;
@@ -982,7 +975,7 @@ static void configure_dirty_replay(const struct world_state *world)
         return;
 
     prepared_dirty_valid = 1;
-    prepared_replay_commands = 1;
+    prepared_replay_commands = 0;
     for (index = 0; index < draw_command_count; ++index) {
         if (command_intersects_rectangle(index,
                                          prepared_dirty_left, prepared_dirty_top,

@@ -1,0 +1,8 @@
+{
+  "id": "finish_bjarn_introduction",
+  "actions": [
+    { "op": "set", "flag": "bjarn_door_open", "value": 3 },
+    { "op": "start_schedule", "entity": "erek", "schedule": "erek_leave_fingolson" },
+    { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_room" }
+  ]
+}

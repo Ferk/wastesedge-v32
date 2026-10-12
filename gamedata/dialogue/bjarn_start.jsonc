@@ -1,0 +1,181 @@
+{
+  "id": "bjarn_start",
+  "start": [
+    { "node": "repeat_narration", "when": { "flag": "bjarn_door_open", "equals": 3 } },
+    { "node": "introduction" }
+  ],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "bjarn", "name": "Bjarn Fingolson", "role": "npc", "entity": "bjarn",
+      "portrait": "assets/ui/portraits/bjarn.png" },
+    { "id": "erek", "name": "Erek Stonebreaker", "role": "npc", "entity": "erek",
+      "portrait": "assets/ui/portraits/erek.png" },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    { "id": "introduction", "speaker": "narrator",
+      "text": "At the door to their room, Erek produces a key and unlocks it.",
+      "next": "erek_reason" },
+    { "id": "erek_reason", "speaker": "erek",
+      "text": "Maybe I should not be doing this, but I do want my master to get his stones back.",
+      "next": "bjarn_demands_identity" },
+    { "id": "bjarn_demands_identity", "speaker": "bjarn",
+      "text": "Erek, who is this, and why have you let him in?",
+      "next": "erek_introduces_player" },
+    { "id": "erek_introduces_player", "speaker": "erek",
+      "text": "This is Banec, master, and he is investigating the theft of your gems. He wanted to talk to you, and I thought that maybe he could help.",
+      "next": "player_mission" },
+    { "id": "player_mission", "speaker": "player",
+      "text": "Yes, sir, that is correct. I am here on the behalf of Lady Silverhair, trying to get to the bottom of the disappearance of your stones.",
+      "next": "bjarn_calls_theft" },
+    { "id": "bjarn_calls_theft", "speaker": "bjarn",
+      "text": "I think that 'theft' is a better word for it than disappearance.",
+      "next": "player_requests_questions" },
+    { "id": "player_requests_questions", "speaker": "player",
+      "text": "Theft, then, if you prefer. Call it what you may, I would like to recover the gems and clear Lady Silverhair's name. Would you mind answering a question or two?",
+      "next": "bjarn_accuses_silverhair" },
+    { "id": "bjarn_accuses_silverhair", "speaker": "bjarn",
+      "text": "Actually, I would mind. I am sure that you already know what happened, so nothing can be gained from bothering me. I would rather you 'recover' the gems from your mistress and return them to me!",
+      "next": "player_asks_reason" },
+    { "id": "player_asks_reason", "speaker": "player",
+      "text": "Sir, please try to be reasonable. Have you even considered the possibility that Lady Silverhair is not the thief?",
+      "next": "bjarn_evidence" },
+    { "id": "bjarn_evidence", "speaker": "bjarn",
+      "text": "What, and ignore all the evidence to the contrary? She came here specifically to buy my gems, insulted their quality to weasel out of paying for them, and then stole them when the first opportunity presented itself!",
+      "on_end": "finish_bjarn_introduction", "end": true },
+
+    { "id": "repeat_narration", "speaker": "narrator",
+      "text": "Bjarn looks you up and down with a stern expression on his face; obviously he is not happy with the disturbance.",
+      "next": "main_menu" },
+    { "id": "main_menu", "speaker": "bjarn",
+      "text": "Look, Half-Elf, I told you that I do not want to be bothered!",
+      "choices": [
+        { "text": "I'm just wondering whether Erek might have taken the gems.",
+          "when": { "flag": "ask_packed_gems", "equals": 1 }, "next": "erek_innocent" },
+        { "text": "I'm just wondering whether Erek might have taken the gems.",
+          "when": { "flag": "ask_packed_gems", "equals": 2 }, "next": "erek_innocent" },
+        { "text": "Why did you insult Lady Silverhair upon her arrival? You set her on edge, even before the negotiations started!",
+          "when": { "flag": "know_bjarns_insult", "equals": 1 }, "next": "insult_excuse" },
+        { "text": "Don't you think that Alek Endhelm might be more likely a thief than Lady Silverhair?",
+          "when": { "flag": "know_alek_eavesdrop", "equals": 1 }, "next": "alek_unlikely" },
+        { "text": "Not even if I've found one of your 'Catseyes'!",
+          "when": { "flag": "gem_worthless", "equals": 1 }, "next": "found_gem" },
+        { "text": "Not even if I've found one of your 'Catseyes'!",
+          "when": { "flag": "gem_worthless", "equals": 2 }, "next": "found_gem" },
+        { "text": "Not even if I've found one of your 'Catseyes'!",
+          "when": { "flag": "gem_worthless", "equals": 3 }, "next": "found_gem" },
+        { "text": "I cannot believe that you have the audacity to refuse my questions. I will leave for now.",
+          "next": "leave" }
+      ]
+    },
+    { "id": "leave", "speaker": "bjarn",
+      "text": "I cannot believe that you have the audacity to ask me questions about this! Please leave!",
+      "end": true },
+
+    { "id": "erek_innocent", "speaker": "bjarn",
+      "text": "You cannot possibly suspect Erek! He is so honest and idealistic that even if he had stolen the gems, he would confess the crime immediately! Do not waste my time with such ridiculous accusations!",
+      "choices": [
+        { "text": "Well, you know Erek best, I guess.", "next": "leave" },
+        { "text": "But Alek Endhelm leads me to believe that the theft may have been committed before you went to bed.",
+          "when": { "flag": "ask_packed_gems", "equals": 2 }, "next": "bjarn_packing_claim" }
+      ]
+    },
+    { "id": "bjarn_packing_claim", "speaker": "bjarn",
+      "text": "Ha! That sounds just like Alek Endhelm. You are a fool to be taken in by that scoundrel's words. The truth is that I personally packed the gems after Erek went to bed. That is, the theft has been committed later that night.",
+      "next": "player_catches_lie" },
+    { "id": "player_catches_lie", "speaker": "player",
+      "text": "Really? According to Erek, you were asleep already when he started packing.",
+      "next": "bjarn_backpedals" },
+    { "id": "bjarn_backpedals", "speaker": "bjarn",
+      "text": "Asleep? I? Certainly not! I was just taking a rest, perhaps. Later I put the pouch with the gems into our luggage, from where the thief - your fine mistress - stole it during the night!",
+      "next": "bjarn_ends_packing" },
+    { "id": "bjarn_ends_packing", "speaker": "bjarn",
+      "text": "I can't believe I am justifying myself in front of the thief's servant! Why am I talking to you at all! You are not doing anything to retrieve my Chrysoberyls. All you care about is freeing your mistress!",
+      "choices": [
+        { "text": "I will go, but I will remember what you said.",
+          "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 3 }],
+          "next": "packing_exit" }
+      ]
+    },
+    { "id": "packing_exit", "speaker": "bjarn",
+      "text": "You are but wasting my time! Out of my sight you go!", "end": true },
+
+    { "id": "insult_excuse", "speaker": "bjarn",
+      "text": "You blame me for your mistress' absence of humour? All I wanted was to liven up the atmosphere before turning to business. I can see nothing wrong with that. Now please stop wasting my time!",
+      "end": true },
+
+    { "id": "alek_unlikely", "speaker": "bjarn",
+      "text": "Alek Endhelm? That shifty-looking mercenary? He is surely up to no good, but I doubt you can pin the crime on him to clear your mistress.",
+      "choices": [
+        { "text": "But he was seen snooping around the parlour during negotiations.", "next": "alek_snooping" },
+        { "text": "What makes you so sure that he is innocent, if you think so poorly of him?", "next": "alek_clumsy" }
+      ]
+    },
+    { "id": "alek_snooping", "speaker": "bjarn",
+      "text": "Well, it is true. He was really interested in my business as soon as I got here! He was snooping around, poking his nose into my affairs. Then he offered me his service as a guard.",
+      "next": "alek_guard_refused" },
+    { "id": "alek_guard_refused", "speaker": "bjarn",
+      "text": "The roads have been getting more and more dangerous recently, that's for sure. But they would be even more dangerous with the likes of him 'guarding' me! So I told him, in no uncertain terms, that I didn't like his looks!",
+      "choices": [
+        { "text": "To me it seems as if Alek was just curious about your gems.", "next": "retrieve_gems" },
+        { "text": "And you don't think he stole your gems in an act of revenge?", "next": "alek_clumsy" }
+      ]
+    },
+    { "id": "alek_clumsy", "speaker": "bjarn",
+      "text": "Come on, a clumsy, lumbering human sneaking into my room while I am asleep and stealing my gems! An ogre would be a more likely sneak thief than Alek Endhelm! He couldn't pick a lock if he had the key!",
+      "next": "only_elf" },
+    { "id": "only_elf", "speaker": "bjarn",
+      "text": "No, it had to have been one of your kind or a real Elf, that is for sure. Now, I am a busy man, so please stop wasting my time!",
+      "end": true },
+    { "id": "retrieve_gems", "speaker": "bjarn",
+      "text": "And so was your Lady Silverhair! Listen, I don't know why I should be speaking with you, if all you care about is freeing your mistress. If you want to make yourself useful you better go and retrieve my Chrysoberyls.",
+      "end": true },
+
+    { "id": "found_gem", "speaker": "bjarn",
+      "text": "Really? I ... I am impressed. Let me see! And tell me where you found it.",
+      "choices": [
+        { "text": "In the pantry.", "next": "pantry_precision" },
+        { "text": "In Lady Silverhair's luggage.", "next": "bjarn_claims_proof" }
+      ]
+    },
+    { "id": "pantry_precision", "speaker": "bjarn",
+      "text": "In the pantry? Can't you precise that some more? After all, the place you found the gem might give us a clue about the thief.",
+      "next": "player_reveals_luggage" },
+    { "id": "player_reveals_luggage", "speaker": "player",
+      "text": "It was hidden in Lady Silverhair's luggage.",
+      "next": "bjarn_claims_proof" },
+    { "id": "bjarn_claims_proof", "speaker": "bjarn",
+      "text": "Ha, I knew it! Who else but Silverhair had reasons and the skills to steal my gems? I'm glad you are finally seeing the truth. Now there can be no more doubt about her guilt. Come, we must inform the guards!",
+      "choices": [
+        { "text": "Not so fast! According to Erek, this gem is no Catseye.",
+          "when": { "flag": "gem_worthless", "equals": 2 }, "next": "dismiss_erek" },
+        { "text": "Not so fast! According to Erek, this gem is no Catseye.",
+          "when": { "flag": "gem_worthless", "equals": 3 }, "next": "dismiss_erek" },
+        { "text": "But Lady Silverhair swears that this is no Catseye.",
+          "when": { "flag": "gem_worthless", "equals": 1 }, "next": "dismiss_silverhair" },
+        { "text": "But Lady Silverhair swears that this is no Catseye.",
+          "when": { "flag": "gem_worthless", "equals": 3 }, "next": "dismiss_silverhair" }
+      ]
+    },
+    { "id": "dismiss_erek", "speaker": "bjarn",
+      "text": "Huh? Erek is young and has much to learn yet, so please excuse his mistake. But this gem is a Chrysoberyl Catseye, no doubt. Now hand it over, so I may take it to Jelom.",
+      "next": "keep_evidence" },
+    { "id": "dismiss_silverhair", "speaker": "bjarn",
+      "text": "The thief? Of course she would say that! Even you cannot be that foolish to take her word over mine. I tell you that this gem is a Chrysoberyl Catseye. Now hand it over, so I can take it to Jelom.",
+      "next": "keep_evidence" },
+    { "id": "keep_evidence", "speaker": "player",
+      "text": "I'm sorry, but I won't give this piece of evidence out of my hands.",
+      "next": "bjarn_concedes" },
+    { "id": "bjarn_concedes", "speaker": "bjarn",
+      "text": "Oh well, it's not as if you could run off with the gem I suppose. You may keep it for now, as long as you see to it that Silverhair gets what she deserves. Now be on your way!",
+      "choices": [
+        { "text": "I will take care of the evidence myself.",
+          "actions": [{ "op": "set", "flag": "bjarn_lies", "value": 1 }],
+          "next": "gem_exit" }
+      ]
+    },
+    { "id": "gem_exit", "speaker": "player",
+      "text": "Don't worry Master Fingolson, I will take care of that myself.", "end": true }
+  ]
+}

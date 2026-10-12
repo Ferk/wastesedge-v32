@@ -1,0 +1,83 @@
+{
+  "id": "sarin_start",
+  "start": [{ "node": "opening" }],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "sarin", "name": "Sarin Trailfollower", "role": "npc", "entity": "sarin",
+      "portrait": "assets/ui/portraits/sarin.png" }
+  ],
+  "nodes": [
+    {
+      "id": "opening", "speaker": "sarin",
+      "text": "What insolence! Banec, do you believe the depths of what they have done to our Lady? To accuse her of common theft, as if she was a human! And to lock her away in this tiny, dirty room! I tell you, I cannot bear it.",
+      "next": "must_bear_it"
+    },
+    {
+      "id": "must_bear_it", "speaker": "player",
+      "text": "I understand, Sarin, but we must bear this for now. At least until I have been able to uncover the truth.",
+      "next": "the_truth"
+    },
+    {
+      "id": "the_truth", "speaker": "sarin",
+      "text": "The truth? The truth is that our Lady is innocent and that, that Dwarf ruffian, he's a liar.",
+      "choices": [
+        {
+          "text": "Perhaps so. Hopefully, we shall see whether he is. What do you know of him?",
+          "next": "very_little"
+        },
+        {
+          "text": "He seems to be telling the truth about the theft. But I cannot believe that our Lady did the deed. There must be a true thief about.",
+          "when": { "flag": "bjarn_door_open", "equals": 3 },
+          "next": "hurry"
+        }
+      ]
+    },
+    {
+      "id": "very_little", "speaker": "sarin",
+      "text": "Very little, I'm happy to say. I was in the common room downstairs, arranging for dinner, when the Lady came out of the room they were in, as angry as I have ever seen her.",
+      "next": "barbarian"
+    },
+    {
+      "id": "barbarian", "speaker": "sarin",
+      "text": "That barbarian must have done something terrible to put her in such a state.",
+      "next": "ask_about_others"
+    },
+    {
+      "id": "ask_about_others", "speaker": "player",
+      "text": "I gather he is always difficult. Do you know anything else? About the other people at the inn, perhaps?",
+      "next": "artist"
+    },
+    {
+      "id": "artist", "speaker": "sarin",
+      "text": "Nay, not a thing. An uncouth lot, save for the one. An artist, I think. Lady Silverhair had words with her when we arrived, but Janesta and I were too busy to learn her name.",
+      "choices": [
+        {
+          "text": "Her name is Frostbloom. Not terribly friendly, but the Lady thinks highly of her talents. She went so far as to buy that figurine on the mantle.",
+          "when": { "flag": "talked_about_yeti", "equals": 1 },
+          "next": "figurine"
+        },
+        {
+          "text": "I'll have to speak to her. Perhaps she may know something. Thank you, Sarin. I'm glad you are here to watch over the Lady during this trouble.",
+          "when": { "flag": "talked_about_yeti", "equals": 0 },
+          "next": "wish_more"
+        }
+      ]
+    },
+    {
+      "id": "wish_more", "speaker": "sarin",
+      "text": "I wish I could do more, Banec. Good luck to you.",
+      "end": true
+    },
+    {
+      "id": "figurine", "speaker": "sarin",
+      "text": "Is that one of hers? She is indeed talented. I may only hope you are as talented in ending this trouble. Good luck to you, Banec.",
+      "end": true
+    },
+    {
+      "id": "hurry", "speaker": "sarin",
+      "text": "I beg you hurry and find him, then. For every minute you do not, is one minute closer our Lady is to peril.",
+      "end": true
+    }
+  ]
+}

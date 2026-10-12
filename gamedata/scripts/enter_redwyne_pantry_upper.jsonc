@@ -1,0 +1,6 @@
+{
+  "id": "enter_redwyne_pantry_upper",
+  "actions": [
+    { "op": "change_scene", "scene": "redwyne_pantry", "spawn": "cellar_upper" }
+  ]
+}

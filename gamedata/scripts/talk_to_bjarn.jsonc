@@ -1,0 +1,6 @@
+{
+  "id": "talk_to_bjarn",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "bjarn_start" }
+  ]
+}

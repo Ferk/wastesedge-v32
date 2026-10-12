@@ -58,6 +58,15 @@ stateful mug objects change in two stages at each table even when the inn is
 off screen. Labeled schedule branches select Orloth's next job, Erek's room
 position, and Rhayne's next safe yard point at runtime using engine randomness
 seeded by Vircon32's hardware generator.
+
+The cellar is reachable by both original inn routes: the kitchen stair and
+the separate common-room stair. Its pantry and Fingolson-room passages are
+reciprocal two-cell thresholds. Erek's conditional dialogue performs the
+original escort into Fingolson's room; Bjarn then follows his room schedule,
+offers the converted investigation branches, and guards the Dwarven chest
+with its original examination remark. The bath, Alek-room, and barn cellar
+thresholds remain inactive until those destination scenes are converted.
+
 Schedule `move` targets are direct destinations: the runtime follows the
 original engine's cardinal mapsquare A* rules and replans if another character
 temporarily occupies the next square. Add waypoints only for authored stops or

@@ -1,0 +1,7 @@
+{
+  "id": "record_silverhair_gem_assessment",
+  "actions": [
+    { "op": "set", "flag": "gem_worthless", "value": 1 },
+    { "op": "set", "flag": "silverhair_gem_pending", "value": 0 }
+  ]
+}

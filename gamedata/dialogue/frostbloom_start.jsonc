@@ -1,113 +1,91 @@
 {
   "id": "frostbloom_start",
   "start": [
-    { "node": "later_greeting", "when": { "flag": "frostbloom_talked", "equals": 2 } },
+    { "node": "question_greeting", "when": { "flag": "frostbloom_flattered", "equals": 2 } },
+    { "node": "retry_flattery", "when": { "flag": "frostbloom_flattered", "equals": 1 } },
+    { "node": "post_yeti_greeting", "when": { "flag": "talked_about_yeti", "equals": 1 } },
     { "node": "second_greeting", "when": { "flag": "frostbloom_talked", "equals": 1 } },
     { "node": "first_greeting" }
   ],
   "speakers": [
-    { "id": "player", "name": "Banec", "role": "player",
-      "portrait": "assets/ui/portraits/player.png" },
-    { "id": "frostbloom", "name": "Rhayne Frostbloom", "role": "npc", "entity": "frostbloom",
-      "portrait": "assets/ui/portraits/frostbloom.png" },
+    { "id": "player", "name": "Banec", "role": "player", "portrait": "assets/ui/portraits/player.png" },
+    { "id": "frostbloom", "name": "Rhayne Frostbloom", "role": "npc", "entity": "frostbloom", "portrait": "assets/ui/portraits/frostbloom.png" },
     { "id": "narrator", "name": "Narrator", "role": "narrator" }
   ],
   "nodes": [
-    {
-      "id": "first_greeting", "speaker": "frostbloom",
-      "text": "Hm? What do you want?",
-      "choices": [
-        { "text": "I am a servant of Lady Imoen Silverhair, and I'd like to ask ...",
-          "actions": [
-            { "op": "set", "flag": "frostbloom_talked", "value": 1 },
-            { "op": "set", "flag": "know_frostbloom", "value": 1 }
-          ],
-          "next": "first_dismissal" }
-      ]
-    },
-    {
-      "id": "first_dismissal", "speaker": "frostbloom",
-      "text": "I know who you are, and I do not care what you wish to ask. Now go away. The Yeti of my soul must have silence.",
-      "end": true
-    },
-    {
-      "id": "second_greeting", "speaker": "frostbloom",
-      "text": "You again? I thought I told you to leave me alone.",
-      "choices": [
-        { "text": "But lady, I must ask you about the theft...",
-          "actions": [{ "op": "set", "flag": "frostbloom_talked", "value": 2 }],
-          "next": "time_theft" }
-      ]
-    },
-    {
-      "id": "time_theft", "speaker": "frostbloom",
-      "text": "The theft? You mean your theft of my precious time, when I could be receiving inspiration? I've lost enough of that already, thank you. Now be gone, silly servant, you begin to annoy me.",
-      "next": "player_persists"
-    },
-    {
-      "id": "player_persists", "speaker": "player",
-      "text": "I will go, but I will return to ask my questions. I must have what you know of my Lady.",
-      "next": "looks_forward"
-    },
-    {
-      "id": "looks_forward", "speaker": "frostbloom",
-      "text": "I look forward to it with all my heart. For now, just go away.",
-      "end": true
-    },
-    {
-      "id": "later_greeting", "speaker": "frostbloom",
-      "text": "Back again, eh? You do hunger for punishment, don't you.",
-      "choices": [
-        { "text": "I try to be diligent, lady.", "next": "introduction" },
-        { "text": "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.", "next": "yeti" }
-      ]
-    },
-    {
-      "id": "introduction", "speaker": "frostbloom",
-      "text": "Well, I must admit that such devotion deserves a reward. Very well, you may stay for a while. A short while. My name is Rhayne Frostbloom. Take care you remember it.",
-      "next": "question_menu"
-    },
-    {
-      "id": "yeti", "speaker": "frostbloom",
-      "text": "Do you really think so? I tried to make it worthy of the noble beast, but I always wonder if I have given it enough life.",
-      "next": "question_menu"
-    },
-    {
-      "id": "question_menu", "speaker": "frostbloom",
-      "text": "Ask of me what you will.",
-      "choices": [
-        { "text": "Did anything unusual happen last night?",
-          "actions": [{ "op": "set", "flag": "know_noise", "value": 2 }],
-          "next": "warm_night" },
-        { "text": "What do you know of the dwarf, Bjarn?", "next": "bjarn" },
-        { "text": "Do you know anything of the people staying here at Waste's Edge?", "next": "guests" },
-        { "text": "I must leave you to your inspiration.", "next": "goodbye" }
-      ]
-    },
-    {
-      "id": "warm_night", "speaker": "frostbloom",
-      "text": "Unusual? It was a warm night, which I am told is quite odd for this time of year. Is that what you had in mind?",
-      "next": "sound"
-    },
-    {
-      "id": "sound", "speaker": "frostbloom",
-      "text": "But there was something odd about the night. There was a sound, which went on for a short time. I could not tell you what it was, but I doubt very much these humans would have heard it.",
-      "next": "question_menu"
-    },
-    {
-      "id": "bjarn", "speaker": "frostbloom",
-      "text": "A rough little creature. No trace of creativity in the man at all. I only noticed him long enough to ignore him, and we were both the better for it.",
-      "next": "question_menu"
-    },
-    {
-      "id": "guests", "speaker": "frostbloom",
-      "text": "The family who serves the travellers are good folk. There is a trace of the yeti's spirit in them, deep inside. But the rest are barely forth a speck of dust in the wind. Dull minds, every one.",
-      "next": "question_menu"
-    },
-    {
-      "id": "goodbye", "speaker": "frostbloom",
-      "text": "I must pursue my inspiration, even in this dismal place. Alone, if you please.",
-      "end": true
-    }
+    { "id": "first_greeting", "speaker": "frostbloom", "text": "Hm? What do you want?", "choices": [
+      { "text": "I am a servant of Lady Imoen Silverhair, and I'd like to ask ...", "actions": [
+        { "op": "set", "flag": "frostbloom_talked", "value": 1 },
+        { "op": "set", "flag": "know_frostbloom", "value": 1 }
+      ], "next": "first_dismissal" }
+    ] },
+    { "id": "first_dismissal", "speaker": "frostbloom", "text": "I know who you are, and I do not care what you wish to ask. Now go away. The Yeti of my soul must have silence.", "end": true },
+
+    { "id": "second_greeting", "speaker": "frostbloom", "text": "You again? I thought I told you to leave me alone.", "choices": [
+      { "text": "But lady, I must ask you about the theft...", "next": "time_theft" }
+    ] },
+    { "id": "time_theft", "speaker": "frostbloom", "text": "The theft? You mean your theft of my precious time, when I could be receiving inspiration? I've lost enough of that already, thank you. Now be gone, silly servant, you begin to annoy me.", "choices": [
+      { "text": "But, lady...", "next": "off_i_say" },
+      { "text": "I will go, but I will return to ask my questions. I must have what you know of my Lady.", "next": "withering_gaze" }
+    ] },
+    { "id": "off_i_say", "speaker": "frostbloom", "text": "Off, I say! I have no patience for this chatter!", "end": true },
+    { "id": "withering_gaze", "speaker": "narrator", "text": "The half-elf fixes you with a withering gaze. For a moment, you feel as if you had been skewered. Her voice is full of sarcasm.", "next": "looks_forward" },
+    { "id": "looks_forward", "speaker": "frostbloom", "text": "I look forward to it with all my heart. For now, just go away.", "end": true },
+
+    { "id": "post_yeti_greeting", "speaker": "frostbloom", "text": "Back again, eh? You do hunger for punishment, don't you.", "choices": [
+      { "text": "I try to be diligent, lady.", "next": "introduction" },
+      { "text": "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.", "next": "yeti_response" }
+    ] },
+    { "id": "introduction", "speaker": "frostbloom", "text": "Well, I must admit that such devotion deserves a reward. Very well, you may stay for a while. A short while. My name is Rhayne Frostbloom. Take care you remember it.", "next": "ask_theft_politely" },
+    { "id": "ask_theft_politely", "speaker": "player", "text": "Thank you, lady. I would ask you about the theft, if I may.", "next": "sick_of_theft" },
+    { "id": "sick_of_theft", "speaker": "frostbloom", "text": "For goodness sake, do not bother me with that nonsense. It's been all anyone speaks about here, and I for one am sick of it.", "next": "lady_in_danger" },
+    { "id": "lady_in_danger", "speaker": "player", "text": "It is important. The Lady Silverhair is in terrible danger.", "next": "gems_are_trash" },
+    { "id": "gems_are_trash", "speaker": "frostbloom", "text": "I know, I know. And even if she is not hung, the Dwarves will be outraged. What a foolish noise over such a little thing. Gems are showy trash. They cannot comprehend the complex soul of a Yeti.", "next": "hardly_foolish" },
+    { "id": "hardly_foolish", "speaker": "player", "text": "But this is hardly foolish, you must understand that.", "next": "lost_in_inspiration" },
+    { "id": "lost_in_inspiration", "speaker": "narrator", "text": "Frostbloom doesn't appear to hear you. She stares off into space, occasionally whispering something about Yetis and souls, but you can make little sense of it.", "end": true },
+
+    { "id": "yeti_response", "speaker": "frostbloom", "text": "Do you really think so? I tried to make it worthy of the noble beast, but I always wonder if I have given it enough life.", "choices": [
+      { "text": "I'm hardly an expert, lady, but to my eye it is excellent.", "next": "reject_modest_praise" },
+      { "text": "It is a masterpiece, my lady. A true achievement that does credit to its model.", "next": "suspicious_smile" }
+    ] },
+    { "id": "reject_modest_praise", "speaker": "frostbloom", "text": "Flattery will get you nowhere, so long as you pretend it is nothing more. I have no time for such idiocy.", "end": true },
+    { "id": "suspicious_smile", "speaker": "narrator", "text": "Frostbloom eyes you suspiciously for a moment, then smiles.", "next": "tests_flattery" },
+    { "id": "tests_flattery", "speaker": "frostbloom", "text": "False flattery, eh? I would wager my next commission you know nothing about the Yeti and their ways, yet would use this praise to loosen my tongue. Well, have I spoken truth?", "choices": [
+      { "text": "No, lady, I honestly appreciate the talent in your piece. That is, you are honestly talented.", "actions": [{ "op": "set", "flag": "frostbloom_flattered", "value": 1 }], "next": "reject_flattery" },
+      { "text": "I may not have an educated taste, but I do know talent when standing in front of me.", "actions": [{ "op": "set", "flag": "frostbloom_flattered", "value": 1 }], "next": "reject_flattery" },
+      { "text": "My lady, you have a keen eye and a keener wit. That is precisely why I gave you praise, although you truly do deserve it.", "actions": [{ "op": "set", "flag": "frostbloom_flattered", "value": 2 }], "next": "accept_flattery" }
+    ] },
+    { "id": "reject_flattery", "speaker": "frostbloom", "text": "Huh! Off with you, I'll not waste time listening to your prattle. If you have a mind to be more honest, come back again. Otherwise, take your foolishness elsewhere.", "end": true },
+
+    { "id": "retry_flattery", "speaker": "frostbloom", "text": "Back to try again? Then tell me whether you offered false flattery! Then we'll see what you're made of.", "choices": [
+      { "text": "No, lady, I honestly appreciate the talent in your piece. That is, you are honestly talented.", "next": "reject_flattery" },
+      { "text": "I may not have an educated taste, but I do know talent when standing in front of me.", "next": "reject_flattery" },
+      { "text": "My lady, you have a keen eye and a keener wit. That is precisely why I gave you praise, although you truly do deserve it.", "actions": [{ "op": "set", "flag": "frostbloom_flattered", "value": 2 }], "next": "accept_flattery" }
+    ] },
+    { "id": "question_greeting", "speaker": "frostbloom", "text": "Ah, the persistent young servant. Do you wish to ask me something more?", "choices": [
+      { "text": "Did anything unusual happen last night?", "when": { "flag": "know_noise", "equals": 0 }, "actions": [
+        { "op": "set", "flag": "know_noise", "value": 2 }
+      ], "next": "warm_night" },
+      { "text": "Did anything unusual happen last night?", "when": { "flag": "know_noise", "equals": 2 }, "next": "noise_followup" },
+      { "text": "What do you know of the dwarf, Bjarn?", "next": "bjarn" },
+      { "text": "Do you know anything of the people staying here at Waste's Edge?", "next": "guests_family" }
+    ] },
+    { "id": "accept_flattery", "speaker": "frostbloom", "text": "Very good answer. I believe you'll do. Ask of me what you will.", "choices": [
+      { "text": "Did anything unusual happen last night?", "when": { "flag": "know_noise", "equals": 0 }, "actions": [
+        { "op": "set", "flag": "know_noise", "value": 2 }
+      ], "next": "warm_night" },
+      { "text": "Did anything unusual happen last night?", "when": { "flag": "know_noise", "equals": 2 }, "next": "noise_followup" },
+      { "text": "What do you know of the dwarf, Bjarn?", "next": "bjarn" },
+      { "text": "Do you know anything of the people staying here at Waste's Edge?", "next": "guests_family" }
+    ] },
+
+    { "id": "warm_night", "speaker": "frostbloom", "text": "Unusual? It was a warm night, which I am told is quite odd for this time of year. Is that what you had in mind?", "next": "press_for_danger" },
+    { "id": "press_for_danger", "speaker": "player", "text": "Of course not! Please, my Lady's very life may be in danger!", "next": "teasing_sound" },
+    { "id": "teasing_sound", "speaker": "frostbloom", "text": "It is such fun to tease you, do you realize that? But there was something odd about the night. There was a sound, which went on for a short time.", "next": "sound_detail" },
+    { "id": "sound_detail", "speaker": "frostbloom", "text": "I could not tell you what it was, but I doubt very much these humans would have heard it. You might ask your fair lady about it, her ears should be keener than mine. Although she may have been too preoccupied to notice.", "end": true },
+    { "id": "noise_followup", "speaker": "frostbloom", "text": "Has your lady told you any more about the sounds I heard? I cannot recall anything else of note.", "end": true },
+    { "id": "bjarn", "speaker": "frostbloom", "text": "A rough little creature. No trace of creativity in the man at all. I only noticed him long enough to ignore him, and we were both the better for it.", "end": true },
+    { "id": "guests_family", "speaker": "frostbloom", "text": "The family who serves the travellers are good folk. There is a trace of the yeti's spirit in them, deep inside.", "next": "guests_rest" },
+    { "id": "guests_rest", "speaker": "frostbloom", "text": "But the rest are barely forth a speck of dust in the wind. Dull minds, every one. Your lady seems the sole exception, I am sorry to say. But at least the rest leave me in peace.", "end": true }
   ]
 }

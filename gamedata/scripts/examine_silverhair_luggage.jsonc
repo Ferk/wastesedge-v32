@@ -1,0 +1,6 @@
+{
+  "id": "examine_silverhair_luggage",
+  "actions": [
+    { "op": "speak", "entity": "player", "text": "Lady Silverhair's luggage, but not what I am looking for." }
+  ]
+}

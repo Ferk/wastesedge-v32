@@ -1,0 +1,6 @@
+{
+  "id": "examine_cellar_cirdanth",
+  "actions": [
+    { "op": "speak", "entity": "player", "text": "'Made in Cirdanth', now that's more like it!" }
+  ]
+}
