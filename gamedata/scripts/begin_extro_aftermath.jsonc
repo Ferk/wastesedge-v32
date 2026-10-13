@@ -1,0 +1,7 @@
+{
+  "id": "begin_extro_aftermath",
+  "actions": [
+    { "op": "play_music", "track": "extro_confession" },
+    { "op": "show_dialogue", "dialogue": "extro_aftermath" }
+  ]
+}

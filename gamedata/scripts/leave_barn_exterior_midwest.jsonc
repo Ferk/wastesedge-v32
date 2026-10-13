@@ -1,0 +1,3 @@
+{ "id": "leave_barn_exterior_midwest", "actions": [
+  { "op": "change_scene", "scene": "redwyne_exterior", "spawn": "barn_ground_midwest" }
+] }

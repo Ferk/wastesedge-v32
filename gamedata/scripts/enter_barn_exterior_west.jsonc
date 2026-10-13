@@ -1,0 +1,3 @@
+{ "id": "enter_barn_exterior_west", "actions": [
+  { "op": "change_scene", "scene": "redwyne_barn", "spawn": "exterior_west" }
+] }

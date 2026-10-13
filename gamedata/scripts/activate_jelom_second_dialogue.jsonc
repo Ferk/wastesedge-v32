@@ -1,0 +1,6 @@
+{
+  "id": "activate_jelom_second_dialogue",
+  "actions": [
+    { "op": "set_entity_dialogue", "entity": "jelom", "dialogue": "jelom_2nd" }
+  ]
+}

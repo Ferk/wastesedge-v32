@@ -1,0 +1,6 @@
+{
+  "id": "record_jelom_waits_for_fingolson",
+  "actions": [
+    { "op": "set", "flag": "convince_jelom", "value": 3 }
+  ]
+}

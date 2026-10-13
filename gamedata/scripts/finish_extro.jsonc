@@ -1,0 +1,7 @@
+{
+  "id": "finish_extro",
+  "actions": [
+    { "op": "set", "flag": "game_completed", "value": 1 },
+    { "op": "set_control", "enabled": false }
+  ]
+}

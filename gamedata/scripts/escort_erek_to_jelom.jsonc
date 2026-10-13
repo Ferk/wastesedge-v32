@@ -1,0 +1,10 @@
+{
+  "id": "escort_erek_to_jelom",
+  "actions": [
+    { "op": "start_schedule", "entity": "erek", "schedule": "erek_jelom_evidence" },
+    { "op": "start_schedule", "entity": "jelom", "schedule": "jelom_evidence" },
+    { "op": "change_scene", "scene": "redwyne_first_floor", "spawn": "jelom_evidence" },
+    { "op": "wait", "frames": 1 },
+    { "op": "show_dialogue", "dialogue": "jelom_2nd" }
+  ]
+}

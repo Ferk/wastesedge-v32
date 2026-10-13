@@ -1,0 +1,13 @@
+{
+  "id": "extro_chest",
+  "start": [{ "node": "hidden" }],
+  "speakers": [{ "id": "narrator", "name": "Narrator", "role": "narrator" }],
+  "nodes": [
+    { "id": "hidden", "speaker": "narrator", "text": "They were here all the time, safe from thieving hands, ...", "next": "niche" },
+    { "id": "niche", "speaker": "narrator", "text": "... well hidden in a niche I carved during my previous visits.", "next": "right_here" },
+    { "id": "right_here", "speaker": "narrator", "text": "Right here.", "next": "but" },
+    { "id": "but", "speaker": "narrator", "text": "But ...", "next": "gone" },
+    { "id": "gone", "speaker": "narrator", "text": "... they are gone!",
+      "on_end": "talan_enters_extro", "end": true }
+  ]
+}

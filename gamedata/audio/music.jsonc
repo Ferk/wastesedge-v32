@@ -9,6 +9,34 @@
       "sample_rate": 11025,
       "volume": 0.5,
       "loop": true
+    },
+    {
+      "id": "extro_confession",
+      "source": "assets/audio/extro_confession.ogg",
+      "sample_rate": 11025,
+      "volume": 0.5,
+      "loop": false
+    },
+    {
+      "id": "extro_reveal",
+      "source": "assets/audio/extro_reveal.ogg",
+      "sample_rate": 11025,
+      "volume": 0.5,
+      "loop": false
+    },
+    {
+      "id": "extro_forest",
+      "source": "assets/audio/extro_forest.ogg",
+      "sample_rate": 11025,
+      "volume": 0.5,
+      "loop": false
+    },
+    {
+      "id": "extro_credits",
+      "source": "assets/audio/extro_credits.ogg",
+      "sample_rate": 11025,
+      "volume": 0.5,
+      "loop": false
     }
   ]
 }

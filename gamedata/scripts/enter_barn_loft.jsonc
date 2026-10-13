@@ -1,0 +1,3 @@
+{ "id": "enter_barn_loft", "actions": [
+  { "op": "change_scene", "scene": "redwyne_barn_loft", "spawn": "ground_stairs" }
+] }

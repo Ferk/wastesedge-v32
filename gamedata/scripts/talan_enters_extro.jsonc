@@ -1,0 +1,8 @@
+{
+  "id": "talan_enters_extro",
+  "actions": [
+    { "op": "start_schedule", "entity": "talan", "schedule": "talan_extro_entrance" },
+    { "op": "wait", "frames": 1 },
+    { "op": "show_dialogue", "dialogue": "extro_talan" }
+  ]
+}

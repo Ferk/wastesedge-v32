@@ -1,0 +1,395 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_barn_loft",
+  "tilecount": 7,
+  "tiledversion": "1.11.0",
+  "tileheight": 120,
+  "tilewidth": 80,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/maps/redwyne_barn_loft/floorings__barn_loft_main_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/barn_loft_main.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 1,
+      "image": "../assets/maps/redwyne_barn_loft/floorings__barn_loft_front_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/barn_loft_front.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 2,
+      "image": "../assets/maps/redwyne_barn_loft/walls__barn_loft_main_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/barn_loft_main.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 3,
+      "image": "../assets/maps/redwyne_barn_loft/stairs__barn_loft_ground_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "stairs/barn_loft-ground.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 4,
+      "image": "../assets/maps/redwyne_barn_loft/furnitures__barn_loft_clutter_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 120,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/barn_loft_clutter.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 5,
+      "image": "../assets/maps/redwyne_barn_loft/walls__barn_loft_main_top_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 16,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/barn_loft_main_top.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 6,
+      "image": "../assets/maps/redwyne_barn_loft/walls__barn_loft_main_front_a0_i0.png",
+      "imagewidth": 80,
+      "imageheight": 80,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/barn_loft_main_front.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 5
+        }
+      ],
+      "type": "map_object"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

@@ -12,6 +12,12 @@ static void tick(struct world_state *world, int frames)
         world_update(world, &actions);
 }
 
+static void walk_tile(struct world_state *world, const struct world_actions *direction)
+{
+    world_update(world, direction);
+    tick(world, 16);
+}
+
 static int count_object_state(const struct world_state *world, int definition, int state)
 {
     int count = 0;
@@ -91,6 +97,24 @@ static int choice_has_condition(const struct generated_runtime_dialogue_choice *
     return 0;
 }
 
+static void choose_visible_dialogue_option(struct world_state *world, const char *text)
+{
+    struct world_actions interact = { 0, 0, 1, 0 };
+    int index;
+    for (index = 0; index < world_dialogue_choice_count(world); ++index) {
+        if (strcmp(world_dialogue_choice_at(world, index), text) == 0) {
+            world->dialogue_choice = index;
+            world_update(world, &interact);
+            return;
+        }
+    }
+    fprintf(stderr, "missing dialogue option: %s\ncurrent text: %s\n", text,
+            world_dialogue_text(world));
+    for (index = 0; index < world_dialogue_choice_count(world); ++index)
+        fprintf(stderr, "  visible: %s\n", world_dialogue_choice_at(world, index));
+    assert(!"expected visible dialogue option");
+}
+
 int main(void)
 {
     struct world_state world;
@@ -134,6 +158,7 @@ int main(void)
     int translucent_scenery = 0;
     int kitchen_smoke_pieces = 0;
     int entrance_threshold_pieces = 0;
+    int entrance_back_eaves = 0;
     int barrel_pieces = 0;
     int vine_pieces = 0;
     int packed_scenery_regions = 0;
@@ -233,6 +258,146 @@ int main(void)
     assert(strcmp(world_dialogue_text(&world),
                   "You again, Half-Elf? What do you want this time?") == 0);
 
+    /* Releasing Silverhair permanently switches Jelom to the second,
+     * evidence-driven conversation. Erek's agreement then reproduces the
+     * original submap-9 staging before opening their joint testimony. */
+    world.dialogue = -1;
+    world.dialogue_actor = -1;
+    world.active_script = GENERATED_SCRIPT_ACTIVATE_JELOM_SECOND_DIALOGUE;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 1);
+    assert(world.actors[GENERATED_ENTITY_JELOM].dialogue ==
+           GENERATED_DIALOGUE_JELOM_2ND);
+
+    world.flags[generated_runtime_scripts[
+        GENERATED_SCRIPT_RECORD_JELOM_NEEDS_EREK].actions[0].a] = 2;
+    world.active_script = GENERATED_SCRIPT_ESCORT_EREK_TO_JELOM;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 3);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.player_x == 1 && world.player_y == 3);
+    assert(world.player_facing == WORLD_EAST);
+    assert(world.actors[GENERATED_ENTITY_JELOM].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_JELOM].x == 2 &&
+           world.actors[GENERATED_ENTITY_JELOM].y == 3);
+    assert(world.actors[GENERATED_ENTITY_EREK].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_EREK].x == 2 &&
+           world.actors[GENERATED_ENTITY_EREK].y == 4);
+    assert(world.dialogue == GENERATED_DIALOGUE_JELOM_2ND);
+    assert(strcmp(world_dialogue_text(&world),
+                  "What's going on now? What are you doing here, Erek Stonebreaker?") == 0);
+
+    /* Once Fingolson's lie is known, Erek corroborates Banec's evidence and
+     * Jelom advances the original quest flags to the final gathering. */
+    world.flags[find_dialogue_choice(
+        find_dialogue_node(&generated_runtime_dialogues[GENERATED_DIALOGUE_JELOM_2ND],
+                           "If this gem really belongs to Master Fingolson, why don't I hear what he has to say about it?"),
+        "Well, Master Fingolson is pretending that this gem is a valuable Catseye, despite the fact that it isn't.")
+        ->conditions[0].flag] = 1;
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    choose_visible_dialogue_option(&world,
+        "Listen Jelom, I am getting sick of you. What is it you want?");
+    world_update(&world, &interact);
+    choose_visible_dialogue_option(&world,
+        "Well, Master Fingolson is pretending that this gem is a valuable Catseye, despite the fact that it isn't.");
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    tick(&world, 3);
+    assert(world.flags[generated_runtime_scripts[
+               GENERATED_SCRIPT_FINISH_JELOM_INVESTIGATION].actions[0].a] == 3);
+    assert(world.flags[generated_runtime_scripts[
+               GENERATED_SCRIPT_FINISH_JELOM_INVESTIGATION].actions[1].a] == 1);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
+    assert(world.player_x == 4 && world.player_y == 8);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO);
+    assert(world.actors[GENERATED_ENTITY_EREK].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_JELOM].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_SILVERHAIR].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_TRISTAN].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_FELLNIR].scene == world.scene_index);
+
+    /* A direct accusation path must converge on Fingolson's confession and
+     * hand control to the authored aftermath without restoring player input. */
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    choose_visible_dialogue_option(&world,
+        "It's obvious that the thief tried to frame Lady Silverhair.");
+    choose_visible_dialogue_option(&world,
+        "No. I mean the theft's sole purpose was to discredit my mistress.");
+    world_update(&world, &interact);
+    choose_visible_dialogue_option(&world,
+        "You do! And you knew of her business.");
+    world_update(&world, &interact);
+    choose_visible_dialogue_option(&world,
+        "But your stones are of poor quality indeed!");
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    world_update(&world, &interact);
+    choose_visible_dialogue_option(&world,
+        "Then you confess that the theft was just pretended?");
+    tick(&world, 1);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_AFTERMATH);
+    assert(strcmp(world_dialogue_text(&world),
+                  "There is no denying it. Yes, I feigned the theft.") == 0);
+    assert(world.control_enabled == 0);
+
+    world.dialogue = -1;
+    world.active_script = GENERATED_SCRIPT_REVEAL_EXTRO_CHEST;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 3);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CHEST);
+    assert(world.actors[GENERATED_ENTITY_BJARN].x == 7 &&
+           world.actors[GENERATED_ENTITY_BJARN].y == 3);
+
+    world.dialogue = -1;
+    world.active_script = GENERATED_SCRIPT_TALAN_ENTERS_EXTRO;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 3);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_TALAN);
+    assert(world.actors[GENERATED_ENTITY_TALAN].scene == world.scene_index);
+    assert(world.actors[GENERATED_ENTITY_TALAN].x == 1 &&
+           world.actors[GENERATED_ENTITY_TALAN].y == 6);
+
+    world.dialogue = -1;
+    world.active_script = GENERATED_SCRIPT_SHOW_EXTRO_EPILOGUE;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 1);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_EPILOGUE);
+    world.dialogue = -1;
+    world.active_script = GENERATED_SCRIPT_SHOW_EXTRO_CREDITS;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 1);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CREDITS);
+    world.dialogue = -1;
+    world.active_script = GENERATED_SCRIPT_FINISH_EXTRO;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 1);
+    assert(world.flags[generated_runtime_scripts[
+               GENERATED_SCRIPT_FINISH_EXTRO].actions[0].a] == 1);
+    assert(world.control_enabled == 0);
+
+    /* Restore the landing for the independent doorway checks below. */
+    world_initialize(&world);
+    world.scene_index = GENERATED_SCENE_REDWYNE_FIRST_FLOOR;
+    world.scene = &generated_runtime_scenes[world.scene_index];
+    world.player_entity = 0;
+
     /* The Silverhair doorway uses two overlapping data-authored triggers.
      * Before Jelom releases her it opens his warning; afterwards the same
      * step changes to the original room and its reciprocal doorway. */
@@ -270,7 +435,7 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
     assert(world.player_x == 5 && world.player_y == 2);
     assert(world.scene->entity_count == 4);
-    assert(world.scene->trigger_count == 1);
+    assert(world.scene->trigger_count == 3);
 
     /* Submap 13 has one original positional event: from (1,6), facing north,
      * Banec refuses to touch his mistress' belongings. The chest-search event
@@ -342,6 +507,15 @@ int main(void)
                 assert(scenery->depth == 280);
                 ++entrance_threshold_pieces;
             }
+            if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
+                scenery->x == 340 && scenery->y == 260 &&
+                scenery->frame.width == 60 && scenery->frame.height == 60) {
+                /* The broad eave belongs to the rear wall of the doorway.
+                 * Keep it behind a player standing on its Y=260 row; the
+                 * separate narrow entrance-top-fore gable remains in front. */
+                assert(scenery->depth == 260);
+                ++entrance_back_eaves;
+            }
             if (scene_index == GENERATED_SCENE_REDWYNE_INN &&
                 ((scenery->x == 20 && scenery->y == 28) ||
                  (scenery->x == 40 && scenery->y == 48))) {
@@ -360,6 +534,7 @@ int main(void)
     assert(translucent_scenery >= 24);
     assert(kitchen_smoke_pieces == 24);
     assert(entrance_threshold_pieces == 2);
+    assert(entrance_back_eaves == 1);
     assert(barrel_pieces == 2);
     assert(vine_pieces == 3);
     assert(packed_scenery_regions > 0);
@@ -383,7 +558,16 @@ int main(void)
     world.player_x = 24;
     world.player_y = 14;
     world_update(&world, &move_north);
-    assert(!world.moving && world.player_x == 24 && world.player_y == 14);
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN);
+    assert(world.player_x == 1 && world.player_y == 6);
+    assert(world.player_facing == WORLD_NORTH);
+    world.trigger_latch = -1;
+    world_update(&world, &move_south);
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
+    assert(world.player_x == 24 && world.player_y == 14);
+    assert(world.player_facing == WORLD_SOUTH);
     world.player_x = 12;
     world.player_y = 14;
     world_update(&world, &move_west);
@@ -415,7 +599,7 @@ int main(void)
     assert(world.music_track == GENERATED_MUSIC_REDWYNE_THEME);
     assert(world.music_revision == 1);
     assert(generated_runtime_scenes[GENERATED_SCENE_REDWYNE_EXTERIOR]
-               .navigation_blocker_count == 4);
+               .navigation_blocker_count == 3);
     tick(&world, 180 - frame);
 
     talan = &world.actors[GENERATED_ENTITY_TALAN];
@@ -1431,8 +1615,8 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
     assert(world.player_x == 3 && world.player_y == 12);
     assert(world.player_facing == WORLD_NORTH);
-    assert(world.scene->spawn_count == 6);
-    assert(world.scene->trigger_count == 16);
+    assert(world.scene->spawn_count == 7);
+    assert(world.scene->trigger_count == 17);
     assert(world.scene->hotspots[3].x == 4 && world.scene->hotspots[3].y == 10);
     assert(world.scene->hotspots[3].facing == WORLD_SOUTH);
     assert(world.scene->hotspots[5].x == 4 && world.scene->hotspots[5].y == 10);
@@ -1544,7 +1728,7 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
     assert(world.player_x == 1 && world.player_y == 6);
     assert(world.player_facing == WORLD_WEST);
-    assert(world.scene->spawn_count == 2);
+    assert(world.scene->spawn_count == 3);
     assert(world.scene->trigger_count == 2);
     assert(world.scene->hotspot_count == 1);
     assert(world.scene->hotspots[0].x == 7 && world.scene->hotspots[0].y == 3);
@@ -1662,6 +1846,64 @@ int main(void)
         assert(world.flags[silverhair_gem_pending_flag] == 0);
     }
 
+    /* Erek's original post-discovery branch independently examines the gem.
+     * Silverhair's assessment contributes one evidence bit; Erek contributes
+     * two, preserving the reference values 2 (Erek only) and 3 (both). */
+    {
+        const struct generated_runtime_dialogue *erek_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_EREK_START];
+        const struct generated_runtime_dialogue_node *erek_menu =
+            find_dialogue_node(erek_dialogue, "Ho there, Banec. What is it this time?");
+        const struct generated_runtime_dialogue_node *identifies_gem =
+            find_dialogue_node(
+                erek_dialogue,
+                "This is a fine example of a Chrysoberyl. Perfectly suitable for a Lady's ring, were that your Mistress' intention. However, it is no Catseye and as such it is of no use in the workings of magic she had in mind, if I recall correctly.");
+        const struct generated_runtime_dialogue_choice *erek_only;
+        const struct generated_runtime_dialogue_choice *both_assessments = 0;
+        int choice_index;
+
+        assert(erek_menu != 0 && identifies_gem != 0);
+        erek_only = find_dialogue_choice(
+            identifies_gem, "Thank you Erek. That's all I need to know.");
+        assert(erek_only != 0);
+        for (choice_index = 0; choice_index < identifies_gem->choice_count; ++choice_index) {
+            const struct generated_runtime_dialogue_choice *choice =
+                &identifies_gem->choices[choice_index];
+            if (strcmp(choice->text, "Thank you Erek. That's all I need to know.") == 0 &&
+                choice_has_condition(choice, gem_worthless_flag, 1)) {
+                both_assessments = choice;
+                break;
+            }
+        }
+        assert(choice_has_condition(erek_only, gem_worthless_flag, 0));
+        assert(choice_has_action(erek_only, gem_worthless_flag, 2));
+        assert(both_assessments != 0);
+        assert(choice_has_action(both_assessments, gem_worthless_flag, 3));
+
+        world.dialogue = GENERATED_DIALOGUE_EREK_START;
+        world.dialogue_node = (int)(erek_menu - erek_dialogue->nodes);
+        world.dialogue_choice = 0;
+        world.dialogue_actor = GENERATED_ENTITY_EREK;
+        choose_visible_dialogue_option(
+            &world, "Erek, I'd like to hear your opinion about the gem I have here.");
+        assert(strcmp(world_dialogue_text(&world),
+                      "That ... - it's one of the Master's. It must be. Where did you get that, Banec?") == 0);
+        choose_visible_dialogue_option(
+            &world, "It was hidden in Lady Silverhair's luggage.");
+        assert(strcmp(world_dialogue_text(&world),
+                      "Then your mistress is not as innocent as you thought, no? Let me see the gem, please.") == 0);
+        world_update(&world, &interact);
+        assert(strstr(world_dialogue_text(&world), "Carefully, Erek takes the gem") != 0);
+        world_update(&world, &interact);
+        assert(strstr(world_dialogue_text(&world), "Once caught again") != 0);
+        world_update(&world, &interact);
+        assert(world.dialogue_node == (int)(identifies_gem - erek_dialogue->nodes));
+        assert(world_dialogue_choice_count(&world) == 1);
+        choose_visible_dialogue_option(&world, "Thank you Erek. That's all I need to know.");
+        assert(world.dialogue < 0);
+        assert(world.flags[gem_worthless_flag] == 3);
+    }
+
     world.active_script = GENERATED_SCRIPT_LEAVE_REDWYNE_PANTRY_UPPER;
     world.script_action = 0;
     world.script_wait = 0;
@@ -1677,6 +1919,111 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_KITCHEN);
     assert(world.player_x == 6 && world.player_y == 5);
     assert(world.player_facing == WORLD_NORTH);
+
+    /* The original pre-release route reaches Silverhair through the barn
+     * ground floor, loft and exterior veranda. It is the only route that can
+     * unlock Frostbloom's Yeti conversation before Jelom relents. */
+    world_initialize(&world);
+    world.dialogue = -1;
+    world.dialogue_actor = -1;
+    world.active_script = GENERATED_SCRIPT_ENTER_BARN_EXTERIOR_WEST;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN);
+    assert(world.player_x == 1 && world.player_y == 6);
+    assert(world.scene->width == 6 && world.scene->height == 8);
+    assert(world.scene->spawn_count == 6);
+    assert(world.scene->trigger_count == 6);
+
+    /* Traverse the real barn floor and stair instead of invoking the scene
+     * transition directly. This protects the quest route from collision or
+     * trigger regressions in the imported map. */
+    walk_tile(&world, &move_north);
+    walk_tile(&world, &move_north);
+    walk_tile(&world, &move_north);
+    walk_tile(&world, &move_east);
+    walk_tile(&world, &move_east);
+    walk_tile(&world, &move_north);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN_LOFT);
+    assert(world.player_x == 1 && world.player_y == 3);
+    assert(world.scene->width == 4 && world.scene->height == 9);
+    assert(world.scene->hotspot_count == 2);
+
+    walk_tile(&world, &move_south);
+    walk_tile(&world, &move_south);
+    walk_tile(&world, &move_south);
+    walk_tile(&world, &move_south);
+    walk_tile(&world, &move_west);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
+    assert(world.player_x == 23 && world.player_y == 12);
+    assert(world.player_facing == WORLD_WEST);
+    assert(world.flags[generated_runtime_scripts[
+               GENERATED_SCRIPT_LEAVE_BARN_LOFT_TO_VERANDA].actions[0].a] == 1);
+
+    /* Holding west crosses the exterior veranda and activates its conditional
+     * first-visit trigger; this exercises the real collision and trigger path. */
+    world.trigger_latch = -1;
+    for (frame = 0; frame < 180 &&
+         world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR; ++frame)
+        world_update(&world, &move_west);
+    assert(frame < 180);
+    for (frame = 0; frame < 30 && world.dialogue < 0; ++frame)
+        tick(&world, 1);
+    assert(frame < 30);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
+    assert(world.player_x == 5 && world.player_y == 4);
+    assert(world.dialogue == GENERATED_DIALOGUE_SILVERHAIR_START);
+    assert(strcmp(world_dialogue_text(&world), "Oh!!") == 0);
+    assert(world.flags[generated_runtime_scripts[
+               GENERATED_SCRIPT_ENTER_SILVERHAIR_FROM_VERANDA_FIRST].actions[0].a] == 1);
+
+    world.dialogue = -1;
+    world.dialogue_actor = -1;
+    world.active_script = GENERATED_SCRIPT_LEAVE_SILVERHAIR_HALLWAY_REFUSED;
+    world.script_action = 0;
+    world.script_wait = 0;
+    world.player_x = 5;
+    world.player_y = 1;
+    tick(&world, 12);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_SILVERHAIR_ROOM);
+    assert(world.player_x == 5 && world.player_y == 2);
+    assert(world_entity_speech(&world, world.player_entity) != 0);
+
+    world.active_script = GENERATED_SCRIPT_LEAVE_SILVERHAIR_TO_VERANDA;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
+    assert(world.player_x == 12 && world.player_y == 12);
+    assert(world.player_facing == WORLD_EAST);
+    assert(world.flags[generated_runtime_scripts[
+               GENERATED_SCRIPT_ENTER_SILVERHAIR_FROM_VERANDA_FIRST].actions[0].a] == 0);
+
+    world.active_script = GENERATED_SCRIPT_ENTER_BARN_LOFT_FROM_VERANDA;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN_LOFT);
+    assert(world.player_x == 1 && world.player_y == 7);
+    world.active_script = GENERATED_SCRIPT_LEAVE_BARN_LOFT;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN);
+    assert(world.player_x == 3 && world.player_y == 3);
+    world.active_script = GENERATED_SCRIPT_LEAVE_BARN_TO_CELLAR;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 12 && world.player_y == 2);
+    world.active_script = GENERATED_SCRIPT_ENTER_BARN_FROM_CELLAR;
+    world.script_action = 0;
+    world.script_wait = 0;
+    tick(&world, 2);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN);
+    assert(world.player_x == 1 && world.player_y == 3);
 
     puts("world schedule checks passed");
     return 0;

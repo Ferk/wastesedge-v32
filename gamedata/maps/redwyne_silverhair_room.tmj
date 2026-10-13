@@ -1192,7 +1192,51 @@
           "properties": [
             { "name": "kind", "type": "string", "value": "exit" },
             { "name": "id", "type": "string", "value": "leave_for_first_floor" },
-            { "name": "script", "type": "string", "value": "leave_silverhair_room" }
+            { "name": "script", "type": "string", "value": "leave_silverhair_room" },
+            { "name": "condition_flag", "type": "string", "value": "came_from_barn" },
+            { "name": "condition_equals", "type": "int", "value": 0 }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 20
+        },
+        {
+          "id": 55,
+          "name": "veranda_door",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "veranda_door" },
+            { "name": "facing", "type": "string", "value": "west" }
+          ],
+          "x": 120,
+          "y": 80
+        },
+        {
+          "height": 20,
+          "id": 56,
+          "name": "leave_for_veranda",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "leave_for_veranda" },
+            { "name": "script", "type": "string", "value": "leave_silverhair_to_veranda" },
+            { "name": "condition_flag", "type": "string", "value": "came_from_barn" },
+            { "name": "condition_equals", "type": "int", "value": 1 }
+          ],
+          "width": 20,
+          "x": 120,
+          "y": 80
+        },
+        {
+          "height": 20,
+          "id": 57,
+          "name": "hallway_refused_from_inside",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "trigger" },
+            { "name": "id", "type": "string", "value": "hallway_refused_from_inside" },
+            { "name": "script", "type": "string", "value": "leave_silverhair_hallway_refused" },
+            { "name": "condition_flag", "type": "string", "value": "came_from_barn" },
+            { "name": "condition_equals", "type": "int", "value": 1 }
           ],
           "width": 20,
           "x": 100,
@@ -1449,7 +1493,7 @@
     }
   ],
   "nextlayerid": 8,
-  "nextobjectid": 55,
+  "nextobjectid": 58,
   "orientation": "orthogonal",
   "properties": [
     {

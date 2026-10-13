@@ -1,0 +1,12 @@
+{
+  "id": "extro_epilogue",
+  "start": [{ "node": "alek" }],
+  "speakers": [{ "id": "narrator", "name": "Epilogue", "role": "narrator" }],
+  "nodes": [
+    { "id": "alek", "speaker": "narrator", "text": "And so Alek Endhelm escaped into the North, where he spent his newly gained wealth for Ale and other pleasures.", "next": "bjarn" },
+    { "id": "bjarn", "speaker": "narrator", "text": "Bjarn Fingolson however, bereft of all honour, was taken to Uzdun'kal and sentenced to the lowest labour. Nowadays his fate serves as an example and a warning to generations of young Dwarves.", "next": "silverhair" },
+    { "id": "silverhair", "speaker": "narrator", "text": "Lady Imoen Silverhair received the finest Chrysoberyl Catseyes as a token of regret, and the magic rings and amulets she crafted were of wondrous might and beauty, desired and admired throughout the realm.", "next": "erek" },
+    { "id": "erek", "speaker": "narrator", "text": "Soon after his return, young Erek accomplished the Rite of Passage and joined adult society. To his surprise, he was sent to the Elvish Council at the High City of Elgilad, as an ambassador for his people.",
+      "on_end": "show_extro_credits", "end": true }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "enter_silverhair_from_veranda_first",
+  "actions": [
+    { "op": "set", "flag": "came_from_barn", "value": 1 },
+    { "op": "set", "flag": "on_veranda", "value": 0 },
+    { "op": "change_scene", "scene": "redwyne_silverhair_room", "spawn": "veranda_door" },
+    { "op": "move_entity", "entity": "player", "x": 5, "y": 4, "facing": "west" },
+    { "op": "show_dialogue", "dialogue": "silverhair_start" }
+  ]
+}

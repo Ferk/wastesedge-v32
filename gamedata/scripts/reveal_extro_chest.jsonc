@@ -1,0 +1,9 @@
+{
+  "id": "reveal_extro_chest",
+  "actions": [
+    { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_extro_chest" },
+    { "op": "wait", "frames": 1 },
+    { "op": "play_music", "track": "extro_reveal" },
+    { "op": "show_dialogue", "dialogue": "extro_chest" }
+  ]
+}

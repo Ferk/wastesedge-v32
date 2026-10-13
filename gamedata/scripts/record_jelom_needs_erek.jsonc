@@ -1,0 +1,6 @@
+{
+  "id": "record_jelom_needs_erek",
+  "actions": [
+    { "op": "set", "flag": "convince_jelom", "value": 1 }
+  ]
+}

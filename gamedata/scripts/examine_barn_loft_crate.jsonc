@@ -1,0 +1,3 @@
+{ "id": "examine_barn_loft_crate", "actions": [
+  { "op": "speak", "entity": "player", "text": "An old, empty crate!" }
+] }

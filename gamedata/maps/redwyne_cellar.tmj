@@ -3327,6 +3327,31 @@
           "width": 20,
           "x": 120,
           "y": 20
+        },
+        {
+          "id": 166,
+          "name": "barn_stairs",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "barn_stairs" },
+            { "name": "facing", "type": "string", "value": "south" }
+          ],
+          "x": 240,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 167,
+          "name": "enter_barn_from_cellar",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_barn_from_cellar" },
+            { "name": "script", "type": "string", "value": "enter_barn_from_cellar" }
+          ],
+          "width": 20,
+          "x": 240,
+          "y": 20
         }
       ],
       "opacity": 0.4,
@@ -4725,7 +4750,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 166,
+  "nextobjectid": 168,
   "orientation": "orthogonal",
   "properties": [
     {

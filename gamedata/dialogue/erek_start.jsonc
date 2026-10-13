@@ -1,6 +1,7 @@
 {
   "id": "erek_start",
   "start": [
+    { "node": "gem_truth_retry", "when": { "flag": "erek_gem_refused", "equals": 1 } },
     { "node": "repeat_narration", "when": { "flag": "erek_talked", "equals": 1 } },
     { "node": "first_narration" }
   ],
@@ -78,6 +79,27 @@
         { "text": "I tried to talk with Master Fingolson, but he would not open the door. Could you have a word with him perhaps?",
           "when": { "flag": "bjarn_door_open", "equals": 1 },
           "next": "fingolson_refusal" },
+        { "text": "Jelom will not believe that the gem I have would be worthless to my mistress. But perhaps you could convince him.",
+          "when": {
+            "all": [
+              { "flag": "convince_jelom", "equals": 1 },
+              { "flag": "gem_worthless", "equals": 2 }
+            ]
+          },
+          "actions": [{ "op": "set", "flag": "convince_jelom", "value": 2 }],
+          "next": "erek_agrees_jelom" },
+        { "text": "Jelom will not believe that the gem I have would be worthless to my mistress. But perhaps you could convince him.",
+          "when": {
+            "all": [
+              { "flag": "convince_jelom", "equals": 1 },
+              { "flag": "gem_worthless", "equals": 3 }
+            ]
+          },
+          "actions": [{ "op": "set", "flag": "convince_jelom", "value": 2 }],
+          "next": "erek_agrees_jelom" },
+        { "text": "Erek, I'd like to hear your opinion about the gem I have here.",
+          "when": { "flag": "have_gem", "equals": 1 },
+          "next": "erek_recognizes_gem" },
         { "text": "Nothing really. Until later, Erek.", "next": "goodbye" }
       ]
     },
@@ -177,6 +199,109 @@
       "id": "erek_beckons", "speaker": "narrator",
       "text": "Seemingly reluctant, Erek beckons you to follow him down into the cellar.",
       "on_end": "escort_to_fingolson_room",
+      "end": true
+    },
+    {
+      "id": "erek_recognizes_gem", "speaker": "erek",
+      "text": "That ... - it's one of the Master's. It must be. Where did you get that, Banec?",
+      "choices": [
+        { "text": "I found it in the pantry.", "next": "erek_doubts_gem_story" },
+        { "text": "It was hidden in Lady Silverhair's luggage.", "next": "erek_requests_gem" }
+      ]
+    },
+    {
+      "id": "erek_doubts_gem_story", "speaker": "erek",
+      "text": "But certainly it was not lying openly on the ground, was it?",
+      "choices": [
+        { "text": "No. It was hidden in Lady Silverhair's luggage.", "next": "erek_requests_gem" },
+        { "text": "Obviously not. Now would you like to see it?", "next": "erek_examines_gem" },
+        { "text": "I would rather not say.",
+          "actions": [{ "op": "set", "flag": "erek_gem_refused", "value": 1 }],
+          "next": "erek_needs_truth" }
+      ]
+    },
+    {
+      "id": "erek_needs_truth", "speaker": "erek",
+      "text": "You don't trust me, Banec? In that case I'm sorry. Unless I know the truth about the gem, I cannot help you.",
+      "end": true
+    },
+    {
+      "id": "gem_truth_retry", "speaker": "narrator",
+      "text": "Erek tries to keep a straight face, but he fails to hide his grin as you address him.",
+      "next": "erek_ready_for_truth"
+    },
+    {
+      "id": "erek_ready_for_truth", "speaker": "erek",
+      "text": "Well, Banec, I was almost certain that it wouldn't take long to change your mind. I'm ready for the truth.",
+      "choices": [
+        { "text": "So it be. The gem was hidden in Lady Silverhair's luggage.",
+          "actions": [{ "op": "set", "flag": "erek_gem_refused", "value": 0 }],
+          "next": "erek_examines_gem" },
+        { "text": "I am not ready to tell you yet.", "next": "erek_needs_truth" }
+      ]
+    },
+    {
+      "id": "erek_requests_gem", "speaker": "erek",
+      "text": "Then your mistress is not as innocent as you thought, no? Let me see the gem, please.",
+      "next": "erek_examines_gem"
+    },
+    {
+      "id": "erek_examines_gem", "speaker": "narrator",
+      "text": "Carefully, Erek takes the gem and examines it closely for a while. Suddenly, he tosses it high into the air, a sparkling green star, gleaming in the light of the fire.",
+      "next": "erek_returns_gem"
+    },
+    {
+      "id": "erek_returns_gem", "speaker": "narrator",
+      "text": "Once caught again, the young Dwarf shakes his head and starts to smile. Finally, he returns the gem.",
+      "next": "erek_identifies_gem"
+    },
+    {
+      "id": "erek_identifies_gem", "speaker": "erek",
+      "text": "This is a fine example of a Chrysoberyl. Perfectly suitable for a Lady's ring, were that your Mistress' intention. However, it is no Catseye and as such it is of no use in the workings of magic she had in mind, if I recall correctly.",
+      "choices": [
+        { "text": "Could you repeat that for Jelom? He would not believe me.",
+          "when": {
+            "all": [
+              { "flag": "convince_jelom", "equals": 1 },
+              { "flag": "gem_worthless", "equals": 0 }
+            ]
+          },
+          "actions": [
+            { "op": "set", "flag": "gem_worthless", "value": 2 },
+            { "op": "set", "flag": "convince_jelom", "value": 2 }
+          ],
+          "next": "erek_agrees_jelom" },
+        { "text": "Could you repeat that for Jelom? He would not believe me.",
+          "when": {
+            "all": [
+              { "flag": "convince_jelom", "equals": 1 },
+              { "flag": "gem_worthless", "equals": 1 }
+            ]
+          },
+          "actions": [
+            { "op": "set", "flag": "gem_worthless", "value": 3 },
+            { "op": "set", "flag": "convince_jelom", "value": 2 }
+          ],
+          "next": "erek_agrees_jelom" },
+        { "text": "Thank you Erek. That's all I need to know.",
+          "when": { "flag": "gem_worthless", "equals": 0 },
+          "actions": [{ "op": "set", "flag": "gem_worthless", "value": 2 }],
+          "next": "erek_gem_thanks" },
+        { "text": "Thank you Erek. That's all I need to know.",
+          "when": { "flag": "gem_worthless", "equals": 1 },
+          "actions": [{ "op": "set", "flag": "gem_worthless", "value": 3 }],
+          "next": "erek_gem_thanks" }
+      ]
+    },
+    {
+      "id": "erek_gem_thanks", "speaker": "player",
+      "text": "Thank you Erek. That's all I need to know.",
+      "end": true
+    },
+    {
+      "id": "erek_agrees_jelom", "speaker": "erek",
+      "text": "Of course, Banec. Let's go and see him.",
+      "on_end": "escort_erek_to_jelom",
       "end": true
     },
     {

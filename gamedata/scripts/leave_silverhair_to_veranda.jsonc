@@ -1,0 +1,8 @@
+{
+  "id": "leave_silverhair_to_veranda",
+  "actions": [
+    { "op": "set", "flag": "came_from_barn", "value": 0 },
+    { "op": "set", "flag": "on_veranda", "value": 1 },
+    { "op": "change_scene", "scene": "redwyne_exterior", "spawn": "silverhair_veranda" }
+  ]
+}

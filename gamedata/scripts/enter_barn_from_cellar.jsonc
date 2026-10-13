@@ -1,0 +1,3 @@
+{ "id": "enter_barn_from_cellar", "actions": [
+  { "op": "change_scene", "scene": "redwyne_barn", "spawn": "cellar_stairs" }
+] }

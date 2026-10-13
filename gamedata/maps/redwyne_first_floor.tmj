@@ -1026,6 +1026,18 @@
           "y": 40
         },
         {
+          "id": 49,
+          "name": "jelom_evidence",
+          "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "jelom_evidence" },
+            { "name": "facing", "type": "string", "value": "east" }
+          ],
+          "x": 20,
+          "y": 60
+        },
+        {
           "height": 20,
           "id": 45,
           "name": "leave_for_common_room",
@@ -1262,7 +1274,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 49,
+  "nextobjectid": 50,
   "orientation": "orthogonal",
   "properties": [
     {

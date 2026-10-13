@@ -224,6 +224,7 @@
     {
       "id": "jelom_releases_silverhair", "speaker": "jelom",
       "text": "Maybe you should go in and see if your mistress can shed some light on the whole affair. However, until we find a new suspect, I'll be keeping an eye on her.",
+      "on_end": "activate_jelom_second_dialogue",
       "end": true
     },
     {

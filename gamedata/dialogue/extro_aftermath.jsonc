@@ -1,0 +1,40 @@
+{
+  "id": "extro_aftermath",
+  "start": [{ "node": "confession" }],
+  "speakers": [
+    { "id": "banec", "name": "Banec", "role": "npc", "entity": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "bjarn", "name": "Bjarn Fingolson", "role": "npc", "entity": "bjarn",
+      "portrait": "assets/ui/portraits/bjarn.png" },
+    { "id": "erek", "name": "Erek Stonebreaker", "role": "npc", "entity": "erek",
+      "portrait": "assets/ui/portraits/erek.png" },
+    { "id": "jelom", "name": "Jelom Rasgar", "role": "npc", "entity": "jelom",
+      "portrait": "assets/ui/portraits/jelom.png" },
+    { "id": "silverhair", "name": "Imoen Silverhair", "role": "npc", "entity": "silverhair",
+      "portrait": "assets/ui/portraits/silverhair.png" }
+  ],
+  "nodes": [
+    { "id": "confession", "speaker": "bjarn", "text": "There is no denying it. Yes, I feigned the theft.", "next": "erek_shocked" },
+    { "id": "erek_shocked", "speaker": "erek", "text": "But Master? How could you do such an infamous deed?", "next": "jelom_demands_gems" },
+    { "id": "jelom_demands_gems", "speaker": "jelom", "text": "That I would know as well! And where are the gems then?", "next": "bjarn_clear" },
+    { "id": "bjarn_clear", "speaker": "bjarn", "text": "What? Haven't I made myself clear already?", "next": "bjarn_hates_elves" },
+    { "id": "bjarn_hates_elves", "speaker": "bjarn", "text": "I despise those Elves and their uncanny ways.", "next": "bjarn_reality" },
+    { "id": "bjarn_reality", "speaker": "bjarn", "text": "Their ... meddling with reality contradicts all principles I learnt to hold true.", "next": "bjarn_provided" },
+    { "id": "bjarn_provided", "speaker": "bjarn", "text": "And yet, I had to provide them with the reagents they need to perform their dark art.", "next": "bjarn_ashamed" },
+    { "id": "bjarn_ashamed", "speaker": "bjarn", "text": "I felt so ... ashamed!", "next": "banec_justifies" },
+    { "id": "banec_justifies", "speaker": "banec", "text": "And you believe this justifies the discomfort you caused my mistress?", "next": "bjarn_mistress" },
+    { "id": "bjarn_mistress", "speaker": "bjarn", "text": "You cannot think further than your mistress, can you?", "next": "bjarn_elder_insult" },
+    { "id": "bjarn_elder_insult", "speaker": "bjarn", "text": "Theft by a high born like Lady Silverhair would have been considered a grave insult by the clan elders.", "next": "bjarn_cease_trade" },
+    { "id": "bjarn_cease_trade", "speaker": "bjarn", "text": "Had she been convicted, they might have chosen to cease trading with her likes.", "next": "bjarn_no_gems" },
+    { "id": "bjarn_no_gems", "speaker": "bjarn", "text": "It might have been years before any Elf got his filthy hands on our beloved gems again!", "next": "silverhair_feared" },
+    { "id": "silverhair_feared", "speaker": "silverhair", "text": "I feared as much and I feared the consequences.", "next": "silverhair_tides" },
+    { "id": "silverhair_tides", "speaker": "silverhair", "text": "Without the arcane arts my kind would soon succumb to the human tides.", "next": "silverhair_needs_gems" },
+    { "id": "silverhair_needs_gems", "speaker": "silverhair", "text": "But without gems and ores purchased from the small folk we cannot create magic.", "next": "jelom_surprised" },
+    { "id": "jelom_surprised", "speaker": "jelom", "text": "Who would have thought that?", "next": "jelom_favour" },
+    { "id": "jelom_favour", "speaker": "jelom", "text": "Seems you owe Banec here a big favour, if I may say so, Lady.", "next": "silverhair_remembers" },
+    { "id": "silverhair_remembers", "speaker": "silverhair", "text": "Rest assured that Banec's deeds will not be forgotten, good man.", "next": "jelom_whereabouts" },
+    { "id": "jelom_whereabouts", "speaker": "jelom", "text": "Well, this is settled then. What remains now are the whereabouts of the gems.", "next": "jelom_calls_bjarn" },
+    { "id": "jelom_calls_bjarn", "speaker": "jelom", "text": "Master Fingolson!",
+      "on_end": "reveal_extro_chest", "end": true }
+  ]
+}

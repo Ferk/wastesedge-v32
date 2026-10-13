@@ -1,0 +1,7 @@
+{
+  "id": "show_extro_credits",
+  "actions": [
+    { "op": "play_music", "track": "extro_credits" },
+    { "op": "show_dialogue", "dialogue": "extro_credits" }
+  ]
+}

@@ -1,0 +1,4 @@
+{ "id": "enter_barn_loft_from_veranda", "actions": [
+  { "op": "set", "flag": "on_veranda", "value": 0 },
+  { "op": "change_scene", "scene": "redwyne_barn_loft", "spawn": "veranda" }
+] }

@@ -59,13 +59,35 @@ off screen. Labeled schedule branches select Orloth's next job, Erek's room
 position, and Rhayne's next safe yard point at runtime using engine randomness
 seeded by Vircon32's hardware generator.
 
+After the pantry gem is recovered, Erek's conversation exposes the original
+conditional examination branch. He reacts differently if Banec conceals where
+the stone was found, allows a later confession, and records his independent
+finding that it is a Chrysoberyl rather than a Catseye. This combines with
+Silverhair's assessment using the original staged `gem_worthless` values.
+Jelom's second conversation then preserves the original proof variants and
+`convince_jelom` stages. If Jelom remains unconvinced, Erek can accompany Banec
+to the landing and testify from his original submap positions. Jelom sends
+Banec to question Fingolson unless the Dwarf's Catseye lie is already known;
+Erek's corroboration then records the final-gathering state. The gathering and
+ending now continue automatically: Bjarn, Erek, Jelom, Silverhair, Tristan,
+Fellnir, and Banec are staged in Fingolson's room; the complete accusation
+graph converges on Bjarn's confession; and the chest reveal, Talan's report,
+four epilogue passages, and credits follow as authored dialogue phases. The
+four original extro music cues are copied into `gamedata` and compiled into
+the ROM. See `docs/deviations.md` for the remaining presentation differences
+from the original animated cutscene.
+
 The cellar is reachable by both original inn routes: the kitchen stair and
 the separate common-room stair. Its pantry and Fingolson-room passages are
-reciprocal two-cell thresholds. Erek's conditional dialogue performs the
+reciprocal two-cell thresholds, and its barn stair now opens the original
+ground-floor/loft route. Erek's conditional dialogue performs the
 original escort into Fingolson's room; Bjarn then follows his room schedule,
 offers the converted investigation branches, and guards the Dwarven chest
-with its original examination remark. The bath, Alek-room, and barn cellar
-thresholds remain inactive until those destination scenes are converted.
+with its original examination remark. The barn loft crosses the exterior
+veranda into Silverhair's room, allowing her Yeti evidence to unlock
+Frostbloom's quest branch before Jelom opens the guarded hallway door. The
+bath and Alek-room cellar thresholds remain inactive until those destination
+scenes are converted.
 
 Schedule `move` targets are direct destinations: the runtime follows the
 original engine's cardinal mapsquare A* rules and replans if another character
@@ -81,7 +103,7 @@ ROM needs neither JSON parsing nor runtime font rendering.
 
 The exterior collision layer retains the original per-square directional
 masks. Objects named `unported_*` close thresholds where the original map
-immediately changed to a scene that has not been converted yet (the barn,
-veranda/Silverhair route, guardhouse, and kitchen pantry). Remove the corresponding guard when
-that transition and destination scene are added; leaving the threshold as
-ordinary walkable exterior terrain permits walking through the building art.
+immediately changed to a scene that has not been converted yet (currently the
+guardhouse). Remove the corresponding guard when that transition and
+destination scene are added; leaving the threshold as ordinary walkable
+exterior terrain permits walking through the building art.

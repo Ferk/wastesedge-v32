@@ -1,0 +1,1329 @@
+{
+  "compressionlevel": -1,
+  "height": 8,
+  "infinite": false,
+  "layers": [
+    {
+      "data": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "height": 8,
+      "id": 1,
+      "name": "background_terrain",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 6,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "data": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "height": 8,
+      "id": 2,
+      "name": "background_details",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 6,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 3,
+      "name": "map_objects",
+      "objects": [
+        {
+          "gid": 6,
+          "height": 20,
+          "id": 1,
+          "name": "barn_left_back",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left_back.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 20
+        },
+        {
+          "gid": 7,
+          "height": 20,
+          "id": 2,
+          "name": "barn_right_back",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right_back.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 20
+        },
+        {
+          "gid": 8,
+          "height": 20,
+          "id": 3,
+          "name": "barn_left",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 20
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 40
+        },
+        {
+          "gid": 9,
+          "height": 20,
+          "id": 4,
+          "name": "barn_right",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 20
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 40
+        },
+        {
+          "gid": 8,
+          "height": 20,
+          "id": 5,
+          "name": "barn_left",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 40
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 60
+        },
+        {
+          "gid": 9,
+          "height": 20,
+          "id": 6,
+          "name": "barn_right",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 40
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 60
+        },
+        {
+          "gid": 8,
+          "height": 20,
+          "id": 7,
+          "name": "barn_left",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 60
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 80
+        },
+        {
+          "gid": 2,
+          "height": 40,
+          "id": 8,
+          "name": "barn_ground-cellar",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "stairs/barn_ground-cellar.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 60
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 20,
+          "y": 70
+        },
+        {
+          "gid": 3,
+          "height": 40,
+          "id": 9,
+          "name": "barn_ground-loft",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "stairs/barn_ground-loft.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 60
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 60,
+          "y": 70
+        },
+        {
+          "gid": 1,
+          "height": 60,
+          "id": 10,
+          "name": "barn_back",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_back.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 60
+            }
+          ],
+          "type": "map_object",
+          "width": 80,
+          "x": 20,
+          "y": 70
+        },
+        {
+          "gid": 9,
+          "height": 20,
+          "id": 11,
+          "name": "barn_right",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 60
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 80
+        },
+        {
+          "gid": 8,
+          "height": 20,
+          "id": 12,
+          "name": "barn_left",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 80
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 100
+        },
+        {
+          "gid": 5,
+          "height": 11,
+          "id": 13,
+          "name": "barn_ground_back_top",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_ground_back_top.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 80
+            }
+          ],
+          "type": "map_object",
+          "width": 21,
+          "x": 60,
+          "y": 41
+        },
+        {
+          "gid": 9,
+          "height": 20,
+          "id": 14,
+          "name": "barn_right",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 80
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 100
+        },
+        {
+          "gid": 8,
+          "height": 20,
+          "id": 15,
+          "name": "barn_left",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 100
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 120
+        },
+        {
+          "gid": 9,
+          "height": 20,
+          "id": 16,
+          "name": "barn_right",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 100
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 120
+        },
+        {
+          "gid": 10,
+          "height": 20,
+          "id": 17,
+          "name": "barn_left_front",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_left_front.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 120
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 0,
+          "y": 140
+        },
+        {
+          "gid": 11,
+          "height": 20,
+          "id": 18,
+          "name": "barn_right_front",
+          "properties": [
+            {
+              "name": "source_object",
+              "type": "string",
+              "value": "walls/barn_right_front.mobj"
+            },
+            {
+              "name": "source_animation",
+              "type": "int",
+              "value": 0
+            },
+            {
+              "name": "sort_y",
+              "type": "int",
+              "value": 120
+            }
+          ],
+          "type": "map_object",
+          "width": 20,
+          "x": 100,
+          "y": 140
+        },
+        {
+          "gid": 12,
+          "height": 30,
+          "id": 35,
+          "name": "player",
+          "properties": [
+            {
+              "name": "entity_def",
+              "type": "string",
+              "value": "player"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "north"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "player"
+            },
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "entity"
+            }
+          ],
+          "type": "actor",
+          "width": 20,
+          "x": 40,
+          "y": 140
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 4,
+      "name": "navigation",
+      "objects": [
+        {
+          "id": 36,
+          "name": "exterior_west",
+          "point": true,
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "spawn"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "exterior_west"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "north"
+            }
+          ],
+          "x": 20,
+          "y": 120
+        },
+        {
+          "id": 37,
+          "name": "exterior_midwest",
+          "point": true,
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "spawn"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "exterior_midwest"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "north"
+            }
+          ],
+          "x": 40,
+          "y": 120
+        },
+        {
+          "id": 38,
+          "name": "exterior_mideast",
+          "point": true,
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "spawn"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "exterior_mideast"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "north"
+            }
+          ],
+          "x": 60,
+          "y": 120
+        },
+        {
+          "id": 39,
+          "name": "exterior_east",
+          "point": true,
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "spawn"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "exterior_east"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "north"
+            }
+          ],
+          "x": 80,
+          "y": 120
+        },
+        {
+          "id": 40,
+          "name": "cellar_stairs",
+          "point": true,
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "spawn"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "cellar_stairs"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "south"
+            }
+          ],
+          "x": 20,
+          "y": 60
+        },
+        {
+          "id": 41,
+          "name": "loft_stairs",
+          "point": true,
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "spawn"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "loft_stairs"
+            },
+            {
+              "name": "facing",
+              "type": "string",
+              "value": "south"
+            }
+          ],
+          "x": 60,
+          "y": 60
+        },
+        {
+          "height": 20,
+          "id": 42,
+          "name": "leave_exterior_west",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "exit"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "leave_exterior_west"
+            },
+            {
+              "name": "script",
+              "type": "string",
+              "value": "leave_barn_exterior_west"
+            }
+          ],
+          "width": 20,
+          "x": 20,
+          "y": 140
+        },
+        {
+          "height": 20,
+          "id": 43,
+          "name": "leave_exterior_midwest",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "exit"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "leave_exterior_midwest"
+            },
+            {
+              "name": "script",
+              "type": "string",
+              "value": "leave_barn_exterior_midwest"
+            }
+          ],
+          "width": 20,
+          "x": 40,
+          "y": 140
+        },
+        {
+          "height": 20,
+          "id": 44,
+          "name": "leave_exterior_mideast",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "exit"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "leave_exterior_mideast"
+            },
+            {
+              "name": "script",
+              "type": "string",
+              "value": "leave_barn_exterior_mideast"
+            }
+          ],
+          "width": 20,
+          "x": 60,
+          "y": 140
+        },
+        {
+          "height": 20,
+          "id": 45,
+          "name": "leave_exterior_east",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "exit"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "leave_exterior_east"
+            },
+            {
+              "name": "script",
+              "type": "string",
+              "value": "leave_barn_exterior_east"
+            }
+          ],
+          "width": 20,
+          "x": 80,
+          "y": 140
+        },
+        {
+          "height": 20,
+          "id": 46,
+          "name": "leave_for_cellar",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "exit"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "leave_for_cellar"
+            },
+            {
+              "name": "script",
+              "type": "string",
+              "value": "leave_barn_to_cellar"
+            }
+          ],
+          "width": 20,
+          "x": 20,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 47,
+          "name": "leave_for_loft",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "exit"
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "value": "leave_for_loft"
+            },
+            {
+              "name": "script",
+              "type": "string",
+              "value": "enter_barn_loft"
+            }
+          ],
+          "width": 20,
+          "x": 60,
+          "y": 40
+        }
+      ],
+      "opacity": 0.4,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 5,
+      "name": "collision",
+      "objects": [
+        {
+          "height": 20,
+          "id": 19,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 0,
+          "y": 20
+        },
+        {
+          "height": 20,
+          "id": 20,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 14
+            }
+          ],
+          "width": 20,
+          "x": 20,
+          "y": 20
+        },
+        {
+          "height": 20,
+          "id": 21,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 14
+            }
+          ],
+          "width": 20,
+          "x": 60,
+          "y": 20
+        },
+        {
+          "height": 20,
+          "id": 22,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 20
+        },
+        {
+          "height": 20,
+          "id": 23,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 0,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 24,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 14
+            }
+          ],
+          "width": 20,
+          "x": 40,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 25,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 14
+            }
+          ],
+          "width": 20,
+          "x": 80,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 26,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 40
+        },
+        {
+          "height": 20,
+          "id": 27,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 0,
+          "y": 60
+        },
+        {
+          "height": 20,
+          "id": 28,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 60
+        },
+        {
+          "height": 20,
+          "id": 29,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 0,
+          "y": 80
+        },
+        {
+          "height": 20,
+          "id": 30,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 80
+        },
+        {
+          "height": 20,
+          "id": 31,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 0,
+          "y": 100
+        },
+        {
+          "height": 20,
+          "id": 32,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 100
+        },
+        {
+          "height": 20,
+          "id": 33,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 0,
+          "y": 120
+        },
+        {
+          "height": 20,
+          "id": 34,
+          "name": "collision",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "collision"
+            },
+            {
+              "name": "walkability",
+              "type": "int",
+              "value": 0
+            }
+          ],
+          "width": 20,
+          "x": 100,
+          "y": 120
+        }
+      ],
+      "opacity": 0.4,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 6,
+  "nextobjectid": 48,
+  "orientation": "orthogonal",
+  "properties": [
+    {
+      "name": "id",
+      "type": "string",
+      "value": "redwyne_barn"
+    },
+    {
+      "name": "tile_size",
+      "type": "int",
+      "value": 20
+    }
+  ],
+  "renderorder": "right-down",
+  "tiledversion": "1.11.0",
+  "tileheight": 20,
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "../tilesets/redwyne_barn.tsj"
+    },
+    {
+      "firstgid": 12,
+      "source": "../tilesets/redwyne_exterior_characters.tsj"
+    }
+  ],
+  "tilewidth": 20,
+  "type": "map",
+  "version": "1.10",
+  "width": 6
+}
