@@ -1,0 +1,3 @@
+{ "id": "enter_upper_hall", "actions": [
+  { "op": "change_scene", "scene": "redwyne_upper_hall", "spawn": "lower_stairs" }
+] }

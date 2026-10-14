@@ -11,6 +11,13 @@ enum world_facing {
 };
 
 #define WORLD_COLLISION_OVERRIDE_CAPACITY 16
+#define WORLD_TRANSITION_FRAMES 8
+
+enum world_transition_phase {
+    WORLD_TRANSITION_NONE = 0,
+    WORLD_TRANSITION_FADE_OUT = 1,
+    WORLD_TRANSITION_FADE_IN = 2
+};
 
 struct world_collision_override {
     int scene;
@@ -85,6 +92,10 @@ struct world_state {
     int music_track;
     int music_revision;
     int visual_revision;
+    int transition_phase;
+    int transition_frame;
+    int transition_scene;
+    int transition_spawn;
     int schedule_random;
     int speech_random;
 };
@@ -92,6 +103,7 @@ struct world_state {
 void world_initialize(struct world_state *world);
 void world_seed_random(struct world_state *world, int seed);
 void world_update(struct world_state *world, const struct world_actions *actions);
+int world_transition_alpha(const struct world_state *world);
 int world_entity_x(const struct world_state *world, int entity_index);
 int world_entity_y(const struct world_state *world, int entity_index);
 int world_entity_facing(const struct world_state *world, int entity_index);
@@ -100,6 +112,14 @@ int world_entity_is_present(const struct world_state *world, int entity_index);
 int world_entity_pixel_x(const struct world_state *world, int entity_index);
 int world_entity_pixel_y(const struct world_state *world, int entity_index);
 int world_entity_animation_frame(const struct world_state *world, int entity_index);
+int world_actor_x(const struct world_state *world, int definition);
+int world_actor_y(const struct world_state *world, int definition);
+int world_actor_facing(const struct world_state *world, int definition);
+int world_actor_is_moving(const struct world_state *world, int definition);
+int world_actor_is_present(const struct world_state *world, int definition);
+int world_actor_pixel_x(const struct world_state *world, int definition);
+int world_actor_pixel_y(const struct world_state *world, int definition);
+int world_actor_animation_frame(const struct world_state *world, int definition);
 const struct generated_runtime_frame *world_scenery_frame(
     const struct world_state *world,
     const struct generated_runtime_scenery *scenery);
@@ -114,5 +134,7 @@ const struct generated_runtime_text *world_dialogue_display(const struct world_s
 const struct generated_runtime_text *world_dialogue_choice_display(const struct world_state *world, int index);
 const struct generated_runtime_text *world_entity_speech(
     const struct world_state *world, int entity_index);
+const struct generated_runtime_text *world_actor_speech(
+    const struct world_state *world, int definition);
 
 #endif

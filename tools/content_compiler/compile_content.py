@@ -653,8 +653,21 @@ def validate_tilesets(map_path: Path, document: dict[str, object], game_root: Pa
                 raise ContentError(f"{tileset_path}: missing tile image {image_source!r}")
             if image_path.suffix.lower() != ".png":
                 raise ContentError(f"{tileset_path}: unsupported tile image format {image_path.suffix!r}")
-            if image_path.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
+            image_data = image_path.read_bytes()
+            if image_data[:8] != b"\x89PNG\r\n\x1a\n":
                 raise ContentError(f"{tileset_path}: tile image is not a PNG: {image_source!r}")
+            actual_width = int.from_bytes(image_data[16:20], "big")
+            actual_height = int.from_bytes(image_data[20:24], "big")
+            declared_width = tile.get("imagewidth")
+            declared_height = tile.get("imageheight")
+            if declared_width is not None and declared_width != actual_width:
+                raise ContentError(
+                    f"{tileset_path}: tile image {image_source!r} declares width "
+                    f"{declared_width}, but the PNG is {actual_width} pixels wide")
+            if declared_height is not None and declared_height != actual_height:
+                raise ContentError(
+                    f"{tileset_path}: tile image {image_source!r} declares height "
+                    f"{declared_height}, but the PNG is {actual_height} pixels high")
         if tile_entries:
             for tile in tile_entries:
                 tile = expect(tile, dict, f"{tileset_path} tile")
@@ -1623,7 +1636,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
 def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict[str, object]], game_root: Path,
                        script_dialogues: dict[str, str], dialogue_index: dict[str, int],
                        script_index: dict[str, int],
-                       flag_index: dict[str, int]) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]], list[str]]:
+                       flag_index: dict[str, int]) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]], list[dict[str, int]], list[str]]:
     """Compile the small initial scene runtime representation.
 
     This deliberately covers authored ground tiles, static depth-capable map
@@ -2087,18 +2100,6 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
             item["state_slot"] = global_state_slot
             global_state_slot += 1
 
-    initial_actor_placements: dict[int, str] = {}
-    for scene in raw_scenes:
-        for entity in scene["entities"]:
-            if entity["player_controlled"] or not entity["initially_present"]:
-                continue
-            definition = int(entity["definition"])
-            if definition in initial_actor_placements:
-                raise ContentError(
-                    f"actor definition {definition} is initially present in both "
-                    f"{initial_actor_placements[definition]!r} and {scene['id']!r}")
-            initial_actor_placements[definition] = str(scene["id"])
-
     visuals = []
     for source_character in sorted(raw_visuals):
         visual = raw_visuals[source_character]
@@ -2110,13 +2111,66 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     for scene in raw_scenes:
         for entity in scene["entities"]:
             entity["visual"] = visual_index[str(entity.pop("visual_key"))]
+
+    # Actors have one world-level identity. Tiled placements establish their
+    # visual/default interaction and, when initially_present is true, their
+    # initial location. They are not a per-scene whitelist: schedules and
+    # scripts may subsequently place an actor in any compiled scene.
+    scene_index = {str(scene["id"]): index for index, scene in enumerate(raw_scenes)}
+    actors: list[dict[str, int]] = []
+    for definition_id in sorted(entity_definitions):
+        definition = entity_definitions[definition_id]
+        actors.append({
+            "visual": -1,
+            "blocks_movement": int(bool(definition["blocks_movement"])),
+            "player_controlled": int(bool(definition["player_controlled"])),
+            "interaction_dialogue": -1,
+            "initial_scene": -1,
+            "initial_x": 0,
+            "initial_y": 0,
+            "initial_facing": 1,
+        })
+    initial_actor_placements: dict[int, str] = {}
+    for scene in raw_scenes:
+        for entity in scene["entities"]:
+            definition = int(entity["definition"])
+            actor = actors[definition]
+            visual = int(entity["visual"])
+            dialogue = int(entity["interaction_dialogue"])
+            if actor["visual"] >= 0 and actor["visual"] != visual:
+                raise ContentError(
+                    f"actor definition {definition} uses different visuals in scene "
+                    f"{scene['id']!r}")
+            actor["visual"] = visual
+            if dialogue >= 0:
+                if (actor["interaction_dialogue"] >= 0 and
+                        actor["interaction_dialogue"] != dialogue):
+                    raise ContentError(
+                        f"actor definition {definition} uses different default dialogues")
+                actor["interaction_dialogue"] = dialogue
+            if entity["player_controlled"] or not entity["initially_present"]:
+                continue
+            if definition in initial_actor_placements:
+                raise ContentError(
+                    f"actor definition {definition} is initially present in both "
+                    f"{initial_actor_placements[definition]!r} and {scene['id']!r}")
+            initial_actor_placements[definition] = str(scene["id"])
+            actor["initial_scene"] = scene_index[str(scene["id"])]
+            actor["initial_x"] = int(entity["tile_x"])
+            actor["initial_y"] = int(entity["tile_y"])
+            actor["initial_facing"] = int(entity["facing"])
+    for definition, definition_id in enumerate(sorted(entity_definitions)):
+        if (entity_definitions[definition_id]["kind"] == "actor" and
+                actors[definition]["visual"] < 0):
+            raise ContentError(
+                f"actor definition {definition_id!r} has no visual-bearing Tiled placement")
     object_visuals = [{"visual_key": key, **raw_object_visuals[key]} for key in sorted(raw_object_visuals)]
     object_visual_index = {str(visual["visual_key"]): index for index, visual in enumerate(object_visuals)}
     for scene in raw_scenes:
         for item in scene["scenery"]:
             if "visual_key" in item:
                 item["visual"] = object_visual_index[str(item.pop("visual_key"))]
-    return raw_scenes, visuals, object_visuals, sorted(resources)
+    return raw_scenes, visuals, object_visuals, actors, sorted(resources)
 
 
 def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: int,
@@ -2131,6 +2185,10 @@ struct generated_runtime_actor_visual {
     struct generated_runtime_frame standing[4];
     struct generated_runtime_frame walking[4][4];
     int walking_count[4];
+};
+struct generated_runtime_actor {
+    int visual, blocks_movement, player_controlled, interaction_dialogue;
+    int initial_scene, initial_x, initial_y, initial_facing;
 };
 struct generated_runtime_collision { int x, y, width, height, walkability; };
 struct generated_runtime_navigation_blocker { int x, y, width, height; };
@@ -2202,6 +2260,8 @@ struct generated_runtime_scene {
 };
 extern const struct generated_runtime_actor_visual generated_runtime_actor_visuals[];
 extern const int generated_runtime_actor_visual_count;
+extern const struct generated_runtime_actor generated_runtime_actors[];
+extern const int generated_runtime_actor_count;
 extern const struct generated_runtime_object_visual generated_runtime_object_visuals[];
 extern const int generated_runtime_object_visual_count;
 extern const struct generated_runtime_script generated_runtime_scripts[];
@@ -2267,6 +2327,7 @@ def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
 
 
 def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, object]],
+                   actors: list[dict[str, int]],
                    object_visuals: list[dict[str, object]], resources: list[str], initial_scene: str,
                    dialogues: list[dict[str, object]], scripts: list[dict[str, object]],
                    glyphs: list[dict[str, object]], space_advance: int,
@@ -2279,6 +2340,14 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             sound, track["loop"], track["speed"], track["volume"]))
     lines.append("};")
     lines.append(f"const int generated_runtime_music_count = {len(music)};\n")
+    lines.append("const struct generated_runtime_actor generated_runtime_actors[] = {")
+    for actor in actors:
+        lines.append("    { %d, %d, %d, %d, %d, %d, %d, %d }," % (
+            actor["visual"], actor["blocks_movement"], actor["player_controlled"],
+            actor["interaction_dialogue"], actor["initial_scene"], actor["initial_x"],
+            actor["initial_y"], actor["initial_facing"]))
+    lines.append("};")
+    lines.append(f"const int generated_runtime_actor_count = {len(actors)};\n")
     for index, scene in enumerate(scenes):
         lines.append(f"static const struct generated_runtime_background generated_runtime_background_{index}[] = {{")
         for item in scene["background"]:
@@ -2551,7 +2620,7 @@ def compile_content(project_root: Path) -> None:
     runtime_dialogue, script_dialogues, runtime_flags = runtime_dialogues(
         inputs["dialogue"], inputs["scripts"], entities, game_root, script_index)
     dialogue_index = {str(item["id"]): index for index, item in enumerate(runtime_dialogue)}
-    runtime_scenes, runtime_visuals, runtime_object_visuals, _ = runtime_scene_data(
+    runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_actors, _ = runtime_scene_data(
         inputs["maps"], entities, game_root, script_dialogues, dialogue_index,
         script_index, {flag: index for index, flag in enumerate(runtime_flags)})
     runtime_schedule_data = runtime_schedules(schedules, entities, runtime_scenes)
@@ -2609,7 +2678,7 @@ def compile_content(project_root: Path) -> None:
     write_output(output_root / "content_scene_data.h", runtime_header(
         len(runtime_flags), stateful_scenery_count, len(entities), maximum_dialogue_nodes))
     write_output(output_root / "content_scene_data.c", runtime_source(
-        runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_resources,
+        runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
         initial_scene, runtime_dialogue, runtime_script_data,
         runtime_glyphs, runtime_space_advance, music, runtime_schedule_data))
     source_textures = [path for path in runtime_resources if not path.startswith(GENERATED_RESOURCE_PREFIX)]

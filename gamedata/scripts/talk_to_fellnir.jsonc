@@ -1,0 +1,3 @@
+{ "id": "talk_to_fellnir", "actions": [
+  { "op": "show_dialogue", "dialogue": "fellnir_start" }
+] }

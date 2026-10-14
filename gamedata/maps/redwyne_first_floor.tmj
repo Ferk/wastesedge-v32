@@ -943,23 +943,6 @@
           "y": 80
         },
         {
-          "gid": 78,
-          "height": 30,
-          "id": 40,
-          "name": "oliver_first_floor",
-          "properties": [
-            { "name": "entity_def", "type": "string", "value": "oliver" },
-            { "name": "facing", "type": "string", "value": "north" },
-            { "name": "id", "type": "string", "value": "oliver_first_floor" },
-            { "name": "initially_present", "type": "bool", "value": false },
-            { "name": "kind", "type": "string", "value": "entity" }
-          ],
-          "type": "actor",
-          "width": 20,
-          "x": 140,
-          "y": 80
-        },
-        {
           "gid": 98,
           "height": 30,
           "id": 41,
@@ -1091,6 +1074,54 @@
           "width": 20,
           "x": 20,
           "y": 140
+        },
+        {
+          "id": 50, "name": "fellnir_door", "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "fellnir_door" },
+            { "name": "facing", "type": "string", "value": "west" }
+          ], "x": 160, "y": 40
+        },
+        {
+          "height": 20, "id": 51, "name": "enter_fellnir_room",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_fellnir_room" },
+            { "name": "script", "type": "string", "value": "enter_fellnir_room" }
+          ], "width": 20, "x": 180, "y": 40
+        },
+        {
+          "id": 52, "name": "guest_door", "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "guest_door" },
+            { "name": "facing", "type": "string", "value": "east" }
+          ], "x": 20, "y": 40
+        },
+        {
+          "height": 20, "id": 53, "name": "enter_guest_room",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_guest_room" },
+            { "name": "script", "type": "string", "value": "enter_guest_room" }
+          ], "width": 20, "x": 0, "y": 40
+        },
+        {
+          "id": 54, "name": "upper_stairs", "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "upper_stairs" },
+            { "name": "facing", "type": "string", "value": "south" }
+          ], "x": 120, "y": 40
+        },
+        {
+          "height": 20, "id": 55, "name": "enter_upper_hall",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_upper_hall" },
+            { "name": "script", "type": "string", "value": "enter_upper_hall" }
+          ], "width": 20, "x": 120, "y": 20
         }
       ],
       "opacity": 1,
@@ -1274,7 +1305,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 50,
+  "nextobjectid": 56,
   "orientation": "orthogonal",
   "properties": [
     {
@@ -1303,10 +1334,6 @@
     {
       "firstgid": 38,
       "source": "../tilesets/redwyne_exterior_characters.tsj"
-    },
-    {
-      "firstgid": 78,
-      "source": "../tilesets/redwyne_exterior_oliver.tsj"
     },
     {
       "firstgid": 98,

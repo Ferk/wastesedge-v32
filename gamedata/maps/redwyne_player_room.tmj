@@ -688,24 +688,6 @@
           "width": 20,
           "x": 100,
           "y": 80
-        },
-        {
-          "gid": 76,
-          "height": 30,
-          "id": 30,
-          "name": "oliver_player_room",
-          "properties": [
-            { "name": "entity_def", "type": "string", "value": "oliver" },
-            { "name": "facing", "type": "string", "value": "north" },
-            { "name": "id", "type": "string", "value": "oliver_player_room" },
-            { "name": "initially_present", "type": "bool", "value": false },
-            { "name": "interaction", "type": "string", "value": "talk_to_oliver" },
-            { "name": "kind", "type": "string", "value": "entity" }
-          ],
-          "type": "actor",
-          "width": 20,
-          "x": 100,
-          "y": 100
         }
       ],
       "opacity": 1,
@@ -965,10 +947,6 @@
     {
       "firstgid": 36,
       "source": "../tilesets/redwyne_exterior_characters.tsj"
-    },
-    {
-      "firstgid": 76,
-      "source": "../tilesets/redwyne_exterior_oliver.tsj"
     }
   ],
   "tilewidth": 20,

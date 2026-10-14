@@ -752,24 +752,6 @@
           "width": 20,
           "x": 20,
           "y": 100
-        },
-        {
-          "gid": 75,
-          "height": 30,
-          "id": 35,
-          "name": "erek_parlour",
-          "properties": [
-            { "name": "entity_def", "type": "string", "value": "erek" },
-            { "name": "facing", "type": "string", "value": "south" },
-            { "name": "id", "type": "string", "value": "erek_parlour" },
-            { "name": "initially_present", "type": "bool", "value": false },
-            { "name": "interaction", "type": "string", "value": "talk_to_erek" },
-            { "name": "kind", "type": "string", "value": "entity" }
-          ],
-          "type": "actor",
-          "width": 20,
-          "x": 80,
-          "y": 120
         }
       ],
       "opacity": 1,
@@ -1083,10 +1065,6 @@
     {
       "firstgid": 35,
       "source": "../tilesets/redwyne_exterior_characters.tsj"
-    },
-    {
-      "firstgid": 75,
-      "source": "../tilesets/redwyne_inn_erek.tsj"
     }
   ],
   "tilewidth": 20,

@@ -32,6 +32,7 @@
     { "op": "start_schedule", "entity": "silverhair", "schedule": "silverhair_room", "delay_frames": 450 },
     { "op": "start_schedule", "entity": "sarin", "schedule": "sarin_room", "delay_frames": 90 },
     { "op": "start_schedule", "entity": "janesta", "schedule": "janesta_room", "delay_frames": 300 },
+    { "op": "start_schedule", "entity": "fellnir", "schedule": "fellnir_room", "delay_frames": 222 },
     { "op": "set_entity_state", "entity": "intro_gate_back", "state": "opening_3" },
     { "op": "set_entity_state", "entity": "intro_gate_fore", "state": "opening_3" },
     { "op": "wait", "frames": 4 },

@@ -1,0 +1,3 @@
+{ "id": "examine_fellnir_yeti", "actions": [
+  { "op": "speak", "entity": "player", "text": "Aw, a midget yeti, how cute!" }
+] }

@@ -1,0 +1,125 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_exterior_entrance_split",
+  "tilecount": 2,
+  "tiledversion": "1.12.2",
+  "tileheight": 68,
+  "tilewidth": 20,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_back.png",
+      "imagewidth": 20,
+      "imageheight": 53,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/entrance-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 1,
+      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_fore.png",
+      "imagewidth": 20,
+      "imageheight": 68,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "houses/redwyne-inn/entrance-fore.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 6
+        }
+      ],
+      "type": "map_object"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

@@ -8,14 +8,39 @@
 static void tick(struct world_state *world, int frames)
 {
     struct world_actions actions = { 0, 0, 0, 0 };
+    int transitioned = 0;
     while (frames-- > 0)
         world_update(world, &actions);
+    /* Scene changes deliberately span a fade-out and fade-in. Most tests are
+     * interested in the settled destination rather than an intermediate
+     * transition frame. */
+    while (world->transition_phase != WORLD_TRANSITION_NONE) {
+        transitioned = 1;
+        world_update(world, &actions);
+    }
+    /* Let the scene-change action's usual one-frame wait and immediate
+     * follow-up (often a conversation) settle after the fade. */
+    if (transitioned) {
+        world_update(world, &actions);
+        world_update(world, &actions);
+        world_update(world, &actions);
+    }
 }
 
 static void walk_tile(struct world_state *world, const struct world_actions *direction)
 {
     world_update(world, direction);
     tick(world, 16);
+}
+
+static void run_script(struct world_state *world, int script)
+{
+    world->dialogue = -1;
+    world->dialogue_actor = -1;
+    world->active_script = script;
+    world->script_action = 0;
+    world->script_wait = 0;
+    tick(world, 2);
 }
 
 static int count_object_state(const struct world_state *world, int definition, int state)
@@ -43,6 +68,15 @@ static int count_translucent_scenery(const struct generated_runtime_scene *scene
         if (scene->scenery[scenery_index].alpha < 255)
             ++count;
     return count;
+}
+
+static int find_scene_entity(const struct generated_runtime_scene *scene, int definition)
+{
+    int index;
+    for (index = 0; index < scene->entity_count; ++index)
+        if (scene->entities[index].definition == definition)
+            return index;
+    return -1;
 }
 
 static int single_condition_flag(const struct generated_runtime_dialogue_choice *choice)
@@ -148,6 +182,7 @@ int main(void)
     int node_index;
     int visual_index;
     int scene_index;
+    int entity_index;
     int scenery_index;
     int branch_index;
     int first_random_step;
@@ -157,7 +192,8 @@ int main(void)
     int packed_followups = 0;
     int translucent_scenery = 0;
     int kitchen_smoke_pieces = 0;
-    int entrance_threshold_pieces = 0;
+    int entrance_back_pieces = 0;
+    int entrance_fore_pieces = 0;
     int entrance_back_eaves = 0;
     int barrel_pieces = 0;
     int vine_pieces = 0;
@@ -172,6 +208,7 @@ int main(void)
     int animation;
 
     world_initialize(&world);
+    assert(generated_runtime_scene_count == 23);
     assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 1) == 8);
 
     /* Examine actions are authored as activation-square hotspots. They retain
@@ -285,6 +322,14 @@ int main(void)
     assert(world.actors[GENERATED_ENTITY_EREK].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_EREK].x == 2 &&
            world.actors[GENERATED_ENTITY_EREK].y == 4);
+    assert(world.actors[GENERATED_ENTITY_EREK].schedule == -1);
+    /* Runtime actors are world-level instances. Erek reaches this scene even
+     * though the Tiled map deliberately has no destination marker for him. */
+    entity_index = find_scene_entity(world.scene, GENERATED_ENTITY_EREK);
+    assert(entity_index < 0);
+    assert(world_actor_is_present(&world, GENERATED_ENTITY_EREK));
+    assert(generated_runtime_actors[GENERATED_ENTITY_EREK].interaction_dialogue ==
+           GENERATED_DIALOGUE_EREK_START);
     assert(world.dialogue == GENERATED_DIALOGUE_JELOM_2ND);
     assert(strcmp(world_dialogue_text(&world),
                   "What's going on now? What are you doing here, Erek Stonebreaker?") == 0);
@@ -401,7 +446,7 @@ int main(void)
     /* The Silverhair doorway uses two overlapping data-authored triggers.
      * Before Jelom releases her it opens his warning; afterwards the same
      * step changes to the original room and its reciprocal doorway. */
-    assert(world.scene->trigger_count == 4);
+    assert(world.scene->trigger_count == 7);
     assert(world.scene->triggers[2].x == 1 && world.scene->triggers[2].y == 7);
     assert(world.scene->triggers[2].condition_flag >= 0);
     assert(world.scene->triggers[2].condition_value == 1);
@@ -490,7 +535,8 @@ int main(void)
             assert(alpha >= 0 && alpha <= 255);
             if (alpha < 255) {
                 assert(alpha == 128 ||
-                       (scene_index == GENERATED_SCENE_REDWYNE_KITCHEN && alpha == 160));
+                       (scene_index == GENERATED_SCENE_REDWYNE_KITCHEN && alpha == 160) ||
+                       (scene_index == GENERATED_SCENE_REDWYNE_BATH && alpha == 150));
                 /* Imported scenery sorts on its logical source base, not on
                  * an alpha-dependent image-bottom adjustment. */
                 assert(scene->scenery[scenery_index].depth % scene->tile_size == 0);
@@ -500,12 +546,15 @@ int main(void)
             }
             if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
                 scenery->x == 360 && scenery->y == 200 &&
-                scenery->frame.width == 20 && scenery->frame.height == 120) {
-                /* entrance.mobj extends below its actual ground footing. The
-                 * threshold must sort at the player's doorway baseline, not
-                 * at the bottom of the sprite's transparent projection. */
+                scenery->frame.width == 20 && scenery->frame.height == 53) {
+                assert(scenery->depth == 240);
+                ++entrance_back_pieces;
+            }
+            if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
+                scenery->x == 360 && scenery->y == 244 &&
+                scenery->frame.width == 20 && scenery->frame.height == 68) {
                 assert(scenery->depth == 280);
-                ++entrance_threshold_pieces;
+                ++entrance_fore_pieces;
             }
             if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
                 scenery->x == 340 && scenery->y == 260 &&
@@ -533,7 +582,8 @@ int main(void)
     }
     assert(translucent_scenery >= 24);
     assert(kitchen_smoke_pieces == 24);
-    assert(entrance_threshold_pieces == 2);
+    assert(entrance_back_pieces == 1);
+    assert(entrance_fore_pieces == 1);
     assert(entrance_back_eaves == 1);
     assert(barrel_pieces == 2);
     assert(vine_pieces == 3);
@@ -1615,8 +1665,8 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
     assert(world.player_x == 3 && world.player_y == 12);
     assert(world.player_facing == WORLD_NORTH);
-    assert(world.scene->spawn_count == 7);
-    assert(world.scene->trigger_count == 17);
+    assert(world.scene->spawn_count == 10);
+    assert(world.scene->trigger_count == 20);
     assert(world.scene->hotspots[3].x == 4 && world.scene->hotspots[3].y == 10);
     assert(world.scene->hotspots[3].facing == WORLD_SOUTH);
     assert(world.scene->hotspots[5].x == 4 && world.scene->hotspots[5].y == 10);
@@ -2024,6 +2074,82 @@ int main(void)
     tick(&world, 2);
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_BARN);
     assert(world.player_x == 1 && world.player_y == 3);
+
+    /* The remaining original submaps form reciprocal, data-authored routes.
+     * Check every newly added branch so a renamed spawn or omitted doorway is
+     * caught before producing a ROM. */
+    world_initialize(&world);
+    run_script(&world, GENERATED_SCRIPT_ENTER_REDWYNE_BATH);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_BATH);
+    assert(world.player_x == 4 && world.player_y == 6);
+    assert(world.scene->hotspot_count == 3);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_REDWYNE_BATH);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 3 && world.player_y == 6);
+
+    run_script(&world, GENERATED_SCRIPT_ENTER_ALEK_ROOM_UPPER);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_ALEK_ROOM);
+    assert(world.player_x == 5 && world.player_y == 6);
+    assert(world.scene->hotspot_count == 1);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_ALEK_ROOM_UPPER);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_CELLAR);
+    assert(world.player_x == 1 && world.player_y == 6);
+
+    run_script(&world, GENERATED_SCRIPT_ENTER_FELLNIR_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FELLNIR_ROOM);
+    assert(world.player_x == 1 && world.player_y == 3);
+    assert(world.scene->hotspot_count == 7);
+    assert(find_scene_entity(world.scene, GENERATED_ENTITY_FELLNIR) >= 0);
+    assert(generated_runtime_schedules[GENERATED_SCHEDULE_FELLNIR_ROOM].entity ==
+           GENERATED_ENTITY_FELLNIR);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_FELLNIR_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.player_x == 8 && world.player_y == 2);
+
+    run_script(&world, GENERATED_SCRIPT_ENTER_GUEST_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_GUEST_ROOM);
+    assert(world.player_x == 4 && world.player_y == 3);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_GUEST_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.player_x == 1 && world.player_y == 2);
+
+    run_script(&world, GENERATED_SCRIPT_ENTER_UPPER_HALL);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_UPPER_HALL);
+    assert(world.player_x == 4 && world.player_y == 2);
+    assert(world.scene->trigger_count == 4);
+    run_script(&world, GENERATED_SCRIPT_ENTER_UPPER_WEST_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_UPPER_WEST_ROOM);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_UPPER_WEST_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_UPPER_HALL);
+    assert(world.player_x == 2 && world.player_y == 5);
+    run_script(&world, GENERATED_SCRIPT_ENTER_UPPER_EAST_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_UPPER_EAST_ROOM);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_UPPER_EAST_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_UPPER_HALL);
+    assert(world.player_x == 1 && world.player_y == 5);
+    run_script(&world, GENERATED_SCRIPT_ENTER_TRISTAN_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_TRISTAN_ROOM);
+    assert(world.scene->hotspot_count == 1);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_TRISTAN_ROOM);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_UPPER_HALL);
+    assert(world.player_x == 1 && world.player_y == 7);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_UPPER_HALL);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+    assert(world.player_x == 6 && world.player_y == 2);
+
+    run_script(&world, GENERATED_SCRIPT_ENTER_GUARDHOUSE);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_GUARDHOUSE);
+    assert(world.player_x == 7 && world.player_y == 3);
+    run_script(&world, GENERATED_SCRIPT_ENTER_GUARDHOUSE_UPPER);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_GUARDHOUSE_UPPER);
+    assert(world.player_x == 2 && world.player_y == 8);
+    assert(world.scene->hotspot_count == 3);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_GUARDHOUSE_UPPER);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_GUARDHOUSE);
+    assert(world.player_x == 2 && world.player_y == 8);
+    run_script(&world, GENERATED_SCRIPT_LEAVE_GUARDHOUSE);
+    assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
+    assert(world.player_x == 13 && world.player_y == 23);
 
     puts("world schedule checks passed");
     return 0;

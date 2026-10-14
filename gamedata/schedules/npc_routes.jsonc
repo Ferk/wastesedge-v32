@@ -486,6 +486,37 @@
       ]
     },
     {
+      "id": "fellnir_room",
+      "entity": "fellnir",
+      "loop": true,
+      "speech": {
+        "lines": [
+          "Master Orloth should throw out that brute!",
+          "Take equal parts of vitriol, nitre and sal ammoniac ..."
+        ],
+        "delay_min_frames": 1200,
+        "delay_max_frames": 2400,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "wait", "label": "choose_place",
+          "delay_min_frames": 222, "delay_max_frames": 444 },
+        { "op": "random_jump", "targets": ["west", "centre", "north", "east"] },
+        { "op": "move", "label": "west", "scene": "redwyne_fellnir_room",
+          "x": 2, "y": 5, "facing": "east" },
+        { "op": "jump", "target": "choose_place" },
+        { "op": "move", "label": "centre", "scene": "redwyne_fellnir_room",
+          "x": 4, "y": 4, "facing": "south" },
+        { "op": "jump", "target": "choose_place" },
+        { "op": "move", "label": "north", "scene": "redwyne_fellnir_room",
+          "x": 4, "y": 2, "facing": "north" },
+        { "op": "jump", "target": "choose_place" },
+        { "op": "move", "label": "east", "scene": "redwyne_fellnir_room",
+          "x": 6, "y": 5, "facing": "west" },
+        { "op": "jump", "target": "choose_place" }
+      ]
+    },
+    {
       "id": "erek_fingolson_escort",
       "entity": "erek",
       "loop": false,

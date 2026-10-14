@@ -1,0 +1,82 @@
+{
+  "id": "fellnir_start",
+  "start": [
+    { "node": "first_greeting", "when": { "flag": "fellnir_talked", "equals": 0 } },
+    { "node": "question_menu" }
+  ],
+  "speakers": [
+    { "id": "player", "name": "Banec", "role": "player",
+      "portrait": "assets/ui/portraits/player.png" },
+    { "id": "fellnir", "name": "Fellnir Kezular", "role": "npc", "entity": "fellnir",
+      "portrait": "assets/ui/portraits/fellnir.png" },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    { "id": "first_greeting", "speaker": "fellnir",
+      "text": "What do you want from me? I don't know anything.",
+      "choices": [
+        { "text": "I am with Lady Silverhair, and I am trying to prove her innocence. Do you know what happened here?",
+          "actions": [{ "op": "set", "flag": "fellnir_talked", "value": 1 }],
+          "next": "first_reaction" }
+      ]
+    },
+    { "id": "first_reaction", "speaker": "narrator",
+      "text": "Fellnir looks suspiciously at you. He absently jots something down in a notebook and shifts one of his beakers slightly.",
+      "next": "knows_nothing" },
+    { "id": "knows_nothing", "speaker": "fellnir",
+      "text": "Ask somebody else. Anybody. I just keep to myself and I don't know anything.",
+      "next": "dismissed" },
+    { "id": "dismissed", "speaker": "narrator",
+      "text": "He turns his attention back to his work, poring over the array of steaming liquids and decanters of unknown origin. You cannot seem to get his attention again.",
+      "end": true },
+
+    { "id": "question_menu", "speaker": "fellnir",
+      "text": "Fellnir keeps working, only occasionally glancing in your direction.",
+      "choices": [
+        { "text": "Excuse me? I realize you know nothing of the theft, but you must know the people of this inn well enough. Is there any way the guard could be convinced to allow me into my Lady's room?",
+          "when": { "all": [
+            { "flag": "know_jelom", "equals": 2 },
+            { "flag": "silverhair_talked", "equals": 0 }
+          ] }, "next": "guard_advice" },
+        { "text": "Pardon me, good sir? I hate to trouble you, but do you know this Fingolson well? I need to enter his room but he will not allow me.",
+          "when": { "flag": "bjarn_door_open", "equals": 1 }, "next": "fingolson_advice" },
+        { "text": "Do you know anything about strange noises the night of the theft?",
+          "when": { "all": [
+            { "flag": "know_noise", "equals": 2 },
+            { "flag": "know_talan_singing", "equals": 0 }
+          ] }, "next": "noise_answer" },
+        { "text": "You've been such a great help sir, I hate to bother you again. But I seem to have angered the innkeeper's wife, and I need her help. Have you any advice?",
+          "when": { "all": [
+            { "flag": "lucia_refuses_key", "equals": 1 },
+            { "flag": "pantry_locked", "equals": 1 }
+          ] }, "next": "lucia_advice" },
+        { "text": "I'm still trying to find information that may help my employer. Are you certain you cannot help?",
+          "repeatable": true, "next": "generic_reaction" }
+      ]
+    },
+    { "id": "guard_advice", "speaker": "narrator",
+      "text": "Fellnir doesn't even look up as he mutters, \"Take equal parts of vitriol, nitre and sal ammoniac ...\" Then he speaks more clearly.",
+      "next": "guard_answer" },
+    { "id": "guard_answer", "speaker": "fellnir",
+      "text": "I would have thought elves and their sort would be more creative. There's more than one way into a room, you know. Now leave me be.",
+      "next": "dismissed" },
+    { "id": "fingolson_advice", "speaker": "narrator",
+      "text": "Fellnir picks up a decanter and puts it down, then peers through a length of piping. He blows into it, then inserts the end into the bottle. After a while, he turns to you.",
+      "next": "fingolson_answer" },
+    { "id": "fingolson_answer", "speaker": "fellnir",
+      "text": "I wouldn't open my door either to someone as nosy as you. Try asking someone he likes. Erek, maybe. So long as you're not talking to me.",
+      "next": "dismissed" },
+    { "id": "lucia_advice", "speaker": "narrator",
+      "text": "Fellnir pours a bluish liquid into one primarily red, and the resulting mixture turns inexplicably green. He swirls it before his eyes for a moment, then takes a sip.",
+      "next": "lucia_answer" },
+    { "id": "lucia_answer", "speaker": "fellnir",
+      "text": "Well, of course she's upset. You got a friend of hers in trouble. Straighten it out with the young guard yourself. I'm just keeping to myself here.",
+      "next": "dismissed" },
+    { "id": "generic_reaction", "speaker": "narrator",
+      "text": "As you finish your question, bubbles appear in a bottle that has no visible flame under it. It boils until a puff of steam makes half the liquid vanish. Fellnir is not impressed.",
+      "next": "knows_nothing" },
+    { "id": "noise_answer", "speaker": "fellnir",
+      "text": "I have better things to do than pay attention to what idle people do with their time.",
+      "end": true }
+  ]
+}

@@ -3352,6 +3352,54 @@
           "width": 20,
           "x": 240,
           "y": 20
+        },
+        {
+          "id": 168, "name": "bath_door", "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "bath_door" },
+            { "name": "facing", "type": "string", "value": "south" }
+          ], "x": 60, "y": 120
+        },
+        {
+          "height": 20, "id": 169, "name": "enter_redwyne_bath",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_redwyne_bath" },
+            { "name": "script", "type": "string", "value": "enter_redwyne_bath" }
+          ], "width": 20, "x": 60, "y": 100
+        },
+        {
+          "id": 170, "name": "alek_door_upper", "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "alek_door_upper" },
+            { "name": "facing", "type": "string", "value": "east" }
+          ], "x": 20, "y": 120
+        },
+        {
+          "id": 171, "name": "alek_door_lower", "point": true,
+          "properties": [
+            { "name": "kind", "type": "string", "value": "spawn" },
+            { "name": "id", "type": "string", "value": "alek_door_lower" },
+            { "name": "facing", "type": "string", "value": "east" }
+          ], "x": 20, "y": 140
+        },
+        {
+          "height": 20, "id": 172, "name": "enter_alek_room_upper",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_alek_room_upper" },
+            { "name": "script", "type": "string", "value": "enter_alek_room_upper" }
+          ], "width": 20, "x": 0, "y": 120
+        },
+        {
+          "height": 20, "id": 173, "name": "enter_alek_room_lower",
+          "properties": [
+            { "name": "kind", "type": "string", "value": "exit" },
+            { "name": "id", "type": "string", "value": "enter_alek_room_lower" },
+            { "name": "script", "type": "string", "value": "enter_alek_room_lower" }
+          ], "width": 20, "x": 0, "y": 140
         }
       ],
       "opacity": 0.4,
@@ -4750,7 +4798,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 168,
+  "nextobjectid": 174,
   "orientation": "orthogonal",
   "properties": [
     {

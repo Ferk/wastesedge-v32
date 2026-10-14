@@ -1,0 +1,1151 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_alek_room",
+  "tilecount": 21,
+  "tiledversion": "1.11.0",
+  "tileheight": 60,
+  "tilewidth": 40,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/tiles/redwyne_exterior/floorings__woodenplanks_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/woodenplanks.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 1,
+      "image": "../assets/maps/redwyne_first_floor/icons__arrows__red_right_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "icons/arrows/red-right.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 2,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_column_b_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-column-b.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 3,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_column_f_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-column-f.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 4,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_h_b_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-h-b.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 5,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_h_f_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-h-f.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 6,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_v_l_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-v-l.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 7,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_v_r_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-v-r.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 8,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tl_rb_a0_i0.png",
+      "imagewidth": 24,
+      "imageheight": 46,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-tl-rb.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 16
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 9,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_bl_rf_a0_i0.png",
+      "imagewidth": 4,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-bl-rf.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 16
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 10,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_bl_rf_a1_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-bl-rf.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 20
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 19
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 11,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tr_lb_a0_i0.png",
+      "imagewidth": 24,
+      "imageheight": 46,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-tr-lb.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 12,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_br_lf_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-br-lf.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 20
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 13,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_br_lf_a1_i0.png",
+      "imagewidth": 4,
+      "imageheight": 60,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-br-lf.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 20
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 14,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tl_lf_a0_i0.png",
+      "imagewidth": 4,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-tl-lf.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 15,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tl_lf_a1_i0.png",
+      "imagewidth": 16,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-tl-lf.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 16,
+      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_bl_lb_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 54,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/cellar/cellar-bl-lb.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 17,
+      "image": "../assets/maps/redwyne_fingolson_room/furnitures__stool_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/stool.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 18,
+      "image": "../assets/maps/redwyne_fingolson_room/furnitures__stone_bed_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/stone_bed.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 19,
+      "image": "../assets/maps/redwyne_fingolson_room/furnitures__stone_v_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 34,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/stone_v.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 20,
+      "image": "../assets/maps/redwyne_alek_room/furnitures__chest_wooden_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/chest-wooden.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

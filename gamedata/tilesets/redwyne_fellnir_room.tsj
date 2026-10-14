@@ -1,0 +1,935 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 20,
+    "orientation": "orthogonal",
+    "width": 20
+  },
+  "name": "redwyne_fellnir_room",
+  "tilecount": 17,
+  "tiledversion": "1.11.0",
+  "tileheight": 40,
+  "tilewidth": 40,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_face_back_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 39,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-face-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 15
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 1,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_tr1_back_a0_i0.png",
+      "imagewidth": 3,
+      "imageheight": 5,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-tr1-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 17
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 15
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 2,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_tl1_back_a0_i0.png",
+      "imagewidth": 3,
+      "imageheight": 5,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-tl1-back.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 15
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 3,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_v_r_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-v-r.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 17
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 4,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_v_l_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-v-l.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 5,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_br1_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-br1.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 17
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 6,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_bl1_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-bl1.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 7,
+      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_face_front_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 39,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/inside/wall-face-front.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 8,
+      "image": "../assets/tiles/redwyne_exterior/icons__arrows__red_left_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "icons/arrows/red-left.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 4
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 9,
+      "image": "../assets/maps/redwyne_fellnir_room/walls__painting1_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/painting1.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 10,
+      "image": "../assets/maps/redwyne_first_floor/floorings__woodenplanks_2_1_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/woodenplanks_2_1.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 11,
+      "image": "../assets/maps/redwyne_first_floor/floorings__woodenplanks_2_2_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 20,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "floorings/woodenplanks_2_2.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 1
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 12,
+      "image": "../assets/tiles/redwyne_inn/walls__window_front_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "walls/window_front.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 3
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 13,
+      "image": "../assets/maps/redwyne_fellnir_room/furnitures__bed_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 30,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/bed.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 14,
+      "image": "../assets/maps/redwyne_fellnir_room/furnitures__table_alchemy_h_a0_i0.png",
+      "imagewidth": 40,
+      "imageheight": 31,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/table_alchemy_h.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 15,
+      "image": "../assets/maps/redwyne_fellnir_room/furnitures__table_alchemy_h_a0_i1.png",
+      "imagewidth": 40,
+      "imageheight": 31,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/table_alchemy_h.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    },
+    {
+      "id": 16,
+      "image": "../assets/maps/redwyne_player_room/furnitures__normal_cupboard_a0_i0.png",
+      "imagewidth": 20,
+      "imageheight": 40,
+      "properties": [
+        {
+          "name": "source_object",
+          "type": "string",
+          "value": "furnitures/normal-cupboard.mobj"
+        },
+        {
+          "name": "source_animation",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "source_image",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "offset_y",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_x",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "base_y",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_width",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "walkability_height",
+          "type": "int",
+          "value": 2
+        }
+      ],
+      "type": "map_object"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

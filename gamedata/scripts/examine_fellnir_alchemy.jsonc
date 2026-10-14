@@ -1,0 +1,3 @@
+{ "id": "examine_fellnir_alchemy", "actions": [
+  { "op": "speak", "entity": "player", "text": "I'd better not touch this ... What if it explodes??" }
+] }

@@ -1,0 +1,3 @@
+{ "id": "enter_guardhouse", "actions": [
+  { "op": "change_scene", "scene": "redwyne_guardhouse", "spawn": "exterior_door" }
+] }
