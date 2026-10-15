@@ -341,8 +341,9 @@ static void record_dialogue_panel(const struct world_state *world)
 
 static void camera_for_player(const struct world_state *world, int *camera_x, int *camera_y)
 {
+    int player_definition = world->scene->entities[world->player_entity].definition;
     const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[
-        generated_runtime_actors[world->scene->entities[world->player_entity].definition].visual];
+        world_actor_visual(world, player_definition)];
     int player_x = world->player_x * world->scene->tile_size;
     int player_y = world->player_y * world->scene->tile_size;
     int x;
@@ -380,13 +381,17 @@ static void draw_background(const struct world_state *world, int camera_x, int c
 
 static const struct generated_runtime_frame *entity_frame(const struct world_state *world, int definition)
 {
-    const struct generated_runtime_actor *entity = &generated_runtime_actors[definition];
-    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
+    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[
+        world_actor_visual(world, definition)];
     int facing = world_actor_facing(world, definition);
     if (world_actor_is_moving(world, definition) && visual->walking_count[facing] > 0)
         return &visual->walking[facing][world_actor_animation_frame(world, definition) %
                                         visual->walking_count[facing]];
-    return &visual->standing[facing];
+    if (visual->standing_count[facing] > 1 && visual->standing_delay[facing] > 0)
+        return &visual->standing[facing][
+            (world_actor_visual_tick(world, definition) / visual->standing_delay[facing]) %
+            visual->standing_count[facing]];
+    return &visual->standing[facing][0];
 }
 
 static int entity_depth(const struct world_state *world, int definition)
@@ -399,8 +404,8 @@ static int entity_depth(const struct world_state *world, int definition)
 
 static void draw_entity(const struct world_state *world, int definition, int camera_x, int camera_y)
 {
-    const struct generated_runtime_actor *entity = &generated_runtime_actors[definition];
-    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
+    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[
+        world_actor_visual(world, definition)];
     const struct generated_runtime_frame *frame = entity_frame(world, definition);
     int x = world_actor_pixel_x(world, definition);
     int y = world_actor_pixel_y(world, definition);
@@ -411,9 +416,9 @@ static void draw_entity(const struct world_state *world, int definition, int cam
 static void player_screen_bounds(const struct world_state *world, int camera_x, int camera_y,
                                  int *left, int *top, int *right, int *bottom)
 {
-    const struct generated_runtime_actor *entity = &generated_runtime_actors[
-        world->scene->entities[world->player_entity].definition];
-    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[entity->visual];
+    int player_definition = world->scene->entities[world->player_entity].definition;
+    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[
+        world_actor_visual(world, player_definition)];
     const struct generated_runtime_frame *frame = entity_frame(
         world, world->scene->entities[world->player_entity].definition);
     int x = world->player_x * world->scene->tile_size;
@@ -462,7 +467,7 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
         int selected_y = 0;
         for (index = 0; index < generated_runtime_actor_count; ++index) {
             int y = entity_depth(world, index);
-            if (generated_runtime_actors[index].visual < 0 ||
+            if (world_actor_visual(world, index) < 0 ||
                 !world_actor_is_present(world, index))
                 continue;
             if (y < last_y || (y == last_y && index <= last_index))
@@ -500,7 +505,6 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
     for (entity_index = 0; entity_index < generated_runtime_actor_count; ++entity_index) {
         const struct generated_runtime_text *speech =
             world_actor_speech(world, entity_index);
-        const struct generated_runtime_actor *entity = &generated_runtime_actors[entity_index];
         const struct generated_runtime_actor_visual *visual;
         const struct generated_runtime_frame *frame;
         int anchor_x;
@@ -513,10 +517,10 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
         int bubble_x;
         int bubble_y;
         int tail_x;
-        if (speech == 0 || entity->visual < 0 ||
+        if (speech == 0 || world_actor_visual(world, entity_index) < 0 ||
             !world_actor_is_present(world, entity_index))
             continue;
-        visual = &generated_runtime_actor_visuals[entity->visual];
+        visual = &generated_runtime_actor_visuals[world_actor_visual(world, entity_index)];
         frame = entity_frame(world, entity_index);
         anchor_x = view_x(world_actor_pixel_x(world, entity_index) -
                           visual->base_x * world->scene->tile_size + frame->offset_x -

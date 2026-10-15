@@ -1135,6 +1135,18 @@ static void update_script(struct world_state *world)
             ++world->script_action;
             continue;
         }
+        if (action->op == GENERATED_SCRIPT_SET_ACTOR_VISUAL) {
+            if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT &&
+                action->b >= 0 && action->b < generated_runtime_actor_visual_count &&
+                world->actors[action->a].visual != action->b) {
+                world->actors[action->a].visual = action->b;
+                world->actors[action->a].visual_tick = 0;
+                world->actors[action->a].animation_frame = 0;
+                ++world->visual_revision;
+            }
+            ++world->script_action;
+            continue;
+        }
         ++world->script_action;
     }
     world->active_script = -1;
@@ -1197,6 +1209,8 @@ void world_initialize(struct world_state *world)
         world->actors[index].move_y = 0;
         world->actors[index].move_progress = 0;
         world->actors[index].animation_frame = 0;
+        world->actors[index].visual = -1;
+        world->actors[index].visual_tick = 0;
         world->actors[index].schedule = -1;
         world->actors[index].schedule_step = 0;
         world->actors[index].schedule_wait = 0;
@@ -1215,6 +1229,7 @@ void world_initialize(struct world_state *world)
     for (entity_index = 0; entity_index < generated_runtime_actor_count; ++entity_index) {
         const struct generated_runtime_actor *entity = &generated_runtime_actors[entity_index];
         struct world_actor_state *actor = &world->actors[entity_index];
+        actor->visual = entity->visual;
         if (entity->player_controlled || entity->initial_scene < 0)
             continue;
         actor->scene = entity->initial_scene;
@@ -1272,6 +1287,28 @@ void world_seed_random(struct world_state *world, int seed)
     world->speech_random = (int)(((value >> 16) ^ value ^ 0x5A17u) & 0xFFFFu);
 }
 
+static void update_actor_visual_animations(struct world_state *world)
+{
+    int definition;
+    for (definition = 0; definition < GENERATED_RUNTIME_ENTITY_COUNT; ++definition) {
+        struct world_actor_state *actor = &world->actors[definition];
+        const struct generated_runtime_actor_visual *visual;
+        int count;
+        int delay;
+        if (!world_actor_is_present(world, definition) || actor->moving ||
+            actor->visual < 0 || actor->visual >= generated_runtime_actor_visual_count)
+            continue;
+        visual = &generated_runtime_actor_visuals[actor->visual];
+        count = visual->standing_count[actor->facing];
+        delay = visual->standing_delay[actor->facing];
+        if (count <= 1 || delay <= 0)
+            continue;
+        ++actor->visual_tick;
+        if (actor->visual_tick % delay == 0)
+            ++world->visual_revision;
+    }
+}
+
 void world_update(struct world_state *world, const struct world_actions *actions)
 {
     int move_x = actions->move_x;
@@ -1279,6 +1316,7 @@ void world_update(struct world_state *world, const struct world_actions *actions
     if (world->player_entity < 0)
         return;
     update_schedules(world);
+    update_actor_visual_animations(world);
     if (world->transition_phase != WORLD_TRANSITION_NONE) {
         update_scene_transition(world);
         return;
@@ -1451,6 +1489,20 @@ int world_actor_animation_frame(const struct world_state *world, int definition)
     if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
         return 0;
     return world->actors[definition].animation_frame;
+}
+
+int world_actor_visual(const struct world_state *world, int definition)
+{
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return -1;
+    return world->actors[definition].visual;
+}
+
+int world_actor_visual_tick(const struct world_state *world, int definition)
+{
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return 0;
+    return world->actors[definition].visual_tick;
 }
 
 static int entity_definition(const struct world_state *world, int entity_index)

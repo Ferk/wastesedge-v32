@@ -412,9 +412,35 @@ int main(void)
     world.script_wait = 0;
     tick(&world, 3);
     assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_TALAN);
+    assert(world_actor_visual(&world, GENERATED_ENTITY_BJARN) !=
+           generated_runtime_actors[GENERATED_ENTITY_BJARN].visual);
+    assert(world_actor_visual(&world, GENERATED_ENTITY_TALAN) !=
+           generated_runtime_actors[GENERATED_ENTITY_TALAN].visual);
+    assert(generated_runtime_actor_visuals[
+               world_actor_visual(&world, GENERATED_ENTITY_BJARN)]
+               .standing_count[WORLD_SOUTH] == 2);
+    assert(generated_runtime_actor_visuals[
+               world_actor_visual(&world, GENERATED_ENTITY_BJARN)]
+               .standing_delay[WORLD_SOUTH] == 13);
+    assert(generated_runtime_actor_visuals[
+               world_actor_visual(&world, GENERATED_ENTITY_TALAN)]
+               .walking_count[WORLD_EAST] == 4);
     assert(world.actors[GENERATED_ENTITY_TALAN].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_TALAN].x == 1 &&
            world.actors[GENERATED_ENTITY_TALAN].y == 6);
+    tick(&world, 11);
+    assert(world.actors[GENERATED_ENTITY_BJARN].x == 7 &&
+           world.actors[GENERATED_ENTITY_BJARN].y == 4 &&
+           world.actors[GENERATED_ENTITY_BJARN].facing == WORLD_SOUTH);
+    assert(world.actors[GENERATED_ENTITY_TALAN].x == 2 &&
+           world.actors[GENERATED_ENTITY_TALAN].y == 6 &&
+           world.actors[GENERATED_ENTITY_TALAN].facing == WORLD_SOUTH);
+    {
+        int crying_tick = world_actor_visual_tick(&world, GENERATED_ENTITY_BJARN);
+        tick(&world, 13);
+        assert(world_actor_visual_tick(&world, GENERATED_ENTITY_BJARN) ==
+               crying_tick + 13);
+    }
 
     world.dialogue = -1;
     world.active_script = GENERATED_SCRIPT_SHOW_EXTRO_EPILOGUE;
@@ -511,16 +537,21 @@ int main(void)
     for (visual_index = 0; visual_index < generated_runtime_actor_visual_count; ++visual_index) {
         const struct generated_runtime_actor_visual *visual =
             &generated_runtime_actor_visuals[visual_index];
-        int texture = visual->standing[0].texture;
+        int texture = visual->standing[0][0].texture;
         assert(texture >= 0);
         for (direction = 0; direction < 4; ++direction) {
-            assert(visual->standing[direction].texture == texture);
+            int standing_frame;
+            assert(visual->standing_count[direction] > 0);
+            for (standing_frame = 0;
+                 standing_frame < visual->standing_count[direction];
+                 ++standing_frame)
+                assert(visual->standing[direction][standing_frame].texture == texture);
             for (animation = 0; animation < visual->walking_count[direction]; ++animation)
                 assert(visual->walking[direction][animation].texture == texture);
         }
-        assert(visual->standing[0].source_x != visual->standing[1].source_x ||
-               visual->standing[0].source_y != visual->standing[1].source_y);
-        assert(visual->standing[0].width > 0 && visual->standing[0].height > 0);
+        assert(visual->standing[0][0].source_x != visual->standing[1][0].source_x ||
+               visual->standing[0][0].source_y != visual->standing[1][0].source_y);
+        assert(visual->standing[0][0].width > 0 && visual->standing[0][0].height > 0);
     }
 
     /* Authored scenery opacity survives content compilation. These are the

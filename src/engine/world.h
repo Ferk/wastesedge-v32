@@ -43,6 +43,8 @@ struct world_actor_state {
     int move_y;
     int move_progress;
     int animation_frame;
+    int visual;
+    int visual_tick;
     int schedule;
     int schedule_step;
     int schedule_wait;
@@ -120,6 +122,8 @@ int world_actor_is_present(const struct world_state *world, int definition);
 int world_actor_pixel_x(const struct world_state *world, int definition);
 int world_actor_pixel_y(const struct world_state *world, int definition);
 int world_actor_animation_frame(const struct world_state *world, int definition);
+int world_actor_visual(const struct world_state *world, int definition);
+int world_actor_visual_tick(const struct world_state *world, int definition);
 const struct generated_runtime_frame *world_scenery_frame(
     const struct world_state *world,
     const struct generated_runtime_scenery *scenery);

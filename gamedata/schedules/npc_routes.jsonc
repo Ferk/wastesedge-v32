@@ -668,12 +668,23 @@
       ]
     },
     {
+      "id": "bjarn_extro_crying",
+      "entity": "bjarn",
+      "loop": false,
+      "steps": [
+        { "op": "move", "scene": "redwyne_fingolson_room", "x": 7, "y": 4,
+          "facing": "south" }
+      ]
+    },
+    {
       "id": "talan_extro_entrance",
       "entity": "talan",
       "loop": false,
       "steps": [
         { "op": "place", "scene": "redwyne_fingolson_room", "x": 1, "y": 6,
-          "facing": "east" }
+          "facing": "east" },
+        { "op": "move", "scene": "redwyne_fingolson_room", "x": 2, "y": 6,
+          "facing": "south" }
       ]
     }
   ]

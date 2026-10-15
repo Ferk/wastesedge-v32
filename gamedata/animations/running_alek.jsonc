@@ -1,0 +1,31 @@
+{
+  "format": "wastesedge-animation-v1",
+  "id": "running_alek",
+  "loop": true,
+  "frames": [
+    {
+      "image": "assets/animations/running_alek/running_alek_i0.png",
+      "delay": 7,
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    {
+      "image": "assets/animations/running_alek/running_alek_i1.png",
+      "delay": 7,
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    {
+      "image": "assets/animations/running_alek/running_alek_i2.png",
+      "delay": 7,
+      "offset_x": 0,
+      "offset_y": 0
+    },
+    {
+      "image": "assets/animations/running_alek/running_alek_i3.png",
+      "delay": 7,
+      "offset_x": 0,
+      "offset_y": 0
+    }
+  ]
+}

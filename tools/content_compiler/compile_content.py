@@ -149,11 +149,28 @@ def collect_entities(paths: list[Path]) -> dict[str, dict[str, object]]:
                 states.append(state)
             if not states:
                 raise ContentError(f"{path} entity {entry_id} must define at least one state")
+            visuals: dict[str, str] = {}
+            for raw_visual in expect(entry.get("visuals", []), list,
+                                     f"{path} entity {entry_id} visuals"):
+                visual = expect(raw_visual, dict,
+                                f"{path} entity {entry_id} visual")
+                visual_id = identifier(visual.get("id"),
+                                       f"{path} entity {entry_id} visual id")
+                if visual_id == "default" or visual_id in visuals:
+                    raise ContentError(
+                        f"{path}: entity {entry_id!r} has invalid or duplicate visual "
+                        f"{visual_id!r}")
+                visuals[visual_id] = expect(
+                    visual.get("tileset"), str,
+                    f"{path} entity {entry_id} visual {visual_id} tileset")
+            if visuals and kind != "actor":
+                raise ContentError(f"{path}: only actor entities may define visual variants")
             result[entry_id] = {
                 "kind": kind,
                 "player_controlled": player_controlled,
                 "blocks_movement": blocks_movement,
                 "states": states,
+                "visuals": visuals,
             }
     if sum(1 for entry in result.values() if entry["player_controlled"]) > 1:
         raise ContentError("only one entity definition may set player_controlled")
@@ -541,7 +558,8 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
     scripts: dict[str, list[dict[str, object]]] = {}
     allowed = {"set", "set_control", "set_entity_state", "set_walkability", "show_dialogue", "speak",
                "change_scene", "move_entity", "wait", "play_music",
-               "start_schedule", "stop_schedule", "set_entity_dialogue"}
+               "start_schedule", "stop_schedule", "set_entity_dialogue",
+               "set_actor_visual"}
     for path in paths:
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
@@ -562,12 +580,13 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
             if operation == "play_music" and identifier(action.get("track"), f"{path} music track") not in music:
                 raise ContentError(f"{path}: unknown music track {action.get('track')!r}")
             if operation in {"set_entity_state", "move_entity", "start_schedule",
-                             "stop_schedule", "set_entity_dialogue"}:
+                             "stop_schedule", "set_entity_dialogue", "set_actor_visual"}:
                 entity_id = identifier(action.get("entity"), f"{path} entity")
                 if entity_id not in entities:
                     raise ContentError(f"{path}: unknown entity {entity_id!r}")
-                if operation == "set_entity_dialogue" and entities[entity_id]["kind"] != "actor":
-                    raise ContentError(f"{path}: set_entity_dialogue requires an actor entity")
+                if operation in {"set_entity_dialogue", "set_actor_visual"} and \
+                        entities[entity_id]["kind"] != "actor":
+                    raise ContentError(f"{path}: {operation} requires an actor entity")
                 if operation == "set_entity_state":
                     state = identifier(action.get("state"), f"{path} entity state")
                     if state not in entities[entity_id]["states"]:
@@ -589,6 +608,11 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     if integer(action.get("delay_frames", 0),
                                f"{path} start_schedule delay_frames") < 0:
                         raise ContentError(f"{path}: start_schedule delay_frames cannot be negative")
+                elif operation == "set_actor_visual":
+                    visual = identifier(action.get("visual"), f"{path} actor visual")
+                    if visual != "default" and visual not in entities[entity_id]["visuals"]:
+                        raise ContentError(
+                            f"{path}: actor {entity_id!r} has no visual {visual!r}")
             if operation == "set_control" and not isinstance(action.get("enabled"), bool):
                 raise ContentError(f"{path}: set_control enabled must be a bool")
             if operation == "set":
@@ -1309,6 +1333,36 @@ def scene_tiles(map_path: Path, document: dict[str, object], game_root: Path) ->
     return result
 
 
+def character_tileset_tiles(tileset_path: Path, game_root: Path) -> list[dict[str, object]]:
+    """Resolve a standalone character collection tileset without map GIDs."""
+    tileset_path = path_inside(game_root, tileset_path.resolve(), "actor visual tileset")
+    if not tileset_path.is_file():
+        raise ContentError(f"missing actor visual tileset: {tileset_path}")
+    document = expect(load_jsonc(tileset_path), dict, str(tileset_path))
+    if document.get("type") != "tileset":
+        raise ContentError(f"{tileset_path}: expected a Tiled tileset")
+    result: list[dict[str, object]] = []
+    for raw_tile in expect(document.get("tiles", []), list, f"{tileset_path}.tiles"):
+        tile = expect(raw_tile, dict, f"{tileset_path} tile")
+        image = expect(tile.get("image"), str, f"{tileset_path} tile image")
+        image_path = path_inside(
+            game_root, (tileset_path.parent / image).resolve(),
+            f"{tileset_path} tile image")
+        if not image_path.is_file():
+            raise ContentError(f"{tileset_path}: missing tile image {image!r}")
+        result.append({
+            "image": image_path.relative_to(game_root).as_posix(),
+            "imagewidth": expect(tile.get("imagewidth"), int,
+                                 f"{tileset_path} tile imagewidth"),
+            "imageheight": expect(tile.get("imageheight"), int,
+                                  f"{tileset_path} tile imageheight"),
+            "properties": properties(tile.get("properties"), f"{tileset_path} tile"),
+        })
+    if not result:
+        raise ContentError(f"{tileset_path}: actor visual tileset has no images")
+    return result
+
+
 def integer(value: object, description: str) -> int:
     return expect(value, int, description)
 
@@ -1529,7 +1583,8 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
 def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict[str, object]],
                     dialogue_index: dict[str, int], scenes: list[dict[str, object]],
                     music_index: dict[str, int], schedule_index: dict[str, int],
-                    flag_index: dict[str, int]) -> list[dict[str, object]]:
+                    flag_index: dict[str, int],
+                    actor_visuals: dict[tuple[str, str], int]) -> list[dict[str, object]]:
     """Compile the cooperative action subset required by the introductory handoff."""
     opcodes = {
         "set_control": 0,
@@ -1545,6 +1600,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "set_walkability": 10,
         "speak": 11,
         "set": 12,
+        "set_actor_visual": 13,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -1623,6 +1679,11 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
             elif operation == "set":
                 a = flag_index[identifier(action.get("flag"), f"{path} flag")]
                 b = integer(action.get("value"), f"{path} flag value")
+            elif operation == "set_actor_visual":
+                entity_id = identifier(action.get("entity"), f"{path} entity")
+                visual_id = identifier(action.get("visual"), f"{path} actor visual")
+                a = entity_index[entity_id]
+                b = actor_visuals[(entity_id, visual_id)]
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
             "id": script_id,
@@ -1636,7 +1697,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
 def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict[str, object]], game_root: Path,
                        script_dialogues: dict[str, str], dialogue_index: dict[str, int],
                        script_index: dict[str, int],
-                       flag_index: dict[str, int]) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]], list[dict[str, int]], list[str]]:
+                       flag_index: dict[str, int]) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]], list[dict[str, int]], dict[tuple[str, str], int], list[str]]:
     """Compile the small initial scene runtime representation.
 
     This deliberately covers authored ground tiles, static depth-capable map
@@ -1647,12 +1708,76 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     raw_scenes: list[dict[str, object]] = []
     raw_visuals: dict[str, dict[str, object]] = {}
     raw_object_visuals: dict[str, dict[str, object]] = {}
+    variant_sources: dict[tuple[str, str], str] = {}
     resources: set[str] = set()
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
     move_index = {
         "stand_north": 0, "stand_south": 1, "stand_west": 2, "stand_east": 3,
         "walk_north": 0, "walk_south": 1, "walk_west": 2, "walk_east": 3,
     }
+
+    def add_character_visual(source_character: str,
+                             candidates: object,
+                             description: str) -> None:
+        if source_character not in raw_visuals:
+            raw_visuals[source_character] = {
+                "frames": [[None] * 16, [None] * 16],
+                "standing_count": [0, 0, 0, 0],
+                "standing_delay": [0, 0, 0, 0],
+                "walk_count": [0, 0, 0, 0],
+                "base_x": None,
+                "base_y": None,
+            }
+        visual = raw_visuals[source_character]
+        for candidate in candidates:
+            candidate_properties = expect(candidate["properties"], dict,
+                                          f"{description} actor tile properties")
+            if candidate_properties.get("source_character") != source_character:
+                continue
+            move = candidate_properties.get("source_move")
+            image_index = candidate_properties.get("source_image")
+            if move not in move_index or not isinstance(image_index, int) or \
+                    image_index < 0 or image_index >= 4:
+                continue
+            base_x = integer(candidate_properties.get("base_x"),
+                             f"{description} actor base_x")
+            base_y = integer(candidate_properties.get("base_y"),
+                             f"{description} actor base_y")
+            if visual["base_x"] is None:
+                visual["base_x"] = base_x
+                visual["base_y"] = base_y
+            elif visual["base_x"] != base_x or visual["base_y"] != base_y:
+                raise ContentError(f"{description}: inconsistent actor base point")
+            frame = {
+                "image": str(candidate["image"]),
+                "width": integer(candidate["imagewidth"],
+                                 f"{description} actor frame width"),
+                "height": integer(candidate["imageheight"],
+                                  f"{description} actor frame height"),
+                "offset_x": integer(candidate_properties.get("offset_x"),
+                                    f"{description} actor offset_x"),
+                "offset_y": integer(candidate_properties.get("offset_y"),
+                                    f"{description} actor offset_y"),
+            }
+            resources.add(str(frame["image"]))
+            direction = move_index[str(move)]
+            group = 0 if str(move).startswith("stand_") else 1
+            slot = direction * 4 + image_index
+            visual["frames"][group][slot] = frame
+            if group == 0:
+                visual["standing_count"][direction] = max(
+                    visual["standing_count"][direction], image_index + 1)
+                delay = integer(candidate_properties.get("frame_delay", 0),
+                                f"{description} actor frame_delay")
+                if delay > 0:
+                    previous = visual["standing_delay"][direction]
+                    if previous not in {0, delay}:
+                        raise ContentError(
+                            f"{description}: standing animation uses unequal frame delays")
+                    visual["standing_delay"][direction] = delay
+            else:
+                visual["walk_count"][direction] = max(
+                    visual["walk_count"][direction], image_index + 1)
 
     for map_path in map_paths:
         document = expect(load_jsonc(map_path), dict, str(map_path))
@@ -2019,38 +2144,9 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                     })
                     stateful_scenery_count += 1
                     continue
-                if source_character not in raw_visuals:
-                    raw_visuals[source_character] = {
-                        "frames": [[None] * 4, [None] * 16],
-                        "walk_count": [0, 0, 0, 0],
-                        "base_x": integer(tile_properties.get("base_x"), f"{map_path} actor base_x"),
-                        "base_y": integer(tile_properties.get("base_y"), f"{map_path} actor base_y"),
-                    }
-                visual = raw_visuals[source_character]
                 # Gather all frames in this character collection, not just the
                 # one used by the scene object.
-                for candidate in tiles.values():
-                    candidate_properties = expect(candidate["properties"], dict, f"{map_path} actor tile properties")
-                    if candidate_properties.get("source_character") != source_character:
-                        continue
-                    move = candidate_properties.get("source_move")
-                    image_index = candidate_properties.get("source_image")
-                    if move not in move_index or not isinstance(image_index, int) or image_index < 0 or image_index >= 4:
-                        continue
-                    frame = {
-                        "image": str(candidate["image"]),
-                        "width": integer(candidate["imagewidth"], f"{map_path} actor frame width"),
-                        "height": integer(candidate["imageheight"], f"{map_path} actor frame height"),
-                        "offset_x": integer(candidate_properties.get("offset_x"), f"{map_path} actor offset_x"),
-                        "offset_y": integer(candidate_properties.get("offset_y"), f"{map_path} actor offset_y"),
-                    }
-                    resources.add(frame["image"])
-                    direction = move_index[move]
-                    if move.startswith("stand_"):
-                        visual["frames"][0][direction] = frame
-                    else:
-                        visual["frames"][1][direction * 4 + image_index] = frame
-                        visual["walk_count"][direction] = max(visual["walk_count"][direction], image_index + 1)
+                add_character_visual(source_character, tiles.values(), str(map_path))
                 facing_name = values.get("facing", "south")
                 facing = {"north": 0, "south": 1, "west": 2, "east": 3}.get(facing_name)
                 if facing is None:
@@ -2078,6 +2174,30 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                            "spawns": spawns, "triggers": triggers, "hotspots": hotspots,
                            "stateful_scenery_count": stateful_scenery_count})
 
+    # Alternate actor appearances are authored as standalone Tiled collection
+    # tilesets. They need no dummy map placement: scripts select them by the
+    # stable variant name declared on the actor definition.
+    for entity_id, definition in entity_definitions.items():
+        for variant_id, relative_tileset in definition["visuals"].items():
+            tileset_path = path_inside(
+                game_root, (game_root / str(relative_tileset)).resolve(),
+                f"actor {entity_id} visual {variant_id} tileset")
+            candidates = character_tileset_tiles(tileset_path, game_root)
+            sources = {
+                str(expect(candidate["properties"], dict,
+                           f"{tileset_path} actor tile properties").get("source_character"))
+                for candidate in candidates
+            }
+            if len(sources) != 1 or "None" in sources:
+                raise ContentError(
+                    f"{tileset_path}: actor visual must contain exactly one source_character")
+            source_character = next(iter(sources))
+            if source_character in raw_visuals:
+                raise ContentError(
+                    f"{tileset_path}: duplicate actor visual source {source_character!r}")
+            add_character_visual(source_character, candidates, str(tileset_path))
+            variant_sources[(entity_id, variant_id)] = source_character
+
     # Runtime indices must match the alphabetical IDs emitted in content_ids.h.
     # Keeping this independent of manifest order also makes reordering inputs a
     # no-op for scripts and schedules that reference scenes by stable name.
@@ -2103,9 +2223,15 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     visuals = []
     for source_character in sorted(raw_visuals):
         visual = raw_visuals[source_character]
-        for direction, frame in enumerate(visual["frames"][0]):
-            if frame is None:
+        for direction in range(4):
+            if visual["standing_count"][direction] <= 0 or \
+                    visual["frames"][0][direction * 4] is None:
                 raise ContentError(f"actor tileset {source_character!r} is missing standing direction {direction}")
+            if (visual["standing_count"][direction] > 1 and
+                    visual["standing_delay"][direction] <= 0):
+                raise ContentError(
+                    f"actor tileset {source_character!r} standing direction {direction} "
+                    "needs a positive frame_delay")
         visuals.append({"source_character": source_character, **visual})
     visual_index = {str(visual["source_character"]): index for index, visual in enumerate(visuals)}
     for scene in raw_scenes:
@@ -2164,13 +2290,21 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 actors[definition]["visual"] < 0):
             raise ContentError(
                 f"actor definition {definition_id!r} has no visual-bearing Tiled placement")
+    actor_visuals: dict[tuple[str, str], int] = {}
+    for definition, definition_id in enumerate(sorted(entity_definitions)):
+        if entity_definitions[definition_id]["kind"] != "actor":
+            continue
+        actor_visuals[(definition_id, "default")] = actors[definition]["visual"]
+        for variant_id in entity_definitions[definition_id]["visuals"]:
+            source_character = variant_sources[(definition_id, variant_id)]
+            actor_visuals[(definition_id, variant_id)] = visual_index[source_character]
     object_visuals = [{"visual_key": key, **raw_object_visuals[key]} for key in sorted(raw_object_visuals)]
     object_visual_index = {str(visual["visual_key"]): index for index, visual in enumerate(object_visuals)}
     for scene in raw_scenes:
         for item in scene["scenery"]:
             if "visual_key" in item:
                 item["visual"] = object_visual_index[str(item.pop("visual_key"))]
-    return raw_scenes, visuals, object_visuals, actors, sorted(resources)
+    return raw_scenes, visuals, object_visuals, actors, actor_visuals, sorted(resources)
 
 
 def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: int,
@@ -2182,7 +2316,9 @@ def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: i
 struct generated_runtime_frame { int texture, source_x, source_y, width, height, offset_x, offset_y; };
 struct generated_runtime_actor_visual {
     int base_x, base_y;
-    struct generated_runtime_frame standing[4];
+    struct generated_runtime_frame standing[4][4];
+    int standing_count[4];
+    int standing_delay[4];
     struct generated_runtime_frame walking[4][4];
     int walking_count[4];
 };
@@ -2299,6 +2435,7 @@ extern const int generated_runtime_space_advance;
 #define GENERATED_SCRIPT_SET_WALKABILITY 10
 #define GENERATED_SCRIPT_SPEAK 11
 #define GENERATED_SCRIPT_SET_FLAG 12
+#define GENERATED_SCRIPT_SET_ACTOR_VISUAL 13
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -2407,7 +2544,13 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append("const struct generated_runtime_actor_visual generated_runtime_actor_visuals[] = {")
     for visual in visuals:
         lines.append(f"    {{ {visual['base_x']}, {visual['base_y']},")
-        lines.append("      { " + ", ".join(frame_initializer(frame, resource_index) for frame in visual["frames"][0]) + " },")
+        lines.append("      {")
+        for direction in range(4):
+            frames = visual["frames"][0][direction * 4:direction * 4 + 4]
+            lines.append("        { " + ", ".join(frame_initializer(frame, resource_index) for frame in frames) + " },")
+        lines.append("      },")
+        lines.append("      { " + ", ".join(str(value) for value in visual["standing_count"]) + " },")
+        lines.append("      { " + ", ".join(str(value) for value in visual["standing_delay"]) + " },")
         lines.append("      {")
         for direction in range(4):
             frames = visual["frames"][1][direction * 4:direction * 4 + 4]
@@ -2620,7 +2763,7 @@ def compile_content(project_root: Path) -> None:
     runtime_dialogue, script_dialogues, runtime_flags = runtime_dialogues(
         inputs["dialogue"], inputs["scripts"], entities, game_root, script_index)
     dialogue_index = {str(item["id"]): index for index, item in enumerate(runtime_dialogue)}
-    runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_actors, _ = runtime_scene_data(
+    runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_actors, actor_visuals, _ = runtime_scene_data(
         inputs["maps"], entities, game_root, script_dialogues, dialogue_index,
         script_index, {flag: index for index, flag in enumerate(runtime_flags)})
     runtime_schedule_data = runtime_schedules(schedules, entities, runtime_scenes)
@@ -2628,7 +2771,9 @@ def compile_content(project_root: Path) -> None:
     music_index = {str(track["id"]): index for index, track in enumerate(music)}
     runtime_script_data = runtime_scripts(
         inputs["scripts"], entities, dialogue_index, runtime_scenes, music_index, schedule_index,
-        {flag: index for index, flag in enumerate(runtime_flags)})
+        {flag: index for index, flag in enumerate(runtime_flags)}, actor_visuals)
+    for definition in entities.values():
+        tilesets.update(str(path) for path in definition["visuals"].values())
     ordered = {"scenes": sorted(scenes), "tilesets": sorted(tilesets),
                "entities": sorted(entities), "music": sorted(music_ids),
                "dialogue": sorted(dialogue), "scripts": sorted(scripts),

@@ -2,7 +2,10 @@
 {
   "entities": [
     { "id": "player", "kind": "actor", "player_controlled": true },
-    { "id": "talan", "kind": "actor" },
+    { "id": "talan", "kind": "actor",
+      "visuals": [
+        { "id": "beaten", "tileset": "tilesets/talan_beaten.tsj" }
+      ] },
     { "id": "tristan", "kind": "actor" },
     { "id": "orloth", "kind": "actor" },
     { "id": "alek", "kind": "actor" },
@@ -14,7 +17,10 @@
     { "id": "silverhair", "kind": "actor" },
     { "id": "sarin", "kind": "actor" },
     { "id": "janesta", "kind": "actor" },
-    { "id": "bjarn", "kind": "actor" },
+    { "id": "bjarn", "kind": "actor",
+      "visuals": [
+        { "id": "crying", "tileset": "tilesets/bjarn_crying.tsj" }
+      ] },
     { "id": "fellnir", "kind": "actor" },
     { "id": "intro_gate_back", "kind": "object",
       "states": ["closed", "opening_1", "opening_2", "opening_3", "open"] },
