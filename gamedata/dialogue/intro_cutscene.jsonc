@@ -1,0 +1,81 @@
+// Text shown by the illustrated opening sequence before the gate dialogue.
+{
+  "id": "intro_cutscene",
+  "start": "road_1",
+  "speakers": [
+    { "id": "narrator", "name": "Narrator", "role": "narrator" },
+    { "id": "player", "name": "Banec", "role": "player" },
+    { "id": "talan", "name": "Talan Wendth", "role": "npc", "entity": "talan" }
+  ],
+  "nodes": [
+    {
+      "id": "road_1", "speaker": "narrator",
+      "text": "One week out of Cirdanth, the trail had become hard. I had begun to wonder days ago whether it could still be called a trail, but it was the only way the caravans had."
+    },
+    {
+      "id": "road_2", "speaker": "narrator",
+      "text": "There were no caravans now, only me, and I had seen few others on the road. Even those had become more scarce the further I went."
+    },
+    {
+      "id": "road_3", "speaker": "narrator",
+      "text": "It was easy to see why."
+    },
+    {
+      "id": "road_4", "speaker": "narrator",
+      "text": "The Lady Silverhair, intent on her mission, had gone on ahead while I was left to complete business in her name, trusting me to follow in good speed."
+    },
+    {
+      "id": "road_5", "speaker": "narrator",
+      "text": "A lone Half-Elf may travel with much more speed than an Elven lady and her servants, so she was now only a day ahead. The thought nearly caused me to forget the harshness of the road."
+    },
+    {
+      "id": "road_6", "speaker": "narrator",
+      "text": "Still, Waste's Edge was a welcome sight."
+    },
+    {
+      "id": "approach", "speaker": "narrator",
+      "text": "As you approach the trading post, there seems to be little sign of life. Eventually you find the Redwyne Inn, which seems to be the main building here."
+    },
+    {
+      "id": "closed_gate", "speaker": "narrator",
+      "text": "The heavy wooden doors are closed, and no one is there to let you in. As you approach the gate, you suddenly hear a voice from within."
+    },
+    {
+      "id": "halt", "speaker": "talan",
+      "text": "Halt! Stand and declare yourself, stranger!"
+    },
+    {
+      "id": "declare", "speaker": "player",
+      "text": "I am Banec, come as an agent for my employer. Tell me, is this the trading post of Waste's Edge?"
+    },
+    {
+      "id": "all_you_see", "speaker": "talan",
+      "text": "That it is, but this is all you'll see of it."
+    },
+    {
+      "id": "camping", "speaker": "talan",
+      "text": "If you turn now and make haste, you should be able to make safe camping before dark."
+    },
+    {
+      "id": "turn_back", "speaker": "player",
+      "text": "Turn back? Whatever for? And why is the gate of a free Inn locked against a footsore traveller?"
+    },
+    {
+      "id": "barred", "speaker": "talan",
+      "text": "I am sorry, traveller, but the Inn is barred and you must be off."
+    },
+    {
+      "id": "trouble", "speaker": "talan",
+      "text": "There has been trouble inside and I have instructions to turn away all who need not be here."
+    },
+    {
+      "id": "must_enter", "speaker": "player",
+      "text": "Trouble? Why then, I must get inside. My employer will need me close at hand!"
+    },
+    {
+      "id": "hard_day", "speaker": "narrator",
+      "text": "Suddenly, it looked like the day would be harder than I thought ...",
+      "end": true
+    }
+  ]
+}

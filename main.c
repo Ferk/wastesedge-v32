@@ -1,5 +1,6 @@
 #include "engine/world.h"
 #include "platform/vircon32/platform.h"
+#include "content_ids.h"
 
 #if defined(__clang__)
 #define MAIN_NOINLINE __attribute__((noinline))
@@ -21,7 +22,8 @@ enum application_mode {
     APPLICATION_PAUSED = 2,
     APPLICATION_LOAD_FROM_TITLE = 3,
     APPLICATION_LOAD_FROM_PAUSE = 4,
-    APPLICATION_SAVE_FROM_PAUSE = 5
+    APPLICATION_SAVE_FROM_PAUSE = 5,
+    APPLICATION_INTRO = 6
 };
 
 static int moved_choice(int current, int movement, int count)
@@ -49,6 +51,7 @@ int main(void)
 
     world_initialize(&world);
     platform_initialize();
+    platform_play_music_track(GENERATED_MUSIC_TITLE_THEME);
     world_seed_random(&world, platform_random_seed());
     storage_result = platform_query_save_slots(slot_states);
     simulation_frame = platform_frame_counter();
@@ -90,12 +93,19 @@ int main(void)
                     world_seed_random(&world, platform_random_seed());
                     platform_invalidate_world();
                     simulation_frame = platform_frame_counter();
-                    mode = APPLICATION_PLAYING;
+                    platform_begin_intro();
+                    mode = APPLICATION_INTRO;
                 } else {
                     storage_result = platform_query_save_slots(slot_states);
                     slot_choice = 0;
                     mode = APPLICATION_LOAD_FROM_TITLE;
                 }
+            }
+        } else if (mode == APPLICATION_INTRO) {
+            if (platform_update_intro(&actions)) {
+                platform_invalidate_world();
+                simulation_frame = platform_frame_counter();
+                mode = APPLICATION_PLAYING;
             }
         } else if (mode == APPLICATION_PAUSED) {
             menu_choice = moved_choice(menu_choice, actions.choice_move, 4);
@@ -117,6 +127,7 @@ int main(void)
                 storage_result = platform_query_save_slots(slot_states);
                 menu_choice = 0;
                 mode = APPLICATION_TITLE;
+                platform_play_music_track(GENERATED_MUSIC_TITLE_THEME);
             }
         } else {
             int from_title = mode == APPLICATION_LOAD_FROM_TITLE;
@@ -154,6 +165,8 @@ int main(void)
         if (mode == APPLICATION_PLAYING) {
             platform_update_audio(&world);
             platform_render_world(&world);
+        } else if (mode == APPLICATION_INTRO) {
+            platform_render_intro();
         } else if (mode == APPLICATION_TITLE) {
             platform_render_title_menu(menu_choice, storage_result);
         } else if (mode == APPLICATION_PAUSED) {

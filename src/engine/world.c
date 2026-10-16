@@ -1494,7 +1494,7 @@ void world_update(struct world_state *world, const struct world_actions *actions
         ++world->game_time;
         /* Ambient map-object animations use the same stable simulation clock
          * as the original engine. Only scenes containing animated scenery need
-         * a redraw; ordinary rooms retain the inexpensive dirty replay path. */
+         * to invalidate an otherwise unchanged full-scene frame. */
         if (world->scene != 0) {
             int scenery_index;
             for (scenery_index = 0; scenery_index < world->scene->scenery_count;

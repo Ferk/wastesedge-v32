@@ -2,6 +2,7 @@
 
 #include "platform/vircon32/platform.h"
 #include "engine/savegame.h"
+#include "content_ids.h"
 
 #define GAME_WIDTH 427
 #define GAME_HEIGHT 240
@@ -33,6 +34,19 @@
 #define SAVE_SLOT_MAGIC 0x57455356
 #define SAVE_PREVIEW_TILES 6
 #define SAVE_PREVIEW_SIZE 60
+#define INTRO_TEXT_FIRST_SPEECH 8
+#define INTRO_TEXT_CONCLUSION 16
+#define INTRO_TEXT_REVEAL_DELAY 5
+#define INTRO_NARRATION_HOLD 250
+#define INTRO_CONCLUSION_HOLD 500
+
+enum intro_phase {
+    INTRO_FOREST = 0,
+    INTRO_APPROACH = 1,
+    INTRO_SPEECH = 2,
+    INTRO_CONCLUSION = 3,
+    INTRO_COMPLETE = 4
+};
 
 #if SAVE_SLOT_HEADER_WORDS + SAVEGAME_MAX_WORDS > SAVE_SLOT_STRIDE
 #error Save payload does not fit in a memory-card slot
@@ -98,6 +112,18 @@ static int displayed_slot_menu_saving;
 static int displayed_slot_menu_selected;
 static int displayed_slot_menu_result;
 static int displayed_slot_menu_states[PLATFORM_SAVE_SLOT_COUNT];
+static int intro_phase;
+static int intro_phase_frame;
+static int intro_text;
+static int intro_visible_glyphs;
+static int intro_text_tick;
+static int intro_text_hold;
+static int intro_forest_x[3];
+static int intro_forest_tick[3];
+static int intro_approach_alpha;
+static int intro_background_y_100;
+static int intro_inn_y_100;
+static int intro_player_y_100;
 static const game_signature wastesedge_card_signature = {
     'W', 'A', 'S', 'T', 'E', 'S', 'E', 'D', 'G', 'E',
     '-', 'V', '3', '2', '-', 'S', 'A', 'V', 'E', 1
@@ -573,6 +599,37 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
     }
 }
 
+/* Draw a compact speech box with an optional tail aimed at its speaker. */
+static void record_speech_box(int x, int y, int text_width, int text_height,
+                              const struct generated_runtime_text *speech,
+                              unsigned int speech_color,
+                              int tail_x, int tail_y)
+{
+    int width = text_width + SPEECH_PADDING_X * 2;
+    int height = text_height + SPEECH_PADDING_Y * 2;
+    unsigned int border_color =
+        (speech_color & 0x00FFFFFFu) | 0x90000000u;
+
+    /* Separate one-pixel edges keep the translucent black interior from
+     * inheriting any tint from the speaker-colored border. */
+    record_solid_rect(x, y, width, height, 0x90101010);
+    record_solid_rect(x - 1, y - 1, width + 2, 1, border_color);
+    record_solid_rect(x - 1, y + height, width + 2, 1, border_color);
+    record_solid_rect(x - 1, y, 1, height, border_color);
+    record_solid_rect(x + width, y, 1, height, border_color);
+    if (tail_x >= 0) {
+        if (tail_y >= y + height)
+            record_solid_rect(tail_x - 2, y + height,
+                              4, tail_y - y - height, border_color);
+        else if (tail_y < y)
+            record_solid_rect(tail_x - 2, tail_y,
+                              4, y - tail_y, border_color);
+    }
+    record_runtime_text(x + SPEECH_PADDING_X, y + SPEECH_PADDING_Y,
+                        text_width, y + height - SPEECH_PADDING_Y,
+                        speech, speech_color);
+}
+
 static void record_ambient_speech(const struct world_state *world, int camera_x, int camera_y)
 {
     int entity_index;
@@ -592,7 +649,6 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
         int bubble_y;
         int tail_x;
         unsigned int speech_color;
-        unsigned int border_color;
         if (speech == 0 || world_actor_visual(world, entity_index) < 0 ||
             !world_actor_is_present(world, entity_index))
             continue;
@@ -620,31 +676,9 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
         if (tail_x > bubble_x + bubble_width - 4)
             tail_x = bubble_x + bubble_width - 4;
         speech_color = generated_runtime_actors[entity_index].speech_color;
-        border_color = (speech_color & 0x00FFFFFFu) | 0x90000000u;
-
-        /* Draw an actual outline rather than a larger filled rectangle behind
-         * the translucent interior. Otherwise the speaker color underneath
-         * would tint the nominally black bubble background. */
-        record_solid_rect(bubble_x, bubble_y,
-                          bubble_width, bubble_height, 0x90101010);
-        record_solid_rect(bubble_x - 1, bubble_y - 1,
-                          bubble_width + 2, 1, border_color);
-        record_solid_rect(bubble_x - 1, bubble_y + bubble_height,
-                          bubble_width + 2, 1, border_color);
-        record_solid_rect(bubble_x - 1, bubble_y,
-                          1, bubble_height, border_color);
-        record_solid_rect(bubble_x + bubble_width, bubble_y,
-                          1, bubble_height, border_color);
-        record_runtime_text(bubble_x + SPEECH_PADDING_X,
-                            bubble_y + SPEECH_PADDING_Y, text_width,
-                            bubble_y + bubble_height - SPEECH_PADDING_Y,
-                            speech, speech_color);
-        if (bubble_y < sprite_top)
-            record_solid_rect(tail_x - 2, bubble_y + bubble_height,
-                              4, SPEECH_SPRITE_GAP, border_color);
-        else
-            record_solid_rect(tail_x - 2, bubble_y - SPEECH_SPRITE_GAP,
-                              4, SPEECH_SPRITE_GAP, border_color);
+        record_speech_box(bubble_x, bubble_y, text_width, text_height,
+                          speech, speech_color, tail_x,
+                          bubble_y < sprite_top ? sprite_top : sprite_bottom);
     }
 }
 
@@ -699,6 +733,10 @@ void platform_initialize(void)
     int index;
     int selected_texture = -1000;
     int persistent_glyph_count = generated_runtime_glyph_count;
+    /* Vircon32 resets the SPU global gain independently of per-channel gain.
+     * Set it explicitly, as the official console games do, so music channels
+     * are audible from the first frame on both hardware and emulators. */
+    set_global_volume(1.0f);
     calibrate_cpu_frame();
     if (persistent_glyph_count > LAST_GLYPH_REGION - FIRST_GLYPH_REGION + 1)
         persistent_glyph_count = LAST_GLYPH_REGION - FIRST_GLYPH_REGION + 1;
@@ -724,16 +762,13 @@ int platform_random_seed(void)
     return rand();
 }
 
-void platform_update_audio(const struct world_state *world)
+/* Start one generated music track immediately on the shared music channel. */
+void platform_play_music_track(int track_index)
 {
     const struct generated_runtime_music *track;
-    if (world->music_track < 0 || world->music_track >= generated_runtime_music_count)
+    if (track_index < 0 || track_index >= generated_runtime_music_count)
         return;
-    if (applied_music_revision == world->music_revision &&
-        get_channel_state(MUSIC_CHANNEL) == channel_playing)
-        return;
-    applied_music_revision = world->music_revision;
-    track = &generated_runtime_music[world->music_track];
+    track = &generated_runtime_music[track_index];
     stop_channel(MUSIC_CHANNEL);
     select_sound(track->sound);
     set_sound_loop(track->loop);
@@ -745,10 +780,206 @@ void platform_update_audio(const struct world_state *world)
     play_channel(MUSIC_CHANNEL);
 }
 
+void platform_update_audio(const struct world_state *world)
+{
+    if (world->music_track < 0 || world->music_track >= generated_runtime_music_count)
+        return;
+    /* A revision represents an authored request to begin a track. Do not use
+     * the channel's stopped state as another request: one-shot cues naturally
+     * reach that state and must remain silent until a script selects music. */
+    if (applied_music_revision == world->music_revision)
+        return;
+    applied_music_revision = world->music_revision;
+    platform_play_music_track(world->music_track);
+}
+
 void platform_stop_audio(void)
 {
     stop_channel(MUSIC_CHANNEL);
     applied_music_revision = -1;
+}
+
+/* Return one authored line from the opening cutscene dialogue resource. */
+static const struct generated_runtime_text *intro_line(int line)
+{
+    const struct generated_runtime_dialogue *dialogue =
+        &generated_runtime_dialogues[GENERATED_DIALOGUE_INTRO_CUTSCENE];
+    if (line < 0 || line >= dialogue->node_count)
+        return 0;
+    return &dialogue->nodes[line].display;
+}
+
+/* Select a new narrated line and restart its typewriter reveal. */
+static void begin_intro_text(int line)
+{
+    intro_text = line;
+    intro_visible_glyphs = 0;
+    intro_text_tick = 0;
+    intro_text_hold = 0;
+}
+
+/* Reveal the current narration and report when its reading pause has elapsed. */
+static int update_intro_text(void)
+{
+    const struct generated_runtime_text *text = intro_line(intro_text);
+    if (text == 0)
+        return 1;
+    if (intro_visible_glyphs < text->glyph_count) {
+        ++intro_text_tick;
+        if (intro_text_tick >= INTRO_TEXT_REVEAL_DELAY) {
+            intro_text_tick = 0;
+            ++intro_visible_glyphs;
+        }
+        return 0;
+    }
+    ++intro_text_hold;
+    return intro_text_hold >= INTRO_NARRATION_HOLD;
+}
+
+/* Advance one parallax layer with the cadence used by the original intro. */
+static void update_intro_forest_layer(int layer, int image, int delay)
+{
+    const struct generated_runtime_frame *frame =
+        &generated_runtime_cutscene_images[image];
+    ++intro_forest_tick[layer];
+    if (intro_forest_tick[layer] < delay)
+        return;
+    intro_forest_tick[layer] = 0;
+    --intro_forest_x[layer];
+    if (intro_forest_x[layer] <= -frame->width)
+        intro_forest_x[layer] += frame->width;
+}
+
+/* Reset the original illustrated introduction for a newly started game. */
+void platform_begin_intro(void)
+{
+    platform_stop_audio();
+    intro_phase = INTRO_FOREST;
+    intro_phase_frame = 0;
+    begin_intro_text(0);
+    intro_forest_x[0] = 0;
+    intro_forest_x[1] = 0;
+    intro_forest_x[2] = 0;
+    intro_forest_tick[0] = 0;
+    intro_forest_tick[1] = 0;
+    intro_forest_tick[2] = 0;
+    intro_approach_alpha = 0;
+    intro_background_y_100 = 0;
+    intro_inn_y_100 = 51000;
+    intro_player_y_100 = 84300;
+    platform_play_music_track(GENERATED_MUSIC_INTRO_FOREST);
+}
+
+/* Update intro timing; A advances one beat while B or Start skips the cutscene. */
+int platform_update_intro(const struct world_actions *actions)
+{
+    static const int speech_duration[] = { 350, 500, 300, 400, 500, 300, 400, 500 };
+    const struct generated_runtime_text *text = intro_line(intro_text);
+    if (actions->cancel_pressed || actions->menu_pressed) {
+        intro_phase = INTRO_COMPLETE;
+        platform_stop_audio();
+        return 1;
+    }
+
+    if (actions->interact_pressed) {
+        if (intro_phase == INTRO_SPEECH) {
+            int speech = intro_text - INTRO_TEXT_FIRST_SPEECH;
+            if (speech >= 0 && speech < 8)
+                intro_phase_frame = speech_duration[speech];
+        } else if (text != 0 && intro_visible_glyphs < text->glyph_count) {
+            intro_visible_glyphs = text->glyph_count;
+            intro_text_tick = 0;
+            intro_text_hold = 0;
+        } else if (intro_phase == INTRO_FOREST) {
+            intro_text_hold = INTRO_NARRATION_HOLD;
+        } else if (intro_phase == INTRO_APPROACH && intro_text == 6) {
+            intro_text_hold = INTRO_NARRATION_HOLD;
+        } else if (intro_phase == INTRO_APPROACH && intro_approach_alpha < 255) {
+            intro_approach_alpha = 255;
+            platform_play_music_track(GENERATED_MUSIC_INTRO_APPROACH);
+        } else if (intro_phase == INTRO_APPROACH && intro_inn_y_100 > -8600) {
+            intro_background_y_100 = 26820;
+            intro_inn_y_100 = -8600;
+            intro_player_y_100 = 9800;
+        } else if (intro_phase == INTRO_APPROACH) {
+            intro_text_hold = INTRO_NARRATION_HOLD;
+        } else if (intro_phase == INTRO_CONCLUSION) {
+            intro_text_hold = INTRO_CONCLUSION_HOLD;
+        }
+    }
+
+    if (intro_phase == INTRO_FOREST) {
+        update_intro_forest_layer(0, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_BACK, 5);
+        update_intro_forest_layer(1, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_MIDDLE, 3);
+        update_intro_forest_layer(2, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_FRONT, 2);
+        ++intro_phase_frame;
+        if (update_intro_text()) {
+            if (intro_text < 5) {
+                begin_intro_text(intro_text + 1);
+            } else {
+                intro_phase = INTRO_APPROACH;
+                intro_phase_frame = 0;
+                begin_intro_text(6);
+            }
+        }
+        return 0;
+    }
+
+    if (intro_phase == INTRO_APPROACH) {
+        int pan_complete;
+        if (intro_approach_alpha < 255) {
+            ++intro_approach_alpha;
+            if (intro_approach_alpha > 255)
+                intro_approach_alpha = 255;
+            if (intro_approach_alpha < 128) {
+                select_channel(MUSIC_CHANNEL);
+                set_channel_volume((128 - intro_approach_alpha) / 256.0f);
+            } else if (intro_approach_alpha == 128) {
+                platform_play_music_track(GENERATED_MUSIC_INTRO_APPROACH);
+            }
+        } else if (intro_inn_y_100 > -8600) {
+            intro_background_y_100 += 18;
+            intro_inn_y_100 -= 40;
+            intro_player_y_100 -= 50;
+        }
+        pan_complete = intro_inn_y_100 <= -8600;
+        if (update_intro_text()) {
+            if (intro_text == 6)
+                begin_intro_text(7);
+            else if (pan_complete) {
+                intro_phase = INTRO_SPEECH;
+                intro_phase_frame = 0;
+                intro_text = INTRO_TEXT_FIRST_SPEECH;
+                platform_play_music_track(GENERATED_MUSIC_INTRO_GATE);
+            }
+        }
+        return 0;
+    }
+
+    if (intro_phase == INTRO_SPEECH) {
+        int speech = intro_text - INTRO_TEXT_FIRST_SPEECH;
+        ++intro_phase_frame;
+        if (speech >= 0 && speech < 8 && intro_phase_frame >= speech_duration[speech]) {
+            ++intro_text;
+            intro_phase_frame = 0;
+            if (intro_text >= INTRO_TEXT_CONCLUSION) {
+                intro_phase = INTRO_CONCLUSION;
+                begin_intro_text(INTRO_TEXT_CONCLUSION);
+            }
+        }
+        return 0;
+    }
+
+    if (intro_phase == INTRO_CONCLUSION) {
+        if (intro_visible_glyphs < intro_line(intro_text)->glyph_count) {
+            update_intro_text();
+        } else if (++intro_text_hold >= INTRO_CONCLUSION_HOLD) {
+            intro_phase = INTRO_COMPLETE;
+            platform_stop_audio();
+            return 1;
+        }
+    }
+    return intro_phase == INTRO_COMPLETE;
 }
 
 static void prepare_world_frame(const struct world_state *world)
@@ -835,6 +1066,165 @@ static void flush_prepared_frame(void)
     }
     set_multiply_color(0xFFFFFFFF);
     set_drawing_scale(1.0f, 1.0f);
+}
+
+/* Record one original 320x240 cutscene image in the Vircon32 display space. */
+static void record_intro_image(int image, int x, int y, int alpha)
+{
+    const struct generated_runtime_frame *frame;
+    int source_x;
+    int source_y;
+    int width;
+    int height;
+    int color;
+    if (image < 0 || image >= generated_runtime_cutscene_image_count)
+        return;
+    frame = &generated_runtime_cutscene_images[image];
+    source_x = frame->source_x;
+    source_y = frame->source_y;
+    width = frame->width;
+    height = frame->height;
+
+    /* The approach artwork is taller than the viewport and moves through
+     * negative coordinates. Crop it explicitly so partially visible images
+     * keep drawing after their origin has moved above or left of the screen. */
+    if (x < 0) {
+        source_x -= x;
+        width += x;
+        x = 0;
+    }
+    if (y < 0) {
+        source_y -= y;
+        height += y;
+        y = 0;
+    }
+    if (x + width > 320)
+        width = 320 - x;
+    if (y + height > 240)
+        height = 240 - y;
+    if (width <= 0 || height <= 0)
+        return;
+
+    color = (int)(((unsigned int)alpha << 24) | 0x00FFFFFFu);
+    record_draw(frame->texture, 0, source_x, source_y,
+                width, height, x * 2, (y * 3) / 2,
+                2.0f, 1.5f, color);
+}
+
+/* Record a wrapping forest layer at its current parallax offset. */
+static void record_intro_forest_layer(int layer, int image)
+{
+    const struct generated_runtime_frame *frame = &generated_runtime_cutscene_images[image];
+    int x = intro_forest_x[layer];
+    record_intro_image(image, x, 0, 255);
+    if (x < 320 - frame->width)
+        record_intro_image(image, x + frame->width, 0, 255);
+}
+
+/* Record the final approach composition used beneath the last speech lines. */
+static void record_intro_gate_composition(void)
+{
+    record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_APPROACH_BACKGROUND,
+                       0, -intro_background_y_100 / 100, 255);
+    record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_INN,
+                       0, intro_inn_y_100 / 100, 255);
+    record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_PLAYER_WALKING,
+                       167, intro_player_y_100 / 100, 255);
+    record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_TALAN, 51, 39, 255);
+}
+
+/* Draw the currently revealed portion of a narration line. */
+static void record_intro_narration(int y)
+{
+    const struct generated_runtime_text *source = intro_line(intro_text);
+    struct generated_runtime_text visible;
+    if (source == 0)
+        return;
+    visible = *source;
+    if (visible.glyph_count > intro_visible_glyphs)
+        visible.glyph_count = intro_visible_glyphs;
+    record_runtime_text(71, y + 1, 498, y + 145, &visible, 0xE0000000);
+    record_runtime_text(70, y, 498, y + 144, &visible, 0xFFFFFFFF);
+}
+
+/* Draw one original colored speech bubble over its illustrated backdrop. */
+static void record_intro_speech(void)
+{
+    static const int bubble_x[] = { 50, 260, 50, 50, 280, 50, 50, 280 };
+    static const int bubble_y[] = { 8, 8, 8, 8, 30, 8, 8, 45 };
+    const struct generated_runtime_dialogue *dialogue =
+        &generated_runtime_dialogues[GENERATED_DIALOGUE_INTRO_CUTSCENE];
+    const struct generated_runtime_text *text = intro_line(intro_text);
+    int speech = intro_text - INTRO_TEXT_FIRST_SPEECH;
+    int maximum_width = 430;
+    int text_width;
+    int text_height;
+    int width;
+    int x;
+    int y;
+    int speaker;
+    unsigned int speech_color;
+    if (text == 0 || speech < 0 || speech >= 8)
+        return;
+    measure_runtime_text(text, maximum_width, &text_width, &text_height);
+    width = text_width + SPEECH_PADDING_X * 2;
+    x = bubble_x[speech];
+    y = bubble_y[speech];
+    if (x + width > DISPLAY_WIDTH - 8)
+        x = DISPLAY_WIDTH - 8 - width;
+    if (x < 8)
+        x = 8;
+    speaker = dialogue->nodes[intro_text].speaker;
+    speech_color = speaker >= 0 && speaker < dialogue->speaker_count
+                       ? dialogue->speakers[speaker].speech_color
+                       : 0xFFFFFFFFu;
+    record_speech_box(x, y, text_width, text_height, text, speech_color,
+                      -1, -1);
+}
+
+/* Render the complete current frame of the original illustrated introduction. */
+void platform_render_intro(void)
+{
+    int initial_fade;
+    draw_command_count = 0;
+    if (intro_phase == INTRO_FOREST) {
+        record_intro_forest_layer(0, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_BACK);
+        record_intro_forest_layer(1, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_MIDDLE);
+        record_intro_forest_layer(2, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_FRONT);
+        record_intro_narration(52);
+        initial_fade = 255 - intro_phase_frame;
+        if (initial_fade > 0)
+            record_solid_rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT,
+                              (int)((unsigned int)initial_fade << 24));
+    } else if (intro_phase == INTRO_APPROACH) {
+        /* The original stops drawing the forest once the mountain view is
+         * opaque; keeping it alive underneath exposes it below the scrolling
+         * artwork if even one edge is rounded differently. */
+        if (intro_approach_alpha < 255) {
+            record_intro_forest_layer(0, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_BACK);
+            record_intro_forest_layer(1, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_MIDDLE);
+            record_intro_forest_layer(2, GENERATED_CUTSCENE_IMAGE_INTRO_FOREST_FRONT);
+        }
+        record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_APPROACH_BACKGROUND,
+                           0, -intro_background_y_100 / 100, intro_approach_alpha);
+        record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_INN,
+                           0, intro_inn_y_100 / 100, 255);
+        record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_PLAYER_WALKING,
+                           167, intro_player_y_100 / 100, 255);
+        record_intro_narration(202);
+    } else if (intro_phase == INTRO_SPEECH) {
+        if (intro_text == 8 || intro_text == 10 || intro_text == 11)
+            record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_GUARD, 0, 0, 255);
+        else if (intro_text == 9)
+            record_intro_image(GENERATED_CUTSCENE_IMAGE_INTRO_PLAYER_CLOSEUP, 0, 0, 255);
+        else
+            record_intro_gate_composition();
+        record_intro_speech();
+    } else {
+        record_intro_gate_composition();
+        record_intro_narration(202);
+    }
+    flush_prepared_frame();
 }
 
 static int dialogue_signature_matches(int dialogue, int node, int choice,

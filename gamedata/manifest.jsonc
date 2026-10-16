@@ -4,6 +4,17 @@
   "initial_scene": "redwyne_exterior",
   "initial_game_time": 7200,
   "title_background": "assets/ui/title/jewelbag_open.png",
+  "cutscene_images": [
+    { "id": "intro_forest_front", "source": "assets/cutscene/intro/forest1.png" },
+    { "id": "intro_forest_middle", "source": "assets/cutscene/intro/forest2.png" },
+    { "id": "intro_forest_back", "source": "assets/cutscene/intro/forest3.png" },
+    { "id": "intro_approach_background", "source": "assets/cutscene/intro/intro_bg.png" },
+    { "id": "intro_inn", "source": "assets/cutscene/intro/intro_inn.png" },
+    { "id": "intro_guard", "source": "assets/cutscene/intro/intro_guard.png" },
+    { "id": "intro_player_closeup", "source": "assets/cutscene/intro/intro_player.png" },
+    { "id": "intro_talan", "source": "assets/cutscene/intro/intro_talan.png" },
+    { "id": "intro_player_walking", "source": "assets/cutscene/intro/player.png" }
+  ],
   "maps": [
     "maps/intro_exterior.tmj",
     "maps/redwyne_exterior.tmj",
@@ -33,6 +44,7 @@
   "schedules": ["schedules/npc_routes.jsonc"],
   "audio": ["audio/music.jsonc"],
   "dialogue": [
+    "dialogue/intro_cutscene.jsonc",
     "dialogue/talan_intro.jsonc",
     "dialogue/talan_start.jsonc",
     "dialogue/tristan_start.jsonc",

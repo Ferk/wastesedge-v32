@@ -65,11 +65,11 @@
     { "id": "n20", "speaker": "talan", "text": "I tell you again, you shall not come in.", "choices": [
       { "text": "But I must! If my Lady is in need of me I cannot simply walk away! Please, I beg you to open the gate so I may aid her.", "next": "n9" }
     ] },
-    { "id": "n21", "speaker": "talan", "text": "I tell you I can't allow you in.", "choices": [
-      { "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n22" },
+    { "id": "n21", "speaker": "talan", "text": "I tell you, I cannot. My orders...", "choices": [
+      { "text": "I am sick of arguing with you. Are you about to let me in, or will I be forced to take action? And believe me, you would not enjoy it.", "next": "n22" },
       { "text": "You'll be in more trouble for not opening that gate than you will be for letting me in, I assure you of that. Now do as I say!", "next": "n24" }
     ] },
-    { "id": "n22", "speaker": "player", "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n23" },
+    { "id": "n22", "speaker": "player", "text": "I am sick of arguing with you. Are you about to let me in, or will I be forced to take action? And believe me, you would not enjoy it.", "next": "n23" },
     { "id": "n23", "speaker": "narrator", "text": "The guard hesitates for a moment, and even from where you stand you can see he is uncertain.", "next": "n25" },
     { "id": "n24", "speaker": "player", "text": "You'll be in more trouble for not opening that gate than you will be for letting me in, I assure you of that. Now do as I say!", "next": "n23" },
     { "id": "n25", "speaker": "narrator", "text": "But finally he seems to reach a conclusion, and after carefully scanning the surroundings, he beckons you in.", "end": true },
