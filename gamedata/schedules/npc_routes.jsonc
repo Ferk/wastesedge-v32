@@ -529,7 +529,6 @@
       "id": "erek_leave_fingolson",
       "entity": "erek",
       "loop": false,
-      "next": "erek_common_room",
       "steps": [
         { "op": "move", "scene": "redwyne_fingolson_room", "x": 1, "y": 7,
           "facing": "west" },
@@ -542,7 +541,8 @@
         { "op": "move", "scene": "redwyne_cellar", "x": 6, "y": 1,
           "facing": "north" },
         { "op": "place", "scene": "redwyne_inn", "x": 9, "y": 2,
-          "facing": "south" }
+          "facing": "south" },
+        { "op": "restore_actor_state" }
       ]
     },
     {
@@ -609,8 +609,27 @@
       "entity": "bjarn",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 6, "y": 6,
+        { "op": "place", "scene": "redwyne_fingolson_room", "x": 3, "y": 6,
           "facing": "west" }
+      ]
+    },
+    {
+      "id": "player_extro_group",
+      "entity": "player",
+      "loop": false,
+      "steps": [
+        { "op": "place_random", "scene": "redwyne_fingolson_room",
+          "positions": [
+            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
+            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
+            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
+            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
+            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
+            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
+            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
+            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
+            { "x": 5, "y": 9, "facing": "north" }
+          ] }
       ]
     },
     {
@@ -618,8 +637,26 @@
       "entity": "erek",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 5, "y": 7,
-          "facing": "north" }
+        { "op": "place_random", "scene": "redwyne_fingolson_room",
+          "positions": [
+            { "x": 2, "y": 5, "facing": "east" },
+            { "x": 2, "y": 6, "facing": "east" },
+            { "x": 3, "y": 6, "facing": "east" },
+            { "x": 4, "y": 6, "facing": "west" },
+            { "x": 5, "y": 6, "facing": "west" },
+            { "x": 2, "y": 7, "facing": "east" },
+            { "x": 3, "y": 7, "facing": "north" },
+            { "x": 4, "y": 7, "facing": "west" },
+            { "x": 5, "y": 7, "facing": "west" },
+            { "x": 2, "y": 8, "facing": "north" },
+            { "x": 3, "y": 8, "facing": "north" },
+            { "x": 4, "y": 8, "facing": "north" },
+            { "x": 5, "y": 8, "facing": "west" },
+            { "x": 2, "y": 9, "facing": "north" },
+            { "x": 3, "y": 9, "facing": "north" },
+            { "x": 4, "y": 9, "facing": "north" },
+            { "x": 5, "y": 9, "facing": "north" }
+          ] }
       ]
     },
     {
@@ -627,8 +664,18 @@
       "entity": "jelom",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 3, "y": 6,
-          "facing": "east" }
+        { "op": "place_random", "scene": "redwyne_fingolson_room",
+          "positions": [
+            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
+            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
+            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
+            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
+            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
+            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
+            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
+            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
+            { "x": 5, "y": 9, "facing": "north" }
+          ] }
       ]
     },
     {
@@ -636,8 +683,18 @@
       "entity": "silverhair",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 4, "y": 6,
-          "facing": "east" }
+        { "op": "place_random", "scene": "redwyne_fingolson_room",
+          "positions": [
+            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
+            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
+            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
+            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
+            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
+            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
+            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
+            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
+            { "x": 5, "y": 9, "facing": "north" }
+          ] }
       ]
     },
     {
@@ -645,8 +702,18 @@
       "entity": "tristan",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 2, "y": 8,
-          "facing": "north" }
+        { "op": "place_random", "scene": "redwyne_fingolson_room",
+          "positions": [
+            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
+            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
+            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
+            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
+            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
+            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
+            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
+            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
+            { "x": 5, "y": 9, "facing": "north" }
+          ] }
       ]
     },
     {
@@ -654,8 +721,18 @@
       "entity": "fellnir",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 5, "y": 8,
-          "facing": "west" }
+        { "op": "place_random", "scene": "redwyne_fingolson_room",
+          "positions": [
+            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
+            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
+            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
+            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
+            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
+            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
+            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
+            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
+            { "x": 5, "y": 9, "facing": "north" }
+          ] }
       ]
     },
     {
@@ -663,9 +740,33 @@
       "entity": "bjarn",
       "loop": false,
       "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 7, "y": 3,
+        { "op": "move", "scene": "redwyne_fingolson_room", "x": 7, "y": 3,
           "facing": "north" }
       ]
+    },
+    {
+      "id": "player_face_talan",
+      "entity": "player",
+      "loop": false,
+      "steps": [{ "op": "face", "facing": "west" }]
+    },
+    {
+      "id": "erek_face_talan",
+      "entity": "erek",
+      "loop": false,
+      "steps": [{ "op": "face", "facing": "west" }]
+    },
+    {
+      "id": "jelom_face_talan",
+      "entity": "jelom",
+      "loop": false,
+      "steps": [{ "op": "face", "facing": "west" }]
+    },
+    {
+      "id": "silverhair_face_talan",
+      "entity": "silverhair",
+      "loop": false,
+      "steps": [{ "op": "face", "facing": "west" }]
     },
     {
       "id": "bjarn_extro_crying",

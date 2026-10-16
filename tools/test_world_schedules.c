@@ -80,6 +80,19 @@ static int find_scene_entity(const struct generated_runtime_scene *scene, int de
     return -1;
 }
 
+static void assert_extro_position(int x, int y, int facing)
+{
+    int expected_facing;
+    assert(x >= 2 && x <= 5);
+    assert(y >= 5 && y <= 9);
+    assert(y != 5 || x == 2);
+    if (x + y < 10)
+        expected_facing = x + 3 > y ? WORLD_SOUTH : WORLD_EAST;
+    else
+        expected_facing = y - (x + 3) > 0 ? WORLD_NORTH : WORLD_WEST;
+    assert(facing == expected_facing);
+}
+
 static int single_condition_flag(const struct generated_runtime_dialogue_choice *choice)
 {
     assert(choice->condition_count == 1);
@@ -341,6 +354,11 @@ int main(void)
     assert(world_actor_is_present(&world, GENERATED_ENTITY_EREK));
     assert(generated_runtime_actors[GENERATED_ENTITY_EREK].interaction_dialogue ==
            GENERATED_DIALOGUE_EREK_START);
+    assert(generated_runtime_actors[GENERATED_ENTITY_PLAYER].speech_color == 0xFF7FEEFFu);
+    assert(generated_runtime_actors[GENERATED_ENTITY_BJARN].speech_color == 0xFF7BACFFu);
+    assert(generated_runtime_actors[GENERATED_ENTITY_EREK].speech_color == 0xFFE086D8u);
+    assert(generated_runtime_actors[GENERATED_ENTITY_FROSTBLOOM].speech_color == 0xFFEDB989u);
+    assert(generated_runtime_actors[GENERATED_ENTITY_JELOM].speech_color == 0xFF91FFCFu);
     assert(world.dialogue == GENERATED_DIALOGUE_JELOM_2ND);
     assert(strcmp(world_dialogue_text(&world),
                   "What's going on now? What are you doing here, Erek Stonebreaker?") == 0);
@@ -368,13 +386,50 @@ int main(void)
     assert(world.flags[generated_runtime_scripts[
                GENERATED_SCRIPT_FINISH_JELOM_INVESTIGATION].actions[1].a] == 1);
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
-    assert(world.player_x == 4 && world.player_y == 8);
+    assert_extro_position(world.player_x, world.player_y, world.player_facing);
     assert(world.dialogue == GENERATED_DIALOGUE_EXTRO);
     assert(world.actors[GENERATED_ENTITY_EREK].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_JELOM].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_SILVERHAIR].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_TRISTAN].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_FELLNIR].scene == world.scene_index);
+    /* Fingolson's await_player callback fixed him at (3,6), facing west.
+     * The player and visitors occupied free cells in the original (2..5, 5..9)
+     * gathering area and faced inward according to their chosen cell. */
+    assert(world.actors[GENERATED_ENTITY_BJARN].x == 3 &&
+           world.actors[GENERATED_ENTITY_BJARN].y == 6 &&
+           world.actors[GENERATED_ENTITY_BJARN].facing == WORLD_WEST);
+    assert_extro_position(world.actors[GENERATED_ENTITY_EREK].x,
+                          world.actors[GENERATED_ENTITY_EREK].y,
+                          world.actors[GENERATED_ENTITY_EREK].facing);
+    assert_extro_position(world.actors[GENERATED_ENTITY_JELOM].x,
+                          world.actors[GENERATED_ENTITY_JELOM].y,
+                          world.actors[GENERATED_ENTITY_JELOM].facing);
+    assert_extro_position(world.actors[GENERATED_ENTITY_SILVERHAIR].x,
+                          world.actors[GENERATED_ENTITY_SILVERHAIR].y,
+                          world.actors[GENERATED_ENTITY_SILVERHAIR].facing);
+    assert_extro_position(world.actors[GENERATED_ENTITY_TRISTAN].x,
+                          world.actors[GENERATED_ENTITY_TRISTAN].y,
+                          world.actors[GENERATED_ENTITY_TRISTAN].facing);
+    assert_extro_position(world.actors[GENERATED_ENTITY_FELLNIR].x,
+                          world.actors[GENERATED_ENTITY_FELLNIR].y,
+                          world.actors[GENERATED_ENTITY_FELLNIR].facing);
+    {
+        const int visitors[] = { GENERATED_ENTITY_EREK, GENERATED_ENTITY_JELOM,
+                                 GENERATED_ENTITY_SILVERHAIR, GENERATED_ENTITY_TRISTAN,
+                                 GENERATED_ENTITY_FELLNIR };
+        int left;
+        int right;
+        for (left = 0; left < 5; ++left) {
+            const struct world_actor_state *actor = &world.actors[visitors[left]];
+            assert(actor->x != world.player_x || actor->y != world.player_y);
+            assert(actor->x != world.actors[GENERATED_ENTITY_BJARN].x ||
+                   actor->y != world.actors[GENERATED_ENTITY_BJARN].y);
+            for (right = left + 1; right < 5; ++right)
+                assert(actor->x != world.actors[visitors[right]].x ||
+                       actor->y != world.actors[visitors[right]].y);
+        }
+    }
 
     /* A direct accusation path must converge on Fingolson's confession and
      * hand control to the authored aftermath without restoring player input. */
@@ -403,16 +458,67 @@ int main(void)
     choose_visible_dialogue_option(&world,
         "Then you confess that the theft was just pretended?");
     tick(&world, 1);
-    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_AFTERMATH);
-    assert(strcmp(world_dialogue_text(&world),
-                  "There is no denying it. Yes, I feigned the theft.") == 0);
+    assert(world.dialogue < 0);
+    assert(world.active_script == GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH);
+    assert(world_actor_speech(&world, GENERATED_ENTITY_BJARN) != 0);
+    assert(world.actors[GENERATED_ENTITY_BJARN].speech_frames == 180);
+    /* The post-confession exchange remains a world-view cutscene. Its only
+     * modal action is the final epilogue after all scripted bubbles finish. */
+    for (frame = 0;
+         frame < generated_runtime_scripts[GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH]
+                     .action_count - 1;
+         ++frame)
+        assert(generated_runtime_scripts[GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH]
+                   .actions[frame].op != GENERATED_SCRIPT_SHOW_DIALOGUE);
     assert(world.control_enabled == 0);
+    {
+        struct world_state completed_extro = world;
+        tick(&completed_extro, 12000);
+        assert(completed_extro.dialogue == GENERATED_DIALOGUE_EXTRO_EPILOGUE);
+        assert(completed_extro.active_script ==
+               GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH);
+        assert(completed_extro.actors[GENERATED_ENTITY_BJARN].x == 7 &&
+               completed_extro.actors[GENERATED_ENTITY_BJARN].y == 4);
+        assert(completed_extro.actors[GENERATED_ENTITY_TALAN].x == 2 &&
+               completed_extro.actors[GENERATED_ENTITY_TALAN].y == 6);
+        assert(completed_extro.player_facing == WORLD_WEST);
+        assert(completed_extro.actors[GENERATED_ENTITY_EREK].facing == WORLD_WEST);
+        assert(completed_extro.actors[GENERATED_ENTITY_JELOM].facing == WORLD_WEST);
+        assert(completed_extro.actors[GENERATED_ENTITY_SILVERHAIR].facing == WORLD_WEST);
+        assert(world_actor_visual(&completed_extro, GENERATED_ENTITY_BJARN) !=
+               generated_runtime_actors[GENERATED_ENTITY_BJARN].visual);
+        assert(world_actor_visual(&completed_extro, GENERATED_ENTITY_TALAN) !=
+               generated_runtime_actors[GENERATED_ENTITY_TALAN].visual);
+    }
 
     world.dialogue = -1;
     world.active_script = GENERATED_SCRIPT_REVEAL_EXTRO_CHEST;
     world.script_action = 0;
     world.script_wait = 0;
     tick(&world, 3);
+    assert(world.dialogue < 0);
+    assert(world.actors[GENERATED_ENTITY_BJARN].moving);
+    assert(world.actors[GENERATED_ENTITY_BJARN].x != 7 ||
+           world.actors[GENERATED_ENTITY_BJARN].y != 3);
+    {
+        int saw_diagonal = 0;
+        int path_frame;
+        for (path_frame = 0; path_frame < 200 && world.dialogue < 0; ++path_frame) {
+            const struct world_actor_state *bjarn =
+                &world.actors[GENERATED_ENTITY_BJARN];
+            if (bjarn->moving) {
+                if (bjarn->move_x != 0 && bjarn->move_y != 0)
+                    saw_diagonal = 1;
+                /* The room's east wall occupies tile column 8. It is not a
+                 * corridor merely because its old directional mask permits
+                 * travel parallel to the wall. */
+                assert(bjarn->x != 8);
+                assert(bjarn->x + bjarn->move_x != 8);
+            }
+            tick(&world, 1);
+        }
+        assert(saw_diagonal);
+    }
     assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CHEST);
     assert(world.actors[GENERATED_ENTITY_BJARN].x == 7 &&
            world.actors[GENERATED_ENTITY_BJARN].y == 3);
@@ -1426,11 +1532,17 @@ int main(void)
             find_dialogue_node(frostbloom_dialogue, "Hm? What do you want?");
         const struct generated_runtime_dialogue_node *erek_menu =
             find_dialogue_node(erek_dialogue, "Ho there, Banec. What is it this time?");
+        const struct generated_runtime_dialogue_node *erek_uncertain =
+            find_dialogue_node(
+                erek_dialogue,
+                "Master Fingolson says her guilt is proven beyond doubt, and there are indeed facts that support his opinion. But I ... am not sure.");
         const struct generated_runtime_dialogue_node *silverhair_menu =
             find_dialogue_node(silverhair_dialogue,
                                "I have little choice. Do you have news? Or questions?");
         const struct generated_runtime_dialogue_choice *meet_frostbloom;
         const struct generated_runtime_dialogue_choice *erek_argument;
+        const struct generated_runtime_dialogue_choice *erek_first_argument;
+        const struct generated_runtime_dialogue_choice *erek_known_argument;
         const struct generated_runtime_dialogue_choice *silverhair_yeti;
         const struct generated_runtime_dialogue_choice *silverhair_argument;
         const struct generated_runtime_dialogue_choice *silverhair_noise;
@@ -1445,13 +1557,20 @@ int main(void)
         int frostbloom_talked_flag;
         int frostbloom_flattered_flag;
 
-        assert(frostbloom_first != 0 && erek_menu != 0 && silverhair_menu != 0);
+        assert(frostbloom_first != 0 && erek_menu != 0 && erek_uncertain != 0 &&
+               silverhair_menu != 0);
         meet_frostbloom = find_dialogue_choice(
             frostbloom_first,
             "I am a servant of Lady Imoen Silverhair, and I'd like to ask ...");
         erek_argument = find_dialogue_choice(
             erek_menu,
             "Could you please repeat what you told me about the argument between your master and Lady Silverhair?");
+        erek_first_argument = find_dialogue_choice(
+            erek_uncertain,
+            "I know of nothing that could possibly support such claims. I really would know what has happened!");
+        erek_known_argument = find_dialogue_choice(
+            erek_uncertain,
+            "You refer to the argument she had with your master?");
         silverhair_yeti = find_dialogue_choice(
             silverhair_menu,
             "I am curious, Lady. What of that figurine there? I do not recall it.");
@@ -1463,6 +1582,7 @@ int main(void)
             "I have spoken with the artist, Frostbloom. She mentioned that she had heard some strange sounds in the night, when the theft must have taken place. Did you hear anything?");
         assert(meet_frostbloom != 0 && meet_frostbloom->action_count == 2);
         assert(erek_argument != 0 && erek_argument->action_count == 2);
+        assert(erek_first_argument != 0 && erek_known_argument != 0);
         assert(silverhair_yeti != 0 && silverhair_yeti->condition_count == 2);
         assert(silverhair_argument != 0 && silverhair_argument->condition_count == 1);
         assert(silverhair_noise != 0 && silverhair_noise->condition_count == 2);
@@ -1471,6 +1591,39 @@ int main(void)
         know_argument_flag = silverhair_argument->conditions[0].flag;
         assert(choice_has_condition(silverhair_yeti, know_frostbloom_flag, 1));
         assert(choice_has_action(erek_argument, know_argument_flag, 1));
+        assert(single_condition_flag(erek_first_argument) == know_argument_flag);
+        assert(single_condition_value(erek_first_argument) == 0);
+        assert(choice_has_action(erek_first_argument, know_argument_flag, 1));
+        assert(single_condition_flag(erek_known_argument) == know_argument_flag);
+        assert(single_condition_value(erek_known_argument) == 1);
+        assert(choice_has_action(erek_known_argument, know_argument_flag, 1));
+
+        /* Erek's repeat wording is only reachable after his first account of
+         * the argument. The original branches its first-time prompt depending
+         * on whether Banec learned about the argument elsewhere. */
+        {
+            struct world_state erek_world;
+            world_initialize(&erek_world);
+            erek_world.dialogue = GENERATED_DIALOGUE_EREK_START;
+            erek_world.dialogue_node = (int)(erek_uncertain - erek_dialogue->nodes);
+            erek_world.dialogue_choice = 0;
+            assert(world_dialogue_choice_count(&erek_world) == 1);
+            assert(strcmp(world_dialogue_choice_at(&erek_world, 0),
+                          "I know of nothing that could possibly support such claims. I really would know what has happened!") == 0);
+            world_update(&erek_world, &interact);
+            assert(erek_world.flags[know_argument_flag] == 1);
+            assert(strcmp(world_dialogue_text(&erek_world),
+                          "Very well then. It was yesterday, in the evening, when Lady Silverhair met my Master and me in the parlour next to the common room.") == 0);
+
+            world_initialize(&erek_world);
+            erek_world.dialogue = GENERATED_DIALOGUE_EREK_START;
+            erek_world.dialogue_node = (int)(erek_uncertain - erek_dialogue->nodes);
+            erek_world.dialogue_choice = 0;
+            erek_world.flags[know_argument_flag] = 1;
+            assert(world_dialogue_choice_count(&erek_world) == 1);
+            assert(strcmp(world_dialogue_choice_at(&erek_world, 0),
+                          "You refer to the argument she had with your master?") == 0);
+        }
 
         /* Frostbloom cannot be praised for a figurine until Silverhair has
          * actually identified it. Her later investigation menu is likewise
@@ -2193,6 +2346,45 @@ int main(void)
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
     assert(world.player_x == 13 && world.player_y == 23);
 
+    /* Temporary escorts can return an actor to an authored checkpoint instead
+     * of hard-coding a follow-up routine. Erek therefore returns to the exact
+     * paused position beside Jelom after opening Fingolson's room. */
+    {
+        struct world_state return_world;
+        struct world_actor_state *returning_erek;
+        const struct generated_runtime_schedule *leave_route =
+            &generated_runtime_schedules[GENERATED_SCHEDULE_EREK_LEAVE_FINGOLSON];
+        world_initialize(&return_world);
+        return_world.dialogue = -1;
+        return_world.dialogue_actor = -1;
+        returning_erek = &return_world.actors[GENERATED_ENTITY_EREK];
+        returning_erek->scene = GENERATED_SCENE_REDWYNE_FIRST_FLOOR;
+        returning_erek->x = 2;
+        returning_erek->y = 4;
+        returning_erek->facing = WORLD_NORTH;
+        returning_erek->schedule = -1;
+        return_world.active_script = GENERATED_SCRIPT_ESCORT_TO_FINGOLSON_ROOM;
+        return_world.script_action = 0;
+        tick(&return_world, 1);
+        assert(return_world.actor_checkpoints[GENERATED_ENTITY_EREK].valid);
+        assert(return_world.actor_checkpoints[GENERATED_ENTITY_EREK].scene ==
+               GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+        return_world.active_script = -1;
+        return_world.transition_phase = WORLD_TRANSITION_NONE;
+        returning_erek->scene = GENERATED_SCENE_REDWYNE_INN;
+        returning_erek->x = 9;
+        returning_erek->y = 2;
+        returning_erek->schedule = GENERATED_SCHEDULE_EREK_LEAVE_FINGOLSON;
+        returning_erek->schedule_step = leave_route->step_count - 1;
+        returning_erek->schedule_wait = 0;
+        tick(&return_world, 1);
+        assert(!return_world.actor_checkpoints[GENERATED_ENTITY_EREK].valid);
+        assert(returning_erek->scene == GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+        assert(returning_erek->x == 2 && returning_erek->y == 4);
+        assert(returning_erek->facing == WORLD_NORTH);
+        assert(returning_erek->schedule == -1);
+    }
+
     /* Save data is pointer-free and restores persistent state while forcing
      * transient route buffers and ROM speech pointers to be reconstructed. */
     {
@@ -2209,6 +2401,17 @@ int main(void)
         world.actors[GENERATED_ENTITY_TALAN].path_length = 7;
         world.actors[GENERATED_ENTITY_TALAN].speech_override =
             (const struct generated_runtime_text *)1;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].valid = 1;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].scene =
+            GENERATED_SCENE_REDWYNE_FIRST_FLOOR;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].x = 2;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].y = 4;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].facing = WORLD_NORTH;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].visual =
+            world.actors[GENERATED_ENTITY_EREK].visual;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].schedule = -1;
+        world.actor_checkpoints[GENERATED_ENTITY_EREK].dialogue =
+            world.actors[GENERATED_ENTITY_EREK].dialogue;
         word_count = savegame_encode(&world, save_words, SAVEGAME_MAX_WORDS);
         assert(word_count > 0 && word_count < SAVEGAME_MAX_WORDS);
         assert(savegame_checksum(save_words, word_count) != 0);
@@ -2222,6 +2425,11 @@ int main(void)
         assert(loaded.actors[GENERATED_ENTITY_TALAN].path_schedule_step == -1);
         assert(loaded.actors[GENERATED_ENTITY_TALAN].path_length == 0);
         assert(loaded.actors[GENERATED_ENTITY_TALAN].speech_override == 0);
+        assert(loaded.actor_checkpoints[GENERATED_ENTITY_EREK].valid);
+        assert(loaded.actor_checkpoints[GENERATED_ENTITY_EREK].scene ==
+               GENERATED_SCENE_REDWYNE_FIRST_FLOOR);
+        assert(loaded.actor_checkpoints[GENERATED_ENTITY_EREK].x == 2 &&
+               loaded.actor_checkpoints[GENERATED_ENTITY_EREK].y == 4);
         loaded_word_count = savegame_encode(&loaded, loaded_words,
                                             SAVEGAME_MAX_WORDS);
         assert(loaded_word_count == word_count);
@@ -2230,7 +2438,8 @@ int main(void)
         /* Version 1 predates the saved game clock; it remains loadable and
          * resumes at the original noon start rather than becoming corrupt. */
         save_words[0] = 1;
-        assert(savegame_decode(&loaded, save_words, word_count - 2));
+        assert(savegame_decode(&loaded, save_words,
+                               word_count - 2 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
         assert(loaded.game_time == generated_runtime_initial_game_time);
         save_words[0] = SAVEGAME_FORMAT_VERSION;
         assert(!savegame_decode(&loaded, save_words, word_count - 1));

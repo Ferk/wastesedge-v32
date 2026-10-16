@@ -77,6 +77,9 @@ static int collision_mask_at(const struct world_state *world, int scene_index,
     return walkability;
 }
 
+static int path_edge_is_open(const struct world_state *world, int scene_index,
+                             int x, int y, int move_x, int move_y);
+
 static void set_collision_mask(struct world_state *world, int scene_index,
                                int tile_x, int tile_y, int walkability)
 {
@@ -122,17 +125,12 @@ static int actor_blocks_tile(const struct world_state *world, int definition, in
 static int can_move(const struct world_state *world, int move_x, int move_y)
 {
     int entity_index;
-    int source_mask = direction_mask(move_x, move_y);
-    int target_mask = opposite_mask(move_x, move_y);
 
     /* Directional map collision and actor occupancy are both defined at the
      * ground anchor. A character's upper sprite cells participate in drawing
      * and sorting, but Adonthell's mapsquare::is_free() did not block them. */
-    if (!(collision_mask_at(world, world->scene_index,
-                            world->player_x, world->player_y) & source_mask) ||
-        !(collision_mask_at(world, world->scene_index,
-                            world->player_x + move_x,
-                            world->player_y + move_y) & target_mask))
+    if (!path_edge_is_open(world, world->scene_index,
+                           world->player_x, world->player_y, move_x, move_y))
         return 0;
 
     for (entity_index = 0; entity_index < generated_runtime_actor_count; ++entity_index)
@@ -446,7 +444,8 @@ static int actor_anchor_blocked(const struct world_state *world, int definition,
                                 int scene_index, int x, int y)
 {
     int other;
-    if (scene_index == world->scene_index && x == world->player_x && y == world->player_y)
+    if (definition != player_definition(world) && scene_index == world->scene_index &&
+        x == world->player_x && y == world->player_y)
         return 1;
     for (other = 0; other < GENERATED_RUNTIME_ENTITY_COUNT; ++other) {
         const struct world_actor_state *actor = &world->actors[other];
@@ -460,15 +459,10 @@ static int scheduled_actor_can_move(const struct world_state *world, int definit
                                     int move_x, int move_y)
 {
     const struct world_actor_state *actor = &world->actors[definition];
-    int source_mask;
-    int target_mask;
     if (actor->scene < 0 || actor->scene >= generated_runtime_scene_count)
         return 0;
-    source_mask = direction_mask(move_x, move_y);
-    target_mask = opposite_mask(move_x, move_y);
-    if (!(collision_mask_at(world, actor->scene, actor->x, actor->y) & source_mask) ||
-        !(collision_mask_at(world, actor->scene,
-                            actor->x + move_x, actor->y + move_y) & target_mask))
+    if (!path_edge_is_open(world, actor->scene, actor->x, actor->y,
+                           move_x, move_y))
         return 0;
     return !actor_anchor_blocked(world, definition, actor->scene,
                                  actor->x + move_x, actor->y + move_y);
@@ -509,9 +503,13 @@ static int path_heuristic(int node)
     int y = node / path_heap_width;
     int dx = x - path_heap_target_x;
     int dy = y - path_heap_target_y;
+    int diagonal;
     if (dx < 0) dx = -dx;
     if (dy < 0) dy = -dy;
-    return dx + dy;
+    diagonal = dx < dy ? dx : dy;
+    /* Adonthell prices a diagonal grid step at 28 versus 20 for a cardinal
+     * step. The equivalent 14/10 octile heuristic remains admissible. */
+    return diagonal * 14 + (dx + dy - diagonal * 2) * 10;
 }
 
 static int path_total_cost(int node)
@@ -582,10 +580,25 @@ static int path_heap_pop(void)
     return result;
 }
 
-/* This follows Adonthell 0.3's path::calculate: four cardinal successors in
- * east, west, north, south order; unit movement cost; Manhattan heuristic;
- * directional walkability checked on both sides; and occupied squares omitted.
- * The original vector of moves is materialized in a fixed route slot. */
+static int path_edge_is_open(const struct world_state *world, int scene_index,
+                             int x, int y, int move_x, int move_y)
+{
+    int source = collision_mask_at(world, scene_index, x, y);
+    int target = collision_mask_at(world, scene_index, x + move_x, y + move_y);
+    if (move_x != 0 &&
+        (!(source & direction_mask(move_x, 0)) ||
+         !(target & opposite_mask(move_x, 0))))
+        return 0;
+    if (move_y != 0 &&
+        (!(source & direction_mask(0, move_y)) ||
+         !(target & opposite_mask(0, move_y))))
+        return 0;
+    return 1;
+}
+
+/* Adonthell's pathfinder expands all eight neighbouring squares and prices a
+ * diagonal step at roughly sqrt(2) times a cardinal one. The original vector
+ * of moves is materialized in a fixed route slot. */
 static int calculate_path(const struct world_state *world, int definition,
                           int scene_index, int start_x, int start_y,
                           int target_x, int target_y, int route_slot)
@@ -598,10 +611,8 @@ static int calculate_path(const struct world_state *world, int definition,
     int current = -1;
     int index;
     int reverse_count = 0;
-    static const int offsets_x[4] = { 1, -1, 0, 0 };
-    static const int offsets_y[4] = { 0, 0, -1, 1 };
-    static const int direction_masks[4] = { WALK_EAST, WALK_WEST, WALK_NORTH, WALK_SOUTH };
-    static const int reverse_masks[4] = { WALK_WEST, WALK_EAST, WALK_SOUTH, WALK_NORTH };
+    static const int offsets_x[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+    static const int offsets_y[8] = { 1, 0, -1, -1, 1, 0, -1, 1 };
 
     if (scene_index < 0 || scene_index >= generated_runtime_scene_count)
         return 0;
@@ -640,7 +651,7 @@ static int calculate_path(const struct world_state *world, int definition,
         if (current == target)
             break;
         path_node_state[current] = PATH_CLOSED;
-        for (direction = 0; direction < 4; ++direction) {
+        for (direction = 0; direction < 8; ++direction) {
             int x = current % width;
             int y = current / width;
             int next_x = x + offsets_x[direction];
@@ -649,16 +660,16 @@ static int calculate_path(const struct world_state *world, int definition,
             int new_cost;
             if (next_x < 0 || next_y < 0 || next_x >= width || next_y >= height)
                 continue;
-            if (!(collision_mask_at(world, scene_index, x, y) & direction_masks[direction]) ||
-                !(collision_mask_at(world, scene_index,
-                                    next_x, next_y) & reverse_masks[direction]))
+            if (!path_edge_is_open(world, scene_index, x, y,
+                                   offsets_x[direction], offsets_y[direction]))
                 continue;
             next = next_y * width + next_x;
             if (next != target && !path_tile_can_be_used(scene, next_x, next_y))
                 continue;
             if (path_tile_is_blocked(world, definition, scene_index, next_x, next_y))
                 continue;
-            new_cost = path_move_cost[current] + 1;
+            new_cost = path_move_cost[current] +
+                       (offsets_x[direction] != 0 && offsets_y[direction] != 0 ? 14 : 10);
             if (path_node_state[next] != PATH_UNSEEN && path_move_cost[next] <= new_cost)
                 continue;
             path_move_cost[next] = new_cost;
@@ -692,9 +703,9 @@ static int calculate_path(const struct world_state *world, int definition,
 
 static void path_direction(int direction, int *move_x, int *move_y)
 {
-    static const int offsets_x[4] = { 1, -1, 0, 0 };
-    static const int offsets_y[4] = { 0, 0, -1, 1 };
-    if (direction < 0 || direction >= 4) {
+    static const int offsets_x[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+    static const int offsets_y[8] = { 1, 0, -1, -1, 1, 0, -1, 1 };
+    if (direction < 0 || direction >= 8) {
         *move_x = 0;
         *move_y = 0;
         return;
@@ -705,6 +716,66 @@ static void path_direction(int direction, int *move_x, int *move_y)
 
 static void start_actor_schedule(struct world_state *world, int definition,
                                  int schedule, int delay);
+
+static void save_actor_state(struct world_state *world, int definition)
+{
+    const struct world_actor_state *actor;
+    struct world_actor_checkpoint *checkpoint;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return;
+    actor = &world->actors[definition];
+    checkpoint = &world->actor_checkpoints[definition];
+    checkpoint->valid = 1;
+    checkpoint->scene = actor->scene;
+    checkpoint->x = actor->x;
+    checkpoint->y = actor->y;
+    checkpoint->facing = actor->facing;
+    checkpoint->animation_frame = actor->animation_frame;
+    checkpoint->visual = actor->visual;
+    checkpoint->visual_tick = actor->visual_tick;
+    checkpoint->schedule = actor->schedule;
+    checkpoint->schedule_step = actor->schedule_step;
+    checkpoint->schedule_wait = actor->schedule_wait;
+    checkpoint->dialogue = actor->dialogue;
+}
+
+static int restore_actor_state(struct world_state *world, int definition)
+{
+    struct world_actor_state *actor;
+    struct world_actor_checkpoint *checkpoint;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return 0;
+    checkpoint = &world->actor_checkpoints[definition];
+    if (!checkpoint->valid)
+        return 0;
+    actor = &world->actors[definition];
+    actor->scene = checkpoint->scene;
+    actor->x = checkpoint->x;
+    actor->y = checkpoint->y;
+    actor->facing = checkpoint->facing;
+    actor->moving = 0;
+    actor->move_x = 0;
+    actor->move_y = 0;
+    actor->move_progress = 0;
+    actor->animation_frame = checkpoint->animation_frame;
+    actor->visual = checkpoint->visual;
+    actor->visual_tick = checkpoint->visual_tick;
+    actor->schedule = checkpoint->schedule;
+    actor->schedule_step = checkpoint->schedule_step;
+    actor->schedule_wait = checkpoint->schedule_wait;
+    actor->path_schedule_step = -1;
+    actor->path_scene = -1;
+    actor->path_length = 0;
+    actor->path_index = 0;
+    actor->speech_line = -1;
+    actor->speech_wait = 0;
+    actor->speech_frames = 0;
+    actor->speech_override = 0;
+    actor->dialogue = checkpoint->dialogue;
+    checkpoint->valid = 0;
+    ++world->visual_revision;
+    return 1;
+}
 
 static void finish_schedule_step(struct world_state *world, int definition,
                                  const struct generated_runtime_schedule_step *step)
@@ -810,6 +881,79 @@ static void update_actor_schedule(struct world_state *world, int definition)
         actor->path_schedule_step = -1;
         actor->schedule_wait = schedule_random_delay(
             world, step->delay_min, step->delay_max);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_RESTORE_ACTOR_STATE) {
+        if (!restore_actor_state(world, definition))
+            finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_FACE) {
+        if (definition == player_definition(world))
+            world->player_facing = step->facing;
+        else
+            actor->facing = step->facing;
+        ++world->visual_revision;
+        finish_schedule_step(world, definition, step);
+        return;
+    }
+    if (step->op == GENERATED_SCHEDULE_PLACE_RANDOM) {
+        int index;
+        int free_count = 0;
+        int selected;
+        const struct generated_runtime_schedule_position *position = 0;
+        if (step->target < 0 || step->value <= 0 ||
+            step->target + step->value > schedule->position_count) {
+            actor->schedule = -1;
+            return;
+        }
+        for (index = 0; index < step->value; ++index) {
+            const struct generated_runtime_schedule_position *candidate =
+                &schedule->positions[step->target + index];
+            if (candidate->scene >= 0 && candidate->scene < generated_runtime_scene_count &&
+                path_tile_can_be_used(&generated_runtime_scenes[candidate->scene],
+                                      candidate->x, candidate->y) &&
+                !actor_anchor_blocked(world, definition, candidate->scene,
+                                      candidate->x, candidate->y))
+                ++free_count;
+        }
+        if (free_count == 0)
+            return;
+        selected = schedule_random_delay(world, 0, free_count - 1);
+        for (index = 0; index < step->value; ++index) {
+            const struct generated_runtime_schedule_position *candidate =
+                &schedule->positions[step->target + index];
+            if (candidate->scene < 0 || candidate->scene >= generated_runtime_scene_count ||
+                !path_tile_can_be_used(&generated_runtime_scenes[candidate->scene],
+                                       candidate->x, candidate->y) ||
+                actor_anchor_blocked(world, definition, candidate->scene,
+                                     candidate->x, candidate->y))
+                continue;
+            if (selected-- == 0) {
+                position = candidate;
+                break;
+            }
+        }
+        if (position == 0)
+            return;
+        if (definition == player_definition(world)) {
+            if (position->scene != world->scene_index)
+                return;
+            world->player_x = position->x;
+            world->player_y = position->y;
+            world->player_facing = position->facing;
+            world->moving = 0;
+            world->move_progress = 0;
+        }
+        else {
+            actor->scene = position->scene;
+            actor->x = position->x;
+            actor->y = position->y;
+            actor->facing = position->facing;
+            actor->move_progress = 0;
+        }
+        ++world->visual_revision;
+        finish_schedule_step(world, definition, step);
         return;
     }
     if (step->op == GENERATED_SCHEDULE_PLACE) {
@@ -1147,6 +1291,18 @@ static void update_script(struct world_state *world)
             ++world->script_action;
             continue;
         }
+        if (action->op == GENERATED_SCRIPT_SAVE_ACTOR_STATE) {
+            save_actor_state(world, action->a);
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_WAIT_SCHEDULE) {
+            if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT &&
+                world->actors[action->a].schedule >= 0)
+                return;
+            ++world->script_action;
+            continue;
+        }
         ++world->script_action;
     }
     world->active_script = -1;
@@ -1225,6 +1381,18 @@ void world_initialize(struct world_state *world)
         world->actors[index].speech_frames = 0;
         world->actors[index].speech_override = 0;
         world->actors[index].dialogue = -1;
+        world->actor_checkpoints[index].valid = 0;
+        world->actor_checkpoints[index].scene = -1;
+        world->actor_checkpoints[index].x = 0;
+        world->actor_checkpoints[index].y = 0;
+        world->actor_checkpoints[index].facing = WORLD_SOUTH;
+        world->actor_checkpoints[index].animation_frame = 0;
+        world->actor_checkpoints[index].visual = -1;
+        world->actor_checkpoints[index].visual_tick = 0;
+        world->actor_checkpoints[index].schedule = -1;
+        world->actor_checkpoints[index].schedule_step = 0;
+        world->actor_checkpoints[index].schedule_wait = 0;
+        world->actor_checkpoints[index].dialogue = -1;
     }
     for (entity_index = 0; entity_index < generated_runtime_actor_count; ++entity_index) {
         const struct generated_runtime_actor *entity = &generated_runtime_actors[entity_index];

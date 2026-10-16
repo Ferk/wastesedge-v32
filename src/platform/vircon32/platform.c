@@ -11,10 +11,11 @@
 #define VIEW_WIDTH DISPLAY_WIDTH
 #define VIEW_X ((DISPLAY_WIDTH - VIEW_WIDTH) / 2)
 #define DIALOG_X (VIEW_X + 12)
-#define DIALOG_Y 88
 #define DIALOG_WIDTH (VIEW_WIDTH - 24)
-#define DIALOG_HEIGHT 260
+#define DIALOG_MAX_HEIGHT 260
+#define DIALOG_BOTTOM (DISPLAY_HEIGHT - 12)
 #define DIALOG_LINE_HEIGHT 19
+#define DIALOG_CHOICE_GAP 5
 #define SPEECH_MAX_TEXT_WIDTH 300
 #define SPEECH_PADDING_X 6
 #define SPEECH_PADDING_Y 3
@@ -59,6 +60,10 @@ static int draw_command_y[MAX_DRAW_COMMANDS];
 static int draw_command_color[MAX_DRAW_COMMANDS];
 static float draw_command_scale_x[MAX_DRAW_COMMANDS];
 static float draw_command_scale_y[MAX_DRAW_COMMANDS];
+/* World draws use the fixed 3:2 game-to-display transform. Dirty replay may
+ * crop only these commands; UI commands have unrelated scales and must retain
+ * their complete regions. */
+static int draw_command_view_scaled[MAX_DRAW_COMMANDS];
 static int ambient_overlay_count;
 static int ambient_overlay_left[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
 static int ambient_overlay_top[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
@@ -95,6 +100,9 @@ static int prepared_replay_commands;
 static int displayed_dialogue = -1;
 static int displayed_node;
 static int displayed_choice;
+static int dialogue_scroll_dialogue = -1;
+static int dialogue_scroll_node = -1;
+static int dialogue_choice_scroll;
 static const struct generated_runtime_scene *displayed_scene;
 static int displayed_player_x;
 static int displayed_player_y;
@@ -154,6 +162,7 @@ static void record_draw(int texture, int region, int region_x, int region_y,
     draw_command_scale_x[index] = scale_x;
     draw_command_scale_y[index] = scale_y;
     draw_command_color[index] = color;
+    draw_command_view_scaled[index] = 0;
 }
 
 static int view_x(int x)
@@ -169,6 +178,7 @@ static int view_y(int y)
 static void record_texture_color(int texture, int texture_x, int texture_y,
                                  int width, int height, int x, int y, int color)
 {
+    int command_index;
     int source_x = texture_x;
     int source_y = texture_y;
     int visible_width = width;
@@ -198,9 +208,12 @@ static void record_texture_color(int texture, int texture_x, int texture_y,
     if (y + visible_height > GAME_HEIGHT)
         visible_height = GAME_HEIGHT - y;
 
+    command_index = draw_command_count;
     record_draw(texture, 0, source_x, source_y, visible_width, visible_height,
                 view_x(x), view_y(y),
                 GAME_SCALE, GAME_SCALE, color);
+    if (draw_command_count > command_index)
+        draw_command_view_scaled[command_index] = 1;
 }
 
 static void record_texture(int texture, int texture_x, int texture_y,
@@ -240,8 +253,9 @@ static void record_ui_frame(const struct generated_runtime_frame *frame,
                 x, y, scale, scale, 0xFFFFFFFF);
 }
 
-static int record_runtime_text(int x, int y, int width, int bottom,
-                               const struct generated_runtime_text *text, int color)
+static int record_runtime_text_clipped(int x, int y, int width, int top, int bottom,
+                                       const struct generated_runtime_text *text,
+                                       int color)
 {
     int cursor_x = x;
     int cursor_y = y;
@@ -268,13 +282,20 @@ static int record_runtime_text(int x, int y, int width, int bottom,
                 cursor_y += DIALOG_LINE_HEIGHT;
             }
         }
-        if (cursor_y + DIALOG_LINE_HEIGHT > bottom)
+        if (cursor_y >= bottom)
             break;
-        record_draw(glyph->texture, LAST_GLYPH_REGION - glyph_index, 0, 0, 0, 0,
-                    cursor_x, cursor_y, 1.0f, 1.0f, color);
+        if (cursor_y >= top && cursor_y + DIALOG_LINE_HEIGHT <= bottom)
+            record_draw(glyph->texture, LAST_GLYPH_REGION - glyph_index, 0, 0, 0, 0,
+                        cursor_x, cursor_y, 1.0f, 1.0f, color);
         cursor_x += glyph->advance;
     }
     return cursor_y + DIALOG_LINE_HEIGHT;
+}
+
+static int record_runtime_text(int x, int y, int width, int bottom,
+                               const struct generated_runtime_text *text, int color)
+{
+    return record_runtime_text_clipped(x, y, width, y, bottom, text, color);
 }
 
 static void measure_runtime_text(const struct generated_runtime_text *text,
@@ -321,44 +342,153 @@ static void record_dialogue_panel(const struct world_state *world)
 {
     const struct generated_runtime_dialogue_speaker *speaker = world_dialogue_speaker(world);
     const struct generated_runtime_text *speech = world_dialogue_display(world);
+    unsigned int speech_color = speaker != 0 ? speaker->speech_color : 0xFFFFFFFFu;
     int choice_count = world_dialogue_choice_count(world);
     int selected_choice = world_dialogue_choice_selected(world);
     int has_portrait = speaker != 0 && speaker->portrait.texture >= 0;
     int text_x = has_portrait ? DIALOG_X + 128 : DIALOG_X + 24;
     int text_width = DIALOG_X + DIALOG_WIDTH - 20 - text_x;
-    int speech_bottom;
-    int choice_y;
+    int choice_text_x = DIALOG_X + 36;
+    int choice_text_width = DIALOG_WIDTH - 70;
+    int speech_width;
+    int speech_height;
+    int selected_top = 0;
+    int selected_bottom = 0;
+    int choices_height = 0;
+    int choice_content_height;
+    int dialog_height;
+    int dialog_y;
+    int choice_view_top;
+    int choice_view_bottom;
+    int choice_view_height;
     int index;
 
+    measure_runtime_text(speech, text_width, &speech_width, &speech_height);
+    for (index = 0; index < choice_count; ++index) {
+        int option_width;
+        int option_height;
+        measure_runtime_text(world_dialogue_choice_display(world, index),
+                             choice_text_width, &option_width, &option_height);
+        if (index == selected_choice) {
+            selected_top = choices_height;
+            selected_bottom = choices_height + option_height;
+        }
+        choices_height += option_height;
+        if (index + 1 < choice_count)
+            choices_height += DIALOG_CHOICE_GAP;
+    }
+    choice_content_height = choices_height;
+
+    if (choice_count > 0) {
+        /* Portrait conversations put answers below the portrait, matching the
+         * original layout. Short answer lists now stop the panel early. */
+        dialog_height = 138 + choice_content_height + 10;
+    } else {
+        int content_bottom = 44 + speech_height;
+        if (has_portrait && content_bottom < 126)
+            content_bottom = 126;
+        dialog_height = content_bottom + 10;
+    }
+    if (dialog_height > DIALOG_MAX_HEIGHT)
+        dialog_height = DIALOG_MAX_HEIGHT;
+    dialog_y = DIALOG_BOTTOM - dialog_height;
+    choice_view_bottom = dialog_y + dialog_height - 10;
+    choice_view_top = choice_count > 0 ? dialog_y + 138 : choice_view_bottom;
+    choice_view_height = choice_view_bottom - choice_view_top;
+
     /* The original conversation UI leaves the scene visible beneath a dark,
-     * warm-edged translucent window. */
-    record_solid_rect(DIALOG_X - 2, DIALOG_Y - 2, DIALOG_WIDTH + 4, DIALOG_HEIGHT + 4, 0xD08A642C);
-    record_solid_rect(DIALOG_X + 2, DIALOG_Y + 2, DIALOG_WIDTH - 4, DIALOG_HEIGHT - 4, 0xB0101820);
+     * warm-edged translucent window. Anchor variable-height panels above the
+     * same bottom margin so short exchanges expose more of the scene. */
+    record_solid_rect(DIALOG_X - 2, dialog_y - 2,
+                      DIALOG_WIDTH + 4, dialog_height + 4, 0xD08A642C);
+    record_solid_rect(DIALOG_X + 2, dialog_y + 2,
+                      DIALOG_WIDTH - 4, dialog_height - 4, 0xB0101820);
 
     if (has_portrait) {
-        record_solid_rect(DIALOG_X + 14, DIALOG_Y + 18, 104, 104, 0xD08A642C);
-        record_solid_rect(DIALOG_X + 18, DIALOG_Y + 22, 96, 96, 0xC0080B10);
-        record_ui_frame(&speaker->portrait, DIALOG_X + 18, DIALOG_Y + 22, 1.5f);
+        record_solid_rect(DIALOG_X + 14, dialog_y + 18, 104, 104, 0xD08A642C);
+        record_solid_rect(DIALOG_X + 18, dialog_y + 22, 96, 96, 0xC0080B10);
+        record_ui_frame(&speaker->portrait, DIALOG_X + 18, dialog_y + 22, 1.5f);
     }
     if (speaker != 0)
-        record_runtime_text(text_x, DIALOG_Y + 16, text_width, DIALOG_Y + 42,
+        record_runtime_text(text_x, dialog_y + 16, text_width, dialog_y + 42,
                             &speaker->name_text, 0xFFFFD070);
-    speech_bottom = record_runtime_text(text_x, DIALOG_Y + 44, text_width, DIALOG_Y + 151,
-                                        speech, 0xFFFFFFFF);
-    choice_y = speech_bottom + 10;
-    if (choice_y < DIALOG_Y + 138)
-        choice_y = DIALOG_Y + 138;
+    record_runtime_text(text_x, dialog_y + 44, text_width,
+                        choice_count > 0 ? choice_view_top - 6
+                                         : dialog_y + dialog_height - 10,
+                        speech, speech_color);
+
+    /* Adonthell's conversation widget is a vertical scrollview. Reset it for
+     * each new line, then move by whole answer rows just far enough to keep
+     * the focused (possibly wrapped) answer visible. */
+    if (displayed_dialogue < 0 ||
+        dialogue_scroll_dialogue != world->dialogue ||
+        dialogue_scroll_node != world->dialogue_node) {
+        dialogue_scroll_dialogue = world->dialogue;
+        dialogue_scroll_node = world->dialogue_node;
+        dialogue_choice_scroll = 0;
+    }
+    if (selected_top < dialogue_choice_scroll) {
+        dialogue_choice_scroll = selected_top;
+    } else if (selected_bottom > dialogue_choice_scroll + choice_view_height) {
+        int target_scroll = selected_bottom - choice_view_height;
+        int option_top = 0;
+        dialogue_choice_scroll = selected_top;
+        for (index = 0; index < choice_count; ++index) {
+            int option_width;
+            int option_height;
+            measure_runtime_text(world_dialogue_choice_display(world, index),
+                                 choice_text_width, &option_width, &option_height);
+            if (option_top >= target_scroll) {
+                dialogue_choice_scroll = option_top;
+                break;
+            }
+            option_top += option_height + DIALOG_CHOICE_GAP;
+        }
+    }
+    if (choice_content_height > choice_view_height &&
+        dialogue_choice_scroll > choice_content_height - choice_view_height)
+        dialogue_choice_scroll = choice_content_height - choice_view_height;
+
+    choices_height = 0;
     for (index = 0; index < choice_count; ++index) {
-        int option_y = choice_y;
-        int option_bottom = record_runtime_text(DIALOG_X + 36, option_y,
-                                                 DIALOG_WIDTH - 58,
-                                                 DIALOG_Y + DIALOG_HEIGHT - 8,
-                                                 world_dialogue_choice_display(world, index),
-                                                 index == selected_choice ? 0xFFFFD070 : 0xFFE7DCA8);
-        if (index == selected_choice)
-            record_solid_rect(DIALOG_X + 22, option_y + 3, 5,
-                              option_bottom - option_y - 6, 0xFFFFD070);
-        choice_y = option_bottom + 5;
+        int option_width;
+        int option_height;
+        int option_y;
+        int visible_top;
+        int visible_bottom;
+        measure_runtime_text(world_dialogue_choice_display(world, index),
+                             choice_text_width, &option_width, &option_height);
+        option_y = choice_view_top + choices_height - dialogue_choice_scroll;
+        visible_top = option_y > choice_view_top ? option_y : choice_view_top;
+        visible_bottom = option_y + option_height < choice_view_bottom
+                             ? option_y + option_height : choice_view_bottom;
+        if (visible_bottom > visible_top) {
+            record_runtime_text_clipped(choice_text_x, option_y, choice_text_width,
+                                        choice_view_top, choice_view_bottom,
+                                        world_dialogue_choice_display(world, index),
+                                        index == selected_choice ? 0xFFFFD070
+                                                                 : 0xFFE7DCA8);
+            if (index == selected_choice && visible_bottom - visible_top > 6)
+                record_solid_rect(DIALOG_X + 22, visible_top + 3, 5,
+                                  visible_bottom - visible_top - 6, 0xFFFFD070);
+        }
+        choices_height += option_height + DIALOG_CHOICE_GAP;
+    }
+
+    if (choice_content_height > choice_view_height) {
+        int track_x = DIALOG_X + DIALOG_WIDTH - 15;
+        int thumb_height = (choice_view_height * choice_view_height) /
+                           choice_content_height;
+        int thumb_y;
+        int maximum_scroll = choice_content_height - choice_view_height;
+        if (thumb_height < 12)
+            thumb_height = 12;
+        thumb_y = choice_view_top;
+        if (maximum_scroll > 0)
+            thumb_y += (dialogue_choice_scroll * (choice_view_height - thumb_height)) /
+                       maximum_scroll;
+        record_solid_rect(track_x, choice_view_top, 4, choice_view_height, 0x604A3828);
+        record_solid_rect(track_x, thumb_y, 4, thumb_height, 0xD0FFD070);
     }
 }
 
@@ -473,8 +603,8 @@ static void player_screen_bounds(const struct world_state *world, int camera_x, 
     }
     *left = view_x(x);
     *top = view_y(y);
-    *right = *left + (width * 3) / 2;
-    *bottom = *top + (height * 3) / 2;
+    *right = *left + (width * 3 + 1) / 2;
+    *bottom = *top + (height * 3 + 1) / 2;
 }
 
 static void draw_depth_sorted_objects(const struct world_state *world, int camera_x, int camera_y)
@@ -540,6 +670,8 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
         int bubble_x;
         int bubble_y;
         int tail_x;
+        unsigned int speech_color;
+        unsigned int border_color;
         if (speech == 0 || world_actor_visual(world, entity_index) < 0 ||
             !world_actor_is_present(world, entity_index))
             continue;
@@ -566,6 +698,8 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
         if (tail_x < bubble_x + 4) tail_x = bubble_x + 4;
         if (tail_x > bubble_x + bubble_width - 4)
             tail_x = bubble_x + bubble_width - 4;
+        speech_color = generated_runtime_actors[entity_index].speech_color;
+        border_color = (speech_color & 0x00FFFFFFu) | 0x90000000u;
 
         if (ambient_overlay_count < GENERATED_RUNTIME_ENTITY_STORAGE_COUNT) {
             int overlay = ambient_overlay_count++;
@@ -576,20 +710,29 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
                 bubble_y + bubble_height + SPEECH_SPRITE_GAP + 1;
         }
 
-        record_solid_rect(bubble_x - 1, bubble_y - 1,
-                          bubble_width + 2, bubble_height + 2, 0x908A642C);
+        /* Draw an actual outline rather than a larger filled rectangle behind
+         * the translucent interior. Otherwise the speaker color underneath
+         * would tint the nominally black bubble background. */
         record_solid_rect(bubble_x, bubble_y,
-                          bubble_width, bubble_height, 0x78101820);
+                          bubble_width, bubble_height, 0x90101010);
+        record_solid_rect(bubble_x - 1, bubble_y - 1,
+                          bubble_width + 2, 1, border_color);
+        record_solid_rect(bubble_x - 1, bubble_y + bubble_height,
+                          bubble_width + 2, 1, border_color);
+        record_solid_rect(bubble_x - 1, bubble_y,
+                          1, bubble_height, border_color);
+        record_solid_rect(bubble_x + bubble_width, bubble_y,
+                          1, bubble_height, border_color);
         record_runtime_text(bubble_x + SPEECH_PADDING_X,
                             bubble_y + SPEECH_PADDING_Y, text_width,
                             bubble_y + bubble_height - SPEECH_PADDING_Y,
-                            speech, 0xFFFFFFFF);
+                            speech, speech_color);
         if (bubble_y < sprite_top)
             record_solid_rect(tail_x - 2, bubble_y + bubble_height,
-                              4, SPEECH_SPRITE_GAP, 0x908A642C);
+                              4, SPEECH_SPRITE_GAP, border_color);
         else
             record_solid_rect(tail_x - 2, bubble_y - SPEECH_SPRITE_GAP,
-                              4, SPEECH_SPRITE_GAP, 0x908A642C);
+                              4, SPEECH_SPRITE_GAP, border_color);
     }
 }
 
@@ -823,9 +966,21 @@ static void flush_prepared_frame(void)
     set_blending_mode(0x20);
     if (!prepared_dirty_valid)
         clear_screen(0xFF101820);
-    /* Partial replay paints the opaque background first, directly over the
-     * retained frame. It must not clear a rectangle: rounding a 1.5x source
-     * crop to that rectangle can leave an uncovered scanline at its edge. */
+    else {
+        /* Erase the complete replay area before rebuilding its layers. This
+         * is required for the transparent pixels around an actor: replaying
+         * the scenery alone cannot overwrite an old opaque player pixel when
+         * the corresponding scenery texel is transparent. Crops below retain
+         * the original 3:2 raster phase, so unlike the former implementation
+         * this clear cannot expose one-pixel gaps between shifted fragments. */
+        select_texture(-1);
+        select_region(256);
+        set_multiply_color(0xFF101820);
+        set_drawing_scale((float)(prepared_dirty_right - prepared_dirty_left),
+                          (float)(prepared_dirty_bottom - prepared_dirty_top));
+        set_drawing_point(prepared_dirty_left, prepared_dirty_top);
+        draw_region_zoomed();
+    }
     set_multiply_color(0xFFFFFFFF);
     color = 0xFFFFFFFF;
     for (index = 0; index < draw_command_count; ++index) {
@@ -849,22 +1004,33 @@ static void flush_prepared_frame(void)
                                               prepared_dirty_right, prepared_dirty_bottom))
                 continue;
 
+            if (!draw_command_view_scaled[index])
+                goto draw_command;
+
             output_right = command_draw_x + (command_width * 3 + 1) / 2;
             output_bottom = command_draw_y + (command_height * 3 + 1) / 2;
-            /* Round the source crop inward. The former outward rounding drew
-             * one scaled source row/column beyond the dirty rectangle. During
-             * vertical movement those writes accumulated as horizontal strips
-             * on static furniture and actors that did not need updating. The
-             * six-pixel dirty halo keeps all genuinely changed pixels well
-             * inside this conservative crop. */
-            if (command_draw_x < prepared_dirty_left)
-                source_left = ((prepared_dirty_left - command_draw_x) * 2 + 2) / 3;
-            if (command_draw_y < prepared_dirty_top)
-                source_top = ((prepared_dirty_top - command_draw_y) * 2 + 2) / 3;
-            if (output_right > prepared_dirty_right)
-                source_right = ((prepared_dirty_right - command_draw_x) * 2) / 3;
-            if (output_bottom > prepared_dirty_bottom)
-                source_bottom = ((prepared_dirty_bottom - command_draw_y) * 2) / 3;
+            /* At 1.5x scale, two source pixels always become exactly three
+             * display pixels. Starting a cropped draw at an odd source pixel
+             * restarts the scaler on the opposite phase, shifting the replayed
+             * texture by one pixel even when its destination looks correct.
+             * Select complete two-pixel pairs so the cropped draw has exactly
+             * the same raster phase as the original full draw. */
+            if (command_draw_x < prepared_dirty_left) {
+                source_left = ((prepared_dirty_left - command_draw_x) * 2) / 3;
+                source_left &= ~1;
+            }
+            if (command_draw_y < prepared_dirty_top) {
+                source_top = ((prepared_dirty_top - command_draw_y) * 2) / 3;
+                source_top &= ~1;
+            }
+            if (output_right > prepared_dirty_right) {
+                source_right = ((prepared_dirty_right - command_draw_x) * 2 + 2) / 3;
+                source_right = (source_right + 1) & ~1;
+            }
+            if (output_bottom > prepared_dirty_bottom) {
+                source_bottom = ((prepared_dirty_bottom - command_draw_y) * 2 + 2) / 3;
+                source_bottom = (source_bottom + 1) & ~1;
+            }
             if (source_left < 0) source_left = 0;
             if (source_top < 0) source_top = 0;
             if (source_right > command_width) source_right = command_width;
@@ -879,6 +1045,7 @@ static void flush_prepared_frame(void)
             command_draw_x += (source_left * 3) / 2;
             command_draw_y += (source_top * 3) / 2;
         }
+draw_command:
         if (draw_command_texture[index] != selected_texture) {
             selected_texture = draw_command_texture[index];
             select_texture(selected_texture);
@@ -1039,6 +1206,8 @@ static void configure_dirty_replay(const struct world_state *world)
 static int enough_time_to_flush(void)
 {
     int replay_commands = prepared_dirty_valid ? prepared_replay_commands : draw_command_count;
+    if (prepared_dirty_valid)
+        ++replay_commands; /* the solid restoration rectangle */
     int estimated_cycles = DRAW_FIXED_CYCLES +
                            replay_commands * DRAW_CYCLES_PER_COMMAND +
                            DRAW_SAFETY_CYCLES;
@@ -1053,7 +1222,7 @@ static void finish_prepared_frame(void)
         displayed_dialogue = prepared_dialogue;
         displayed_node = prepared_node;
         displayed_choice = prepared_choice;
-        displayed_world_valid = 0;
+        remember_displayed_world();
     } else {
         displayed_dialogue = -1;
         remember_displayed_world();
@@ -1079,13 +1248,19 @@ void platform_render_world(const struct world_state *world)
         int choice = world->dialogue_choice;
 
         if (dialogue_signature_matches(dialogue, node, choice,
-                                       displayed_dialogue, displayed_node, displayed_choice)) {
+                                       displayed_dialogue, displayed_node, displayed_choice) &&
+            displayed_world_matches(world)) {
             return;
         }
 
         /* Dialogue is relatively static and glyph-heavy. Always give it the
-         * existing compute/draw split rather than gambling on a partial panel. */
+         * existing compute/draw split rather than gambling on a partial panel.
+         * The original kept updating and drawing the world underneath modal
+         * dialogue, so retain the frame only while that world snapshot also
+         * matches. Otherwise schedules would advance invisibly and appear to
+         * jump whenever a new dialogue node forced the next refresh. */
         prepare_world_frame(world);
+        remember_prepared_world(world);
         prepared_dialogue = dialogue;
         prepared_node = node;
         prepared_choice = choice;
@@ -1094,6 +1269,11 @@ void platform_render_world(const struct world_state *world)
         return;
     }
 
+    /* A matching world snapshot rendered with a dialogue panel is not a valid
+     * panel-free frame. Closing dialogue must therefore restore the world even
+     * when no simulation state changed during the conversation. */
+    if (displayed_dialogue >= 0)
+        displayed_world_valid = 0;
     displayed_dialogue = -1;
     if (displayed_world_matches(world))
         return;

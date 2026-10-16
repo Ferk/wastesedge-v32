@@ -155,6 +155,22 @@ int savegame_encode(const struct world_state *world, int *words, int capacity)
     write_word(&writer, world->speech_random);
     write_word(&writer, world->game_time);
     write_word(&writer, world->game_time_subticks);
+    for (index = 0; index < GENERATED_RUNTIME_ENTITY_COUNT; ++index) {
+        const struct world_actor_checkpoint *checkpoint =
+            &world->actor_checkpoints[index];
+        write_word(&writer, checkpoint->valid);
+        write_word(&writer, checkpoint->scene);
+        write_word(&writer, checkpoint->x);
+        write_word(&writer, checkpoint->y);
+        write_word(&writer, checkpoint->facing);
+        write_word(&writer, checkpoint->animation_frame);
+        write_word(&writer, checkpoint->visual);
+        write_word(&writer, checkpoint->visual_tick);
+        write_word(&writer, checkpoint->schedule);
+        write_word(&writer, checkpoint->schedule_step);
+        write_word(&writer, checkpoint->schedule_wait);
+        write_word(&writer, checkpoint->dialogue);
+    }
 
     return writer.failed ? 0 : writer.count;
 }
@@ -207,6 +223,29 @@ static int validate_restored_world(const struct world_state *world)
             (actor->x < 0 || actor->y < 0 ||
              actor->x >= generated_runtime_scenes[actor->scene].width ||
              actor->y >= generated_runtime_scenes[actor->scene].height))
+            return 0;
+    }
+    for (index = 0; index < GENERATED_RUNTIME_ENTITY_COUNT; ++index) {
+        const struct world_actor_checkpoint *checkpoint =
+            &world->actor_checkpoints[index];
+        if (checkpoint->valid != 0 && checkpoint->valid != 1)
+            return 0;
+        if (!checkpoint->valid)
+            continue;
+        if (checkpoint->scene < -1 ||
+            checkpoint->scene >= generated_runtime_scene_count ||
+            !valid_facing(checkpoint->facing) ||
+            checkpoint->visual < -1 ||
+            checkpoint->visual >= generated_runtime_actor_visual_count ||
+            checkpoint->schedule < -1 ||
+            checkpoint->schedule >= generated_runtime_schedule_count ||
+            checkpoint->dialogue < -1 ||
+            checkpoint->dialogue >= generated_runtime_dialogue_count)
+            return 0;
+        if (checkpoint->scene >= 0 &&
+            (checkpoint->x < 0 || checkpoint->y < 0 ||
+             checkpoint->x >= generated_runtime_scenes[checkpoint->scene].width ||
+             checkpoint->y >= generated_runtime_scenes[checkpoint->scene].height))
             return 0;
     }
     for (index = 0; index < world->collision_override_count; ++index) {
@@ -335,6 +374,24 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
     if (version >= 2) {
         restored_world.game_time = read_word(&reader);
         restored_world.game_time_subticks = read_word(&reader);
+    }
+    if (version >= 3) {
+        for (index = 0; index < GENERATED_RUNTIME_ENTITY_COUNT; ++index) {
+            struct world_actor_checkpoint *checkpoint =
+                &restored_world.actor_checkpoints[index];
+            checkpoint->valid = read_word(&reader);
+            checkpoint->scene = read_word(&reader);
+            checkpoint->x = read_word(&reader);
+            checkpoint->y = read_word(&reader);
+            checkpoint->facing = read_word(&reader);
+            checkpoint->animation_frame = read_word(&reader);
+            checkpoint->visual = read_word(&reader);
+            checkpoint->visual_tick = read_word(&reader);
+            checkpoint->schedule = read_word(&reader);
+            checkpoint->schedule_step = read_word(&reader);
+            checkpoint->schedule_wait = read_word(&reader);
+            checkpoint->dialogue = read_word(&reader);
+        }
     }
 
     restored_world.scene = (restored_world.scene_index >= 0 &&

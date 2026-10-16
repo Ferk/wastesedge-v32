@@ -8,6 +8,7 @@
     { "op": "set_control", "enabled": false },
     { "op": "change_scene", "scene": "redwyne_fingolson_room", "spawn": "extro_group" },
     { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_extro_group" },
+    { "op": "start_schedule", "entity": "player", "schedule": "player_extro_group" },
     { "op": "start_schedule", "entity": "erek", "schedule": "erek_extro_group" },
     { "op": "start_schedule", "entity": "jelom", "schedule": "jelom_extro_group" },
     { "op": "start_schedule", "entity": "silverhair", "schedule": "silverhair_extro_group" },

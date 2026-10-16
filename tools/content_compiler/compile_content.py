@@ -94,6 +94,17 @@ def identifier(value: object, description: str) -> str:
     return value
 
 
+def rgb_color(value: object, description: str) -> int:
+    """Parse author-facing #RRGGBB into Vircon32's opaque ABGR word order."""
+    value = expect(value, str, description)
+    if not re.fullmatch(r"#[0-9A-Fa-f]{6}", value):
+        raise ContentError(f"{description} must use #RRGGBB notation, got {value!r}")
+    red = int(value[1:3], 16)
+    green = int(value[3:5], 16)
+    blue = int(value[5:7], 16)
+    return 0xFF000000 | (blue << 16) | (green << 8) | red
+
+
 def relative_input(root: Path, raw_path: object, category: str) -> Path:
     relative = expect(raw_path, str, f"manifest {category} entry")
     candidate = (root / relative).resolve()
@@ -165,10 +176,14 @@ def collect_entities(paths: list[Path]) -> dict[str, dict[str, object]]:
                     f"{path} entity {entry_id} visual {visual_id} tileset")
             if visuals and kind != "actor":
                 raise ContentError(f"{path}: only actor entities may define visual variants")
+            speech_color = rgb_color(
+                entry.get("speech_color", "#FFFFFF"),
+                f"{path} entity {entry_id} speech_color")
             result[entry_id] = {
                 "kind": kind,
                 "player_controlled": player_controlled,
                 "blocks_movement": blocks_movement,
+                "speech_color": speech_color,
                 "states": states,
                 "visuals": visuals,
             }
@@ -229,9 +244,9 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
                                                      f"{path} schedule {schedule_id} steps")):
                 step = expect(raw_step, dict, f"{path} schedule {schedule_id} step {index}")
                 operation = identifier(step.get("op"), f"{path} schedule {schedule_id} step {index} op")
-                if operation not in {"move", "place", "wait", "speak",
+                if operation not in {"move", "place", "place_random", "face", "wait", "speak",
                                      "set_object_state", "toggle_object_state",
-                                     "jump", "random_jump"}:
+                                     "jump", "random_jump", "restore_actor_state"}:
                     raise ContentError(f"{path}: unsupported schedule operation {operation!r}")
                 delay_min = integer(step.get("delay_min_frames", step.get("delay_frames", 0)),
                                     f"{path} schedule {schedule_id} step {index} minimum delay")
@@ -262,6 +277,37 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
                         raise ContentError(f"{path}: unsupported schedule facing {facing!r}")
                     compiled_step.update({"scene": scene, "x": x, "y": y,
                                           "facing": facing})
+                elif operation == "place_random":
+                    scene = identifier(step.get("scene"),
+                                       f"{path} schedule {schedule_id} step {index} scene")
+                    positions: list[dict[str, object]] = []
+                    for position_number, raw_position in enumerate(expect(
+                            step.get("positions"), list,
+                            f"{path} schedule {schedule_id} step {index} positions")):
+                        position = expect(
+                            raw_position, dict,
+                            f"{path} schedule {schedule_id} step {index} position {position_number}")
+                        x = integer(position.get("x"),
+                                    f"{path} schedule {schedule_id} step {index} position {position_number} x")
+                        y = integer(position.get("y"),
+                                    f"{path} schedule {schedule_id} step {index} position {position_number} y")
+                        facing = identifier(
+                            position.get("facing"),
+                            f"{path} schedule {schedule_id} step {index} position {position_number} facing")
+                        if facing not in facing_names:
+                            raise ContentError(f"{path}: unsupported schedule facing {facing!r}")
+                        positions.append({"x": x, "y": y, "facing": facing})
+                    if not positions:
+                        raise ContentError(
+                            f"{path}: schedule {schedule_id!r} random placement step {index} "
+                            "needs at least one position")
+                    compiled_step.update({"scene": scene, "positions": positions})
+                elif operation == "face":
+                    facing = identifier(step.get("facing"),
+                                        f"{path} schedule {schedule_id} step {index} facing")
+                    if facing not in facing_names:
+                        raise ContentError(f"{path}: unsupported schedule facing {facing!r}")
+                    compiled_step["facing"] = facing
                 elif operation == "speak":
                     text = expect(step.get("text"), str,
                                   f"{path} schedule {schedule_id} step {index} text")
@@ -304,6 +350,8 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
                             f"{path}: schedule {schedule_id!r} random jump step {index} "
                             "needs at least one target")
                     compiled_step["targets"] = targets
+                elif operation == "restore_actor_state":
+                    pass
                 elif delay_min == 0:
                     raise ContentError(
                         f"{path}: schedule {schedule_id!r} wait step {index} needs a positive delay")
@@ -337,7 +385,8 @@ def collect_schedules(paths: list[Path], entities: dict[str, dict[str, object]])
     return result
 
 
-def dialogue_speakers(document: dict[str, object], path: Path, entities: set[str],
+def dialogue_speakers(document: dict[str, object], path: Path,
+                      entities: dict[str, dict[str, object]],
                       game_root: Path) -> list[dict[str, object]]:
     result: list[dict[str, object]] = []
     speaker_ids: set[str] = set()
@@ -359,6 +408,15 @@ def dialogue_speakers(document: dict[str, object], path: Path, entities: set[str
         entity = speaker.get("entity")
         if entity is not None and identifier(entity, f"{path} speaker {speaker_id} entity") not in entities:
             raise ContentError(f"{path}: speaker {speaker_id!r} refers to unknown entity {entity!r}")
+        speaker_entity = str(entity) if entity is not None else None
+        if speaker_entity is None and role == "npc" and speaker_id in entities:
+            speaker_entity = speaker_id
+        if speaker_entity is None and role == "player":
+            speaker_entity = next(
+                (entity_id for entity_id, definition in entities.items()
+                 if definition["player_controlled"]), None)
+        speech_color = (int(entities[speaker_entity]["speech_color"])
+                        if speaker_entity is not None else 0xFFFFFFFF)
         portrait = speaker.get("portrait")
         portrait_width = 0
         portrait_height = 0
@@ -377,6 +435,7 @@ def dialogue_speakers(document: dict[str, object], path: Path, entities: set[str
             "id": speaker_id,
             "name": name,
             "role": role,
+            "speech_color": speech_color,
             "portrait": portrait,
             "portrait_width": portrait_width,
             "portrait_height": portrait_height,
@@ -559,7 +618,7 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
     allowed = {"set", "set_control", "set_entity_state", "set_walkability", "show_dialogue", "speak",
                "change_scene", "move_entity", "wait", "play_music",
                "start_schedule", "stop_schedule", "set_entity_dialogue",
-               "set_actor_visual"}
+               "set_actor_visual", "save_actor_state", "wait_schedule"}
     for path in paths:
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
@@ -580,11 +639,13 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
             if operation == "play_music" and identifier(action.get("track"), f"{path} music track") not in music:
                 raise ContentError(f"{path}: unknown music track {action.get('track')!r}")
             if operation in {"set_entity_state", "move_entity", "start_schedule",
-                             "stop_schedule", "set_entity_dialogue", "set_actor_visual"}:
+                             "stop_schedule", "set_entity_dialogue", "set_actor_visual",
+                             "save_actor_state", "wait_schedule"}:
                 entity_id = identifier(action.get("entity"), f"{path} entity")
                 if entity_id not in entities:
                     raise ContentError(f"{path}: unknown entity {entity_id!r}")
-                if operation in {"set_entity_dialogue", "set_actor_visual"} and \
+                if operation in {"set_entity_dialogue", "set_actor_visual",
+                                 "save_actor_state", "wait_schedule"} and \
                         entities[entity_id]["kind"] != "actor":
                     raise ContentError(f"{path}: {operation} requires an actor entity")
                 if operation == "set_entity_state":
@@ -1483,7 +1544,8 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     operation_index = {"move": 0, "place": 1, "wait": 2,
                        "set_object_state": 3, "toggle_object_state": 4,
-                       "speak": 5, "jump": 6, "random_jump": 7}
+                       "speak": 5, "jump": 6, "random_jump": 7,
+                       "restore_actor_state": 8, "place_random": 9, "face": 10}
     schedule_index = {schedule_id: index for index, schedule_id in enumerate(sorted(schedules))}
     result: list[dict[str, object]] = []
     for schedule_id in sorted(schedules):
@@ -1498,6 +1560,7 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
             if "label" in step
         }
         branches: list[int] = []
+        positions: list[tuple[int, int, int, int]] = []
         steps: list[tuple[int, int, int, int, int, int, int, int, int]] = []
         for step_number, step in enumerate(schedule["steps"]):
             operation = str(step["op"])
@@ -1526,10 +1589,35 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
                               delay_min, delay_max, first_branch,
                               len(step["targets"])))
                 continue
+            if operation == "restore_actor_state":
+                steps.append((operation_index[operation], -1, 0, 0, 0,
+                              delay_min, delay_max, -1, -1))
+                continue
+            if operation == "face":
+                steps.append((operation_index[operation], -1, 0, 0,
+                              facing_index[str(step["facing"])],
+                              delay_min, delay_max, -1, -1))
+                continue
             scene_id = str(step["scene"])
             if scene_id not in scene_index:
                 raise ContentError(
                     f"schedule {schedule_id!r} step {step_number} refers to unknown scene {scene_id!r}")
+            if operation == "place_random":
+                scene = scenes[scene_index[scene_id]]
+                first_position = len(positions)
+                for position_number, position in enumerate(step["positions"]):
+                    x = int(position["x"])
+                    y = int(position["y"])
+                    if x < 0 or y < 0 or x >= int(scene["width"]) or y >= int(scene["height"]):
+                        raise ContentError(
+                            f"schedule {schedule_id!r} step {step_number} position "
+                            f"{position_number} ({x}, {y}) is outside scene {scene_id!r}")
+                    positions.append((scene_index[scene_id], x, y,
+                                      facing_index[str(position["facing"])]))
+                steps.append((operation_index[operation], scene_index[scene_id], 0, 0, 0,
+                              delay_min, delay_max, first_position,
+                              len(step["positions"])))
+                continue
             if operation in {"move", "place"}:
                 scene = scenes[scene_index[scene_id]]
                 x = int(step["x"])
@@ -1579,6 +1667,7 @@ def runtime_schedules(schedules: dict[str, dict[str, object]],
                                 schedule_index[str(schedule["next"])]),
                        "steps": steps,
                        "branches": branches,
+                       "positions": positions,
                        "speech": speech})
     return result
 
@@ -1604,6 +1693,8 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "speak": 11,
         "set": 12,
         "set_actor_visual": 13,
+        "save_actor_state": 14,
+        "wait_schedule": 15,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -1687,6 +1778,10 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 visual_id = identifier(action.get("visual"), f"{path} actor visual")
                 a = entity_index[entity_id]
                 b = actor_visuals[(entity_id, visual_id)]
+            elif operation == "save_actor_state":
+                a = entity_index[identifier(action.get("entity"), f"{path} entity")]
+            elif operation == "wait_schedule":
+                a = entity_index[identifier(action.get("entity"), f"{path} entity")]
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
             "id": script_id,
@@ -2259,6 +2354,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
             "visual": -1,
             "blocks_movement": int(bool(definition["blocks_movement"])),
             "player_controlled": int(bool(definition["player_controlled"])),
+            "speech_color": int(definition["speech_color"]),
             "interaction_dialogue": -1,
             "initial_scene": -1,
             "initial_x": 0,
@@ -2333,6 +2429,7 @@ struct generated_runtime_actor_visual {
 };
 struct generated_runtime_actor {
     int visual, blocks_movement, player_controlled, interaction_dialogue;
+    unsigned int speech_color;
     int initial_scene, initial_x, initial_y, initial_facing;
 };
 struct generated_runtime_collision { int x, y, width, height, walkability; };
@@ -2353,11 +2450,13 @@ struct generated_runtime_script {
     int action_count, speech_count;
 };
 struct generated_runtime_schedule_step { int op, scene, x, y, facing, delay_min, delay_max, target, value; };
+struct generated_runtime_schedule_position { int scene, x, y, facing; };
 struct generated_runtime_schedule {
     const struct generated_runtime_schedule_step *steps;
     const int *branches;
+    const struct generated_runtime_schedule_position *positions;
     const struct generated_runtime_text *speech;
-    int step_count, branch_count, entity, loop, next_schedule;
+    int step_count, branch_count, position_count, entity, loop, next_schedule;
     int speech_count, ambient_speech_count;
     int speech_delay_min, speech_delay_max, speech_duration;
 };
@@ -2368,6 +2467,7 @@ struct generated_runtime_dialogue_speaker {
     const char *name;
     struct generated_runtime_text name_text;
     struct generated_runtime_frame portrait;
+    unsigned int speech_color;
     int is_player, is_narrator;
 };
 struct generated_runtime_dialogue_choice {
@@ -2448,6 +2548,8 @@ extern const struct generated_runtime_frame generated_runtime_title_background;
 #define GENERATED_SCRIPT_SPEAK 11
 #define GENERATED_SCRIPT_SET_FLAG 12
 #define GENERATED_SCRIPT_SET_ACTOR_VISUAL 13
+#define GENERATED_SCRIPT_SAVE_ACTOR_STATE 14
+#define GENERATED_SCRIPT_WAIT_SCHEDULE 15
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -2456,6 +2558,9 @@ extern const struct generated_runtime_frame generated_runtime_title_background;
 #define GENERATED_SCHEDULE_SPEAK 5
 #define GENERATED_SCHEDULE_JUMP 6
 #define GENERATED_SCHEDULE_RANDOM_JUMP 7
+#define GENERATED_SCHEDULE_RESTORE_ACTOR_STATE 8
+#define GENERATED_SCHEDULE_PLACE_RANDOM 9
+#define GENERATED_SCHEDULE_FACE 10
 #define GENERATED_TRIGGER_ENTER 0
 #define GENERATED_TRIGGER_LEAVE 1
 #endif
@@ -2495,9 +2600,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_music_count = {len(music)};\n")
     lines.append("const struct generated_runtime_actor generated_runtime_actors[] = {")
     for actor in actors:
-        lines.append("    { %d, %d, %d, %d, %d, %d, %d, %d }," % (
+        lines.append("    { %d, %d, %d, %d, 0x%08Xu, %d, %d, %d, %d }," % (
             actor["visual"], actor["blocks_movement"], actor["player_controlled"],
-            actor["interaction_dialogue"], actor["initial_scene"], actor["initial_x"],
+            actor["interaction_dialogue"], actor["speech_color"],
+            actor["initial_scene"], actor["initial_x"],
             actor["initial_y"], actor["initial_facing"]))
     lines.append("};")
     lines.append(f"const int generated_runtime_actor_count = {len(actors)};\n")
@@ -2617,6 +2723,13 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         if schedule["branches"]:
             lines.append(f"static const int generated_runtime_schedule_branches_{index}[] = {{ " +
                          ", ".join(str(branch) for branch in schedule["branches"]) + " };")
+        if schedule["positions"]:
+            lines.append(
+                f"static const struct generated_runtime_schedule_position "
+                f"generated_runtime_schedule_positions_{index}[] = {{")
+            lines.extend("    { %d, %d, %d, %d }," % position
+                         for position in schedule["positions"])
+            lines.append("};")
         speech = schedule.get("speech")
         if speech is not None:
             for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
@@ -2633,6 +2746,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         speech = schedule.get("speech")
         branches_name = (f"generated_runtime_schedule_branches_{index}"
                          if schedule["branches"] else "0")
+        positions_name = (f"generated_runtime_schedule_positions_{index}"
+                          if schedule["positions"] else "0")
         speech_name = f"generated_runtime_schedule_speech_{index}" if speech is not None else "0"
         speech_count = len(speech["lines"]) if speech is not None else 0
         ambient_count = speech["ambient_count"] if speech is not None else 0
@@ -2640,8 +2755,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         delay_max = speech["delay_max"] if speech is not None else 0
         duration = speech["duration"] if speech is not None else 0
         lines.append(
-            f"    {{ generated_runtime_schedule_steps_{index}, {branches_name}, {speech_name}, "
+            f"    {{ generated_runtime_schedule_steps_{index}, {branches_name}, "
+            f"{positions_name}, {speech_name}, "
             f"{len(schedule['steps'])}, {len(schedule['branches'])}, "
+            f"{len(schedule['positions'])}, "
             f"{schedule['entity']}, {schedule['loop']}, {schedule['next']}, "
             f"{speech_count}, {ambient_count}, {delay_min}, {delay_max}, {duration} }},")
     lines.append("};")
@@ -2677,9 +2794,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                     "offset_x": 0,
                     "offset_y": 0,
                 }
-            lines.append("    { %s, { generated_runtime_dialogue_speaker_glyphs_%d_%d, %d }, %s, %d, %d }," % (
+            lines.append("    { %s, { generated_runtime_dialogue_speaker_glyphs_%d_%d, %d }, %s, 0x%08X, %d, %d }," % (
                 json.dumps(speaker["name"]), dialogue_index, speaker_index, len(speaker["name_glyphs"]),
-                frame_initializer(portrait, resource_index), int(speaker["role"] == "player"),
+                frame_initializer(portrait, resource_index), speaker["speech_color"],
+                int(speaker["role"] == "player"),
                 int(speaker["role"] == "narrator"),
             ))
         lines.append("};")

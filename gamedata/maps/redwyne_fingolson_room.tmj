@@ -1216,6 +1216,21 @@
           "y": 140
         },
         {
+          "height": 140,
+          "id": 81,
+          "name": "solid_east_wall",
+          "properties": [
+            {
+              "name": "kind",
+              "type": "string",
+              "value": "navigation_blocker"
+            }
+          ],
+          "width": 20,
+          "x": 160,
+          "y": 60
+        },
+        {
           "id": 65,
           "name": "cellar_upper",
           "point": true,
@@ -2051,7 +2066,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 81,
+  "nextobjectid": 82,
   "orientation": "orthogonal",
   "properties": [
     {

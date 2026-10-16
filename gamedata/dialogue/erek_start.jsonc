@@ -55,7 +55,41 @@
     {
       "id": "uncertain", "speaker": "erek",
       "text": "Master Fingolson says her guilt is proven beyond doubt, and there are indeed facts that support his opinion. But I ... am not sure.",
-      "next": "main_menu"
+      "choices": [
+        {
+          "text": "I know of nothing that could possibly support such claims. I really would know what has happened!",
+          "when": { "flag": "know_argument", "equals": 0 },
+          "actions": [
+            { "op": "set", "flag": "know_low_quality", "value": 1 },
+            { "op": "set", "flag": "know_argument", "value": 1 }
+          ],
+          "next": "argument_first_intro"
+        },
+        {
+          "text": "You refer to the argument she had with your master?",
+          "when": { "flag": "know_argument", "equals": 1 },
+          "actions": [
+            { "op": "set", "flag": "know_low_quality", "value": 1 },
+            { "op": "set", "flag": "know_argument", "value": 1 }
+          ],
+          "next": "argument_known"
+        }
+      ]
+    },
+    {
+      "id": "argument_first_intro", "speaker": "erek",
+      "text": "Very well then. It was yesterday, in the evening, when Lady Silverhair met my Master and me in the parlour next to the common room.",
+      "next": "silverhair_offer"
+    },
+    {
+      "id": "argument_known", "speaker": "erek",
+      "text": "Why yes! She said herself that the master deserves no payment. And the next day, his gems are gone. Who wouldn't deem her guilty after that?",
+      "next": "request_argument_recount"
+    },
+    {
+      "id": "request_argument_recount", "speaker": "player",
+      "text": "I think Lady Silverhair might have had a reason to utter such words. Perhaps you could recount the conversation she had with your master?",
+      "next": "argument_intro"
     },
     {
       "id": "repeat_narration", "speaker": "narrator",
