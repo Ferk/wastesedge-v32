@@ -27,12 +27,6 @@
 #define DRAW_FIXED_CYCLES 12000
 #define DRAW_CYCLES_PER_COMMAND 160
 #define DRAW_SAFETY_CYCLES 20000
-/* Partial replays convert between the 427x240 game grid and the 640x360
- * display grid. The 1.5x rasterizer and integer source clipping can touch a
- * few pixels beyond the mathematical sprite rectangle. Keep a conservative
- * display-space halo so no edge sample from the previous player frame can be
- * left behind as movement advances the dirty region. */
-#define DIRTY_PADDING 6
 #define MUSIC_CHANNEL 0
 #define SAVE_SLOT_STRIDE 1024
 #define SAVE_SLOT_HEADER_WORDS 8
@@ -60,15 +54,6 @@ static int draw_command_y[MAX_DRAW_COMMANDS];
 static int draw_command_color[MAX_DRAW_COMMANDS];
 static float draw_command_scale_x[MAX_DRAW_COMMANDS];
 static float draw_command_scale_y[MAX_DRAW_COMMANDS];
-/* World draws use the fixed 3:2 game-to-display transform. Dirty replay may
- * crop only these commands; UI commands have unrelated scales and must retain
- * their complete regions. */
-static int draw_command_view_scaled[MAX_DRAW_COMMANDS];
-static int ambient_overlay_count;
-static int ambient_overlay_left[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
-static int ambient_overlay_top[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
-static int ambient_overlay_right[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
-static int ambient_overlay_bottom[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
 
 static int prepared_dialogue = -1;
 static int prepared_node;
@@ -85,18 +70,6 @@ static int prepared_move_y;
 static int prepared_move_progress;
 static int prepared_animation_frame;
 static int prepared_visual_revision;
-static int prepared_camera_x;
-static int prepared_camera_y;
-static int prepared_player_left;
-static int prepared_player_top;
-static int prepared_player_right;
-static int prepared_player_bottom;
-static int prepared_dirty_valid;
-static int prepared_dirty_left;
-static int prepared_dirty_top;
-static int prepared_dirty_right;
-static int prepared_dirty_bottom;
-static int prepared_replay_commands;
 static int displayed_dialogue = -1;
 static int displayed_node;
 static int displayed_choice;
@@ -113,12 +86,6 @@ static int displayed_move_y;
 static int displayed_move_progress;
 static int displayed_animation_frame;
 static int displayed_visual_revision;
-static int displayed_camera_x;
-static int displayed_camera_y;
-static int displayed_player_left;
-static int displayed_player_top;
-static int displayed_player_right;
-static int displayed_player_bottom;
 static int displayed_world_valid;
 static int cpu_cycles_per_frame = DEFAULT_CPU_CYCLES_PER_FRAME;
 static int applied_music_revision = -1;
@@ -162,7 +129,6 @@ static void record_draw(int texture, int region, int region_x, int region_y,
     draw_command_scale_x[index] = scale_x;
     draw_command_scale_y[index] = scale_y;
     draw_command_color[index] = color;
-    draw_command_view_scaled[index] = 0;
 }
 
 static int view_x(int x)
@@ -178,7 +144,6 @@ static int view_y(int y)
 static void record_texture_color(int texture, int texture_x, int texture_y,
                                  int width, int height, int x, int y, int color)
 {
-    int command_index;
     int source_x = texture_x;
     int source_y = texture_y;
     int visible_width = width;
@@ -208,12 +173,9 @@ static void record_texture_color(int texture, int texture_x, int texture_y,
     if (y + visible_height > GAME_HEIGHT)
         visible_height = GAME_HEIGHT - y;
 
-    command_index = draw_command_count;
     record_draw(texture, 0, source_x, source_y, visible_width, visible_height,
                 view_x(x), view_y(y),
                 GAME_SCALE, GAME_SCALE, color);
-    if (draw_command_count > command_index)
-        draw_command_view_scaled[command_index] = 1;
 }
 
 static void record_texture(int texture, int texture_x, int texture_y,
@@ -566,47 +528,6 @@ static void draw_entity(const struct world_state *world, int definition, int cam
                  y - visual->base_y * world->scene->tile_size + frame->offset_y - camera_y);
 }
 
-static void player_screen_bounds(const struct world_state *world, int camera_x, int camera_y,
-                                 int *left, int *top, int *right, int *bottom)
-{
-    int player_definition = world->scene->entities[world->player_entity].definition;
-    const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[
-        world_actor_visual(world, player_definition)];
-    const struct generated_runtime_frame *frame = entity_frame(
-        world, world->scene->entities[world->player_entity].definition);
-    int x = world->player_x * world->scene->tile_size;
-    int y = world->player_y * world->scene->tile_size;
-    int width = frame->width;
-    int height = frame->height;
-    if (world->moving) {
-        x += world->move_x * world->move_progress;
-        y += world->move_y * world->move_progress;
-    }
-    x += -visual->base_x * world->scene->tile_size + frame->offset_x - camera_x;
-    y += -visual->base_y * world->scene->tile_size + frame->offset_y - camera_y;
-    if (x < 0) {
-        width += x;
-        x = 0;
-    }
-    if (y < 0) {
-        height += y;
-        y = 0;
-    }
-    if (x + width > GAME_WIDTH)
-        width = GAME_WIDTH - x;
-    if (y + height > GAME_HEIGHT)
-        height = GAME_HEIGHT - y;
-    if (width <= 0 || height <= 0) {
-        *left = *right = VIEW_X;
-        *top = *bottom = 0;
-        return;
-    }
-    *left = view_x(x);
-    *top = view_y(y);
-    *right = *left + (width * 3 + 1) / 2;
-    *bottom = *top + (height * 3 + 1) / 2;
-}
-
 static void draw_depth_sorted_objects(const struct world_state *world, int camera_x, int camera_y)
 {
     const struct generated_runtime_scene *scene = world->scene;
@@ -700,15 +621,6 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
             tail_x = bubble_x + bubble_width - 4;
         speech_color = generated_runtime_actors[entity_index].speech_color;
         border_color = (speech_color & 0x00FFFFFFu) | 0x90000000u;
-
-        if (ambient_overlay_count < GENERATED_RUNTIME_ENTITY_STORAGE_COUNT) {
-            int overlay = ambient_overlay_count++;
-            ambient_overlay_left[overlay] = bubble_x - 1;
-            ambient_overlay_top[overlay] = bubble_y - SPEECH_SPRITE_GAP - 1;
-            ambient_overlay_right[overlay] = bubble_x + bubble_width + 1;
-            ambient_overlay_bottom[overlay] =
-                bubble_y + bubble_height + SPEECH_SPRITE_GAP + 1;
-        }
 
         /* Draw an actual outline rather than a larger filled rectangle behind
          * the translucent interior. Otherwise the speaker color underneath
@@ -845,15 +757,7 @@ static void prepare_world_frame(const struct world_state *world)
     int camera_y;
     int transition_alpha;
     draw_command_count = 0;
-    ambient_overlay_count = 0;
-    prepared_dirty_valid = 0;
-    prepared_replay_commands = 0;
     camera_for_player(world, &camera_x, &camera_y);
-    prepared_camera_x = camera_x;
-    prepared_camera_y = camera_y;
-    player_screen_bounds(world, camera_x, camera_y,
-                         &prepared_player_left, &prepared_player_top,
-                         &prepared_player_right, &prepared_player_bottom);
     draw_background(world, camera_x, camera_y);
     draw_depth_sorted_objects(world, camera_x, camera_y);
     if (world_dialogue_is_open(world))
@@ -864,90 +768,6 @@ static void prepare_world_frame(const struct world_state *world)
     if (transition_alpha > 0)
         record_solid_rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT,
                           (int)((unsigned int)transition_alpha << 24));
-}
-
-static int command_intersects_rectangle(int index, int left, int top, int right, int bottom)
-{
-    float scaled_width = draw_command_region_width[index] * draw_command_scale_x[index];
-    float scaled_height = draw_command_region_height[index] * draw_command_scale_y[index];
-    int width = (int)scaled_width;
-    int height = (int)scaled_height;
-    int x = draw_command_x[index];
-    int y = draw_command_y[index];
-    if ((float)width < scaled_width) ++width;
-    if ((float)height < scaled_height) ++height;
-    return width > 0 && height > 0 && x < right && y < bottom &&
-           x + width > left && y + height > top;
-}
-
-static void expand_dirty_for_translucent_commands(void)
-{
-    int changed;
-    do {
-        int index;
-        changed = 0;
-        for (index = 0; index < draw_command_count; ++index) {
-            unsigned int alpha = (unsigned int)draw_command_color[index] >> 24;
-            float scaled_width;
-            float scaled_height;
-            int width;
-            int height;
-            int left;
-            int top;
-            int right;
-            int bottom;
-            if (alpha >= 255 || draw_command_region_width[index] <= 0 ||
-                draw_command_region_height[index] <= 0 ||
-                !command_intersects_rectangle(index,
-                                              prepared_dirty_left, prepared_dirty_top,
-                                              prepared_dirty_right, prepared_dirty_bottom))
-                continue;
-
-            /* Partial texture clipping rounds outward so opaque images never
-             * leave a seam. Doing that to an alpha-blended command can touch
-             * an uncleared pixel outside the dirty rectangle and blend the
-             * same wall over it once more on every movement frame. Include
-             * the complete translucent draw (plus its raster halo) instead,
-             * so it is always replayed onto freshly restored pixels. Repeat
-             * because expanding to one overlapping object may reach another. */
-            scaled_width = draw_command_region_width[index] * draw_command_scale_x[index];
-            scaled_height = draw_command_region_height[index] * draw_command_scale_y[index];
-            width = (int)scaled_width;
-            height = (int)scaled_height;
-            if ((float)width < scaled_width) ++width;
-            if ((float)height < scaled_height) ++height;
-            left = draw_command_x[index] - DIRTY_PADDING;
-            top = draw_command_y[index] - DIRTY_PADDING;
-            right = draw_command_x[index] + width + DIRTY_PADDING;
-            bottom = draw_command_y[index] + height + DIRTY_PADDING;
-            if (left < prepared_dirty_left) {
-                prepared_dirty_left = left;
-                changed = 1;
-            }
-            if (top < prepared_dirty_top) {
-                prepared_dirty_top = top;
-                changed = 1;
-            }
-            if (right > prepared_dirty_right) {
-                prepared_dirty_right = right;
-                changed = 1;
-            }
-            if (bottom > prepared_dirty_bottom) {
-                prepared_dirty_bottom = bottom;
-                changed = 1;
-            }
-        }
-    } while (changed);
-}
-
-static int ambient_overlay_intersects_rectangle(int left, int top, int right, int bottom)
-{
-    int index;
-    for (index = 0; index < ambient_overlay_count; ++index)
-        if (ambient_overlay_left[index] < right && ambient_overlay_top[index] < bottom &&
-            ambient_overlay_right[index] > left && ambient_overlay_bottom[index] > top)
-            return 1;
-    return 0;
 }
 
 static void flush_prepared_frame(void)
@@ -964,23 +784,7 @@ static void flush_prepared_frame(void)
     int index;
 
     set_blending_mode(0x20);
-    if (!prepared_dirty_valid)
-        clear_screen(0xFF101820);
-    else {
-        /* Erase the complete replay area before rebuilding its layers. This
-         * is required for the transparent pixels around an actor: replaying
-         * the scenery alone cannot overwrite an old opaque player pixel when
-         * the corresponding scenery texel is transparent. Crops below retain
-         * the original 3:2 raster phase, so unlike the former implementation
-         * this clear cannot expose one-pixel gaps between shifted fragments. */
-        select_texture(-1);
-        select_region(256);
-        set_multiply_color(0xFF101820);
-        set_drawing_scale((float)(prepared_dirty_right - prepared_dirty_left),
-                          (float)(prepared_dirty_bottom - prepared_dirty_top));
-        set_drawing_point(prepared_dirty_left, prepared_dirty_top);
-        draw_region_zoomed();
-    }
+    clear_screen(0xFF101820);
     set_multiply_color(0xFFFFFFFF);
     color = 0xFFFFFFFF;
     for (index = 0; index < draw_command_count; ++index) {
@@ -992,60 +796,6 @@ static void flush_prepared_frame(void)
         int command_draw_x = draw_command_x[index];
         int command_draw_y = draw_command_y[index];
 
-        if (prepared_dirty_valid) {
-            int output_right;
-            int output_bottom;
-            int source_left = 0;
-            int source_top = 0;
-            int source_right = command_width;
-            int source_bottom = command_height;
-            if (!command_intersects_rectangle(index,
-                                              prepared_dirty_left, prepared_dirty_top,
-                                              prepared_dirty_right, prepared_dirty_bottom))
-                continue;
-
-            if (!draw_command_view_scaled[index])
-                goto draw_command;
-
-            output_right = command_draw_x + (command_width * 3 + 1) / 2;
-            output_bottom = command_draw_y + (command_height * 3 + 1) / 2;
-            /* At 1.5x scale, two source pixels always become exactly three
-             * display pixels. Starting a cropped draw at an odd source pixel
-             * restarts the scaler on the opposite phase, shifting the replayed
-             * texture by one pixel even when its destination looks correct.
-             * Select complete two-pixel pairs so the cropped draw has exactly
-             * the same raster phase as the original full draw. */
-            if (command_draw_x < prepared_dirty_left) {
-                source_left = ((prepared_dirty_left - command_draw_x) * 2) / 3;
-                source_left &= ~1;
-            }
-            if (command_draw_y < prepared_dirty_top) {
-                source_top = ((prepared_dirty_top - command_draw_y) * 2) / 3;
-                source_top &= ~1;
-            }
-            if (output_right > prepared_dirty_right) {
-                source_right = ((prepared_dirty_right - command_draw_x) * 2 + 2) / 3;
-                source_right = (source_right + 1) & ~1;
-            }
-            if (output_bottom > prepared_dirty_bottom) {
-                source_bottom = ((prepared_dirty_bottom - command_draw_y) * 2 + 2) / 3;
-                source_bottom = (source_bottom + 1) & ~1;
-            }
-            if (source_left < 0) source_left = 0;
-            if (source_top < 0) source_top = 0;
-            if (source_right > command_width) source_right = command_width;
-            if (source_bottom > command_height) source_bottom = command_height;
-            if (source_right <= source_left || source_bottom <= source_top)
-                continue;
-
-            command_x += source_left;
-            command_y += source_top;
-            command_width = source_right - source_left;
-            command_height = source_bottom - source_top;
-            command_draw_x += (source_left * 3) / 2;
-            command_draw_y += (source_top * 3) / 2;
-        }
-draw_command:
         if (draw_command_texture[index] != selected_texture) {
             selected_texture = draw_command_texture[index];
             select_texture(selected_texture);
@@ -1120,12 +870,6 @@ static void remember_displayed_world(void)
     displayed_move_progress = prepared_move_progress;
     displayed_animation_frame = prepared_animation_frame;
     displayed_visual_revision = prepared_visual_revision;
-    displayed_camera_x = prepared_camera_x;
-    displayed_camera_y = prepared_camera_y;
-    displayed_player_left = prepared_player_left;
-    displayed_player_top = prepared_player_top;
-    displayed_player_right = prepared_player_right;
-    displayed_player_bottom = prepared_player_bottom;
     displayed_world_valid = 1;
 }
 
@@ -1143,73 +887,10 @@ static int displayed_world_matches(const struct world_state *world)
            displayed_visual_revision == world->visual_revision;
 }
 
-static void configure_dirty_replay(const struct world_state *world)
-{
-    int index;
-    if (!displayed_world_valid || displayed_scene != world->scene ||
-        displayed_visual_revision != world->visual_revision ||
-        displayed_camera_x != prepared_camera_x ||
-        displayed_camera_y != prepared_camera_y)
-        return;
-
-    prepared_dirty_left = displayed_player_left;
-    if (prepared_player_left < prepared_dirty_left)
-        prepared_dirty_left = prepared_player_left;
-    prepared_dirty_top = displayed_player_top;
-    if (prepared_player_top < prepared_dirty_top)
-        prepared_dirty_top = prepared_player_top;
-    prepared_dirty_right = displayed_player_right;
-    if (prepared_player_right > prepared_dirty_right)
-        prepared_dirty_right = prepared_player_right;
-    prepared_dirty_bottom = displayed_player_bottom;
-    if (prepared_player_bottom > prepared_dirty_bottom)
-        prepared_dirty_bottom = prepared_player_bottom;
-
-    prepared_dirty_left -= DIRTY_PADDING;
-    prepared_dirty_top -= DIRTY_PADDING;
-    prepared_dirty_right += DIRTY_PADDING;
-    prepared_dirty_bottom += DIRTY_PADDING;
-
-    expand_dirty_for_translucent_commands();
-
-    if (prepared_dirty_left < VIEW_X) prepared_dirty_left = VIEW_X;
-    if (prepared_dirty_top < 0) prepared_dirty_top = 0;
-    if (prepared_dirty_right > VIEW_X + VIEW_WIDTH)
-        prepared_dirty_right = VIEW_X + VIEW_WIDTH;
-    if (prepared_dirty_bottom > DISPLAY_HEIGHT)
-        prepared_dirty_bottom = DISPLAY_HEIGHT;
-    if (prepared_dirty_right <= prepared_dirty_left ||
-        prepared_dirty_bottom <= prepared_dirty_top)
-        return;
-
-    /* Ambient panels are screen-space command groups: translucent rectangles,
-     * a tail, and several independently recorded glyphs. The world-texture
-     * clipper cannot safely replay only a fragment of that group; its backdrop
-     * would erase the panel while non-intersecting glyphs remained omitted.
-     * Use the coherent full-frame path only when a player's dirty rectangle
-     * actually touches a bubble. Ordinary movement keeps partial replay. */
-    if (ambient_overlay_intersects_rectangle(
-            prepared_dirty_left, prepared_dirty_top,
-            prepared_dirty_right, prepared_dirty_bottom))
-        return;
-
-    prepared_dirty_valid = 1;
-    prepared_replay_commands = 0;
-    for (index = 0; index < draw_command_count; ++index) {
-        if (command_intersects_rectangle(index,
-                                         prepared_dirty_left, prepared_dirty_top,
-                                         prepared_dirty_right, prepared_dirty_bottom))
-            ++prepared_replay_commands;
-    }
-}
-
 static int enough_time_to_flush(void)
 {
-    int replay_commands = prepared_dirty_valid ? prepared_replay_commands : draw_command_count;
-    if (prepared_dirty_valid)
-        ++replay_commands; /* the solid restoration rectangle */
     int estimated_cycles = DRAW_FIXED_CYCLES +
-                           replay_commands * DRAW_CYCLES_PER_COMMAND +
+                           draw_command_count * DRAW_CYCLES_PER_COMMAND +
                            DRAW_SAFETY_CYCLES;
     return get_cycle_counter() + estimated_cycles < cpu_cycles_per_frame;
 }
@@ -1281,7 +962,9 @@ void platform_render_world(const struct world_state *world)
     preparation_frame = get_frame_counter();
     prepare_world_frame(world);
     remember_prepared_world(world);
-    configure_dirty_replay(world);
+    /* Actors use the complete scene replay path. Keeping the player on that
+     * same path avoids phase differences between cropped and full textures,
+     * which can leave one-pixel trails while the player moves. */
     prepared_is_dialogue = 0;
     prepared_frame_valid = 1;
 
