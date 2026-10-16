@@ -1,6 +1,7 @@
 #include "platform/vircon32/vircon.h"
 
 #include "platform/vircon32/platform.h"
+#include "engine/savegame.h"
 
 #define GAME_WIDTH 427
 #define GAME_HEIGHT 240
@@ -32,6 +33,15 @@
  * left behind as movement advances the dirty region. */
 #define DIRTY_PADDING 6
 #define MUSIC_CHANNEL 0
+#define SAVE_SLOT_STRIDE 1024
+#define SAVE_SLOT_HEADER_WORDS 8
+#define SAVE_SLOT_MAGIC 0x57455356
+#define SAVE_PREVIEW_TILES 6
+#define SAVE_PREVIEW_SIZE 60
+
+#if SAVE_SLOT_HEADER_WORDS + SAVEGAME_MAX_WORDS > SAVE_SLOT_STRIDE
+#error Save payload does not fit in a memory-card slot
+#endif
 
 /* Vircon32 has no writable framebuffer or display lists. Keep a small display
  * list in RAM so layout and depth work happen without touching the GPU, then
@@ -104,6 +114,19 @@ static int displayed_player_bottom;
 static int displayed_world_valid;
 static int cpu_cycles_per_frame = DEFAULT_CPU_CYCLES_PER_FRAME;
 static int applied_music_revision = -1;
+static int save_words[SAVEGAME_MAX_WORDS];
+static struct world_state save_slot_previews[PLATFORM_SAVE_SLOT_COUNT];
+static int save_slot_preview_valid[PLATFORM_SAVE_SLOT_COUNT];
+static int displayed_slot_menu_valid;
+static int displayed_slot_menu_from_title;
+static int displayed_slot_menu_saving;
+static int displayed_slot_menu_selected;
+static int displayed_slot_menu_result;
+static int displayed_slot_menu_states[PLATFORM_SAVE_SLOT_COUNT];
+static const game_signature wastesedge_card_signature = {
+    'W', 'A', 'S', 'T', 'E', 'S', 'E', 'D', 'G', 'E',
+    '-', 'V', '3', '2', '-', 'S', 'A', 'V', 'E', 1
+};
 
 static void define_region_rectangle(int x, int y, int width, int height)
 {
@@ -573,8 +596,12 @@ static void record_ambient_speech(const struct world_state *world, int camera_x,
 void platform_poll_actions(struct world_actions *actions)
 {
     static int interaction_was_held;
+    static int cancel_was_held;
+    static int menu_was_held;
     static int previous_choice_direction;
     int interaction_held;
+    int cancel_held;
+    int menu_held;
     int choice_direction;
     select_gamepad(0);
     actions->move_x = gamepad_direction_x();
@@ -585,6 +612,12 @@ void platform_poll_actions(struct world_actions *actions)
     interaction_held = gamepad_button_a() > 0 || gamepad_button_x() > 0;
     actions->interact_pressed = interaction_held && !interaction_was_held;
     interaction_was_held = interaction_held;
+    cancel_held = gamepad_button_b() > 0 || gamepad_button_y() > 0;
+    actions->cancel_pressed = cancel_held && !cancel_was_held;
+    cancel_was_held = cancel_held;
+    menu_held = gamepad_button_start() > 0;
+    actions->menu_pressed = menu_held && !menu_was_held;
+    menu_was_held = menu_held;
 }
 
 int platform_frame_counter(void)
@@ -655,6 +688,12 @@ void platform_update_audio(const struct world_state *world)
     set_channel_speed(track->speed);
     set_channel_loop(track->loop);
     play_channel(MUSIC_CHANNEL);
+}
+
+void platform_stop_audio(void)
+{
+    stop_channel(MUSIC_CHANNEL);
+    applied_music_revision = -1;
 }
 
 static void prepare_world_frame(const struct world_state *world)
@@ -1074,6 +1113,486 @@ void platform_render_world(const struct world_state *world)
         return;
 
     finish_prepared_frame();
+}
+
+static int save_slot_offset(int slot)
+{
+    return game_signature_words + slot * SAVE_SLOT_STRIDE;
+}
+
+static int storage_card_status(void)
+{
+    if (!card_is_connected())
+        return PLATFORM_STORAGE_NO_CARD;
+    if (card_is_empty())
+        return PLATFORM_STORAGE_OK;
+    if (!card_signature_matches(&wastesedge_card_signature))
+        return PLATFORM_STORAGE_FOREIGN_CARD;
+    return PLATFORM_STORAGE_OK;
+}
+
+int platform_query_save_slots(int slot_states[PLATFORM_SAVE_SLOT_COUNT])
+{
+    int status = storage_card_status();
+    int slot;
+    displayed_slot_menu_valid = 0;
+    for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot) {
+        slot_states[slot] = PLATFORM_SAVE_SLOT_EMPTY;
+        save_slot_preview_valid[slot] = 0;
+    }
+    if (status != PLATFORM_STORAGE_OK || card_is_empty())
+        return status;
+    for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot) {
+        int offset = save_slot_offset(slot);
+        int word_count;
+        unsigned int expected_checksum;
+        if (card_read_word(offset) != SAVE_SLOT_MAGIC)
+            continue;
+        word_count = card_read_word(offset + 3);
+        if (card_read_word(offset + 1) < SAVEGAME_MINIMUM_VERSION ||
+            card_read_word(offset + 1) > SAVEGAME_FORMAT_VERSION ||
+            (unsigned int)card_read_word(offset + 2) != savegame_content_fingerprint() ||
+            word_count <= 0 || word_count > SAVEGAME_MAX_WORDS) {
+            slot_states[slot] = PLATFORM_SAVE_SLOT_INVALID;
+            continue;
+        }
+        expected_checksum = (unsigned int)card_read_word(offset + 4);
+        card_read_words(save_words, offset + SAVE_SLOT_HEADER_WORDS, word_count);
+        if (savegame_checksum(save_words, word_count) != expected_checksum ||
+            !savegame_decode(&save_slot_previews[slot], save_words, word_count)) {
+            slot_states[slot] = PLATFORM_SAVE_SLOT_INVALID;
+            continue;
+        }
+        slot_states[slot] = PLATFORM_SAVE_SLOT_USED;
+        save_slot_preview_valid[slot] = 1;
+    }
+    return PLATFORM_STORAGE_OK;
+}
+
+int platform_save_slot(const struct world_state *world, int slot)
+{
+    int status;
+    int offset;
+    int word_count;
+    unsigned int checksum;
+    if (slot < 0 || slot >= PLATFORM_SAVE_SLOT_COUNT)
+        return PLATFORM_STORAGE_WRITE_FAILED;
+    status = storage_card_status();
+    if (status != PLATFORM_STORAGE_OK)
+        return status;
+    word_count = savegame_encode(world, save_words, SAVEGAME_MAX_WORDS);
+    if (word_count <= 0)
+        return PLATFORM_STORAGE_WRITE_FAILED;
+    checksum = savegame_checksum(save_words, word_count);
+    if (card_is_empty()) {
+        card_write_signature(&wastesedge_card_signature);
+        if (!card_signature_matches(&wastesedge_card_signature))
+            return PLATFORM_STORAGE_WRITE_FAILED;
+    }
+    offset = save_slot_offset(slot);
+    /* Clear the commit marker first. A reset or removed card during the write
+     * leaves an invalid slot instead of a valid-looking partial save. */
+    card_write_word(offset, 0);
+    card_write_word(offset + 1, SAVEGAME_FORMAT_VERSION);
+    card_write_word(offset + 2, (int)savegame_content_fingerprint());
+    card_write_word(offset + 3, word_count);
+    card_write_word(offset + 4, (int)checksum);
+    card_write_word(offset + 5, world->scene_index);
+    card_write_word(offset + 6, get_date());
+    card_write_word(offset + 7, get_time());
+    card_write_words(save_words, offset + SAVE_SLOT_HEADER_WORDS, word_count);
+    card_write_word(offset, SAVE_SLOT_MAGIC);
+    if (card_read_word(offset) != SAVE_SLOT_MAGIC ||
+        (unsigned int)card_read_word(offset + 4) != checksum)
+        return PLATFORM_STORAGE_WRITE_FAILED;
+    return PLATFORM_STORAGE_SAVED;
+}
+
+int platform_load_slot(struct world_state *world, int slot)
+{
+    int status;
+    int offset;
+    int word_count;
+    unsigned int expected_checksum;
+    if (slot < 0 || slot >= PLATFORM_SAVE_SLOT_COUNT)
+        return PLATFORM_STORAGE_EMPTY_SLOT;
+    status = storage_card_status();
+    if (status != PLATFORM_STORAGE_OK)
+        return status;
+    if (card_is_empty())
+        return PLATFORM_STORAGE_EMPTY_SLOT;
+    offset = save_slot_offset(slot);
+    if (card_read_word(offset) != SAVE_SLOT_MAGIC)
+        return PLATFORM_STORAGE_EMPTY_SLOT;
+    if (card_read_word(offset + 1) < SAVEGAME_MINIMUM_VERSION ||
+        card_read_word(offset + 1) > SAVEGAME_FORMAT_VERSION ||
+        (unsigned int)card_read_word(offset + 2) != savegame_content_fingerprint())
+        return PLATFORM_STORAGE_INCOMPATIBLE_SAVE;
+    word_count = card_read_word(offset + 3);
+    if (word_count <= 0 || word_count > SAVEGAME_MAX_WORDS)
+        return PLATFORM_STORAGE_CORRUPT_SLOT;
+    expected_checksum = (unsigned int)card_read_word(offset + 4);
+    card_read_words(save_words, offset + SAVE_SLOT_HEADER_WORDS, word_count);
+    if (savegame_checksum(save_words, word_count) != expected_checksum)
+        return PLATFORM_STORAGE_CORRUPT_SLOT;
+    if (!savegame_decode(world, save_words, word_count))
+        return PLATFORM_STORAGE_INCOMPATIBLE_SAVE;
+    applied_music_revision = -1;
+    prepared_frame_valid = 0;
+    displayed_world_valid = 0;
+    displayed_dialogue = -1;
+    return PLATFORM_STORAGE_OK;
+}
+
+static void draw_direct_rectangle(int x, int y, int width, int height, int color)
+{
+    select_texture(-1);
+    select_region(256);
+    set_multiply_color(color);
+    set_drawing_scale((float)width, (float)height);
+    set_drawing_point(x, y);
+    draw_region_zoomed();
+    set_drawing_scale(1.0f, 1.0f);
+}
+
+static void draw_preview_frame(const struct generated_runtime_frame *frame,
+                               int world_x, int world_y, int alpha,
+                               int crop_x, int crop_y, int crop_size,
+                               int destination_x, int destination_y)
+{
+    int left = world_x > crop_x ? world_x : crop_x;
+    int top = world_y > crop_y ? world_y : crop_y;
+    int right = world_x + frame->width;
+    int bottom = world_y + frame->height;
+    int crop_right = crop_x + crop_size;
+    int crop_bottom = crop_y + crop_size;
+    int output_left;
+    int output_top;
+    int output_right;
+    int output_bottom;
+    int source_width;
+    int source_height;
+    if (right > crop_right) right = crop_right;
+    if (bottom > crop_bottom) bottom = crop_bottom;
+    if (right <= left || bottom <= top || frame->texture < 0)
+        return;
+    output_left = destination_x + ((left - crop_x) * SAVE_PREVIEW_SIZE) / crop_size;
+    output_top = destination_y + ((top - crop_y) * SAVE_PREVIEW_SIZE) / crop_size;
+    output_right = destination_x + ((right - crop_x) * SAVE_PREVIEW_SIZE) / crop_size;
+    output_bottom = destination_y + ((bottom - crop_y) * SAVE_PREVIEW_SIZE) / crop_size;
+    source_width = right - left;
+    source_height = bottom - top;
+    if (output_right <= output_left || output_bottom <= output_top)
+        return;
+    select_texture(frame->texture);
+    select_region(0);
+    define_region_rectangle(frame->source_x + left - world_x,
+                            frame->source_y + top - world_y,
+                            source_width, source_height);
+    set_multiply_color((int)(((unsigned int)alpha << 24) | 0x00FFFFFFu));
+    set_drawing_scale((float)(output_right - output_left) / (float)source_width,
+                      (float)(output_bottom - output_top) / (float)source_height);
+    set_drawing_point(output_left, output_top);
+    draw_region_zoomed();
+}
+
+static void draw_preview_entity(const struct world_state *world, int definition,
+                                int crop_x, int crop_y, int crop_size,
+                                int destination_x, int destination_y)
+{
+    int visual_index = world_actor_visual(world, definition);
+    const struct generated_runtime_actor_visual *visual;
+    const struct generated_runtime_frame *frame;
+    int x;
+    int y;
+    if (visual_index < 0 || visual_index >= generated_runtime_actor_visual_count)
+        return;
+    visual = &generated_runtime_actor_visuals[visual_index];
+    frame = entity_frame(world, definition);
+    x = world_actor_pixel_x(world, definition) -
+        visual->base_x * world->scene->tile_size + frame->offset_x;
+    y = world_actor_pixel_y(world, definition) -
+        visual->base_y * world->scene->tile_size + frame->offset_y;
+    draw_preview_frame(frame, x, y, 255, crop_x, crop_y, crop_size,
+                       destination_x, destination_y);
+}
+
+static void draw_slot_preview(const struct world_state *world, int x, int y)
+{
+    const struct generated_runtime_scene *scene = world->scene;
+    int crop_size = SAVE_PREVIEW_TILES * scene->tile_size;
+    int crop_x = world_actor_pixel_x(world,
+        scene->entities[world->player_entity].definition) + scene->tile_size / 2 - crop_size / 2;
+    int crop_y = world_actor_pixel_y(world,
+        scene->entities[world->player_entity].definition) + scene->tile_size / 2 - crop_size / 2;
+    int maximum_x = scene->width * scene->tile_size - crop_size;
+    int maximum_y = scene->height * scene->tile_size - crop_size;
+    int scenery_index = 0;
+    int drawn = 0;
+    int last_y = -1;
+    int last_index = -1;
+    int index;
+    if (maximum_x < 0)
+        crop_x = maximum_x / 2;
+    else {
+        if (crop_x < 0) crop_x = 0;
+        if (crop_x > maximum_x) crop_x = maximum_x;
+    }
+    if (maximum_y < 0)
+        crop_y = maximum_y / 2;
+    else {
+        if (crop_y < 0) crop_y = 0;
+        if (crop_y > maximum_y) crop_y = maximum_y;
+    }
+
+    draw_direct_rectangle(x, y, SAVE_PREVIEW_SIZE, SAVE_PREVIEW_SIZE, 0xFF080B10);
+    for (index = 0; index < scene->background_count; ++index) {
+        const struct generated_runtime_background *item = &scene->background[index];
+        draw_preview_frame(&item->frame, item->x, item->y, 255,
+                           crop_x, crop_y, crop_size, x, y);
+    }
+    while (drawn < generated_runtime_actor_count) {
+        int selected = -1;
+        int selected_y = 0;
+        for (index = 0; index < generated_runtime_actor_count; ++index) {
+            int depth = entity_depth(world, index);
+            if (world_actor_visual(world, index) < 0 ||
+                !world_actor_is_present(world, index) ||
+                depth < last_y || (depth == last_y && index <= last_index))
+                continue;
+            if (selected < 0 || depth < selected_y ||
+                (depth == selected_y && index < selected)) {
+                selected = index;
+                selected_y = depth;
+            }
+        }
+        if (selected < 0)
+            break;
+        while (scenery_index < scene->scenery_count &&
+               scene->scenery[scenery_index].depth <= selected_y) {
+            const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
+            draw_preview_frame(world_scenery_frame(world, item), item->x, item->y,
+                               item->alpha, crop_x, crop_y, crop_size, x, y);
+        }
+        draw_preview_entity(world, selected, crop_x, crop_y, crop_size, x, y);
+        last_y = selected_y;
+        last_index = selected;
+        ++drawn;
+    }
+    while (scenery_index < scene->scenery_count) {
+        const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
+        draw_preview_frame(world_scenery_frame(world, item), item->x, item->y,
+                           item->alpha, crop_x, crop_y, crop_size, x, y);
+    }
+    set_multiply_color(0xFFFFFFFF);
+    set_drawing_scale(1.0f, 1.0f);
+}
+
+static void draw_direct_text_centered(int y, const char *text, int color)
+{
+    int width = (int)strlen(text) * bios_character_width;
+    set_drawing_scale(1.0f, 1.0f);
+    set_multiply_color(color);
+    print_at((DISPLAY_WIDTH - width) / 2, y, text);
+}
+
+static const char *storage_message(int result)
+{
+    if (result == PLATFORM_STORAGE_NO_CARD) return "NO MEMORY CARD";
+    if (result == PLATFORM_STORAGE_FOREIGN_CARD) return "CARD BELONGS TO ANOTHER GAME";
+    if (result == PLATFORM_STORAGE_EMPTY_SLOT) return "EMPTY SLOT";
+    if (result == PLATFORM_STORAGE_CORRUPT_SLOT) return "SAVE DATA IS CORRUPT";
+    if (result == PLATFORM_STORAGE_INCOMPATIBLE_SAVE) return "SAVE IS FROM ANOTHER BUILD";
+    if (result == PLATFORM_STORAGE_WRITE_FAILED) return "COULD NOT SAVE GAME";
+    if (result == PLATFORM_STORAGE_SAVED) return "GAME SAVED";
+    return "";
+}
+
+static void draw_title_background(void)
+{
+    const struct generated_runtime_frame *frame = &generated_runtime_title_background;
+    clear_screen(0xFF101820);
+    if (frame->texture >= 0 && frame->width > 0 && frame->height > 0) {
+        select_texture(frame->texture);
+        select_region(0);
+        define_region_rectangle(frame->source_x, frame->source_y,
+                                frame->width, frame->height);
+        set_multiply_color(0xFFFFFFFF);
+        set_drawing_scale((float)DISPLAY_WIDTH / (float)frame->width,
+                          (float)DISPLAY_HEIGHT / (float)frame->height);
+        set_drawing_point(0, 0);
+        draw_region_zoomed();
+        set_drawing_scale(1.0f, 1.0f);
+    }
+    draw_direct_rectangle(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0x50101820);
+}
+
+static void draw_menu_panel(void)
+{
+    set_blending_mode(0x20);
+    draw_direct_rectangle(108, 28, 424, 304, 0xFF8A642C);
+    draw_direct_rectangle(112, 32, 416, 296, 0xFF101820);
+}
+
+static void draw_menu_option(int y, const char *text, int selected)
+{
+    if (selected)
+        draw_direct_rectangle(174, y - 4, 292, 28, 0xFF604020);
+    draw_direct_text_centered(y, text, selected ? 0xFFFFD070 : 0xFFFFFFFF);
+}
+
+static void draw_menu_status(int result)
+{
+    const char *message = storage_message(result);
+    if (message[0] != 0)
+        draw_direct_text_centered(298, message,
+                                  result == PLATFORM_STORAGE_SAVED ?
+                                  0xFF80FF80 : 0xFF8080FF);
+}
+
+static void draw_two_digits(int x, int y, unsigned int value)
+{
+    value %= 100;
+    if (value < 10) {
+        print_at(x, y, "0");
+        x += bios_character_width;
+    }
+    print_uint_at(x, y, value);
+}
+
+static void draw_save_time(int x, int y, int game_time)
+{
+    unsigned int time = game_time < 0 ? 0u : (unsigned int)game_time;
+    unsigned int day = time / (600u * 24u);
+    unsigned int hour = (time / 600u) % 24u;
+    unsigned int minute = (time / 10u) % 60u;
+    print_at(x, y, "DAY");
+    print_uint_at(x + bios_character_width * 4, y, day);
+    print_at(x + bios_character_width * 9, y, "-");
+    draw_two_digits(x + bios_character_width * 11, y, hour);
+    print_at(x + bios_character_width * 13, y, ":");
+    draw_two_digits(x + bios_character_width * 14, y, minute);
+}
+
+static int slot_menu_matches(int from_title, int saving, int selected,
+                             const int slot_states[PLATFORM_SAVE_SLOT_COUNT],
+                             int storage_result)
+{
+    int slot;
+    if (!displayed_slot_menu_valid ||
+        displayed_slot_menu_from_title != from_title ||
+        displayed_slot_menu_saving != saving ||
+        displayed_slot_menu_selected != selected ||
+        displayed_slot_menu_result != storage_result)
+        return 0;
+    for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot)
+        if (displayed_slot_menu_states[slot] != slot_states[slot])
+            return 0;
+    return 1;
+}
+
+static void remember_slot_menu(int from_title, int saving, int selected,
+                               const int slot_states[PLATFORM_SAVE_SLOT_COUNT],
+                               int storage_result)
+{
+    int slot;
+    displayed_slot_menu_valid = 1;
+    displayed_slot_menu_from_title = from_title;
+    displayed_slot_menu_saving = saving;
+    displayed_slot_menu_selected = selected;
+    displayed_slot_menu_result = storage_result;
+    for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot)
+        displayed_slot_menu_states[slot] = slot_states[slot];
+}
+
+void platform_begin_menu(void)
+{
+    /* A prepared display list must not be replayed over a menu on a later
+     * frame. Keep the currently displayed world as the pause backdrop. */
+    prepared_frame_valid = 0;
+}
+
+void platform_invalidate_world(void)
+{
+    prepared_frame_valid = 0;
+    displayed_world_valid = 0;
+    displayed_dialogue = -1;
+}
+
+void platform_render_title_menu(int selected, int storage_result)
+{
+    draw_title_background();
+    draw_direct_text_centered(58, "-- WASTE'S EDGE --", 0xFFFFD070);
+    draw_menu_option(164, "NEW GAME", selected == 0);
+    draw_menu_option(204, "LOAD GAME", selected == 1);
+    draw_menu_status(storage_result);
+    set_multiply_color(0xFFFFFFFF);
+}
+
+void platform_render_pause_menu(int selected, int storage_result)
+{
+    draw_menu_panel();
+    draw_direct_text_centered(58, "GAME PAUSED", 0xFFFFD070);
+    draw_menu_option(112, "CONTINUE", selected == 0);
+    draw_menu_option(152, "SAVE GAME", selected == 1);
+    draw_menu_option(192, "LOAD GAME", selected == 2);
+    draw_menu_option(232, "BACK TO TITLE", selected == 3);
+    draw_menu_status(storage_result);
+    set_multiply_color(0xFFFFFFFF);
+}
+
+void platform_render_slot_menu(int from_title, int saving, int selected,
+                               const int slot_states[PLATFORM_SAVE_SLOT_COUNT],
+                               int storage_result)
+{
+    int slot;
+    const char *message;
+    if (slot_menu_matches(from_title, saving, selected, slot_states, storage_result))
+        return;
+    if (from_title)
+        draw_title_background();
+    set_blending_mode(0x20);
+    draw_direct_rectangle(36, 6, 568, 348, 0xFF8A642C);
+    draw_direct_rectangle(40, 10, 560, 340, 0xFF101820);
+    draw_direct_text_centered(28, saving ? "SAVE GAME" : "LOAD GAME", 0xFFFFD070);
+    for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot) {
+        int y = 56 + slot * 64;
+        int used = slot_states[slot] == PLATFORM_SAVE_SLOT_USED &&
+                   save_slot_preview_valid[slot];
+        draw_direct_rectangle(58, y, 524, 62,
+                              slot == selected ? 0xFF8A642C : 0xFF304050);
+        draw_direct_rectangle(60, y + 2, 520, 58,
+                              slot == selected ? 0xFF302820 : 0xFF182028);
+        draw_direct_rectangle(62, y, 62, 62,
+                              slot == selected ? 0xFFFFD070 : 0xFF607080);
+        if (used)
+            draw_slot_preview(&save_slot_previews[slot], 63, y + 1);
+        else {
+            draw_direct_rectangle(63, y + 1, SAVE_PREVIEW_SIZE,
+                                  SAVE_PREVIEW_SIZE, 0xFF080B10);
+            set_multiply_color(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
+                               0xFFFF8080 : 0xFF8090A0);
+            print_at(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? 65 : 73,
+                     y + 23,
+                     slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? "INVALID" : "EMPTY");
+        }
+        set_multiply_color(slot == selected ? 0xFFFFD070 : 0xFFFFFFFF);
+        print_at(138, y + 9, used ? save_slot_previews[slot].scene->display_name :
+                 (slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
+                  "INCOMPATIBLE SAVE" : "EMPTY SLOT"));
+        print_at(508, y + 9, "SLOT");
+        print_uint_at(556, y + 9, (unsigned)(slot + 1));
+        if (used)
+            draw_save_time(138, y + 33, save_slot_previews[slot].game_time);
+    }
+    message = storage_message(storage_result);
+    if (message[0] != 0)
+        draw_direct_text_centered(330, message,
+                                  storage_result == PLATFORM_STORAGE_SAVED ?
+                                  0xFF80FF80 : 0xFF8080FF);
+    set_multiply_color(0xFFFFFFFF);
+    set_drawing_scale(1.0f, 1.0f);
+    remember_slot_menu(from_title, saving, selected, slot_states, storage_result);
 }
 
 void platform_present(void)

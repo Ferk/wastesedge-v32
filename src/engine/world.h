@@ -12,6 +12,8 @@ enum world_facing {
 
 #define WORLD_COLLISION_OVERRIDE_CAPACITY 16
 #define WORLD_TRANSITION_FRAMES 8
+#define WORLD_GAME_TIME_SUBTICKS_PER_UNIT 15
+#define WORLD_GAME_TIME_SUBTICKS_PER_FRAME 2
 
 enum world_transition_phase {
     WORLD_TRANSITION_NONE = 0,
@@ -31,6 +33,8 @@ struct world_actions {
     int move_y;
     int interact_pressed;
     int choice_move;
+    int cancel_pressed;
+    int menu_pressed;
 };
 
 struct world_actor_state {
@@ -100,6 +104,9 @@ struct world_state {
     int transition_spawn;
     int schedule_random;
     int speech_random;
+    /* Tenths of an in-world minute, matching the original clock units. */
+    int game_time;
+    int game_time_subticks;
 };
 
 void world_initialize(struct world_state *world);

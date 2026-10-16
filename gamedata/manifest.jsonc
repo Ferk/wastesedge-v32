@@ -2,6 +2,8 @@
 {
   "format": "wastesedge-content-v1",
   "initial_scene": "redwyne_exterior",
+  "initial_game_time": 7200,
+  "title_background": "assets/ui/title/jewelbag_open.png",
   "maps": [
     "maps/intro_exterior.tmj",
     "maps/redwyne_exterior.tmj",

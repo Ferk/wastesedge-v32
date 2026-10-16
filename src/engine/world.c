@@ -1268,6 +1268,8 @@ void world_initialize(struct world_state *world)
     world->transition_spawn = -1;
     world->schedule_random = 1;
     world->speech_random = 17;
+    world->game_time = generated_runtime_initial_game_time;
+    world->game_time_subticks = 0;
     if (select_player_entity(world)) {
         const struct generated_runtime_entity *entity = &world->scene->entities[world->player_entity];
         world->player_x = entity->tile_x;
@@ -1315,6 +1317,14 @@ void world_update(struct world_state *world, const struct world_actions *actions
     int move_y = actions->move_y;
     if (world->player_entity < 0)
         return;
+    /* The original clock advanced eight tenths-of-a-minute units per real
+     * second. Preserve that rate at this engine's 60 Hz simulation frequency
+     * with an integer accumulator. */
+    world->game_time_subticks += WORLD_GAME_TIME_SUBTICKS_PER_FRAME;
+    if (world->game_time_subticks >= WORLD_GAME_TIME_SUBTICKS_PER_UNIT) {
+        world->game_time_subticks -= WORLD_GAME_TIME_SUBTICKS_PER_UNIT;
+        ++world->game_time;
+    }
     update_schedules(world);
     update_actor_visual_animations(world);
     if (world->transition_phase != WORLD_TRANSITION_NONE) {

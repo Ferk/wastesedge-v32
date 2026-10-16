@@ -1280,7 +1280,8 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
 
 def collect_runtime_resources(scenes: list[dict[str, object]], visuals: list[dict[str, object]],
                               object_visuals: list[dict[str, object]],
-                              dialogues: list[dict[str, object]], glyphs: list[dict[str, object]]) -> list[str]:
+                              dialogues: list[dict[str, object]], glyphs: list[dict[str, object]],
+                              extra_images: list[str] | None = None) -> list[str]:
     """Return image references in exactly the order supplied to the ROM builder."""
     resources: set[str] = set()
     for scene in scenes:
@@ -1304,6 +1305,8 @@ def collect_runtime_resources(scenes: list[dict[str, object]], visuals: list[dic
                 resources.add(expect(portrait, str, "runtime dialogue portrait"))
     for glyph in glyphs:
         resources.add(expect(glyph["image"], str, "runtime dialogue glyph atlas"))
+    if extra_images is not None:
+        resources.update(extra_images)
     return (sorted(path for path in resources if not path.startswith(GENERATED_RESOURCE_PREFIX)) +
             sorted(path for path in resources if path.startswith(GENERATED_RESOURCE_PREFIX)))
 
@@ -1783,6 +1786,11 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
         document = expect(load_jsonc(map_path), dict, str(map_path))
         scene_properties = properties(document.get("properties"), str(map_path))
         scene_id = identifier(scene_properties.get("id"), f"{map_path} scene id")
+        display_name = scene_properties.get("display_name")
+        if display_name is None:
+            display_name = " ".join(part.capitalize() for part in scene_id.split("_"))
+        if not isinstance(display_name, str) or not display_name.strip():
+            raise ContentError(f"{map_path}: scene display_name must be a non-empty string")
         entry_dialogue = -1
         if "on_enter" in scene_properties:
             entry_script = identifier(scene_properties["on_enter"], f"{map_path} scene on_enter")
@@ -2167,7 +2175,8 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 })
         scenery.sort(key=lambda item: item["depth"])
         spawns.sort(key=lambda item: str(item["id"]))
-        raw_scenes.append({"id": scene_id, "width": width, "height": height, "tile_size": tile_size,
+        raw_scenes.append({"id": scene_id, "display_name": display_name,
+                           "width": width, "height": height, "tile_size": tile_size,
                            "entry_dialogue": entry_dialogue, "terrain": terrain,
                            "collisions": collisions, "navigation_blockers": navigation_blockers,
                            "scenery": scenery, "entities": entities,
@@ -2384,6 +2393,7 @@ struct generated_runtime_dialogue {
     int start_count, end_script;
 };
 struct generated_runtime_scene {
+    const char *display_name;
     int width, height, tile_size, entry_dialogue;
     const struct generated_runtime_background *background; int background_count;
     const struct generated_runtime_collision *collisions; int collision_count;
@@ -2409,11 +2419,13 @@ extern const int generated_runtime_music_count;
 extern const struct generated_runtime_scene generated_runtime_scenes[];
 extern const int generated_runtime_scene_count;
 extern const int generated_runtime_initial_scene;
+extern const int generated_runtime_initial_game_time;
 extern const struct generated_runtime_dialogue generated_runtime_dialogues[];
 extern const int generated_runtime_dialogue_count;
 extern const struct generated_runtime_glyph generated_runtime_glyphs[];
 extern const int generated_runtime_glyph_count;
 extern const int generated_runtime_space_advance;
+extern const struct generated_runtime_frame generated_runtime_title_background;
 #define GENERATED_RUNTIME_FLAG_COUNT %d
 #define GENERATED_RUNTIME_FLAG_STORAGE_COUNT (GENERATED_RUNTIME_FLAG_COUNT > 0 ? GENERATED_RUNTIME_FLAG_COUNT : 1)
 #define GENERATED_RUNTIME_STATEFUL_SCENERY_COUNT %d
@@ -2466,11 +2478,15 @@ def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
 def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, object]],
                    actors: list[dict[str, int]],
                    object_visuals: list[dict[str, object]], resources: list[str], initial_scene: str,
+                   initial_game_time: int,
                    dialogues: list[dict[str, object]], scripts: list[dict[str, object]],
                    glyphs: list[dict[str, object]], space_advance: int,
-                   music: list[dict[str, object]], schedules: list[dict[str, object]]) -> str:
+                   music: list[dict[str, object]], schedules: list[dict[str, object]],
+                   title_background: dict[str, object]) -> str:
     resource_index = {path: index for index, path in enumerate(resources)}
     lines = ["/* Generated by tools/content_compiler/compile_content.py; do not edit. */", '#include "content_scene_data.h"', ""]
+    lines.append("const struct generated_runtime_frame generated_runtime_title_background = " +
+                 frame_initializer(title_background, resource_index) + ";\n")
     lines.append("const struct generated_runtime_music generated_runtime_music[] = {")
     for sound, track in enumerate(music):
         lines.append("    { %d, %d, %.8gf, %.8gf }," % (
@@ -2714,8 +2730,9 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_dialogue_count = {len(dialogues)};\n")
     lines.append("const struct generated_runtime_scene generated_runtime_scenes[] = {")
     for index, scene in enumerate(scenes):
-        lines.append("    { %d, %d, %d, %d, generated_runtime_background_%d, %d, generated_runtime_collisions_%d, %d, generated_runtime_navigation_blockers_%d, %d, generated_runtime_scenery_%d, %d, %d, generated_runtime_entities_%d, %d, generated_runtime_spawns_%d, %d, generated_runtime_triggers_%d, %d, generated_runtime_hotspots_%d, %d }," % (
-            scene["width"], scene["height"], scene["tile_size"], scene["entry_dialogue"],
+        lines.append("    { %s, %d, %d, %d, %d, generated_runtime_background_%d, %d, generated_runtime_collisions_%d, %d, generated_runtime_navigation_blockers_%d, %d, generated_runtime_scenery_%d, %d, %d, generated_runtime_entities_%d, %d, generated_runtime_spawns_%d, %d, generated_runtime_triggers_%d, %d, generated_runtime_hotspots_%d, %d }," % (
+            json.dumps(scene["display_name"]), scene["width"], scene["height"],
+            scene["tile_size"], scene["entry_dialogue"],
             index, len(scene["background"]), index, len(scene["collisions"]),
             index, len(scene["navigation_blockers"]),
             index, len(scene["scenery"]), scene["stateful_scenery_count"],
@@ -2724,6 +2741,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append("};")
     lines.append(f"const int generated_runtime_scene_count = {len(scenes)};")
     lines.append(f"const int generated_runtime_initial_scene = {[scene['id'] for scene in scenes].index(initial_scene)};")
+    lines.append(f"const int generated_runtime_initial_game_time = {initial_game_time};")
     lines.append("")
     return "\n".join(lines)
 
@@ -2759,6 +2777,24 @@ def compile_content(project_root: Path) -> None:
     initial_scene = identifier(manifest.get("initial_scene"), "manifest initial_scene")
     if initial_scene not in scenes:
         raise ContentError(f"manifest initial_scene refers to unknown scene {initial_scene!r}")
+    initial_game_time = integer(manifest.get("initial_game_time", 0),
+                                "manifest initial_game_time")
+    if initial_game_time < 0:
+        raise ContentError("manifest initial_game_time must not be negative")
+    title_path = relative_input(game_root, manifest.get("title_background"), "title_background")
+    try:
+        from PIL import Image
+        with Image.open(title_path) as title_image:
+            title_width, title_height = title_image.size
+    except (ImportError, OSError) as error:
+        raise ContentError(f"cannot load title background {title_path}: {error}") from error
+    title_background = {
+        "image": title_path.relative_to(game_root).as_posix(),
+        "width": title_width,
+        "height": title_height,
+        "offset_x": 0,
+        "offset_y": 0,
+    }
     script_index = {script_id: index for index, script_id in enumerate(sorted(scripts))}
     runtime_dialogue, script_dialogues, runtime_flags = runtime_dialogues(
         inputs["dialogue"], inputs["scripts"], entities, game_root, script_index)
@@ -2790,7 +2826,8 @@ def compile_content(project_root: Path) -> None:
         runtime_dialogue, runtime_schedule_data, runtime_script_data, game_root, output_root)
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
-                                                  runtime_dialogue, runtime_glyphs)
+                                                  runtime_dialogue, runtime_glyphs,
+                                                  [str(title_background["image"])])
     maximum_cartridge_textures = 256
     if len(runtime_resources) > maximum_cartridge_textures:
         raise ContentError(
@@ -2824,8 +2861,9 @@ def compile_content(project_root: Path) -> None:
         len(runtime_flags), stateful_scenery_count, len(entities), maximum_dialogue_nodes))
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
-        initial_scene, runtime_dialogue, runtime_script_data,
-        runtime_glyphs, runtime_space_advance, music, runtime_schedule_data))
+        initial_scene, initial_game_time, runtime_dialogue, runtime_script_data,
+        runtime_glyphs, runtime_space_advance, music, runtime_schedule_data,
+        title_background))
     source_textures = [path for path in runtime_resources if not path.startswith(GENERATED_RESOURCE_PREFIX)]
     generated_textures = [path.removeprefix(GENERATED_RESOURCE_PREFIX) for path in runtime_resources if path.startswith(GENERATED_RESOURCE_PREFIX)]
     cmake_lists = {

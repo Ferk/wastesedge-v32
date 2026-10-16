@@ -67,12 +67,14 @@ add_custom_command(
 
 set(runtime_sources
   "${CMAKE_CURRENT_SOURCE_DIR}/main.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/savegame.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/platform.c"
   "${generated_dir}/content_data.c"
   "${generated_dir}/content_scene_data.c")
 set(runtime_headers
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/vircon.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/savegame.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/platform.h"
   "${generated_dir}/content_ids.h"

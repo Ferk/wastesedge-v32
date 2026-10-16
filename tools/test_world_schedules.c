@@ -3,11 +3,12 @@
 #include <string.h>
 
 #include "content_ids.h"
+#include "engine/savegame.h"
 #include "engine/world.h"
 
 static void tick(struct world_state *world, int frames)
 {
-    struct world_actions actions = { 0, 0, 0, 0 };
+    struct world_actions actions = { 0, 0, 0, 0, 0, 0 };
     int transitioned = 0;
     while (frames-- > 0)
         world_update(world, &actions);
@@ -133,7 +134,7 @@ static int choice_has_condition(const struct generated_runtime_dialogue_choice *
 
 static void choose_visible_dialogue_option(struct world_state *world, const char *text)
 {
-    struct world_actions interact = { 0, 0, 1, 0 };
+    struct world_actions interact = { 0, 0, 1, 0, 0, 0 };
     int index;
     for (index = 0; index < world_dialogue_choice_count(world); ++index) {
         if (strcmp(world_dialogue_choice_at(world, index), text) == 0) {
@@ -170,11 +171,11 @@ int main(void)
     const struct generated_runtime_dialogue_node *jelom_node = 0;
     const struct generated_runtime_dialogue_node *jelom_question_node = 0;
     const struct generated_runtime_dialogue_node *jelom_suspicion_node = 0;
-    struct world_actions interact = { 0, 0, 1, 0 };
-    struct world_actions move_north = { 0, -1, 0, 0 };
-    struct world_actions move_east = { 1, 0, 0, 0 };
-    struct world_actions move_west = { -1, 0, 0, 0 };
-    struct world_actions move_south = { 0, 1, 0, 0 };
+    struct world_actions interact = { 0, 0, 1, 0, 0, 0 };
+    struct world_actions move_north = { 0, -1, 0, 0, 0, 0 };
+    struct world_actions move_east = { 1, 0, 0, 0, 0, 0 };
+    struct world_actions move_west = { -1, 0, 0, 0, 0, 0 };
+    struct world_actions move_south = { 0, 1, 0, 0, 0, 0 };
     int frozen_x;
     int frozen_y;
     int frozen_progress;
@@ -210,6 +211,16 @@ int main(void)
     world_initialize(&world);
     assert(generated_runtime_scene_count == 23);
     assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 1) == 8);
+    {
+        struct world_state clock_world;
+        struct world_actions idle = { 0, 0, 0, 0, 0, 0 };
+        world_initialize(&clock_world);
+        assert(clock_world.game_time == generated_runtime_initial_game_time);
+        for (frame = 0; frame < 60; ++frame)
+            world_update(&clock_world, &idle);
+        assert(clock_world.game_time == generated_runtime_initial_game_time + 8);
+        assert(clock_world.game_time_subticks == 0);
+    }
 
     /* Examine actions are authored as activation-square hotspots. They retain
      * the facing requirement and produce ordinary non-modal actor speech. */
@@ -2181,6 +2192,51 @@ int main(void)
     run_script(&world, GENERATED_SCRIPT_LEAVE_GUARDHOUSE);
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR);
     assert(world.player_x == 13 && world.player_y == 23);
+
+    /* Save data is pointer-free and restores persistent state while forcing
+     * transient route buffers and ROM speech pointers to be reconstructed. */
+    {
+        struct world_state loaded;
+        int save_words[SAVEGAME_MAX_WORDS];
+        int loaded_words[SAVEGAME_MAX_WORDS];
+        int word_count;
+        int loaded_word_count;
+        world.flags[0] = 73;
+        world.object_states[0] = 2;
+        world.game_time = 8117;
+        world.game_time_subticks = 9;
+        world.actors[GENERATED_ENTITY_TALAN].path_schedule_step = 4;
+        world.actors[GENERATED_ENTITY_TALAN].path_length = 7;
+        world.actors[GENERATED_ENTITY_TALAN].speech_override =
+            (const struct generated_runtime_text *)1;
+        word_count = savegame_encode(&world, save_words, SAVEGAME_MAX_WORDS);
+        assert(word_count > 0 && word_count < SAVEGAME_MAX_WORDS);
+        assert(savegame_checksum(save_words, word_count) != 0);
+        assert(savegame_decode(&loaded, save_words, word_count));
+        assert(loaded.scene == &generated_runtime_scenes[world.scene_index]);
+        assert(loaded.scene_index == world.scene_index);
+        assert(loaded.player_x == world.player_x && loaded.player_y == world.player_y);
+        assert(loaded.flags[0] == 73);
+        assert(loaded.object_states[0] == 2);
+        assert(loaded.game_time == 8117 && loaded.game_time_subticks == 9);
+        assert(loaded.actors[GENERATED_ENTITY_TALAN].path_schedule_step == -1);
+        assert(loaded.actors[GENERATED_ENTITY_TALAN].path_length == 0);
+        assert(loaded.actors[GENERATED_ENTITY_TALAN].speech_override == 0);
+        loaded_word_count = savegame_encode(&loaded, loaded_words,
+                                            SAVEGAME_MAX_WORDS);
+        assert(loaded_word_count == word_count);
+        assert(memcmp(loaded_words, save_words,
+                      (size_t)word_count * sizeof(save_words[0])) == 0);
+        /* Version 1 predates the saved game clock; it remains loadable and
+         * resumes at the original noon start rather than becoming corrupt. */
+        save_words[0] = 1;
+        assert(savegame_decode(&loaded, save_words, word_count - 2));
+        assert(loaded.game_time == generated_runtime_initial_game_time);
+        save_words[0] = SAVEGAME_FORMAT_VERSION;
+        assert(!savegame_decode(&loaded, save_words, word_count - 1));
+        save_words[1] ^= 1;
+        assert(!savegame_decode(&loaded, save_words, word_count));
+    }
 
     puts("world schedule checks passed");
     return 0;
