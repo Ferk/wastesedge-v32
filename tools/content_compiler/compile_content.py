@@ -1814,6 +1814,49 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
         "walk_north": 0, "walk_south": 1, "walk_west": 2, "walk_east": 3,
     }
 
+    def object_visual(tiles: dict[int, dict[str, object]], source_object: str, source_animation: int,
+                      animation_delay: int, description: str) -> str:
+        """Collect all frames for one legacy map-object animation."""
+        visual_key = f"{source_object}#{source_animation}"
+        if visual_key in raw_object_visuals:
+            visual = raw_object_visuals[visual_key]
+            if int(visual.get("animation_delay", 0)) != animation_delay:
+                raise ContentError(
+                    f"{description}: object visual {visual_key!r} uses inconsistent animation_delay")
+            return visual_key
+        frames: list[dict[str, object]] = []
+        candidates: list[tuple[int, dict[str, object]]] = []
+        for candidate in tiles.values():
+            candidate_properties = expect(candidate["properties"], dict,
+                                          f"{description} object tile properties")
+            if (candidate_properties.get("source_object") != source_object or
+                    candidate_properties.get("source_animation", 0) != source_animation):
+                continue
+            image_index = candidate_properties.get("source_image")
+            if isinstance(image_index, int) and image_index >= 0:
+                candidates.append((image_index, candidate))
+        for image_index, candidate in sorted(candidates, key=lambda item: item[0]):
+            if image_index != len(frames):
+                raise ContentError(f"{description}: object visual {visual_key!r} has a frame gap")
+            candidate_properties = expect(candidate["properties"], dict,
+                                          f"{description} object tile properties")
+            frame = {
+                "image": str(candidate["image"]),
+                "width": integer(candidate["imagewidth"], f"{description} object frame width"),
+                "height": integer(candidate["imageheight"], f"{description} object frame height"),
+                "offset_x": integer(candidate_properties.get("offset_x", 0), f"{description} object offset_x"),
+                "offset_y": integer(candidate_properties.get("offset_y", 0), f"{description} object offset_y"),
+            }
+            frames.append(frame)
+            resources.add(str(frame["image"]))
+        if not frames:
+            raise ContentError(f"{description}: object visual {visual_key!r} has no frames")
+        raw_object_visuals[visual_key] = {
+            "frames": frames,
+            "animation_delay": animation_delay if len(frames) > 1 else 0,
+        }
+        return visual_key
+
     def add_character_visual(source_character: str,
                              candidates: object,
                              description: str) -> None:
@@ -2128,6 +2171,20 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                     alpha = integer(values.get("alpha", 255), f"{map_path} scenery alpha")
                     if alpha < 0 or alpha > 255:
                         raise ContentError(f"{map_path}: scenery alpha must be between 0 and 255")
+                    source_object = tile_properties.get("source_object")
+                    source_animation = tile_properties.get("source_animation", 0)
+                    visual_key = None
+                    if isinstance(source_object, str):
+                        animation_delay = integer(
+                            tile_properties.get("animation_delay", 0),
+                            f"{map_path} object animation_delay")
+                        if animation_delay < 0:
+                            raise ContentError(f"{map_path}: object animation_delay must not be negative")
+                    if isinstance(source_object, str) and animation_delay > 0:
+                        visual_key = object_visual(
+                            tiles, source_object, integer(source_animation,
+                                                         f"{map_path} object source_animation"),
+                            animation_delay, str(map_path))
                     # Tiled tile objects use x at the left edge and y at the
                     # image's baseline. Legacy Adonthell objects, however,
                     # sort on their logical base square rather than their
@@ -2153,6 +2210,8 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                                          f"{map_path} scenery sort_y"),
                         "alpha": alpha,
                     })
+                    if visual_key is not None:
+                        scenery[-1]["visual_key"] = visual_key
                     resources.add(image)
                     continue
                 entity_def = identifier(values.get("entity_def"), f"{map_path} entity_def")
@@ -2182,47 +2241,20 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         raise ContentError(
                             f"{map_path}: object entity {object_id!r} has unknown initial state "
                             f"{initial_state_name!r}")
-                    visual_key = f"{source_object}#{source_animation}"
-                    if visual_key not in raw_object_visuals:
-                        frames: list[dict[str, object]] = []
-                        candidates: list[tuple[int, dict[str, object]]] = []
-                        for candidate in tiles.values():
-                            candidate_properties = expect(candidate["properties"], dict,
-                                                          f"{map_path} object tile properties")
-                            if (candidate_properties.get("source_object") != source_object or
-                                candidate_properties.get("source_animation", 0) != source_animation):
-                                continue
-                            image_index = candidate_properties.get("source_image")
-                            if isinstance(image_index, int) and image_index >= 0:
-                                candidates.append((image_index, candidate))
-                        for image_index, candidate in sorted(candidates, key=lambda item: item[0]):
-                            if image_index != len(frames):
-                                raise ContentError(f"{map_path}: object visual {source_object!r} has a frame gap")
-                            candidate_properties = expect(candidate["properties"], dict,
-                                                          f"{map_path} object tile properties")
-                            frame = {
-                                "image": str(candidate["image"]),
-                                "width": integer(candidate["imagewidth"], f"{map_path} object frame width"),
-                                "height": integer(candidate["imageheight"], f"{map_path} object frame height"),
-                                "offset_x": integer(candidate_properties.get("offset_x", 0), f"{map_path} object offset_x"),
-                                "offset_y": integer(candidate_properties.get("offset_y", 0), f"{map_path} object offset_y"),
-                            }
-                            frames.append(frame)
-                            resources.add(str(frame["image"]))
-                        if not frames:
-                            raise ContentError(f"{map_path}: object visual {source_object!r} has no frames")
-                        state_count = len(entity_definitions[entity_def]["states"])
-                        if len(frames) > state_count:
-                            raise ContentError(
-                                f"{map_path}: object visual {source_object!r} has more images than "
-                                f"entity {entity_def!r} has states"
-                            )
-                        # Legacy state animations may use a zero-sized image to
-                        # mean "draw nothing". Such images cannot be Tiled
-                        # collection tiles, so missing trailing states compile
-                        # to an explicit empty runtime frame.
-                        frames.extend([None] * (state_count - len(frames)))
-                        raw_object_visuals[visual_key] = {"frames": frames}
+                    visual_key = object_visual(tiles, source_object, source_animation,
+                                               0, str(map_path))
+                    frames = raw_object_visuals[visual_key]["frames"]
+                    state_count = len(entity_definitions[entity_def]["states"])
+                    if len(frames) > state_count:
+                        raise ContentError(
+                            f"{map_path}: object visual {source_object!r} has more images than "
+                            f"entity {entity_def!r} has states"
+                        )
+                    # Legacy state animations may use a zero-sized image to
+                    # mean "draw nothing". Such images cannot be Tiled
+                    # collection tiles, so missing trailing states compile
+                    # to an explicit empty runtime frame.
+                    frames.extend([None] * (state_count - len(frames)))
                     baseline = integer(obj.get("y"), f"{map_path} scenery y")
                     source_depth = baseline
                     if "base_y" in tile_properties:
@@ -2435,7 +2467,7 @@ struct generated_runtime_actor {
 struct generated_runtime_collision { int x, y, width, height, walkability; };
 struct generated_runtime_navigation_blocker { int x, y, width, height; };
 struct generated_runtime_background { struct generated_runtime_frame frame; int x, y; };
-struct generated_runtime_object_visual { const struct generated_runtime_frame *frames; int frame_count; };
+struct generated_runtime_object_visual { const struct generated_runtime_frame *frames; int frame_count; int frame_delay; };
 struct generated_runtime_scenery { struct generated_runtime_frame frame; int x, y, depth, alpha, definition, state_slot, initial_state, visual; };
 struct generated_runtime_entity { int visual, tile_x, tile_y, facing, blocks_movement, player_controlled, interaction_dialogue, definition, initially_present; };
 struct generated_runtime_spawn { int tile_x, tile_y, facing; };
@@ -2687,7 +2719,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append("};")
     lines.append("const struct generated_runtime_object_visual generated_runtime_object_visuals[] = {")
     for index, visual in enumerate(object_visuals):
-        lines.append(f"    {{ generated_runtime_object_frames_{index}, {len(visual['frames'])} }},")
+        lines.append(f"    {{ generated_runtime_object_frames_{index}, {len(visual['frames'])}, {int(visual.get('animation_delay', 0))} }},")
     lines.append("};")
     lines.append(f"const int generated_runtime_object_visual_count = {len(object_visuals)};\n")
     for index, script in enumerate(scripts):

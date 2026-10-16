@@ -1492,6 +1492,23 @@ void world_update(struct world_state *world, const struct world_actions *actions
     if (world->game_time_subticks >= WORLD_GAME_TIME_SUBTICKS_PER_UNIT) {
         world->game_time_subticks -= WORLD_GAME_TIME_SUBTICKS_PER_UNIT;
         ++world->game_time;
+        /* Ambient map-object animations use the same stable simulation clock
+         * as the original engine. Only scenes containing animated scenery need
+         * a redraw; ordinary rooms retain the inexpensive dirty replay path. */
+        if (world->scene != 0) {
+            int scenery_index;
+            for (scenery_index = 0; scenery_index < world->scene->scenery_count;
+                 ++scenery_index) {
+                const struct generated_runtime_scenery *scenery =
+                    &world->scene->scenery[scenery_index];
+                if (scenery->visual >= 0 &&
+                    scenery->visual < generated_runtime_object_visual_count &&
+                    generated_runtime_object_visuals[scenery->visual].frame_delay > 0) {
+                    ++world->visual_revision;
+                    break;
+                }
+            }
+        }
     }
     update_schedules(world);
     update_actor_visual_animations(world);
@@ -1737,13 +1754,17 @@ const struct generated_runtime_frame *world_scenery_frame(
     const struct generated_runtime_object_visual *visual;
     int state;
     if (scenery->visual < 0 || scenery->visual >= generated_runtime_object_visual_count ||
-        scenery->state_slot < 0 ||
-        scenery->state_slot >= GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT)
+        (scenery->state_slot >= GENERATED_RUNTIME_STATEFUL_STORAGE_COUNT))
         return &scenery->frame;
     visual = &generated_runtime_object_visuals[scenery->visual];
     if (visual->frame_count <= 0)
         return &scenery->frame;
-    state = world->object_states[scenery->state_slot];
+    if (scenery->state_slot >= 0)
+        state = world->object_states[scenery->state_slot];
+    else if (visual->frame_delay > 0)
+        state = (world->game_time / visual->frame_delay) % visual->frame_count;
+    else
+        state = 0;
     if (state < 0) state = 0;
     if (state >= visual->frame_count) state = visual->frame_count - 1;
     return &visual->frames[state];

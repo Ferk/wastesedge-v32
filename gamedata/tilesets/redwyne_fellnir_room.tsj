@@ -784,6 +784,11 @@
           "value": 0
         },
         {
+          "name": "animation_delay",
+          "type": "int",
+          "value": 1
+        },
+        {
           "name": "source_image",
           "type": "int",
           "value": 0
