@@ -55,10 +55,18 @@ int main(void)
     int storage_result;
     int simulation_frame;
     int cutscene_from_world = 0;
+    int cutscene_to_title = 0;
 
     world_initialize(&world);
     platform_initialize();
     platform_play_music_track(generated_runtime_title_music);
+    if (generated_runtime_title_cutscene >= 0) {
+        int dialogue = generated_runtime_title_cutscene;
+        int start_node = generated_runtime_dialogues[dialogue].starts[0].node;
+        platform_begin_cutscene(dialogue, start_node);
+        cutscene_to_title = 1;
+        mode = APPLICATION_CUTSCENE;
+    }
     world_seed_random(&world, platform_random_seed());
     storage_result = platform_query_save_slots(slot_states);
     simulation_frame = platform_frame_counter();
@@ -116,6 +124,7 @@ int main(void)
                             generated_runtime_dialogues[dialogue].starts[0].node;
                         platform_begin_cutscene(dialogue, start_node);
                         cutscene_from_world = 0;
+                        cutscene_to_title = 0;
                         mode = APPLICATION_CUTSCENE;
                     } else {
                         mode = APPLICATION_PLAYING;
@@ -137,6 +146,10 @@ int main(void)
                         simulation_frame = platform_frame_counter();
                         mode = APPLICATION_PLAYING;
                     }
+                } else if (cutscene_to_title) {
+                    cutscene_to_title = 0;
+                    platform_begin_menu();
+                    mode = APPLICATION_TITLE;
                 } else {
                     platform_stop_audio();
                     platform_invalidate_world();

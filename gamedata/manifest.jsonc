@@ -3,14 +3,30 @@
   "format": "wastesedge-content-v1",
   "initial_scene": "redwyne_exterior",
   "initial_game_time": 7200,
+  "title_cutscene": "title_cutscene",
   "new_game_cutscene": "intro_cutscene",
   "game_title": "Waste's Edge",
   "title_music": "title_theme",
   "save_signature": "WASTESEDGE-V32-SAVE",
   "save_version": 1,
   "save_magic": "WESV",
-  "title_background": "assets/ui/title/jewelbag_open.png",
+  "title_background": {
+    "source": "assets/ui/title/title_atlas.png",
+    "rect": [320, 0, 320, 240]
+  },
+  "title_logo": {
+    "source": "assets/ui/title/title_atlas.png",
+    "rect": [247, 240, 145, 27],
+    "x": 88,
+    "y": 30
+  },
   "cutscene_images": [
+    { "id": "title_closed_bag", "source": "assets/ui/title/title_atlas.png",
+      "rect": [0, 0, 320, 240] },
+    { "id": "title_open_bag", "source": "assets/ui/title/title_atlas.png",
+      "rect": [320, 0, 320, 240] },
+    { "id": "title_version", "source": "assets/ui/title/title_atlas.png",
+      "rect": [0, 240, 247, 84] },
     { "id": "intro_forest_front", "source": "assets/cutscene/intro/forest1.png" },
     { "id": "intro_forest_middle", "source": "assets/cutscene/intro/forest2.png" },
     { "id": "intro_forest_back", "source": "assets/cutscene/intro/forest3.png" },
@@ -62,6 +78,7 @@
   "schedules": ["schedules/npc_routes.jsonc"],
   "audio": ["audio/music.jsonc"],
   "dialogue": [
+    "dialogue/title_cutscene.jsonc",
     "dialogue/intro_cutscene.jsonc",
     "dialogue/talan_intro.jsonc",
     "dialogue/talan_start.jsonc",

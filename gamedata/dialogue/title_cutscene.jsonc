@@ -1,0 +1,30 @@
+// Original-style title reveal before the interactive main menu appears.
+{
+  "id": "title_cutscene",
+  "presentation": {
+    "type": "cutscene",
+    "background": "#000000",
+    "fade_in_frames": 255,
+    "text": { "mode": "none" },
+    "layers": [
+      { "image": "title_closed_bag", "from_node": "closed_fade",
+        "to_node": "open_fade", "clock": "sequence" },
+      { "image": "title_version", "from_node": "closed_hold",
+        "to_node": "open_fade", "x": 33, "y": 86, "clock": "range" },
+      { "image": "title_open_bag", "from_node": "open_fade",
+        "to_node": "open_fade", "fade_in_frames": 255 }
+    ]
+  },
+  "start": "closed_fade",
+  "speakers": [
+    { "id": "title", "name": "Title", "role": "narrator" }
+  ],
+  "nodes": [
+    { "id": "closed_fade", "speaker": "title", "text": "",
+      "auto_advance_frames": 150, "next": "closed_hold" },
+    { "id": "closed_hold", "speaker": "title", "text": "",
+      "auto_advance_frames": 210, "next": "open_fade" },
+    { "id": "open_fade", "speaker": "title", "text": "",
+      "auto_advance_frames": 320, "end": true }
+  ]
+}

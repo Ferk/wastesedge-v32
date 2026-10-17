@@ -32,6 +32,35 @@
 #define SAVE_SLOT_HEADER_WORDS 8
 #define SAVE_PREVIEW_TILES 6
 #define SAVE_PREVIEW_SIZE 60
+
+/* Vircon32 colors use AABBGGRR ordering. Keep every authored renderer color
+ * named here so alpha values and palette choices remain easy to audit. */
+#define COLOR_WHITE 0xFFFFFFFFu
+#define COLOR_RGB_MASK 0x00FFFFFFu
+#define COLOR_DARK_BACKGROUND 0xFF101820u
+#define COLOR_DIALOG_BORDER 0x90C0C0C0u
+#define COLOR_DIALOG_BACKGROUND 0xA0080808u
+#define COLOR_DIALOG_PORTRAIT_BACKGROUND 0x40080B10u
+#define COLOR_ACCENT_GOLD 0xFFB0F8F8u
+#define COLOR_TEXT_PALE 0xFFB0B0A0u
+#define COLOR_SCROLL_TRACK 0x603A3828u
+#define COLOR_SCROLL_THUMB 0xD0FFD070u
+#define COLOR_BALLOON_BACKGROUND 0x90101010u
+#define COLOR_ALPHA_BALLOON_SPEECH 0x90000000u
+#define COLOR_TEXT_SHADOW 0xE0000000u
+#define COLOR_SAVE_PREVIEW_BACKGROUND 0xFF080B10u
+#define COLOR_PANEL_BORDER 0xFF2C6868u
+#define COLOR_PANEL_BACKGROUND 0xFF101820u
+#define COLOR_MENU_SELECTION 0x80404020u
+#define COLOR_STATUS_SUCCESS 0xFF80FF80u
+#define COLOR_STATUS_INFO 0xFF8080FFu
+#define COLOR_SLOT_EMPTY_BORDER 0xFF304050u
+#define COLOR_SLOT_SELECTED_BACKGROUND 0xFF302820u
+#define COLOR_SLOT_BACKGROUND 0xFF182028u
+#define COLOR_SLOT_SELECTED_TEXT 0xFFD0D070u
+#define COLOR_SLOT_TEXT 0xFF607080u
+#define COLOR_STATUS_ERROR 0xFF8080F0u
+#define COLOR_SLOT_SELECTED_METADATA 0xFF8090A0u
 #if SAVE_SLOT_HEADER_WORDS + SAVEGAME_MAX_WORDS > SAVE_SLOT_STRIDE
 #error Save payload does not fit in a memory-card slot
 #endif
@@ -186,7 +215,7 @@ static void record_texture(int texture, int texture_x, int texture_y,
                            int width, int height, int x, int y)
 {
     record_texture_color(texture, texture_x, texture_y, width, height,
-                         x, y, 0xFFFFFFFF);
+                         x, y, COLOR_WHITE);
 }
 
 static void record_frame(const struct generated_runtime_frame *frame, int x, int y)
@@ -198,7 +227,7 @@ static void record_frame(const struct generated_runtime_frame *frame, int x, int
 static void record_scenery_frame(const struct generated_runtime_frame *frame,
                                  int x, int y, int alpha)
 {
-    int color = (int)(((unsigned int)alpha << 24) | 0x00FFFFFFu);
+    int color = (int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK);
     record_texture_color(frame->texture, frame->source_x, frame->source_y,
                          frame->width, frame->height, x, y, color);
 }
@@ -216,7 +245,7 @@ static void record_ui_frame(const struct generated_runtime_frame *frame,
         return;
     record_draw(frame->texture, 0, frame->source_x, frame->source_y,
                 frame->width, frame->height,
-                x, y, scale, scale, 0xFFFFFFFF);
+                x, y, scale, scale, COLOR_WHITE);
 }
 
 static int record_runtime_text_clipped(int x, int y, int width, int top, int bottom,
@@ -350,7 +379,7 @@ static void record_dialogue_panel(const struct world_state *world)
 {
     const struct generated_runtime_dialogue_speaker *speaker = world_dialogue_speaker(world);
     const struct generated_runtime_text *speech = world_dialogue_display(world);
-    unsigned int speech_color = speaker != 0 ? speaker->speech_color : 0xFFFFFFFFu;
+    unsigned int speech_color = speaker != 0 ? speaker->speech_color : COLOR_WHITE;
     int choice_count = world_dialogue_choice_count(world);
     int selected_choice = world_dialogue_choice_selected(world);
     int has_portrait = speaker != 0 && speaker->portrait.texture >= 0;
@@ -408,18 +437,18 @@ static void record_dialogue_panel(const struct world_state *world)
      * warm-edged translucent window. Anchor variable-height panels above the
      * same bottom margin so short exchanges expose more of the scene. */
     record_solid_rect(DIALOG_X - 2, dialog_y - 2,
-                      DIALOG_WIDTH + 4, dialog_height + 4, 0xD08A642C);
+                      DIALOG_WIDTH + 4, dialog_height + 4, COLOR_DIALOG_BORDER);
     record_solid_rect(DIALOG_X + 2, dialog_y + 2,
-                      DIALOG_WIDTH - 4, dialog_height - 4, 0xB0101820);
+                      DIALOG_WIDTH - 4, dialog_height - 4, COLOR_DIALOG_BACKGROUND);
 
     if (has_portrait) {
-        record_solid_rect(DIALOG_X + 14, dialog_y + 18, 104, 104, 0xD08A642C);
-        record_solid_rect(DIALOG_X + 18, dialog_y + 22, 96, 96, 0xC0080B10);
+        record_solid_rect(DIALOG_X + 18, dialog_y + 22, 96, 96,
+                          COLOR_DIALOG_PORTRAIT_BACKGROUND);
         record_ui_frame(&speaker->portrait, DIALOG_X + 18, dialog_y + 22, 1.5f);
     }
     if (speaker != 0)
         record_runtime_text(text_x, dialog_y + 16, text_width, dialog_y + 42,
-                            &speaker->name_text, 0xFFFFD070);
+                            &speaker->name_text, COLOR_ACCENT_GOLD);
     record_runtime_text(text_x, dialog_y + 44, text_width,
                         choice_count > 0 ? choice_view_top - 6
                                          : dialog_y + dialog_height - 10,
@@ -474,11 +503,11 @@ static void record_dialogue_panel(const struct world_state *world)
             record_runtime_text_clipped(choice_text_x, option_y, choice_text_width,
                                         choice_view_top, choice_view_bottom,
                                         world_dialogue_choice_display(world, index),
-                                        index == selected_choice ? 0xFFFFD070
-                                                                 : 0xFFE7DCA8);
+                                        index == selected_choice ? COLOR_ACCENT_GOLD
+                                                                 : COLOR_TEXT_PALE);
             if (index == selected_choice && visible_bottom - visible_top > 6)
                 record_solid_rect(DIALOG_X + 22, visible_top + 3, 5,
-                                  visible_bottom - visible_top - 6, 0xFFFFD070);
+                                  visible_bottom - visible_top - 6, COLOR_ACCENT_GOLD);
         }
         choices_height += option_height + DIALOG_CHOICE_GAP;
     }
@@ -495,8 +524,9 @@ static void record_dialogue_panel(const struct world_state *world)
         if (maximum_scroll > 0)
             thumb_y += (dialogue_choice_scroll * (choice_view_height - thumb_height)) /
                        maximum_scroll;
-        record_solid_rect(track_x, choice_view_top, 4, choice_view_height, 0x604A3828);
-        record_solid_rect(track_x, thumb_y, 4, thumb_height, 0xD0FFD070);
+        record_solid_rect(track_x, choice_view_top, 4, choice_view_height,
+                          COLOR_SCROLL_TRACK);
+        record_solid_rect(track_x, thumb_y, 4, thumb_height, COLOR_SCROLL_THUMB);
     }
 }
 
@@ -628,11 +658,11 @@ static void record_speech_box(int x, int y, int text_width, int text_height,
     int width = text_width + SPEECH_PADDING_X * 2;
     int height = text_height + SPEECH_PADDING_Y * 2;
     unsigned int border_color =
-        (speech_color & 0x00FFFFFFu) | 0x90000000u;
+        (speech_color & COLOR_RGB_MASK) | COLOR_ALPHA_BALLOON_SPEECH;
 
     /* Separate one-pixel edges keep the translucent black interior from
      * inheriting any tint from the speaker-colored border. */
-    record_solid_rect(x, y, width, height, 0x90101010);
+    record_solid_rect(x, y, width, height, COLOR_BALLOON_BACKGROUND);
     record_solid_rect(x - 1, y - 1, width + 2, 1, border_color);
     record_solid_rect(x - 1, y + height, width + 2, 1, border_color);
     record_solid_rect(x - 1, y, 1, height, border_color);
@@ -1061,9 +1091,9 @@ static void flush_prepared_frame(void)
     int index;
 
     set_blending_mode(0x20);
-    clear_screen(0xFF101820);
-    set_multiply_color(0xFFFFFFFF);
-    color = 0xFFFFFFFF;
+    clear_screen(COLOR_DARK_BACKGROUND);
+    set_multiply_color(COLOR_WHITE);
+    color = COLOR_WHITE;
     for (index = 0; index < draw_command_count; ++index) {
         int command_region = draw_command_region[index];
         int command_x = draw_command_region_x[index];
@@ -1110,7 +1140,7 @@ static void flush_prepared_frame(void)
         set_drawing_point(command_draw_x, command_draw_y);
         draw_region_zoomed();
     }
-    set_multiply_color(0xFFFFFFFF);
+    set_multiply_color(COLOR_WHITE);
     set_drawing_scale(1.0f, 1.0f);
 }
 
@@ -1151,7 +1181,7 @@ static void record_cutscene_image(int image, int x, int y, int alpha)
     if (width <= 0 || height <= 0)
         return;
 
-    color = (int)(((unsigned int)alpha << 24) | 0x00FFFFFFu);
+    color = (int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK);
     record_draw(frame->texture, 0, source_x, source_y,
                 width, height, x * 2, (y * 3) / 2,
                 2.0f, 1.5f, color);
@@ -1275,7 +1305,7 @@ static void record_cutscene_text(const struct generated_runtime_dialogue *dialog
                                 node->cutscene_text_y + 1,
                                 node->cutscene_text_width,
                                 node->cutscene_text_bottom + 1,
-                                &visible, 0xE0000000u);
+                                &visible, COLOR_TEXT_SHADOW);
         record_runtime_text(node->cutscene_text_x, node->cutscene_text_y,
                             node->cutscene_text_width,
                             node->cutscene_text_bottom,
@@ -1646,7 +1676,7 @@ static void draw_preview_frame(const struct generated_runtime_frame *frame,
     define_region_rectangle(frame->source_x + left - world_x,
                             frame->source_y + top - world_y,
                             source_width, source_height);
-    set_multiply_color((int)(((unsigned int)alpha << 24) | 0x00FFFFFFu));
+    set_multiply_color((int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK));
     set_drawing_scale((float)(output_right - output_left) / (float)source_width,
                       (float)(output_bottom - output_top) / (float)source_height);
     set_drawing_point(output_left, output_top);
@@ -1702,7 +1732,8 @@ static void draw_slot_preview(const struct world_state *world, int x, int y)
         if (crop_y > maximum_y) crop_y = maximum_y;
     }
 
-    draw_direct_rectangle(x, y, SAVE_PREVIEW_SIZE, SAVE_PREVIEW_SIZE, 0xFF080B10);
+    draw_direct_rectangle(x, y, SAVE_PREVIEW_SIZE, SAVE_PREVIEW_SIZE,
+                          COLOR_SAVE_PREVIEW_BACKGROUND);
     for (index = 0; index < scene->background_count; ++index) {
         const struct generated_runtime_background *item = &scene->background[index];
         draw_preview_frame(&item->frame, item->x, item->y, 255,
@@ -1741,7 +1772,7 @@ static void draw_slot_preview(const struct world_state *world, int x, int y)
         draw_preview_frame(world_scenery_frame(world, item), item->x, item->y,
                            item->alpha, crop_x, crop_y, crop_size, x, y);
     }
-    set_multiply_color(0xFFFFFFFF);
+    set_multiply_color(COLOR_WHITE);
     set_drawing_scale(1.0f, 1.0f);
 }
 
@@ -1768,34 +1799,50 @@ static const char *storage_message(int result)
 static void draw_title_background(void)
 {
     const struct generated_runtime_frame *frame = &generated_runtime_title_background;
-    clear_screen(0xFF101820);
+    clear_screen(COLOR_DARK_BACKGROUND);
     if (frame->texture >= 0 && frame->width > 0 && frame->height > 0) {
         select_texture(frame->texture);
         select_region(0);
         define_region_rectangle(frame->source_x, frame->source_y,
                                 frame->width, frame->height);
-        set_multiply_color(0xFFFFFFFF);
+        set_multiply_color(COLOR_WHITE);
         set_drawing_scale((float)DISPLAY_WIDTH / (float)frame->width,
                           (float)DISPLAY_HEIGHT / (float)frame->height);
         set_drawing_point(0, 0);
         draw_region_zoomed();
         set_drawing_scale(1.0f, 1.0f);
     }
-    draw_direct_rectangle(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0x50101820);
+}
+
+/* Draw the optional manifest-authored logo in original 320x240 coordinates. */
+static void draw_title_logo(void)
+{
+    const struct generated_runtime_frame *frame = &generated_runtime_title_logo;
+    if (frame->texture < 0 || frame->width <= 0 || frame->height <= 0)
+        return;
+    select_texture(frame->texture);
+    select_region(0);
+    define_region_rectangle(frame->source_x, frame->source_y,
+                            frame->width, frame->height);
+    set_multiply_color(COLOR_WHITE);
+    set_drawing_scale(2.0f, 1.5f);
+    set_drawing_point(frame->offset_x * 2, (frame->offset_y * 3) / 2);
+    draw_region_zoomed();
+    set_drawing_scale(1.0f, 1.0f);
 }
 
 static void draw_menu_panel(void)
 {
     set_blending_mode(0x20);
-    draw_direct_rectangle(108, 28, 424, 304, 0xFF8A642C);
-    draw_direct_rectangle(112, 32, 416, 296, 0xFF101820);
+    draw_direct_rectangle(108, 28, 424, 304, COLOR_PANEL_BORDER);
+    draw_direct_rectangle(112, 32, 416, 296, COLOR_PANEL_BACKGROUND);
 }
 
 static void draw_menu_option(int y, const char *text, int selected)
 {
     if (selected)
-        draw_direct_rectangle(174, y - 4, 292, 28, 0xFF604020);
-    draw_direct_text_centered(y, text, selected ? 0xFFFFD070 : 0xFFFFFFFF);
+        draw_direct_rectangle(174, y - 4, 292, 28, COLOR_MENU_SELECTION);
+    draw_direct_text_centered(y, text, selected ? COLOR_ACCENT_GOLD : COLOR_WHITE);
 }
 
 static void draw_menu_status(int result)
@@ -1804,7 +1851,7 @@ static void draw_menu_status(int result)
     if (message[0] != 0)
         draw_direct_text_centered(298, message,
                                   result == PLATFORM_STORAGE_SAVED ?
-                                  0xFF80FF80 : 0xFF8080FF);
+                                  COLOR_STATUS_SUCCESS : COLOR_STATUS_INFO);
 }
 
 static void draw_two_digits(int x, int y, unsigned int value)
@@ -1879,23 +1926,24 @@ void platform_invalidate_world(void)
 void platform_render_title_menu(int selected, int storage_result)
 {
     draw_title_background();
-    draw_direct_text_centered(58, generated_runtime_game_title, 0xFFFFD070);
+    draw_title_logo();
+    draw_direct_text_centered(96, generated_runtime_game_title, COLOR_ACCENT_GOLD);
     draw_menu_option(164, "NEW GAME", selected == 0);
     draw_menu_option(204, "LOAD GAME", selected == 1);
     draw_menu_status(storage_result);
-    set_multiply_color(0xFFFFFFFF);
+    set_multiply_color(COLOR_WHITE);
 }
 
 void platform_render_pause_menu(int selected, int storage_result)
 {
     draw_menu_panel();
-    draw_direct_text_centered(58, "GAME PAUSED", 0xFFFFD070);
+    draw_direct_text_centered(58, "GAME PAUSED", COLOR_ACCENT_GOLD);
     draw_menu_option(112, "CONTINUE", selected == 0);
     draw_menu_option(152, "SAVE GAME", selected == 1);
     draw_menu_option(192, "LOAD GAME", selected == 2);
     draw_menu_option(232, "BACK TO TITLE", selected == 3);
     draw_menu_status(storage_result);
-    set_multiply_color(0xFFFFFFFF);
+    set_multiply_color(COLOR_WHITE);
 }
 
 void platform_render_slot_menu(int from_title, int saving, int selected,
@@ -1909,31 +1957,32 @@ void platform_render_slot_menu(int from_title, int saving, int selected,
     if (from_title)
         draw_title_background();
     set_blending_mode(0x20);
-    draw_direct_rectangle(36, 6, 568, 348, 0xFF8A642C);
-    draw_direct_rectangle(40, 10, 560, 340, 0xFF101820);
-    draw_direct_text_centered(28, saving ? "SAVE GAME" : "LOAD GAME", 0xFFFFD070);
+    draw_direct_rectangle(36, 6, 568, 348, COLOR_PANEL_BORDER);
+    draw_direct_rectangle(40, 10, 560, 340, COLOR_PANEL_BACKGROUND);
+    draw_direct_text_centered(28, saving ? "SAVE GAME" : "LOAD GAME", COLOR_ACCENT_GOLD);
     for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot) {
         int y = 56 + slot * 64;
         int used = slot_states[slot] == PLATFORM_SAVE_SLOT_USED &&
                    save_slot_preview_valid[slot];
         draw_direct_rectangle(58, y, 524, 62,
-                              slot == selected ? 0xFF8A642C : 0xFF304050);
+                              slot == selected ? COLOR_PANEL_BORDER : COLOR_SLOT_EMPTY_BORDER);
         draw_direct_rectangle(60, y + 2, 520, 58,
-                              slot == selected ? 0xFF302820 : 0xFF182028);
+                              slot == selected ? COLOR_SLOT_SELECTED_BACKGROUND :
+                              COLOR_SLOT_BACKGROUND);
         draw_direct_rectangle(62, y, 62, 62,
-                              slot == selected ? 0xFFFFD070 : 0xFF607080);
+                              slot == selected ? COLOR_SLOT_SELECTED_TEXT : COLOR_SLOT_TEXT);
         if (used)
             draw_slot_preview(&save_slot_previews[slot], 63, y + 1);
         else {
             draw_direct_rectangle(63, y + 1, SAVE_PREVIEW_SIZE,
-                                  SAVE_PREVIEW_SIZE, 0xFF080B10);
+                                  SAVE_PREVIEW_SIZE, COLOR_SAVE_PREVIEW_BACKGROUND);
             set_multiply_color(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
-                               0xFFFF8080 : 0xFF8090A0);
+                               COLOR_STATUS_ERROR : COLOR_SLOT_SELECTED_METADATA);
             print_at(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? 65 : 73,
                      y + 23,
-                     slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? "INVALID" : "EMPTY");
+                     slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? "ERROR" : "EMPTY");
         }
-        set_multiply_color(slot == selected ? 0xFFFFD070 : 0xFFFFFFFF);
+        set_multiply_color(slot == selected ? COLOR_SLOT_SELECTED_TEXT : COLOR_WHITE);
         print_at(138, y + 9, used ? save_slot_previews[slot].scene->display_name :
                  (slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
                   "INCOMPATIBLE SAVE" : "EMPTY SLOT"));
@@ -1946,8 +1995,8 @@ void platform_render_slot_menu(int from_title, int saving, int selected,
     if (message[0] != 0)
         draw_direct_text_centered(330, message,
                                   storage_result == PLATFORM_STORAGE_SAVED ?
-                                  0xFF80FF80 : 0xFF8080FF);
-    set_multiply_color(0xFFFFFFFF);
+                                  COLOR_STATUS_SUCCESS : COLOR_STATUS_INFO);
+    set_multiply_color(COLOR_WHITE);
     set_drawing_scale(1.0f, 1.0f);
     remember_slot_menu(from_title, saving, selected, slot_states, storage_result);
 }

@@ -227,6 +227,22 @@ int main(void)
     assert(generated_runtime_title_music == GENERATED_MUSIC_TITLE_THEME);
     assert(generated_runtime_save_magic == 0x57455356);
     assert(generated_runtime_save_signature[19] == 1);
+    assert(generated_runtime_title_cutscene == GENERATED_DIALOGUE_TITLE_CUTSCENE);
+    assert(generated_runtime_title_background.source_x == 320);
+    assert(generated_runtime_title_background.width == 320);
+    assert(generated_runtime_title_logo.source_x == 247);
+    assert(generated_runtime_title_logo.offset_x == 88);
+    {
+        const struct generated_runtime_dialogue *title =
+            &generated_runtime_dialogues[generated_runtime_title_cutscene];
+        assert(title->presentation_mode ==
+               GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
+        assert(title->cutscene_layer_count == 3);
+        assert(title->fade_in_frames == 255);
+        assert(title->nodes[0].auto_advance_frames == 150);
+        assert(title->nodes[1].auto_advance_frames == 210);
+        assert(title->nodes[2].auto_advance_frames == 320);
+    }
     {
         const struct generated_runtime_dialogue *opening =
             &generated_runtime_dialogues[generated_runtime_new_game_cutscene];
@@ -522,9 +538,9 @@ int main(void)
                    .cutscene_layers[3].clock_mode ==
                GENERATED_CUTSCENE_CLOCK_RANGE);
         assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
-                   .cutscene_layers[2].alpha_frames == 255);
+                   .cutscene_layers[2].alpha_frames == 60);
         assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
-                   .cutscene_layers[3].alpha_frames == 255);
+                   .cutscene_layers[3].alpha_frames == 60);
         assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
                    .nodes[completed_extro.dialogue_node].auto_advance_frames > 0);
         assert(completed_extro.music_track == GENERATED_MUSIC_EXTRO_CONFESSION);
