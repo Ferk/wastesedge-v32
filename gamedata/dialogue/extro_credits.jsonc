@@ -1,17 +1,21 @@
 {
   "id": "extro_credits",
-  "start": [{ "node": "title" }],
-  "speakers": [{ "id": "credits", "name": "Waste's Edge", "role": "narrator" }],
+  "presentation": {
+    "type": "cutscene",
+    "background": "#101820",
+    "text": { "mode": "scroll", "x": 320, "y": 380, "bottom": 360,
+      "rate": 2 }
+  },
+  "start": [{ "node": "roll" }],
+  "speakers": [{ "id": "credits", "name": "Credits", "role": "narrator" }],
   "nodes": [
-    { "id": "title", "speaker": "credits", "text": "V32\n- Waste's Edge -\n\nDirected by Alexandre Courbot and Kai Sterker\n\nPorted by Fernando Carmona Varo", "next": "writing" },
-    { "id": "writing", "speaker": "credits", "text": "Written by Kai Sterker, Mike Nieforth and Josh Glover\n\nBased on an original idea by Kai Sterker", "next": "cast_one" },
-    { "id": "cast_one", "speaker": "credits", "text": "Cast\n\nBanec - you\nImoen Silverhair - herself\nBjarn Fingolson - himself\nErek Stonebreaker - himself\nOrloth Redwyne - himself\nAlek Endhelm - himself", "next": "cast_two" },
-    { "id": "cast_two", "speaker": "credits", "text": "Oliver Redwyne - himself\nTalan Wendth - himself\nJelom Rasgar - himself\nTristan Illig - himself\nFellnir Kezular - himself\nLucia Redwyne - herself", "next": "cast_three" },
-    { "id": "cast_three", "speaker": "credits", "text": "Rhayne Frostbloom - herself\nSarin Trailfollower - himself\nJanesta Skywind - herself\n\nMrs. Frostbloom's assistant: Yeti\nCasting: Benjamin Walther-Franks", "next": "production" },
-    { "id": "production", "speaker": "credits", "text": "Director of photography: Alexandre Courbot\nArt director: James Nash\nAssistant art director: Benjamin Walther-Franks\nWardrobe: Benjamin Walther-Franks\nMusic and foley: Joseph Toscano", "next": "thanks" },
-    { "id": "thanks", "speaker": "credits", "text": "This port was possible thanks to the Adonthell team and the team behind the Vircon32 platform.", "next": "no_yetis" },
-    { "id": "no_yetis", "speaker": "credits", "text": "No Yetis were harmed during the production of this game.", "next": "end" },
-    { "id": "end", "speaker": "credits", "text": "The END",
-      "on_end": "finish_extro", "end": true }
+    {
+      "id": "roll",
+      "speaker": "credits",
+      "text": "Adonthell\n\n- Waste's Edge -\n\n\ndirected by:\nAlexandre Courbot\nKai Sterker\n\n\nwritten by:\nKai Sterker\nMike Nieforth\nJosh Glover\n\n\nbased on an original idea by:\nKai Sterker\n\n\nVircon32 port by:\nFernando Carmona Varo\n\n\ncast:\nBanec - you\nImoen Silverhair - herself\nBjarn Fingolson - himself\nErek Stonebreaker - himself\nOrloth Redwyne - himself\nAlek Endhelm - himself\nOliver Redwyne - himself\nTalan Wendth - himself\nJelom Rasgar - himself\nTristan Illig - himself\nFellnir Kezular - himself\nLucia Redwyne - herself\nRhayne Frostbloom - herself\nSarin Trailfollower - himself\nJanesta Skywind - herself\n\n\nMrs. Frostbloom's assistant:\nYeti\n\n\ncasting:\nBenjamin Walther-Franks\n\n\ndirector of photography:\nAlexandre Courbot\n\n\nart director:\nJames Nash\n\n\nassistant art director:\nBenjamin Walther-Franks\n\n\nwardrobe:\nBenjamin Walther-Franks\n\n\nmusic and foley:\nJoseph Toscano\n\n\nThe Adonthell and Vircon32 teams wish to thank\nthe people behind all the Free Software\n whose work made this game possible.\n\n\nNo Yetis were harmed during\nthe production of this game.\n\n\n\nThe END",
+      "auto_advance_frames": 3400,
+      "hold_at_end": true,
+      "end": true
+    }
   ]
 }

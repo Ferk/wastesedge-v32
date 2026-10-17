@@ -3,7 +3,6 @@
   "actions": [
     { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_extro_chest" },
     { "op": "wait_schedule", "entity": "bjarn" },
-    { "op": "play_music", "track": "extro_reveal" },
     { "op": "show_dialogue", "dialogue": "extro_chest" }
   ]
 }

@@ -435,6 +435,7 @@ def dialogue_speakers(document: dict[str, object], path: Path,
             "id": speaker_id,
             "name": name,
             "role": role,
+            "entity": speaker_entity,
             "speech_color": speech_color,
             "portrait": portrait,
             "portrait_width": portrait_width,
@@ -1319,7 +1320,10 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
     glyph_index = {str(entry["character"]): index for index, entry in enumerate(entries)}
 
     def encode(text: str) -> list[int]:
-        return [-1 if character.isspace() else glyph_index[character] for character in text]
+        """Encode spaces and authored line breaks distinctly for the runtime."""
+        return [(-2 if character in "\r\n" else
+                 -1 if character.isspace() else glyph_index[character])
+                for character in text]
 
     for dialogue in dialogues:
         for speaker in dialogue["speakers"]:
@@ -1432,7 +1436,9 @@ def integer(value: object, description: str) -> int:
 
 
 def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], entities: set[str],
-                      game_root: Path, script_index: dict[str, int]) -> tuple[list[dict[str, object]], dict[str, str], list[str]]:
+                      game_root: Path, script_index: dict[str, int],
+                      music_index: dict[str, int],
+                      cutscene_image_index: dict[str, int]) -> tuple[list[dict[str, object]], dict[str, str], list[str]]:
     """Compile dialogue nodes, choices, and their deliberately small effects."""
     dialogues: list[dict[str, object]] = []
     flags: set[str] = set()
@@ -1440,6 +1446,11 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
         document = expect(load_jsonc(path), dict, str(path))
         dialogue_id = identifier(document.get("id"), f"{path} dialogue id")
         raw_speakers = dialogue_speakers(document, path, entities, game_root)
+        entity_index = {entity_id: index
+                        for index, entity_id in enumerate(sorted(entities))}
+        for speaker in raw_speakers:
+            speaker["entity_index"] = (-1 if speaker["entity"] is None else
+                                       entity_index[str(speaker["entity"])])
         speaker_index = {str(speaker["id"]): index for index, speaker in enumerate(raw_speakers)}
         raw_nodes = expect(document.get("nodes"), list, f"{path}.nodes")
         if not raw_nodes:
@@ -1481,15 +1492,230 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
             else:
                 next_node = index + 1 if index + 1 < len(raw_nodes) else -1
             speaker_id = identifier(node.get("speaker"), f"{path} node speaker")
+            auto_advance_frames = integer(
+                node.get("auto_advance_frames", 0),
+                f"{path} node auto_advance_frames")
+            if auto_advance_frames < 0:
+                raise ContentError(
+                    f"{path}: auto_advance_frames cannot be negative")
+            hold_at_end = expect(node.get("hold_at_end", False), bool,
+                                 f"{path} node hold_at_end")
+            if hold_at_end and auto_advance_frames <= 0:
+                raise ContentError(
+                    f"{path}: hold_at_end requires positive auto_advance_frames")
+            music_id = node.get("music")
+            if music_id is None:
+                music_track = -1
+            else:
+                music_id = identifier(music_id, f"{path} node music")
+                if music_id not in music_index:
+                    raise ContentError(f"{path}: unknown music track {music_id!r}")
+                music_track = music_index[music_id]
             nodes.append({
                 "text": expect(node.get("text"), str, f"{path} node text"),
                 "speaker": speaker_index[speaker_id],
                 "choices": choices,
                 "next": next_node,
+                "auto_advance_frames": auto_advance_frames,
+                "hold_at_end": int(hold_at_end),
+                "music_track": music_track,
+                "music_delay_frames": integer(
+                    node.get("music_delay_frames", 0),
+                    f"{path} node music_delay_frames"),
+                "music_fade_out_frames": integer(
+                    node.get("music_fade_out_frames", 0),
+                    f"{path} node music_fade_out_frames"),
+                "cutscene_finish_ranges": int(expect(
+                    node.get("cutscene_finish_ranges", False), bool,
+                    f"{path} node cutscene_finish_ranges")),
                 "on_end": (-1 if node.get("on_end") is None else
                            script_index[identifier(node.get("on_end"),
                                                    f"{path} node on_end")]),
             })
+        presentation = document.get("presentation", "panel")
+        presentation_mode = 0
+        cutscene_layers: list[dict[str, object]] = []
+        text_mode = 0
+        text_x = text_y = text_width = text_bottom = text_rate = 0
+        background_color = 0
+        fade_in_frames = 0
+        if isinstance(presentation, str):
+            if presentation == "panel":
+                presentation_mode = 0
+            elif presentation == "map_balloon":
+                presentation_mode = 1
+            else:
+                raise ContentError(
+                    f"{path}: unsupported dialogue presentation {presentation!r}")
+        else:
+            presentation = expect(presentation, dict, f"{path} presentation")
+            if presentation.get("type") != "cutscene":
+                raise ContentError(f"{path}: presentation type must be 'cutscene'")
+            presentation_mode = 2
+            fade_in_frames = integer(
+                presentation.get("fade_in_frames", 0),
+                f"{path} cutscene fade_in_frames")
+            if fade_in_frames < 0:
+                raise ContentError(f"{path}: cutscene fade_in_frames cannot be negative")
+            background = presentation.get("background")
+            if background is not None:
+                background_color = rgb_color(background, f"{path} cutscene background")
+            raw_text = expect(presentation.get("text", {}), dict,
+                              f"{path} cutscene text")
+            text_kind = raw_text.get("mode", "none")
+            text_modes = {"none": 0, "bubble": 1, "typeover": 2, "scroll": 3}
+            if text_kind not in text_modes:
+                raise ContentError(f"{path}: unsupported cutscene text mode {text_kind!r}")
+            text_mode = text_modes[str(text_kind)]
+            text_x = integer(
+                raw_text.get("x", -1 if text_kind == "bubble" else 0),
+                f"{path} cutscene text x")
+            text_y = integer(raw_text.get("y", 0), f"{path} cutscene text y")
+            text_width = integer(raw_text.get("width", 500),
+                                 f"{path} cutscene text width")
+            text_bottom = integer(raw_text.get("bottom", 360),
+                                  f"{path} cutscene text bottom")
+            text_rate = integer(raw_text.get("rate", 1), f"{path} cutscene text rate")
+            if text_rate <= 0:
+                raise ContentError(f"{path}: cutscene text rate must be positive")
+            for layer_number, raw_layer in enumerate(expect(
+                    presentation.get("layers", []), list,
+                    f"{path} cutscene layers")):
+                layer = expect(raw_layer, dict,
+                               f"{path} cutscene layer {layer_number}")
+                raw_images = layer.get("images", layer.get("image"))
+                if isinstance(raw_images, str):
+                    raw_images = [raw_images]
+                raw_images = expect(raw_images, list,
+                                    f"{path} cutscene layer images")
+                images: list[int] = []
+                for raw_image in raw_images:
+                    image_id = identifier(raw_image, f"{path} cutscene layer image")
+                    if image_id not in cutscene_image_index:
+                        raise ContentError(
+                            f"{path}: unknown cutscene image {image_id!r}")
+                    images.append(cutscene_image_index[image_id])
+                if not images:
+                    raise ContentError(f"{path}: cutscene layer needs an image")
+                first_node_id = identifier(layer.get("from_node", raw_nodes[0]["id"]),
+                                           f"{path} cutscene layer from_node")
+                last_node_id = identifier(layer.get("to_node", raw_nodes[-1]["id"]),
+                                          f"{path} cutscene layer to_node")
+                if first_node_id not in node_index or last_node_id not in node_index:
+                    raise ContentError(f"{path}: cutscene layer refers to an unknown node")
+                first_node = node_index[first_node_id]
+                last_node = node_index[last_node_id]
+                if first_node > last_node:
+                    raise ContentError(f"{path}: cutscene layer node range is reversed")
+                # A layer spanning several nodes represents one continuous
+                # visual by default. Resetting its animation and alpha at every
+                # caption boundary produces an unintended flash.
+                default_clock = "range" if first_node != last_node else "node"
+                clock = layer.get("clock", default_clock)
+                clock_modes = {"node": 0, "sequence": 1, "range": 2}
+                if clock not in clock_modes:
+                    raise ContentError(
+                        f"{path}: cutscene layer clock must be node, sequence, or range")
+                tracks: dict[str, list[dict[str, int]]] = {}
+                for track_name in ("x", "y", "alpha"):
+                    keyframes: list[dict[str, int]] = []
+                    previous_frame = -1
+                    for raw_keyframe in expect(
+                            layer.get(f"{track_name}_keyframes", []), list,
+                            f"{path} cutscene {track_name}_keyframes"):
+                        keyframe = expect(
+                            raw_keyframe, dict,
+                            f"{path} cutscene {track_name}_keyframe")
+                        frame = integer(
+                            keyframe.get("frame"),
+                            f"{path} cutscene {track_name}_keyframe frame")
+                        value = integer(
+                            keyframe.get(track_name),
+                            f"{path} cutscene {track_name}_keyframe {track_name}")
+                        if frame < 0 or frame <= previous_frame:
+                            raise ContentError(
+                                f"{path}: cutscene {track_name}_keyframes must "
+                                "have increasing frames")
+                        if track_name == "alpha" and not 0 <= value <= 255:
+                            raise ContentError(
+                                f"{path}: cutscene alpha keyframe must be 0 through 255")
+                        previous_frame = frame
+                        keyframes.append({"frame": frame, "value": value})
+                    tracks[track_name] = keyframes
+                frame_delay = integer(layer.get("frame_delay", 0),
+                                      f"{path} cutscene frame_delay")
+                wrap_delay = integer(layer.get("wrap_x_delay", 0),
+                                     f"{path} cutscene wrap_x_delay")
+                wrap_step = integer(layer.get("wrap_x_step", 1),
+                                    f"{path} cutscene wrap_x_step")
+                if "fade_in_frames" in layer and "alpha_frames" in layer:
+                    raise ContentError(
+                        f"{path}: use only fade_in_frames or legacy alpha_frames")
+                alpha_frames = integer(
+                    layer.get("fade_in_frames", layer.get("alpha_frames", 0)),
+                    f"{path} cutscene fade_in_frames")
+                if frame_delay < 0 or wrap_delay < 0 or alpha_frames < 0:
+                    raise ContentError(f"{path}: cutscene timing values cannot be negative")
+                if len(images) > 1 and frame_delay <= 0:
+                    raise ContentError(
+                        f"{path}: animated cutscene layer needs positive frame_delay")
+                cutscene_layers.append({
+                    "images": images,
+                    "x_keyframes": tracks["x"],
+                    "y_keyframes": tracks["y"],
+                    "alpha_keyframes": tracks["alpha"],
+                    "first_node": first_node,
+                    "last_node": last_node,
+                    "x": integer(layer.get("x", 0), f"{path} cutscene layer x"),
+                    "y": integer(layer.get("y", 0), f"{path} cutscene layer y"),
+                    "clock_mode": clock_modes[str(clock)],
+                    "frame_delay": frame_delay,
+                    "wrap_delay": wrap_delay,
+                    "wrap_step": wrap_step,
+                    "alpha_frames": alpha_frames,
+                })
+            for node_number, (node, raw_node) in enumerate(zip(nodes, raw_nodes)):
+                raw_node = expect(raw_node, dict, f"{path}.node")
+                node_text = expect(raw_node.get("cutscene_text", raw_text), dict,
+                                   f"{path} node cutscene_text")
+                node_text_kind = node_text.get("mode", text_kind)
+                if node_text_kind not in text_modes:
+                    raise ContentError(
+                        f"{path}: unsupported node cutscene text mode {node_text_kind!r}")
+                node["cutscene_text_mode"] = text_modes[str(node_text_kind)]
+                node["cutscene_text_x"] = integer(
+                    node_text.get("x", text_x), f"{path} node cutscene text x")
+                node["cutscene_text_y"] = integer(
+                    node_text.get("y", text_y), f"{path} node cutscene text y")
+                node["cutscene_text_width"] = integer(
+                    node_text.get("width", text_width),
+                    f"{path} node cutscene text width")
+                node["cutscene_text_bottom"] = integer(
+                    node_text.get("bottom", text_bottom),
+                    f"{path} node cutscene text bottom")
+                node["cutscene_text_rate"] = integer(
+                    node_text.get("rate", text_rate),
+                    f"{path} node cutscene text rate")
+                node["cutscene_text_hold"] = integer(
+                    node_text.get("hold_frames", 0),
+                    f"{path} node cutscene text hold_frames")
+                node["cutscene_text_shadow"] = int(expect(
+                    node_text.get("shadow", raw_text.get("shadow", False)), bool,
+                    f"{path} node cutscene text shadow"))
+                if node["cutscene_text_rate"] <= 0 or node["cutscene_text_hold"] < 0:
+                    raise ContentError(
+                        f"{path}: cutscene text rate must be positive and hold_frames non-negative")
+        for node in nodes:
+            node.setdefault("cutscene_text_mode", text_mode)
+            node.setdefault("cutscene_text_x", text_x)
+            node.setdefault("cutscene_text_y", text_y)
+            node.setdefault("cutscene_text_width", text_width)
+            node.setdefault("cutscene_text_bottom", text_bottom)
+            node.setdefault("cutscene_text_rate", text_rate)
+            node.setdefault("cutscene_text_hold", 0)
+            node.setdefault("cutscene_text_shadow", 0)
+            if node["music_delay_frames"] < 0 or node["music_fade_out_frames"] < 0:
+                raise ContentError(f"{path}: node music timing cannot be negative")
         dialogues.append({
             "id": dialogue_id,
             "starts": [{
@@ -1501,6 +1727,16 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                        script_index[identifier(document.get("on_end"), f"{path} on_end")]),
             "speakers": raw_speakers,
             "nodes": nodes,
+            "presentation_mode": presentation_mode,
+            "cutscene_layers": cutscene_layers,
+            "text_mode": text_mode,
+            "text_x": text_x,
+            "text_y": text_y,
+            "text_width": text_width,
+            "text_bottom": text_bottom,
+            "text_rate": text_rate,
+            "background_color": background_color,
+            "fade_in_frames": fade_in_frames,
         })
     dialogues.sort(key=lambda item: str(item["id"]))
     dialogue_ids = {str(item["id"]) for item in dialogues}
@@ -2500,7 +2736,7 @@ struct generated_runtime_dialogue_speaker {
     struct generated_runtime_text name_text;
     struct generated_runtime_frame portrait;
     unsigned int speech_color;
-    int is_player, is_narrator;
+    int is_player, is_narrator, entity;
 };
 struct generated_runtime_dialogue_choice {
     const char *text;
@@ -2513,7 +2749,21 @@ struct generated_runtime_dialogue_node {
     const char *text;
     struct generated_runtime_text display;
     const struct generated_runtime_dialogue_choice *choices;
-    int choice_count, next_node, speaker, end_script;
+    int choice_count, next_node, speaker, end_script, auto_advance_frames;
+    int music_track, hold_at_end, music_delay_frames, music_fade_out_frames;
+    int cutscene_text_mode, cutscene_text_x, cutscene_text_y;
+    int cutscene_text_width, cutscene_text_bottom, cutscene_text_rate;
+    int cutscene_text_hold, cutscene_text_shadow, cutscene_finish_ranges;
+};
+struct generated_runtime_cutscene_keyframe { int frame, value; };
+struct generated_runtime_cutscene_layer {
+    const int *images;
+    const struct generated_runtime_cutscene_keyframe *x_keyframes;
+    const struct generated_runtime_cutscene_keyframe *y_keyframes;
+    const struct generated_runtime_cutscene_keyframe *alpha_keyframes;
+    int image_count, x_keyframe_count, y_keyframe_count, alpha_keyframe_count;
+    int first_node, last_node, x, y, clock_mode;
+    int frame_delay, wrap_x_delay, wrap_x_step, alpha_frames;
 };
 struct generated_runtime_dialogue_start { int node, flag, value; };
 struct generated_runtime_dialogue {
@@ -2522,8 +2772,23 @@ struct generated_runtime_dialogue {
     const struct generated_runtime_dialogue_node *nodes;
     int node_count;
     const struct generated_runtime_dialogue_start *starts;
-    int start_count, end_script;
+    int start_count, end_script, presentation_mode;
+    const struct generated_runtime_cutscene_layer *cutscene_layers;
+    int cutscene_layer_count;
+    int text_mode, text_x, text_y, text_width, text_bottom, text_rate;
+    unsigned int background_color;
+    int fade_in_frames;
 };
+#define GENERATED_DIALOGUE_PRESENTATION_PANEL 0
+#define GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON 1
+#define GENERATED_DIALOGUE_PRESENTATION_CUTSCENE 2
+#define GENERATED_CUTSCENE_TEXT_NONE 0
+#define GENERATED_CUTSCENE_TEXT_BUBBLE 1
+#define GENERATED_CUTSCENE_TEXT_TYPEOVER 2
+#define GENERATED_CUTSCENE_TEXT_SCROLL 3
+#define GENERATED_CUTSCENE_CLOCK_NODE 0
+#define GENERATED_CUTSCENE_CLOCK_SEQUENCE 1
+#define GENERATED_CUTSCENE_CLOCK_RANGE 2
 struct generated_runtime_scene {
     const char *display_name;
     int width, height, tile_size, entry_dialogue;
@@ -2552,6 +2817,11 @@ extern const struct generated_runtime_scene generated_runtime_scenes[];
 extern const int generated_runtime_scene_count;
 extern const int generated_runtime_initial_scene;
 extern const int generated_runtime_initial_game_time;
+extern const int generated_runtime_new_game_cutscene;
+extern const char generated_runtime_game_title[];
+extern const int generated_runtime_title_music;
+extern const int generated_runtime_save_signature[20];
+extern const int generated_runtime_save_magic;
 extern const struct generated_runtime_dialogue generated_runtime_dialogues[];
 extern const int generated_runtime_dialogue_count;
 extern const struct generated_runtime_glyph generated_runtime_glyphs[];
@@ -2622,7 +2892,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                    glyphs: list[dict[str, object]], space_advance: int,
                    music: list[dict[str, object]], schedules: list[dict[str, object]],
                    title_background: dict[str, object],
-                   cutscene_images: list[dict[str, object]]) -> str:
+                   cutscene_images: list[dict[str, object]],
+                   new_game_cutscene: int, game_title: str,
+                   title_music: int, save_signature: list[int],
+                   save_magic: int) -> str:
     resource_index = {path: index for index, path in enumerate(resources)}
     lines = ["/* Generated by tools/content_compiler/compile_content.py; do not edit. */", '#include "content_scene_data.h"', ""]
     lines.append("const struct generated_runtime_frame generated_runtime_title_background = " +
@@ -2818,6 +3091,41 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_glyph_count = {len(glyphs)};")
     lines.append(f"const int generated_runtime_space_advance = {space_advance};\n")
     for dialogue_index, dialogue in enumerate(dialogues):
+        for layer_index, layer in enumerate(dialogue["cutscene_layers"]):
+            lines.append(
+                f"static const int generated_runtime_cutscene_images_{dialogue_index}_{layer_index}[] = {{ " +
+                ", ".join(str(image) for image in layer["images"]) + " };")
+            for track_name in ("x", "y", "alpha"):
+                keyframes = layer[f"{track_name}_keyframes"]
+                if keyframes:
+                    lines.append(
+                        f"static const struct generated_runtime_cutscene_keyframe "
+                        f"generated_runtime_cutscene_{track_name}_{dialogue_index}_{layer_index}[] = {{")
+                    lines.extend(
+                        "    { %d, %d }," % (keyframe["frame"], keyframe["value"])
+                        for keyframe in keyframes)
+                    lines.append("};")
+        if dialogue["cutscene_layers"]:
+            lines.append(
+                f"static const struct generated_runtime_cutscene_layer "
+                f"generated_runtime_cutscene_layers_{dialogue_index}[] = {{")
+            for layer_index, layer in enumerate(dialogue["cutscene_layers"]):
+                track_names = [
+                    (f"generated_runtime_cutscene_{track}_{dialogue_index}_{layer_index}"
+                     if layer[f"{track}_keyframes"] else "0")
+                    for track in ("x", "y", "alpha")
+                ]
+                lines.append(
+                    "    { generated_runtime_cutscene_images_%d_%d, %s, %s, %s, "
+                    "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
+                        dialogue_index, layer_index, *track_names,
+                        len(layer["images"]), len(layer["x_keyframes"]),
+                        len(layer["y_keyframes"]), len(layer["alpha_keyframes"]),
+                        layer["first_node"], layer["last_node"],
+                        layer["x"], layer["y"], layer["clock_mode"],
+                        layer["frame_delay"], layer["wrap_delay"],
+                        layer["wrap_step"], layer["alpha_frames"]))
+            lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_start generated_runtime_dialogue_starts_{dialogue_index}[] = {{")
         for start in dialogue["starts"]:
             flag = -1 if start["flag"] is None else start["flag"]
@@ -2837,11 +3145,11 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                     "offset_x": 0,
                     "offset_y": 0,
                 }
-            lines.append("    { %s, { generated_runtime_dialogue_speaker_glyphs_%d_%d, %d }, %s, 0x%08X, %d, %d }," % (
+            lines.append("    { %s, { generated_runtime_dialogue_speaker_glyphs_%d_%d, %d }, %s, 0x%08X, %d, %d, %d }," % (
                 json.dumps(speaker["name"]), dialogue_index, speaker_index, len(speaker["name_glyphs"]),
                 frame_initializer(portrait, resource_index), speaker["speech_color"],
                 int(speaker["role"] == "player"),
-                int(speaker["role"] == "narrator"),
+                int(speaker["role"] == "narrator"), speaker["entity_index"],
             ))
         lines.append("};")
         for node_index, node in enumerate(dialogue["nodes"]):
@@ -2879,14 +3187,34 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         for node_index, node in enumerate(dialogue["nodes"]):
             choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node_index}"
                             if node["choices"] else "0")
-            lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d }, %s, %d, %d, %d, %d }," % (
+            lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d }, %s, "
+                         "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
                 json.dumps(node["text"]), dialogue_index, node_index, len(node["text_glyphs"]),
                 choices_name, len(node["choices"]), node["next"], node["speaker"],
-                node["on_end"]))
+                node["on_end"], node["auto_advance_frames"], node["music_track"],
+                node["hold_at_end"], node["music_delay_frames"],
+                node["music_fade_out_frames"], node["cutscene_text_mode"],
+                node["cutscene_text_x"], node["cutscene_text_y"],
+                node["cutscene_text_width"], node["cutscene_text_bottom"],
+                node["cutscene_text_rate"], node["cutscene_text_hold"],
+                node["cutscene_text_shadow"], node["cutscene_finish_ranges"]))
         lines.append("};")
     lines.append("const struct generated_runtime_dialogue generated_runtime_dialogues[] = {")
     for index, dialogue in enumerate(dialogues):
-        lines.append(f"    {{ generated_runtime_dialogue_speakers_{index}, {len(dialogue['speakers'])}, generated_runtime_dialogue_nodes_{index}, {len(dialogue['nodes'])}, generated_runtime_dialogue_starts_{index}, {len(dialogue['starts'])}, {dialogue['on_end']} }},")
+        layers_name = (f"generated_runtime_cutscene_layers_{index}"
+                       if dialogue["cutscene_layers"] else "0")
+        lines.append(
+            "    { generated_runtime_dialogue_speakers_%d, %d, "
+            "generated_runtime_dialogue_nodes_%d, %d, "
+            "generated_runtime_dialogue_starts_%d, %d, %d, %d, %s, %d, "
+            "%d, %d, %d, %d, %d, %d, %u, %d }," % (
+                index, len(dialogue["speakers"]), index, len(dialogue["nodes"]),
+                index, len(dialogue["starts"]), dialogue["on_end"],
+                dialogue["presentation_mode"], layers_name,
+                len(dialogue["cutscene_layers"]), dialogue["text_mode"],
+                dialogue["text_x"], dialogue["text_y"], dialogue["text_width"],
+                dialogue["text_bottom"], dialogue["text_rate"],
+                dialogue["background_color"], dialogue["fade_in_frames"]))
     lines.append("};")
     lines.append(f"const int generated_runtime_dialogue_count = {len(dialogues)};\n")
     lines.append("const struct generated_runtime_scene generated_runtime_scenes[] = {")
@@ -2903,6 +3231,12 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_scene_count = {len(scenes)};")
     lines.append(f"const int generated_runtime_initial_scene = {[scene['id'] for scene in scenes].index(initial_scene)};")
     lines.append(f"const int generated_runtime_initial_game_time = {initial_game_time};")
+    lines.append(f"const int generated_runtime_new_game_cutscene = {new_game_cutscene};")
+    lines.append(f"const char generated_runtime_game_title[] = {json.dumps(game_title)};")
+    lines.append(f"const int generated_runtime_title_music = {title_music};")
+    lines.append("const int generated_runtime_save_signature[20] = { " +
+                 ", ".join(str(value) for value in save_signature) + " };")
+    lines.append(f"const int generated_runtime_save_magic = {save_magic};")
     lines.append("")
     return "\n".join(lines)
 
@@ -2972,25 +3306,92 @@ def compile_content(project_root: Path) -> None:
                 image_width, image_height = source_image.size
         except OSError as error:
             raise ContentError(f"cannot load cutscene image {image_path}: {error}") from error
+        source_rect = image_entry.get("rect")
+        if source_rect is None:
+            source_x = source_y = 0
+            frame_width, frame_height = image_width, image_height
+        else:
+            source_rect = expect(source_rect, list, f"cutscene image {image_id} rect")
+            if len(source_rect) != 4 or not all(isinstance(value, int) for value in source_rect):
+                raise ContentError(f"cutscene image {image_id} rect must be [x, y, width, height]")
+            source_x, source_y, frame_width, frame_height = source_rect
+            if (source_x < 0 or source_y < 0 or frame_width <= 0 or frame_height <= 0 or
+                    source_x + frame_width > image_width or source_y + frame_height > image_height):
+                raise ContentError(f"cutscene image {image_id} rect lies outside {image_path}")
         cutscene_images.append({
             "id": image_id,
             "image": image_path.relative_to(game_root).as_posix(),
-            "width": image_width,
-            "height": image_height,
+            "width": frame_width,
+            "height": frame_height,
+            "source_x": source_x,
+            "source_y": source_y,
             "offset_x": 0,
             "offset_y": 0,
         })
     cutscene_images.sort(key=lambda item: str(item["id"]))
+    cutscene_image_index = {
+        str(image["id"]): index for index, image in enumerate(cutscene_images)
+    }
     script_index = {script_id: index for index, script_id in enumerate(sorted(scripts))}
+    music_index = {str(track["id"]): index for index, track in enumerate(music)}
+    game_title = expect(manifest.get("game_title"), str, "manifest game_title")
+    if not game_title:
+        raise ContentError("manifest game_title cannot be empty")
+    save_signature_text = expect(
+        manifest.get("save_signature"), str, "manifest save_signature")
+    if not 1 <= len(save_signature_text) <= 19 or not save_signature_text.isascii():
+        raise ContentError(
+            "manifest save_signature must contain 1 through 19 ASCII characters")
+    save_version = integer(manifest.get("save_version"), "manifest save_version")
+    save_signature = [ord(character) for character in save_signature_text]
+    save_signature.extend([0] * (19 - len(save_signature)))
+    save_signature.append(save_version)
+    save_magic_text = expect(manifest.get("save_magic"), str, "manifest save_magic")
+    if len(save_magic_text) != 4 or not save_magic_text.isascii():
+        raise ContentError("manifest save_magic must contain exactly four ASCII characters")
+    save_magic = 0
+    for character in save_magic_text:
+        save_magic = (save_magic << 8) | ord(character)
+    title_music_id = manifest.get("title_music")
+    if title_music_id is None:
+        title_music = -1
+    else:
+        title_music_id = identifier(title_music_id, "manifest title_music")
+        if title_music_id not in music_index:
+            raise ContentError(
+                f"manifest title_music refers to unknown track {title_music_id!r}")
+        title_music = music_index[title_music_id]
     runtime_dialogue, script_dialogues, runtime_flags = runtime_dialogues(
-        inputs["dialogue"], inputs["scripts"], entities, game_root, script_index)
+        inputs["dialogue"], inputs["scripts"], entities, game_root,
+        script_index, music_index, cutscene_image_index)
     dialogue_index = {str(item["id"]): index for index, item in enumerate(runtime_dialogue)}
+    new_game_cutscene_id = manifest.get("new_game_cutscene")
+    if new_game_cutscene_id is None:
+        new_game_cutscene = -1
+    else:
+        new_game_cutscene_id = identifier(
+            new_game_cutscene_id, "manifest new_game_cutscene")
+        if new_game_cutscene_id not in dialogue_index:
+            raise ContentError(
+                f"manifest new_game_cutscene refers to unknown dialogue "
+                f"{new_game_cutscene_id!r}")
+        new_game_cutscene = dialogue_index[new_game_cutscene_id]
+        if runtime_dialogue[new_game_cutscene]["presentation_mode"] != 2:
+            raise ContentError("manifest new_game_cutscene must use cutscene presentation")
+        opening_starts = runtime_dialogue[new_game_cutscene]["starts"]
+        if len(opening_starts) != 1 or opening_starts[0]["flag"] is not None:
+            raise ContentError(
+                "manifest new_game_cutscene must have one unconditional start")
+        if runtime_dialogue[new_game_cutscene]["on_end"] >= 0 or any(
+                node["on_end"] >= 0 or node["choices"]
+                for node in runtime_dialogue[new_game_cutscene]["nodes"]):
+            raise ContentError(
+                "manifest new_game_cutscene cannot use choices or script hooks")
     runtime_scenes, runtime_visuals, runtime_object_visuals, runtime_actors, actor_visuals, _ = runtime_scene_data(
         inputs["maps"], entities, game_root, script_dialogues, dialogue_index,
         script_index, {flag: index for index, flag in enumerate(runtime_flags)})
     runtime_schedule_data = runtime_schedules(schedules, entities, runtime_scenes)
     schedule_index = {str(item["id"]): index for index, item in enumerate(runtime_schedule_data)}
-    music_index = {str(track["id"]): index for index, track in enumerate(music)}
     runtime_script_data = runtime_scripts(
         inputs["scripts"], entities, dialogue_index, runtime_scenes, music_index, schedule_index,
         {flag: index for index, flag in enumerate(runtime_flags)}, actor_visuals)
@@ -3053,7 +3454,8 @@ def compile_content(project_root: Path) -> None:
         runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
         initial_scene, initial_game_time, runtime_dialogue, runtime_script_data,
         runtime_glyphs, runtime_space_advance, music, runtime_schedule_data,
-        title_background, cutscene_images))
+        title_background, cutscene_images, new_game_cutscene, game_title,
+        title_music, save_signature, save_magic))
     source_textures = [path for path in runtime_resources if not path.startswith(GENERATED_RESOURCE_PREFIX)]
     generated_textures = [path.removeprefix(GENERATED_RESOURCE_PREFIX) for path in runtime_resources if path.startswith(GENERATED_RESOURCE_PREFIX)]
     cmake_lists = {

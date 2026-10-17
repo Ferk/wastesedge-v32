@@ -98,6 +98,7 @@ struct world_state {
     int dialogue_node;
     int dialogue_choice;
     int dialogue_actor;
+    int dialogue_auto_frame;
     unsigned char dialogue_used[GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT];
     struct world_actor_state actors[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
     struct world_actor_checkpoint actor_checkpoints[GENERATED_RUNTIME_ENTITY_STORAGE_COUNT];
@@ -130,6 +131,8 @@ struct world_state {
 void world_initialize(struct world_state *world);
 void world_seed_random(struct world_state *world, int seed);
 void world_update(struct world_state *world, const struct world_actions *actions);
+int world_dialogue_is_cutscene(const struct world_state *world);
+void world_finish_cutscene(struct world_state *world, int final_node);
 int world_transition_alpha(const struct world_state *world);
 int world_entity_x(const struct world_state *world, int entity_index);
 int world_entity_y(const struct world_state *world, int entity_index);

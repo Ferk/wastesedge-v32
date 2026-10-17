@@ -3,6 +3,12 @@
   "format": "wastesedge-content-v1",
   "initial_scene": "redwyne_exterior",
   "initial_game_time": 7200,
+  "new_game_cutscene": "intro_cutscene",
+  "game_title": "Waste's Edge",
+  "title_music": "title_theme",
+  "save_signature": "WASTESEDGE-V32-SAVE",
+  "save_version": 1,
+  "save_magic": "WESV",
   "title_background": "assets/ui/title/jewelbag_open.png",
   "cutscene_images": [
     { "id": "intro_forest_front", "source": "assets/cutscene/intro/forest1.png" },
@@ -13,7 +19,19 @@
     { "id": "intro_guard", "source": "assets/cutscene/intro/intro_guard.png" },
     { "id": "intro_player_closeup", "source": "assets/cutscene/intro/intro_player.png" },
     { "id": "intro_talan", "source": "assets/cutscene/intro/intro_talan.png" },
-    { "id": "intro_player_walking", "source": "assets/cutscene/intro/player.png" }
+    { "id": "intro_player_walking", "source": "assets/cutscene/intro/player.png" },
+    { "id": "extro_wall", "source": "assets/cutscene/extro/atlas_a.png", "rect": [0, 0, 320, 240] },
+    { "id": "extro_chest", "source": "assets/cutscene/extro/atlas_a.png", "rect": [0, 240, 244, 240] },
+    { "id": "extro_closed_bag", "source": "assets/cutscene/extro/atlas_b.png", "rect": [0, 0, 320, 240] },
+    { "id": "extro_open_bag", "source": "assets/cutscene/extro/atlas_b.png", "rect": [0, 240, 320, 240] },
+    { "id": "extro_bjarn", "source": "assets/cutscene/extro/bjarn.png" },
+    { "id": "extro_forest_back", "source": "assets/cutscene/intro/forest3.png" },
+    { "id": "extro_forest_middle", "source": "assets/cutscene/intro/forest2.png" },
+    { "id": "extro_forest_front", "source": "assets/cutscene/intro/forest1.png" },
+    { "id": "extro_alek_0", "source": "assets/cutscene/extro/alek_atlas.png", "rect": [0, 0, 90, 117] },
+    { "id": "extro_alek_1", "source": "assets/cutscene/extro/alek_atlas.png", "rect": [90, 0, 90, 117] },
+    { "id": "extro_alek_2", "source": "assets/cutscene/extro/alek_atlas.png", "rect": [180, 0, 90, 117] },
+    { "id": "extro_alek_3", "source": "assets/cutscene/extro/alek_atlas.png", "rect": [270, 0, 90, 117] }
   ],
   "maps": [
     "maps/intro_exterior.tmj",

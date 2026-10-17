@@ -190,6 +190,25 @@ static int hotspot_script(const struct world_state *world)
     return selected;
 }
 
+/* Enter one dialogue node and apply any audiovisual cue authored on it. */
+static void enter_dialogue_node(struct world_state *world, int node_index)
+{
+    const struct generated_runtime_dialogue *dialogue;
+    const struct generated_runtime_dialogue_node *node;
+    world->dialogue_node = node_index;
+    world->dialogue_auto_frame = 0;
+    if (world->dialogue < 0 || world->dialogue >= generated_runtime_dialogue_count)
+        return;
+    dialogue = &generated_runtime_dialogues[world->dialogue];
+    if (node_index < 0 || node_index >= dialogue->node_count)
+        return;
+    node = &dialogue->nodes[node_index];
+    if (node->music_track >= 0 && world->music_track != node->music_track) {
+        world->music_track = node->music_track;
+        ++world->music_revision;
+    }
+}
+
 static void apply_dialogue_choice(struct world_state *world,
                                   const struct generated_runtime_dialogue_choice *choice)
 {
@@ -202,7 +221,7 @@ static void apply_dialogue_choice(struct world_state *world,
     if (!choice->repeatable && choice->next_node >= 0 &&
         choice->next_node < GENERATED_RUNTIME_DIALOGUE_USED_COUNT)
         world->dialogue_used[choice->next_node] = 1;
-    world->dialogue_node = choice->next_node;
+    enter_dialogue_node(world, choice->next_node);
 }
 
 static int dialogue_choice_is_visible(
@@ -381,13 +400,28 @@ static void close_dialogue(struct world_state *world)
     world->dialogue_node = 0;
     world->dialogue_choice = 0;
     world->dialogue_actor = -1;
+    world->dialogue_auto_frame = 0;
     if (end_script >= 0)
         start_script(world, end_script);
+}
+
+/* Advance to a node's authored successor, or close at a terminal node. */
+static void advance_or_close_dialogue(
+    struct world_state *world,
+    const struct generated_runtime_dialogue_node *node)
+{
+    if (node->next_node >= 0) {
+        enter_dialogue_node(world, node->next_node);
+        world->dialogue_choice = 0;
+    } else {
+        close_dialogue(world);
+    }
 }
 
 static void start_dialogue(struct world_state *world, int dialogue)
 {
     const struct generated_runtime_dialogue *runtime_dialogue;
+    int start_node = 0;
     int index;
     if (dialogue < 0 || dialogue >= generated_runtime_dialogue_count)
         return;
@@ -395,17 +429,17 @@ static void start_dialogue(struct world_state *world, int dialogue)
     for (index = 0; index < GENERATED_RUNTIME_DIALOGUE_USED_COUNT; ++index)
         world->dialogue_used[index] = 0;
     world->dialogue = dialogue;
-    world->dialogue_node = 0;
     for (index = 0; index < runtime_dialogue->start_count; ++index) {
         const struct generated_runtime_dialogue_start *start = &runtime_dialogue->starts[index];
         if (start->flag < 0 ||
             (start->flag < GENERATED_RUNTIME_FLAG_COUNT &&
              world->flags[start->flag] == start->value)) {
-            world->dialogue_node = start->node;
+            start_node = start->node;
             break;
         }
     }
     world->dialogue_choice = 0;
+    enter_dialogue_node(world, start_node);
 }
 
 static int advance_player_motion(struct world_state *world)
@@ -1330,9 +1364,33 @@ static void advance_past_player_lines(struct world_state *world)
             close_dialogue(world);
             return;
         }
-        world->dialogue_node = node->next_node;
+        enter_dialogue_node(world, node->next_node);
     }
     close_dialogue(world);
+}
+
+/* Report whether the open dialogue must run in the paused cutscene player. */
+int world_dialogue_is_cutscene(const struct world_state *world)
+{
+    return world->dialogue >= 0 &&
+           world->dialogue < generated_runtime_dialogue_count &&
+           generated_runtime_dialogues[world->dialogue].presentation_mode ==
+               GENERATED_DIALOGUE_PRESENTATION_CUTSCENE;
+}
+
+/* Close a paused cutscene and immediately run its continuation up to the next
+ * blocking action. This permits consecutive cutscenes without exposing one
+ * intervening gameplay frame. */
+void world_finish_cutscene(struct world_state *world, int final_node)
+{
+    if (!world_dialogue_is_cutscene(world))
+        return;
+    if (final_node >= 0 &&
+        final_node < generated_runtime_dialogues[world->dialogue].node_count)
+        world->dialogue_node = final_node;
+    close_dialogue(world);
+    if (world->active_script >= 0)
+        update_script(world);
 }
 
 void world_initialize(struct world_state *world)
@@ -1355,6 +1413,7 @@ void world_initialize(struct world_state *world)
     world->dialogue_node = 0;
     world->dialogue_choice = 0;
     world->dialogue_actor = -1;
+    world->dialogue_auto_frame = 0;
     for (index = 0; index < GENERATED_RUNTIME_ENTITY_STORAGE_COUNT; ++index) {
         world->actors[index].scene = -1;
         world->actors[index].x = 0;
@@ -1485,6 +1544,10 @@ void world_update(struct world_state *world, const struct world_actions *actions
     int move_y = actions->move_y;
     if (world->player_entity < 0)
         return;
+    /* The application-level cutscene player owns these dialogues. Keep every
+     * part of the loaded world frozen until it reports completion. */
+    if (world_dialogue_is_cutscene(world))
+        return;
     /* The original clock advanced eight tenths-of-a-minute units per real
      * second. Preserve that rate at this engine's 60 Hz simulation frequency
      * with an integer accumulator. */
@@ -1520,6 +1583,34 @@ void world_update(struct world_state *world, const struct world_actions *actions
         const struct generated_runtime_dialogue *dialogue = &generated_runtime_dialogues[world->dialogue];
         const struct generated_runtime_dialogue_node *node = &dialogue->nodes[world->dialogue_node];
         int choice_count = dialogue_visible_choice_count(world, node);
+        if (node->auto_advance_frames > 0) {
+            /* A held terminal card continues its authored animation until the
+             * target frame, then remains there. Interaction fast-forwards to
+             * that final frame instead of closing the cinematic. */
+            if (node->hold_at_end) {
+                if (actions->interact_pressed || actions->cancel_pressed)
+                    world->dialogue_auto_frame = node->auto_advance_frames;
+                else if (world->dialogue_auto_frame < node->auto_advance_frames)
+                    ++world->dialogue_auto_frame;
+                return;
+            }
+            /* A advances one live-map balloon, matching illustrated
+             * cutscenes. B still skips the entire timed sequence. */
+            if (actions->cancel_pressed) {
+                close_dialogue(world);
+            } else if (actions->interact_pressed &&
+                       dialogue->presentation_mode ==
+                           GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON) {
+                advance_or_close_dialogue(world, node);
+            } else if (actions->interact_pressed) {
+                close_dialogue(world);
+            } else {
+                ++world->dialogue_auto_frame;
+                if (world->dialogue_auto_frame >= node->auto_advance_frames)
+                    advance_or_close_dialogue(world, node);
+            }
+            return;
+        }
         if (choice_count > 0 && actions->choice_move != 0) {
             world->dialogue_choice += actions->choice_move;
             if (world->dialogue_choice < 0)
@@ -1536,11 +1627,8 @@ void world_update(struct world_state *world, const struct world_actions *actions
                 apply_dialogue_choice(world, choice);
                 world->dialogue_choice = 0;
                 advance_past_player_lines(world);
-            } else if (node->next_node >= 0) {
-                world->dialogue_node = node->next_node;
-                world->dialogue_choice = 0;
             } else {
-                close_dialogue(world);
+                advance_or_close_dialogue(world, node);
             }
         }
         return;

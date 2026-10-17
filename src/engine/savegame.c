@@ -171,6 +171,7 @@ int savegame_encode(const struct world_state *world, int *words, int capacity)
         write_word(&writer, checkpoint->schedule_wait);
         write_word(&writer, checkpoint->dialogue);
     }
+    write_word(&writer, world->dialogue_auto_frame);
 
     return writer.failed ? 0 : writer.count;
 }
@@ -393,6 +394,8 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
             checkpoint->dialogue = read_word(&reader);
         }
     }
+    if (version >= 4)
+        restored_world.dialogue_auto_frame = read_word(&reader);
 
     restored_world.scene = (restored_world.scene_index >= 0 &&
                             restored_world.scene_index < generated_runtime_scene_count) ?
@@ -403,6 +406,7 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
     restored_world.visual_revision = 1;
     restored_world.music_revision = 1;
     if (restored_world.game_time < 0 || restored_world.game_time_subticks < 0 ||
+        restored_world.dialogue_auto_frame < 0 ||
         restored_world.game_time_subticks >= WORLD_GAME_TIME_SUBTICKS_PER_UNIT ||
         reader.failed || reader.position != reader.count ||
         !validate_restored_world(&restored_world))

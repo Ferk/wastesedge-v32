@@ -1,13 +1,45 @@
 {
   "id": "extro_chest",
+  "presentation": {
+    "type": "cutscene",
+    "text": { "mode": "bubble", "y": 30, "width": 500 },
+    "layers": [
+      { "image": "extro_wall", "from_node": "hidden", "to_node": "niche",
+        "clock": "range" },
+      {
+        "image": "extro_chest", "from_node": "hidden", "to_node": "niche",
+        "clock": "range",
+        "x_keyframes": [
+          { "frame": 0, "x": 75 }, { "frame": 80, "x": 75 },
+          { "frame": 90, "x": 65 }, { "frame": 93, "x": 71 },
+          { "frame": 109, "x": 55 }, { "frame": 114, "x": 65 },
+          { "frame": 159, "x": 20 }, { "frame": 249, "x": -160 },
+          { "frame": 289, "x": -200 }, { "frame": 297, "x": -184 },
+          { "frame": 306, "x": -175 }
+        ]
+      },
+      { "image": "extro_closed_bag", "from_node": "niche", "to_node": "right_here",
+        "clock": "range", "fade_in_frames": 60 },
+      { "image": "extro_open_bag", "from_node": "right_here", "to_node": "but",
+        "clock": "range", "fade_in_frames": 60 },
+      { "image": "extro_bjarn", "from_node": "gone", "to_node": "gone" }
+    ]
+  },
   "start": [{ "node": "hidden" }],
-  "speakers": [{ "id": "narrator", "name": "Narrator", "role": "narrator" }],
+  "on_end": "talan_enters_extro",
+  "speakers": [
+    { "id": "bjarn", "name": "Bjarn Fingolson", "role": "npc" }
+  ],
   "nodes": [
-    { "id": "hidden", "speaker": "narrator", "text": "They were here all the time, safe from thieving hands, ...", "next": "niche" },
-    { "id": "niche", "speaker": "narrator", "text": "... well hidden in a niche I carved during my previous visits.", "next": "right_here" },
-    { "id": "right_here", "speaker": "narrator", "text": "Right here.", "next": "but" },
-    { "id": "but", "speaker": "narrator", "text": "But ...", "next": "gone" },
-    { "id": "gone", "speaker": "narrator", "text": "... they are gone!",
-      "on_end": "talan_enters_extro", "end": true }
+    { "id": "hidden", "speaker": "bjarn", "text": "They were here all the time, safe from thieving hands, ...",
+      "auto_advance_frames": 320, "next": "niche" },
+    { "id": "niche", "speaker": "bjarn", "text": "... well hidden in a niche I carved during my previous visits.",
+      "auto_advance_frames": 310, "next": "right_here" },
+    { "id": "right_here", "speaker": "bjarn", "text": "Right here.",
+      "auto_advance_frames": 200, "next": "but" },
+    { "id": "but", "speaker": "bjarn", "text": "But ...", "music": "extro_reveal",
+      "auto_advance_frames": 200, "next": "gone" },
+    { "id": "gone", "speaker": "bjarn", "text": "... they are gone!",
+      "auto_advance_frames": 280, "end": true }
   ]
 }

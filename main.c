@@ -1,6 +1,5 @@
 #include "engine/world.h"
 #include "platform/vircon32/platform.h"
-#include "content_ids.h"
 
 #if defined(__clang__)
 #define MAIN_NOINLINE __attribute__((noinline))
@@ -23,7 +22,7 @@ enum application_mode {
     APPLICATION_LOAD_FROM_TITLE = 3,
     APPLICATION_LOAD_FROM_PAUSE = 4,
     APPLICATION_SAVE_FROM_PAUSE = 5,
-    APPLICATION_INTRO = 6
+    APPLICATION_CUTSCENE = 6
 };
 
 static int moved_choice(int current, int movement, int count)
@@ -38,6 +37,13 @@ static int moved_choice(int current, int movement, int count)
     return current;
 }
 
+/* Start a compiled cutscene while keeping the current world paused in memory. */
+static void begin_world_cutscene(struct world_state *world)
+{
+    platform_update_audio(world);
+    platform_begin_cutscene(world->dialogue, world->dialogue_node);
+}
+
 int main(void)
 {
     struct world_state world;
@@ -48,10 +54,11 @@ int main(void)
     int slot_choice = 0;
     int storage_result;
     int simulation_frame;
+    int cutscene_from_world = 0;
 
     world_initialize(&world);
     platform_initialize();
-    platform_play_music_track(GENERATED_MUSIC_TITLE_THEME);
+    platform_play_music_track(generated_runtime_title_music);
     world_seed_random(&world, platform_random_seed());
     storage_result = platform_query_save_slots(slot_states);
     simulation_frame = platform_frame_counter();
@@ -60,7 +67,11 @@ int main(void)
         platform_poll_actions(&actions);
 
         if (mode == APPLICATION_PLAYING) {
-            if (actions.menu_pressed) {
+            if (world_dialogue_is_cutscene(&world)) {
+                begin_world_cutscene(&world);
+                cutscene_from_world = 1;
+                mode = APPLICATION_CUTSCENE;
+            } else if (actions.menu_pressed) {
                 mode = APPLICATION_PAUSED;
                 menu_choice = 0;
                 storage_result = PLATFORM_STORAGE_OK;
@@ -79,6 +90,12 @@ int main(void)
                 }
                 for (update = 0; update < update_count; ++update) {
                     world_update(&world, &actions);
+                    if (world_dialogue_is_cutscene(&world)) {
+                        begin_world_cutscene(&world);
+                        cutscene_from_world = 1;
+                        mode = APPLICATION_CUTSCENE;
+                        break;
+                    }
                     /* Held movement applies to catch-up updates, but button
                      * and menu edges must only be consumed once. */
                     consume_action_edges(&actions);
@@ -93,19 +110,39 @@ int main(void)
                     world_seed_random(&world, platform_random_seed());
                     platform_invalidate_world();
                     simulation_frame = platform_frame_counter();
-                    platform_begin_intro();
-                    mode = APPLICATION_INTRO;
+                    if (generated_runtime_new_game_cutscene >= 0) {
+                        int dialogue = generated_runtime_new_game_cutscene;
+                        int start_node =
+                            generated_runtime_dialogues[dialogue].starts[0].node;
+                        platform_begin_cutscene(dialogue, start_node);
+                        cutscene_from_world = 0;
+                        mode = APPLICATION_CUTSCENE;
+                    } else {
+                        mode = APPLICATION_PLAYING;
+                    }
                 } else {
                     storage_result = platform_query_save_slots(slot_states);
                     slot_choice = 0;
                     mode = APPLICATION_LOAD_FROM_TITLE;
                 }
             }
-        } else if (mode == APPLICATION_INTRO) {
-            if (platform_update_intro(&actions)) {
-                platform_invalidate_world();
-                simulation_frame = platform_frame_counter();
-                mode = APPLICATION_PLAYING;
+        } else if (mode == APPLICATION_CUTSCENE) {
+            if (platform_update_cutscene(&actions)) {
+                if (cutscene_from_world) {
+                    world_finish_cutscene(&world, platform_cutscene_node());
+                    if (world_dialogue_is_cutscene(&world)) {
+                        begin_world_cutscene(&world);
+                    } else {
+                        platform_invalidate_world();
+                        simulation_frame = platform_frame_counter();
+                        mode = APPLICATION_PLAYING;
+                    }
+                } else {
+                    platform_stop_audio();
+                    platform_invalidate_world();
+                    simulation_frame = platform_frame_counter();
+                    mode = APPLICATION_PLAYING;
+                }
             }
         } else if (mode == APPLICATION_PAUSED) {
             menu_choice = moved_choice(menu_choice, actions.choice_move, 4);
@@ -127,7 +164,7 @@ int main(void)
                 storage_result = platform_query_save_slots(slot_states);
                 menu_choice = 0;
                 mode = APPLICATION_TITLE;
-                platform_play_music_track(GENERATED_MUSIC_TITLE_THEME);
+                platform_play_music_track(generated_runtime_title_music);
             }
         } else {
             int from_title = mode == APPLICATION_LOAD_FROM_TITLE;
@@ -156,7 +193,13 @@ int main(void)
                     if (storage_result == PLATFORM_STORAGE_OK) {
                         platform_invalidate_world();
                         simulation_frame = platform_frame_counter();
-                        mode = APPLICATION_PLAYING;
+                        if (world_dialogue_is_cutscene(&world)) {
+                            begin_world_cutscene(&world);
+                            cutscene_from_world = 1;
+                            mode = APPLICATION_CUTSCENE;
+                        } else {
+                            mode = APPLICATION_PLAYING;
+                        }
                     }
                 }
             }
@@ -165,8 +208,8 @@ int main(void)
         if (mode == APPLICATION_PLAYING) {
             platform_update_audio(&world);
             platform_render_world(&world);
-        } else if (mode == APPLICATION_INTRO) {
-            platform_render_intro();
+        } else if (mode == APPLICATION_CUTSCENE) {
+            platform_render_cutscene();
         } else if (mode == APPLICATION_TITLE) {
             platform_render_title_menu(menu_choice, storage_result);
         } else if (mode == APPLICATION_PAUSED) {

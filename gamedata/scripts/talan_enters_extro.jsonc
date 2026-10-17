@@ -4,8 +4,13 @@
     { "op": "set_actor_visual", "entity": "bjarn", "visual": "crying" },
     { "op": "set_actor_visual", "entity": "talan", "visual": "beaten" },
     { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_extro_crying" },
+    { "op": "wait", "frames": 120 },
+    { "op": "start_schedule", "entity": "erek", "schedule": "erek_face_talan" },
+    { "op": "start_schedule", "entity": "jelom", "schedule": "jelom_face_talan" },
+    { "op": "start_schedule", "entity": "silverhair", "schedule": "silverhair_face_talan" },
+    { "op": "start_schedule", "entity": "player", "schedule": "player_face_talan" },
     { "op": "start_schedule", "entity": "talan", "schedule": "talan_extro_entrance" },
-    { "op": "wait", "frames": 1 },
+    { "op": "wait", "frames": 30 },
     { "op": "show_dialogue", "dialogue": "extro_talan" }
   ]
 }

@@ -223,6 +223,31 @@ int main(void)
 
     world_initialize(&world);
     assert(generated_runtime_scene_count == 23);
+    assert(strcmp(generated_runtime_game_title, "Waste's Edge") == 0);
+    assert(generated_runtime_title_music == GENERATED_MUSIC_TITLE_THEME);
+    assert(generated_runtime_save_magic == 0x57455356);
+    assert(generated_runtime_save_signature[19] == 1);
+    {
+        const struct generated_runtime_dialogue *opening =
+            &generated_runtime_dialogues[generated_runtime_new_game_cutscene];
+        assert(generated_runtime_new_game_cutscene ==
+               GENERATED_DIALOGUE_INTRO_CUTSCENE);
+        assert(opening->presentation_mode ==
+               GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
+        assert(opening->cutscene_layer_count == 10);
+        assert(opening->cutscene_layers[0].wrap_x_step == -1);
+        assert(opening->cutscene_layers[3].clock_mode ==
+               GENERATED_CUTSCENE_CLOCK_RANGE);
+        assert(opening->cutscene_layers[8].clock_mode ==
+               GENERATED_CUTSCENE_CLOCK_RANGE);
+        assert(opening->cutscene_layers[3].y_keyframe_count == 3);
+        assert(opening->cutscene_layers[3].alpha_keyframe_count == 2);
+        assert(opening->nodes[0].cutscene_text_mode ==
+               GENERATED_CUTSCENE_TEXT_TYPEOVER);
+        assert(opening->nodes[8].cutscene_text_mode ==
+               GENERATED_CUTSCENE_TEXT_BUBBLE);
+        assert(opening->nodes[8].music_track == GENERATED_MUSIC_INTRO_GATE);
+    }
     assert(count_object_state(&world, GENERATED_ENTITY_TABLE_MUG, 1) == 8);
     {
         struct world_state clock_world;
@@ -462,21 +487,58 @@ int main(void)
     assert(world.active_script == GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH);
     assert(world_actor_speech(&world, GENERATED_ENTITY_BJARN) != 0);
     assert(world.actors[GENERATED_ENTITY_BJARN].speech_frames == 180);
-    /* The post-confession exchange remains a world-view cutscene. Its only
-     * modal action is the final epilogue after all scripted bubbles finish. */
-    for (frame = 0;
-         frame < generated_runtime_scripts[GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH]
-                     .action_count - 1;
-         ++frame)
-        assert(generated_runtime_scripts[GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH]
-                   .actions[frame].op != GENERATED_SCRIPT_SHOW_DIALOGUE);
+    /* The world-view confession hands off to the original illustrated chest
+     * reveal instead of repeating those five lines as ordinary map bubbles. */
+    {
+        const struct generated_runtime_script *aftermath =
+            &generated_runtime_scripts[GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH];
+        const struct generated_runtime_script_action *last =
+            &aftermath->actions[aftermath->action_count - 1];
+        assert(last->op == GENERATED_SCRIPT_SHOW_DIALOGUE);
+        assert(last->a == GENERATED_DIALOGUE_EXTRO_CHEST);
+    }
     assert(world.control_enabled == 0);
     {
         struct world_state completed_extro = world;
-        tick(&completed_extro, 12000);
+        for (frame = 0;
+             frame < 12000 &&
+             completed_extro.dialogue != GENERATED_DIALOGUE_EXTRO_CHEST;
+             ++frame)
+            tick(&completed_extro, 1);
+        assert(completed_extro.dialogue == GENERATED_DIALOGUE_EXTRO_CHEST);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .presentation_mode == GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layer_count == 5);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layers[1].x_keyframe_count == 11);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layers[1].clock_mode ==
+               GENERATED_CUTSCENE_CLOCK_RANGE);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layers[2].clock_mode ==
+               GENERATED_CUTSCENE_CLOCK_RANGE);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layers[3].clock_mode ==
+               GENERATED_CUTSCENE_CLOCK_RANGE);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layers[2].alpha_frames == 255);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .cutscene_layers[3].alpha_frames == 255);
+        assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CHEST]
+                   .nodes[completed_extro.dialogue_node].auto_advance_frames > 0);
+        assert(completed_extro.music_track == GENERATED_MUSIC_EXTRO_CONFESSION);
+        {
+            int paused_time = completed_extro.game_time;
+            tick(&completed_extro, 400);
+            assert(completed_extro.dialogue_node == 0);
+            assert(completed_extro.game_time == paused_time);
+        }
+        world_finish_cutscene(&completed_extro, 4);
+        assert(completed_extro.dialogue != GENERATED_DIALOGUE_EXTRO_CHEST);
+        assert(completed_extro.music_track == GENERATED_MUSIC_EXTRO_CONFESSION);
+        tick(&completed_extro, 4000);
         assert(completed_extro.dialogue == GENERATED_DIALOGUE_EXTRO_EPILOGUE);
-        assert(completed_extro.active_script ==
-               GENERATED_SCRIPT_BEGIN_EXTRO_AFTERMATH);
         assert(completed_extro.actors[GENERATED_ENTITY_BJARN].x == 7 &&
                completed_extro.actors[GENERATED_ENTITY_BJARN].y == 4);
         assert(completed_extro.actors[GENERATED_ENTITY_TALAN].x == 2 &&
@@ -528,7 +590,7 @@ int main(void)
     world.script_action = 0;
     world.script_wait = 0;
     tick(&world, 3);
-    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_TALAN);
+    assert(world.dialogue < 0);
     assert(world_actor_visual(&world, GENERATED_ENTITY_BJARN) !=
            generated_runtime_actors[GENERATED_ENTITY_BJARN].visual);
     assert(world_actor_visual(&world, GENERATED_ENTITY_TALAN) !=
@@ -542,10 +604,33 @@ int main(void)
     assert(generated_runtime_actor_visuals[
                world_actor_visual(&world, GENERATED_ENTITY_TALAN)]
                .walking_count[WORLD_EAST] == 4);
+    /* Presentation pacing may delay Talan's entrance, but the authored route
+     * must still place him in the room before his map-balloon dialogue. */
+    for (frame = 0;
+         frame < 192 &&
+         world.actors[GENERATED_ENTITY_TALAN].scene != world.scene_index;
+         ++frame)
+        tick(&world, 1);
     assert(world.actors[GENERATED_ENTITY_TALAN].scene == world.scene_index);
-    assert(world.actors[GENERATED_ENTITY_TALAN].x == 1 &&
-           world.actors[GENERATED_ENTITY_TALAN].y == 6);
-    tick(&world, 11);
+    for (frame = 0;
+         frame < 64 && world.dialogue != GENERATED_DIALOGUE_EXTRO_TALAN;
+         ++frame)
+        tick(&world, 1);
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_TALAN);
+    assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_TALAN]
+               .presentation_mode == GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON);
+    assert(world_dialogue_speaker(&world)->entity == GENERATED_ENTITY_TALAN);
+    /* Confirming a timed map balloon advances only that balloon. It must not
+     * close the sequence and prematurely start its on_end continuation. */
+    {
+        const struct generated_runtime_dialogue *talan_dialogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_TALAN];
+        int first_node = world.dialogue_node;
+        assert(talan_dialogue->nodes[first_node].next_node >= 0);
+        world_update(&world, &interact);
+        assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_TALAN);
+        assert(world.dialogue_node == talan_dialogue->nodes[first_node].next_node);
+    }
     assert(world.actors[GENERATED_ENTITY_BJARN].x == 7 &&
            world.actors[GENERATED_ENTITY_BJARN].y == 4 &&
            world.actors[GENERATED_ENTITY_BJARN].facing == WORLD_SOUTH);
@@ -565,20 +650,47 @@ int main(void)
     world.script_wait = 0;
     tick(&world, 1);
     assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_EPILOGUE);
+    {
+        const struct generated_runtime_dialogue *epilogue =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_EPILOGUE];
+        int first_node = world.dialogue_node;
+        int duration = epilogue->nodes[first_node].auto_advance_frames;
+        assert(epilogue->presentation_mode ==
+               GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
+        assert(epilogue->cutscene_layer_count == 4);
+        assert(epilogue->cutscene_layers[0].wrap_x_delay == 5);
+        assert(epilogue->cutscene_layers[2].image_count == 4);
+        assert(epilogue->cutscene_layers[2].frame_delay == 14);
+        assert(duration > 0);
+        tick(&world, duration);
+        assert(world.dialogue_node == first_node);
+        world_finish_cutscene(&world, epilogue->node_count - 1);
+    }
+    /* Completing the paused epilogue immediately enters its authored credit
+     * cutscene without exposing one intervening world frame. */
+    assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CREDITS);
+    assert(generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CREDITS]
+               .presentation_mode == GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
+    {
+        const struct generated_runtime_dialogue_node *credits =
+            &generated_runtime_dialogues[GENERATED_DIALOGUE_EXTRO_CREDITS]
+                 .nodes[world.dialogue_node];
+        assert(credits->auto_advance_frames > 0);
+        assert(credits->hold_at_end);
+        tick(&world, credits->auto_advance_frames + 60);
+        assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CREDITS);
+        assert(world.dialogue_auto_frame == 0);
+        world_update(&world, &interact);
+        assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CREDITS);
+        assert(world.dialogue_auto_frame == 0);
+    }
+    world_initialize(&world);
     world.dialogue = -1;
     world.active_script = GENERATED_SCRIPT_SHOW_EXTRO_CREDITS;
     world.script_action = 0;
     world.script_wait = 0;
     tick(&world, 1);
     assert(world.dialogue == GENERATED_DIALOGUE_EXTRO_CREDITS);
-    world.dialogue = -1;
-    world.active_script = GENERATED_SCRIPT_FINISH_EXTRO;
-    world.script_action = 0;
-    world.script_wait = 0;
-    tick(&world, 1);
-    assert(world.flags[generated_runtime_scripts[
-               GENERATED_SCRIPT_FINISH_EXTRO].actions[0].a] == 1);
-    assert(world.control_enabled == 0);
 
     /* Restore the landing for the independent doorway checks below. */
     world_initialize(&world);
@@ -2439,7 +2551,7 @@ int main(void)
          * resumes at the original noon start rather than becoming corrupt. */
         save_words[0] = 1;
         assert(savegame_decode(&loaded, save_words,
-                               word_count - 2 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
+                               word_count - 3 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
         assert(loaded.game_time == generated_runtime_initial_game_time);
         save_words[0] = SAVEGAME_FORMAT_VERSION;
         assert(!savegame_decode(&loaded, save_words, word_count - 1));

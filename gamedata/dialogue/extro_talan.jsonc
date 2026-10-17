@@ -1,6 +1,8 @@
 {
   "id": "extro_talan",
+  "presentation": "map_balloon",
   "start": [{ "node": "alarm" }],
+  "on_end": "show_extro_epilogue",
   "speakers": [
     { "id": "banec", "name": "Banec", "role": "npc", "entity": "player",
       "portrait": "assets/ui/portraits/player.png" },
@@ -14,17 +16,17 @@
       "portrait": "assets/ui/portraits/talan.png" }
   ],
   "nodes": [
-    { "id": "alarm", "speaker": "talan", "text": "Sir, sir! To the gate! Quick! The thief is loose!", "next": "bjarn_jewels" },
-    { "id": "bjarn_jewels", "speaker": "bjarn", "text": "My jewels, oh my jewels!", "next": "banec_talan" },
-    { "id": "banec_talan", "speaker": "banec", "text": "By Andomiel's Tree! What happened to you, Talan?!", "next": "talan_alek" },
-    { "id": "talan_alek", "speaker": "talan", "text": "It was the mercenary, sir! He sneaked upon me and hit me over the head.", "next": "silverhair_irony" },
-    { "id": "silverhair_irony", "speaker": "silverhair", "text": "O sweet irony.", "next": "jelom_stolen" },
-    { "id": "jelom_stolen", "speaker": "jelom", "text": "Then the gems have been stolen after all?!", "next": "jelom_alek" },
-    { "id": "jelom_alek", "speaker": "jelom", "text": "By that scum, Alek!? Now that's funny.", "next": "bjarn_how" },
-    { "id": "bjarn_how", "speaker": "bjarn", "text": "How can you say that? And why are you still here?", "next": "bjarn_chase" },
-    { "id": "bjarn_chase", "speaker": "bjarn", "text": "Will nobody go after my gems!?", "next": "jelom_why" },
-    { "id": "jelom_why", "speaker": "jelom", "text": "What for?", "next": "jelom_sentence" },
+    { "id": "alarm", "speaker": "talan", "text": "Sir, sir! To the gate! Quick! The thief is loose!", "auto_advance_frames": 180, "next": "bjarn_jewels" },
+    { "id": "bjarn_jewels", "speaker": "bjarn", "text": "My jewels, oh my jewels!", "auto_advance_frames": 150, "next": "banec_talan" },
+    { "id": "banec_talan", "speaker": "banec", "text": "By Andomiel's Tree! What happened to you, Talan?!", "auto_advance_frames": 180, "next": "talan_alek" },
+    { "id": "talan_alek", "speaker": "talan", "text": "It was the mercenary, sir! He sneaked upon me and hit me over the head.", "auto_advance_frames": 210, "next": "silverhair_irony" },
+    { "id": "silverhair_irony", "speaker": "silverhair", "text": "O sweet irony.", "auto_advance_frames": 120, "next": "jelom_stolen" },
+    { "id": "jelom_stolen", "speaker": "jelom", "text": "Then the gems have been stolen after all?!", "auto_advance_frames": 180, "next": "jelom_alek" },
+    { "id": "jelom_alek", "speaker": "jelom", "text": "By that scum, Alek!? Now that's funny.", "auto_advance_frames": 180, "next": "bjarn_how" },
+    { "id": "bjarn_how", "speaker": "bjarn", "text": "How can you say that? And why are you still here?", "auto_advance_frames": 180, "next": "bjarn_chase" },
+    { "id": "bjarn_chase", "speaker": "bjarn", "text": "Will nobody go after my gems!?", "auto_advance_frames": 150, "next": "jelom_why" },
+    { "id": "jelom_why", "speaker": "jelom", "text": "What for?", "auto_advance_frames": 120, "next": "jelom_sentence" },
     { "id": "jelom_sentence", "speaker": "jelom", "text": "Where you are going you won't need them any more. Besides, Alek is probably long gone by now ...",
-      "on_end": "show_extro_epilogue", "end": true }
+      "auto_advance_frames": 270, "end": true }
   ]
 }
