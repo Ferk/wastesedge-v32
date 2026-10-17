@@ -1566,7 +1566,7 @@ void world_update(struct world_state *world, const struct world_actions *actions
                     &world->scene->scenery[scenery_index];
                 if (scenery->visual >= 0 &&
                     scenery->visual < generated_runtime_object_visual_count &&
-                    generated_runtime_object_visuals[scenery->visual].frame_delay > 0) {
+                    generated_runtime_object_visuals[scenery->visual].cycle_delay > 0) {
                     ++world->visual_revision;
                     break;
                 }
@@ -1849,9 +1849,15 @@ const struct generated_runtime_frame *world_scenery_frame(
         return &scenery->frame;
     if (scenery->state_slot >= 0)
         state = world->object_states[scenery->state_slot];
-    else if (visual->frame_delay > 0)
-        state = (world->game_time / visual->frame_delay) % visual->frame_count;
-    else
+    else if (visual->cycle_delay > 0) {
+        int elapsed = world->game_time % visual->cycle_delay;
+        state = 0;
+        while (state + 1 < visual->frame_count &&
+               elapsed >= visual->frame_delays[state]) {
+            elapsed -= visual->frame_delays[state];
+            ++state;
+        }
+    } else
         state = 0;
     if (state < 0) state = 0;
     if (state >= visual->frame_count) state = visual->frame_count - 1;

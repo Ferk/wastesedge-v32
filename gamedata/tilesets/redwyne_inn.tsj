@@ -678,7 +678,12 @@
         {
           "name": "animation_delay",
           "type": "int",
-          "value": 1
+          "value": 8
+        },
+        {
+          "name": "animation_sequence",
+          "type": "string",
+          "value": "0,1,2,1"
         },
         {
           "name": "source_image",
@@ -1007,7 +1012,7 @@
         {
           "name": "animation_delay",
           "type": "int",
-          "value": 1
+          "value": 40
         },
         {
           "name": "source_image",
@@ -1064,6 +1069,11 @@
           "value": 1
         },
         {
+          "name": "animation_delay",
+          "type": "int",
+          "value": 8
+        },
+        {
           "name": "source_image",
           "type": "int",
           "value": 1
@@ -1116,6 +1126,11 @@
           "name": "source_animation",
           "type": "int",
           "value": 1
+        },
+        {
+          "name": "animation_delay",
+          "type": "int",
+          "value": 4
         },
         {
           "name": "source_image",
@@ -1172,6 +1187,11 @@
           "value": 1
         },
         {
+          "name": "animation_delay",
+          "type": "int",
+          "value": 2
+        },
+        {
           "name": "source_image",
           "type": "int",
           "value": 3
@@ -1222,6 +1242,11 @@
         },
         {
           "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "animation_delay",
           "type": "int",
           "value": 1
         },
@@ -1280,6 +1305,11 @@
           "value": 1
         },
         {
+          "name": "animation_delay",
+          "type": "int",
+          "value": 1
+        },
+        {
           "name": "source_image",
           "type": "int",
           "value": 5
@@ -1330,6 +1360,11 @@
         },
         {
           "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "animation_delay",
           "type": "int",
           "value": 1
         },
@@ -1388,6 +1423,11 @@
           "value": 1
         },
         {
+          "name": "animation_delay",
+          "type": "int",
+          "value": 1
+        },
+        {
           "name": "source_image",
           "type": "int",
           "value": 7
@@ -1438,6 +1478,11 @@
         },
         {
           "name": "source_animation",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "animation_delay",
           "type": "int",
           "value": 1
         },

@@ -32,6 +32,7 @@
 #define SAVE_SLOT_HEADER_WORDS 8
 #define SAVE_PREVIEW_TILES 6
 #define SAVE_PREVIEW_SIZE 60
+#define WALK_ANIMATION_SLOWDOWN 2
 
 /* Vircon32 colors use AABBGGRR ordering. Keep every authored renderer color
  * named here so alpha values and palette choices remain easy to audit. */
@@ -575,9 +576,13 @@ static const struct generated_runtime_frame *entity_frame(const struct world_sta
     const struct generated_runtime_actor_visual *visual = &generated_runtime_actor_visuals[
         world_actor_visual(world, definition)];
     int facing = world_actor_facing(world, definition);
-    if (world_actor_is_moving(world, definition) && visual->walking_count[facing] > 0)
-        return &visual->walking[facing][world_actor_animation_frame(world, definition) %
-                                        visual->walking_count[facing]];
+    if (world_actor_is_moving(world, definition) && visual->walking_count[facing] > 0) {
+        /* The movement counter remains distance-driven. Holding each pose for
+         * two source steps slows only the gait, never character movement. */
+        int animation_frame = world_actor_animation_frame(world, definition) /
+                              WALK_ANIMATION_SLOWDOWN;
+        return &visual->walking[facing][animation_frame % visual->walking_count[facing]];
+    }
     if (visual->standing_count[facing] > 1 && visual->standing_delay[facing] > 0)
         return &visual->standing[facing][
             (world_actor_visual_tick(world, definition) / visual->standing_delay[facing]) %
@@ -1144,7 +1149,19 @@ static void flush_prepared_frame(void)
     set_drawing_scale(1.0f, 1.0f);
 }
 
-/* Record one original 320x240 cutscene image in the Vircon32 display space. */
+/* Return a cutscene image width expressed in legacy 320-pixel source space. */
+static int cutscene_logical_width(const struct generated_runtime_frame *frame)
+{
+    if (frame->native_size)
+        return (frame->width + 1) / 2;
+    return frame->width;
+}
+
+/* Record one cutscene image in the Vircon32 display space.
+ *
+ * Legacy artwork uses 320x240 source pixels and receives the original
+ * 2x/1.5x display transform. Larger manifest rectangles are authored at
+ * display resolution, so they retain their native pixel dimensions. */
 static void record_cutscene_image(int image, int x, int y, int alpha)
 {
     const struct generated_runtime_frame *frame;
@@ -1160,6 +1177,33 @@ static void record_cutscene_image(int image, int x, int y, int alpha)
     source_y = frame->source_y;
     width = frame->width;
     height = frame->height;
+
+    if (frame->native_size) {
+        int display_x = x * 2;
+        int display_y = (y * 3) / 2;
+
+        if (display_x < 0) {
+            source_x -= display_x;
+            width += display_x;
+            display_x = 0;
+        }
+        if (display_y < 0) {
+            source_y -= display_y;
+            height += display_y;
+            display_y = 0;
+        }
+        if (display_x + width > DISPLAY_WIDTH)
+            width = DISPLAY_WIDTH - display_x;
+        if (display_y + height > DISPLAY_HEIGHT)
+            height = DISPLAY_HEIGHT - display_y;
+        if (width <= 0 || height <= 0)
+            return;
+        color = (int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK);
+        record_draw(frame->texture, 0, source_x, source_y,
+                    width, height, display_x, display_y,
+                    1.0f, 1.0f, color);
+        return;
+    }
 
     /* The approach artwork is taller than the viewport and moves through
      * negative coordinates. Crop it explicitly so partially visible images
@@ -1252,16 +1296,17 @@ static void record_cutscene_layer(
     if (layer->alpha_frames > 0 && clock < layer->alpha_frames)
         alpha = clock * 255 / layer->alpha_frames;
     if (layer->wrap_x_delay > 0) {
-        x += ((clock / layer->wrap_x_delay) * layer->wrap_x_step) % source->width;
-        while (x <= -source->width)
-            x += source->width;
-        while (x >= source->width)
-            x -= source->width;
+        int logical_width = cutscene_logical_width(source);
+        x += ((clock / layer->wrap_x_delay) * layer->wrap_x_step) % logical_width;
+        while (x <= -logical_width)
+            x += logical_width;
+        while (x >= logical_width)
+            x -= logical_width;
         record_cutscene_image(image, x, y, alpha);
         if (x > 0)
-            record_cutscene_image(image, x - source->width, y, alpha);
-        else if (x + source->width < 320)
-            record_cutscene_image(image, x + source->width, y, alpha);
+            record_cutscene_image(image, x - logical_width, y, alpha);
+        else if (x + logical_width < 320)
+            record_cutscene_image(image, x + logical_width, y, alpha);
         return;
     }
     record_cutscene_image(image, x, y, alpha);
@@ -1806,8 +1851,11 @@ static void draw_title_background(void)
         define_region_rectangle(frame->source_x, frame->source_y,
                                 frame->width, frame->height);
         set_multiply_color(COLOR_WHITE);
-        set_drawing_scale((float)DISPLAY_WIDTH / (float)frame->width,
-                          (float)DISPLAY_HEIGHT / (float)frame->height);
+        if (frame->native_size)
+            set_drawing_scale(1.0f, 1.0f);
+        else
+            set_drawing_scale((float)DISPLAY_WIDTH / (float)frame->width,
+                              (float)DISPLAY_HEIGHT / (float)frame->height);
         set_drawing_point(0, 0);
         draw_region_zoomed();
         set_drawing_scale(1.0f, 1.0f);
@@ -1825,7 +1873,10 @@ static void draw_title_logo(void)
     define_region_rectangle(frame->source_x, frame->source_y,
                             frame->width, frame->height);
     set_multiply_color(COLOR_WHITE);
-    set_drawing_scale(2.0f, 1.5f);
+    if (frame->native_size)
+        set_drawing_scale(1.0f, 1.0f);
+    else
+        set_drawing_scale(2.0f, 1.5f);
     set_drawing_point(frame->offset_x * 2, (frame->offset_y * 3) / 2);
     draw_region_zoomed();
     set_drawing_scale(1.0f, 1.0f);

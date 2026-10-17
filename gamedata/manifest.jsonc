@@ -12,21 +12,21 @@
   "save_magic": "WESV",
   "title_background": {
     "source": "assets/ui/title/title_atlas.png",
-    "rect": [320, 0, 320, 240]
+    "rect": [0, 360, 640, 360]
   },
   "title_logo": {
     "source": "assets/ui/title/title_atlas.png",
-    "rect": [247, 240, 145, 27],
+    "rect": [239, 720, 145, 27],
     "x": 88,
     "y": 30
   },
   "cutscene_images": [
     { "id": "title_closed_bag", "source": "assets/ui/title/title_atlas.png",
-      "rect": [0, 0, 320, 240] },
+      "rect": [0, 0, 640, 360] },
     { "id": "title_open_bag", "source": "assets/ui/title/title_atlas.png",
-      "rect": [320, 0, 320, 240] },
+      "rect": [0, 360, 640, 360] },
     { "id": "title_version", "source": "assets/ui/title/title_atlas.png",
-      "rect": [0, 240, 247, 84] },
+      "rect": [0, 720, 238, 80] },
     { "id": "intro_forest_front", "source": "assets/cutscene/intro/forest1.png" },
     { "id": "intro_forest_middle", "source": "assets/cutscene/intro/forest2.png" },
     { "id": "intro_forest_back", "source": "assets/cutscene/intro/forest3.png" },

@@ -786,7 +786,7 @@
         {
           "name": "animation_delay",
           "type": "int",
-          "value": 1
+          "value": 8
         },
         {
           "name": "source_image",

@@ -191,7 +191,7 @@
         { "text": "You suspect somebody else?",
           "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
           "next": "erek_alek_eavesdrop" },
-        { "text": "Thank you Erek. That is all I needed to know.", "next": "main_menu" }
+        { "text": "Thank you Erek. That is all I needed to know.", "next": "thanks_goodbye" }
       ]
     },
     {
@@ -207,7 +207,12 @@
     {
       "id": "packed_denial", "speaker": "erek",
       "text": "What do you mean? No ... they weren't. Of course not!",
-      "next": "main_menu"
+      "next": "packed_thanks"
+    },
+    {
+      "id": "packed_thanks", "speaker": "player",
+      "text": "Thank you Erek.",
+      "end": true
     },
     {
       "id": "fingolson_refusal", "speaker": "erek",
@@ -347,20 +352,58 @@
     {
       "id": "erek_insult_reflection", "speaker": "erek",
       "text": "He can be tough when it gets down to business, but why would he want to insult Lady Silverhair before? This makes no sense to me.",
-      "next": "main_menu"
+      "next": "erek_offer_more"
+    },
+    {
+      "id": "erek_offer_more", "speaker": "erek",
+      "text": "I really cannot say why he would do that, but perhaps I can help you with something else instead?",
+      "choices": [
+        { "text": "I tried to talk with Master Fingolson, but he would not open the door. Could you have a word with him perhaps?",
+          "when": { "flag": "bjarn_door_open", "equals": 1 },
+          "next": "fingolson_refusal" },
+        { "text": "That was all for now, Erek. Until later.", "next": "insult_goodbye" }
+      ]
+    },
+    {
+      "id": "insult_goodbye", "speaker": "player",
+      "text": "That was all for now, Erek. Until later.",
+      "end": true
     },
     {
       "id": "erek_catseye_question", "speaker": "erek",
       "text": "Sometimes, a thin narrow band runs across the length of a gem, glowing in the light, see? That gives them the appearance of a cat's eye, hence the name.",
       "choices": [
         { "text": "I see. And Fingolson's stones were truly of such nature?", "next": "erek_catseye_uncertain" },
-        { "text": "Thank you Erek. That is all I needed to know.", "next": "main_menu" }
+        { "text": "Thank you Erek. That is all I needed to know.", "next": "thanks_goodbye" }
       ]
     },
     {
       "id": "erek_catseye_uncertain", "speaker": "erek",
       "text": "Well ... yes ... when looked at in a certain way, under the right light. No wonder your mistress mistook them for Cymophanes.",
-      "next": "main_menu"
+      "choices": [
+        { "text": "I see. Thank you Erek, you've been most helpful.", "next": "helpful_goodbye" },
+        { "text": "Is that your opinion, or that of Master Fingolson?", "next": "erek_defends_fingolson" }
+      ]
+    },
+    {
+      "id": "helpful_goodbye", "speaker": "player",
+      "text": "I see. Thank you Erek, you've been most helpful.",
+      "end": true
+    },
+    {
+      "id": "erek_defends_fingolson", "speaker": "erek",
+      "text": "What do you mean? You are not suggesting that my Master tried to deceive Lady Silverhair?",
+      "next": "low_quality_reason"
+    },
+    {
+      "id": "low_quality_reason", "speaker": "player",
+      "text": "That's not important now. But if the gems were of poor quality, they'd be worthless to her and she'd have no reason to steal them.",
+      "next": "erek_did_not_inspect"
+    },
+    {
+      "id": "erek_did_not_inspect", "speaker": "erek",
+      "text": "I am sorry, but I haven't seen them up close, so I have to rely on my Master's word. I would know the difference if I had them in my hand, but that's unlikely.",
+      "end": true
     },
     {
       "id": "erek_alek_eavesdrop", "speaker": "erek",
@@ -370,7 +413,7 @@
     {
       "id": "erek_alek_eavesdrop_note", "speaker": "player",
       "text": "That is unlikely perhaps, but not impossible.",
-      "next": "main_menu"
+      "end": true
     },
     {
       "id": "erek_employer_confrontation", "speaker": "erek",
@@ -401,16 +444,56 @@
     {
       "id": "erek_truth_accepts", "speaker": "erek",
       "text": "I hope you don't think poorly of me now, Banec. I didn't mean to insult you. But to say nothing about it would have meant to hide the truth. And by now you should know how I think about that.",
-      "next": "main_menu"
+      "next": "erek_ends_truth_argument"
     },
     {
       "id": "erek_truth_argument", "speaker": "erek",
       "text": "Ha! The Master is right, then. Elves and their likes are no company for an upright Dwarf! All you care for is worthless knowledge and useless trinkets.",
-      "next": "main_menu"
+      "next": "player_asks_fingolson_view"
+    },
+    {
+      "id": "player_asks_fingolson_view", "speaker": "player",
+      "text": "Is that what Fingolson says?",
+      "next": "erek_quotes_fingolson"
+    },
+    {
+      "id": "erek_quotes_fingolson", "speaker": "erek",
+      "text": "That are his very words. First I thought he was too extreme in his judgement, but the more I get to see of the world, the more I can see the truth behind his words.",
+      "next": "erek_reconsiders"
+    },
+    {
+      "id": "erek_reconsiders", "speaker": "erek",
+      "text": "Although my feelings tell me that you do not fit into this scheme, Banec. Perhaps I spoke too fast.",
+      "next": "player_asks_trade"
+    },
+    {
+      "id": "player_asks_trade", "speaker": "player",
+      "text": "Perhaps you just shouldn't listen to everything Master Fingolson says. How did he become a tradesman anyway, if he despises the people he has to deal with that much?",
+      "next": "erek_explains_elders"
+    },
+    {
+      "id": "erek_explains_elders", "speaker": "erek",
+      "text": "Usually, the Elders decide what occupation a young Dwarf will practise. They'll take his talents and also their needs into account, but seldom what the individual likes.",
+      "next": "erek_fingolson_trade"
+    },
+    {
+      "id": "erek_fingolson_trade", "speaker": "erek",
+      "text": "Master Fingolson is a skilled merchant, but it is easy to see that this is not what he wanted to be.",
+      "next": "erek_ends_truth_argument"
+    },
+    {
+      "id": "erek_ends_truth_argument", "speaker": "erek",
+      "text": "But no more of this. I don't want to keep you from more important business.",
+      "end": true
     },
     {
       "id": "erek_gem_thanks", "speaker": "player",
       "text": "Thank you Erek. That's all I need to know.",
+      "end": true
+    },
+    {
+      "id": "thanks_goodbye", "speaker": "player",
+      "text": "Thank you Erek. That is all I needed to know.",
       "end": true
     },
     {

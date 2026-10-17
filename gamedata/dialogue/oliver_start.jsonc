@@ -29,7 +29,7 @@
     {
       "id": "introduction", "speaker": "oliver",
       "text": "Oh! I am Oliver, sir. I help Mum and Dad with the Inn. Looking after the stables and such.",
-      "next": "question_menu"
+      "choices": "question_menu"
     },
     {
       "id": "repeat_narration", "speaker": "narrator",
@@ -39,7 +39,10 @@
     {
       "id": "repeat_greeting", "speaker": "oliver",
       "text": "Uh, hello again sir. Do you have more questions?",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Can you tell me something about Waste's Edge, Oliver?", "next": "lady_guest" },
+        { "text": "What do you know about the theft?", "next": "theft_story" }
+      ]
     },
     {
       "id": "question_menu", "speaker": "oliver",
@@ -69,7 +72,10 @@
     {
       "id": "other_guests", "speaker": "oliver",
       "text": "Yes, but they are just ordinary people. Merchants and such.",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Then you better tell me about the Elven Lady, Oliver.", "next": "lady_details" },
+        { "text": "Well, thank you for the information. Until later.", "next": "goodbye" }
+      ]
     },
     {
       "id": "theft", "speaker": "oliver",
@@ -100,7 +106,7 @@
     {
       "id": "stable_noise", "speaker": "oliver",
       "text": "Yeah. Someone must have been in the stables. But when I went and had a look, they were gone.",
-      "next": "question_menu"
+      "next": "goodbye"
     },
     {
       "id": "goodbye", "speaker": "player",

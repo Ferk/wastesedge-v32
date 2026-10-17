@@ -80,7 +80,7 @@
     {
       "id": "jelom_allows_questions", "speaker": "jelom",
       "text": "So I won't prevent you from pestering the folk at the Inn. But should you find out anything, you report to me, you understand! Now, what is it you want from me?",
-      "next": "question_menu"
+      "choices": "question_menu"
     },
     {
       "id": "repeat_greeting", "speaker": "jelom",

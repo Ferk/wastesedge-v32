@@ -220,6 +220,9 @@ int main(void)
     int gem_worthless_flag;
     int direction;
     int animation;
+    int found_clock_animation = 0;
+    int found_barrel_animation = 0;
+    int found_smoke_animation = 0;
 
     world_initialize(&world);
     assert(generated_runtime_scene_count == 23);
@@ -228,10 +231,33 @@ int main(void)
     assert(generated_runtime_save_magic == 0x57455356);
     assert(generated_runtime_save_signature[19] == 1);
     assert(generated_runtime_title_cutscene == GENERATED_DIALOGUE_TITLE_CUTSCENE);
-    assert(generated_runtime_title_background.source_x == 320);
-    assert(generated_runtime_title_background.width == 320);
-    assert(generated_runtime_title_logo.source_x == 247);
+    assert(generated_runtime_title_background.source_x == 0);
+    assert(generated_runtime_title_background.source_y == 360);
+    assert(generated_runtime_title_background.width == 640);
+    assert(generated_runtime_title_background.height == 360);
+    assert(generated_runtime_title_background.native_size);
+    assert(generated_runtime_title_logo.source_x == 239);
     assert(generated_runtime_title_logo.offset_x == 88);
+    /* Animated scenery retains source-specific frame holds and sequences.
+     * These signatures cover the clock's repeated middle frame, the leaking
+     * barrel's accelerating drops, and the normal nine-frame smoke loop. */
+    for (visual_index = 0;
+         visual_index < generated_runtime_object_visual_count;
+         ++visual_index) {
+        const struct generated_runtime_object_visual *visual =
+            &generated_runtime_object_visuals[visual_index];
+        if (visual->frame_count == 4 && visual->cycle_delay == 32)
+            found_clock_animation = 1;
+        if (visual->frame_count == 9 && visual->cycle_delay == 59 &&
+            visual->frame_delays[0] == 40 && visual->frame_delays[1] == 8 &&
+            visual->frame_delays[2] == 4 && visual->frame_delays[3] == 2)
+            found_barrel_animation = 1;
+        if (visual->frame_count == 9 && visual->cycle_delay == 18)
+            found_smoke_animation = 1;
+    }
+    assert(found_clock_animation);
+    assert(found_barrel_animation);
+    assert(found_smoke_animation);
     {
         const struct generated_runtime_dialogue *title =
             &generated_runtime_dialogues[generated_runtime_title_cutscene];
@@ -1131,6 +1157,18 @@ int main(void)
     assert(world_dialogue_choice_count(&world) == 6);
 
     oliver_dialogue = &generated_runtime_dialogues[GENERATED_DIALOGUE_OLIVER_START];
+    {
+        const struct generated_runtime_dialogue_node *introduction =
+            find_dialogue_node(oliver_dialogue,
+                               "Oh! I am Oliver, sir. I help Mum and Dad with "
+                               "the Inn. Looking after the stables and such.");
+        const struct generated_runtime_dialogue_node *menu =
+            find_dialogue_node(oliver_dialogue,
+                               "What would you like to know, sir?");
+        assert(introduction != 0 && menu != 0);
+        assert(introduction->choices == menu->choices);
+        assert(introduction->choice_count == menu->choice_count);
+    }
     for (node_index = 0; node_index < oliver_dialogue->node_count; ++node_index) {
         const struct generated_runtime_dialogue_node *node = &oliver_dialogue->nodes[node_index];
         int choice_index;
@@ -1161,8 +1199,9 @@ int main(void)
                        single_condition_flag(&jelom_question_node->choices[2]));
                 ++alek_fact_bindings;
             }
-            if (strstr(choice->text, "so good in finding stuff out") != 0 &&
-                choice->action_count == 1) {
+            if (choice->action_count == 1 &&
+                choice->actions[0].flag ==
+                    single_condition_flag(&jelom_question_node->choices[3])) {
                 assert(choice->actions[0].flag ==
                        single_condition_flag(&jelom_question_node->choices[3]));
                 assert(choice->actions[0].value == 1);
@@ -1170,8 +1209,10 @@ int main(void)
             }
         }
     }
-    assert(alek_fact_bindings == 1);
-    assert(packed_fact_bindings == 1);
+    /* The original Alek graph repeats this lead in its initial, repeat, and
+     * two follow-up menus; either response to his Erek theory records it. */
+    assert(alek_fact_bindings == 4);
+    assert(packed_fact_bindings == 2);
 
     for (node_index = 0;
          node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_EREK_START].node_count;

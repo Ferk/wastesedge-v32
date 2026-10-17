@@ -55,12 +55,18 @@
     {
       "id": "dislikes_implication", "speaker": "alek",
       "text": "I don't like the implication. It's not wise going around, calling other people thieves.",
-      "next": "need_answers"
+      "choices": [
+        { "text": "So far, I've called you nothing. But if you don't help me with a few answers, I might change my mind.",
+          "next": "need_answers" },
+        { "text": "I daresay being caught eavesdropping on the victim just before his gems are stolen is unwise as well.",
+          "when": { "flag": "know_alek_eavesdrop", "equals": 1 },
+          "next": "alek_eavesdrop_accusation" }
+      ]
     },
     {
       "id": "need_answers", "speaker": "player",
       "text": "So far, I've called you nothing. But if you don't help me with a few answers, I might change my mind.",
-      "next": "question_menu"
+      "next": "answer_questions"
     },
     {
       "id": "not_so_quick", "speaker": "alek",
@@ -73,7 +79,15 @@
     {
       "id": "answer_questions", "speaker": "alek",
       "text": "To hell with you, Half-Elf. What do you want to know?",
-      "next": "question_menu"
+      "choices": [
+        { "text": "What is your business here, then?", "next": "business_answer" },
+        { "text": "Master Orloth says your chamber is below ground, next to the Dwarf's. So did you hear anything unusual in the night of the theft?",
+          "when": { "flag": "know_aleks_room", "equals": 1 },
+          "next": "ask_about_cellar" },
+        { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
+          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "next": "not_spying" }
+      ]
     },
     {
       "id": "repeat_narration", "speaker": "narrator",
@@ -88,40 +102,47 @@
     {
       "id": "repeat_reply", "speaker": "alek",
       "text": "You're getting on my nerves, Half-Elf. Go ahead then, ask your stupid questions.",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Actually, there is nothing you could possibly tell me.", "next": "leave" },
+        { "text": "What is your business here, then?", "next": "business_answer" },
+        { "text": "Master Orloth says your chamber is below ground, next to the Dwarf's. So did you hear anything unusual in the night of the theft?",
+          "when": { "flag": "know_aleks_room", "equals": 1 },
+          "next": "ask_about_cellar" },
+        { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
+          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "next": "not_spying" }
+      ]
     },
     {
       "id": "question_menu", "speaker": "alek",
       "text": "Now do you have any dumb questions left, or can I go back to my drink?",
       "choices": [
-        {
-          "text": "I daresay being caught eavesdropping on the victim just before his gems are stolen is unwise as well.",
-          "when": { "flag": "know_alek_eavesdrop", "equals": 1 },
-          "next": "alek_eavesdrop_accusation"
-        },
         { "text": "So what is your business here, then?", "next": "business_answer" },
         { "text": "Master Orloth says your chamber is below ground, next to the Dwarf's. So did you hear anything unusual in the night of the theft?",
           "when": { "flag": "know_aleks_room", "equals": 1 },
           "next": "ask_about_cellar" },
         { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
           "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
-          "next": "not_spying" },
-        { "text": "Perhaps it's just me, but I'd ask myself why the thief hasn't left Waste's Edge.", "next": "good_question" },
-        { "text": "Actually, there is nothing you could possibly tell me.", "next": "leave" }
+          "next": "not_spying" }
       ]
     },
     {
       "id": "alek_eavesdrop_accusation", "speaker": "alek",
       "text": "Who told you? The little gritsucker? He'll say what his master tells him to say, haven't you noticed?",
-      "choices": [
-        { "text": "Leave the thinking to me and simply answer my questions, will you?", "next": "alek_eavesdrop_admits" },
-        { "text": "I certainly don't need your help. For all I know, you may well be the thief.", "next": "alek_eavesdrop_threat" }
-      ]
+      "next": "alek_eavesdrop_admits"
     },
     {
       "id": "alek_eavesdrop_admits", "speaker": "alek",
       "text": "Come on, don't make a face like that, Half-Elf. Of course I was there. I was on my way to see what all the shouting was about. Looked like my skills might have been needed.",
-      "next": "question_menu"
+      "next": "silverhair_burst_out"
+    },
+    {
+      "id": "silverhair_burst_out", "speaker": "alek",
+      "text": "Next moment, the door's burstin' open and your lovely mistress rushes past ... - I don't think you could call that eavesdropping.",
+      "choices": [
+        { "text": "Leave the thinking to me and simply answer my questions, will you?", "next": "answer_questions" },
+        { "text": "For what would they have needed your skills?", "next": "skills_answer" }
+      ]
     },
     {
       "id": "alek_eavesdrop_threat", "speaker": "alek",
@@ -131,7 +152,14 @@
     {
       "id": "business_answer", "speaker": "alek",
       "text": "If it makes you happy; I made camp here on my way back from Limebruck where I had an ... appointment, which is absolutely none of your concern. I'm just an innocent traveller caught in this bloody mess.",
-      "next": "question_menu"
+      "next": "business_waste_of_time"
+    },
+    {
+      "id": "business_waste_of_time", "speaker": "alek",
+      "text": "So? Was that of any help? I shouldn't think so. A waste of time it was!",
+      "choices": [
+        { "text": "Well, that's it! I have enough of your useless blather. But I shall be watching you!", "next": "end_warning" }
+      ]
     },
     {
       "id": "ask_about_cellar", "speaker": "player",
@@ -165,7 +193,9 @@
     {
       "id": "different_company", "speaker": "alek",
       "text": "If you don't like what you hear from me, why don't you look for different company, Half-Elf?",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Perhaps you are right. Any further conversation would be useless anyway. So I'll leave you ... for now!", "next": "leave" }
+      ]
     },
     {
       "id": "ask_for_proof", "speaker": "player",
@@ -175,7 +205,9 @@
     {
       "id": "no_proof", "speaker": "alek",
       "text": "I don't. But since you are so good in finding stuff out, this shouldn't be a problem for you!",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Well, that's it! I have enough of your useless blather. But I shall be watching you!", "next": "end_warning" }
+      ]
     },
     {
       "id": "gems_guarded", "speaker": "player",
@@ -198,15 +230,13 @@
       "id": "ask_erek_who_packed", "speaker": "alek",
       "text": "You don't believe me? Perhaps you should ask Erek who has packed them then!",
       "choices": [
-        { "text": "I don't. But since you are so good in finding stuff out, this shouldn't be a problem for you!",
+        { "text": "Don't make me laugh. That's the most ridiculous thing I ever heard.",
           "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 1 }],
-          "next": "packed_gems_lead" }
+          "next": "different_company" },
+        { "text": "Do you have any proof of this?",
+          "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 1 }],
+          "next": "no_proof" }
       ]
-    },
-    {
-      "id": "packed_gems_lead", "speaker": "player",
-      "text": "I don't. But since you are so good in finding stuff out, this shouldn't be a problem for you!",
-      "next": "question_menu"
     },
     {
       "id": "not_spying", "speaker": "alek",
@@ -219,17 +249,48 @@
     {
       "id": "skills_answer", "speaker": "alek",
       "text": "You disappoint me, Half-Elf. The poor Dwarfs were practically attacked by that furious woman. How should I know she wasn't about to turn them into toads or something?",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Don't make me laugh. That's the most ridiculous thing I ever heard.", "next": "different_company" },
+        { "text": "Don't tell me you thought Fingolson would enrol you as his guard?", "next": "guard_answer" }
+      ]
     },
     {
       "id": "guard_answer", "speaker": "alek",
       "text": "So what? You think I stole his gems because he didn't accept my offer?",
-      "next": "question_menu"
+      "choices": [
+        { "text": "I think you wouldn't need any reason at all. However, until I find a clue as to your guilt, I'll have to leave you to yourself.", "next": "end_suspicion" }
+      ]
     },
     {
       "id": "good_question", "speaker": "alek",
       "text": "Good question, isn't it! Now if I were you, Half-Elf, I'd be off to a quiet corner and made some use of what brain I had.",
-      "next": "question_menu"
+      "choices": [
+        { "text": "Perhaps you are right. Any further conversation would be useless anyway. So I'll leave you ... for now!", "next": "leave" },
+        { "text": "Very funny! Should I ever need a fool, I'll send for you.", "next": "smartass_help" }
+      ]
+    },
+    {
+      "id": "smartass_help", "speaker": "alek",
+      "text": "Just tryin' to help. But a smartass like you doesn't need any help, do you?",
+      "choices": [
+        { "text": "I certainly don't need yours. For all I know, you may well be the thief.", "next": "alek_eavesdrop_threat" },
+        { "text": "Simply answering my questions would be help enough!", "next": "ask_anyway" }
+      ]
+    },
+    {
+      "id": "ask_anyway", "speaker": "alek",
+      "text": "If you say so. Then go on, ask what you want, even if it's not getting you anywhere.",
+      "choices": "question_menu"
+    },
+    {
+      "id": "end_warning", "speaker": "player",
+      "text": "Well, that's it! I have enough of your useless blather. But I shall be watching you!",
+      "end": true
+    },
+    {
+      "id": "end_suspicion", "speaker": "player",
+      "text": "I think you wouldn't need any reason at all. However, until I find a clue as to your guilt, I'll have to leave you to yourself.",
+      "end": true
     },
     {
       "id": "leave", "speaker": "player",

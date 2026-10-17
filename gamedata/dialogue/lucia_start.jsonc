@@ -189,12 +189,12 @@
     {
       "id": "ask_talan", "speaker": "lucia",
       "text": "But perhaps you should ask Talan, as he was on duty that night. If somebody noticed something, then it was him.",
-      "next": "question_menu"
+      "end": true
     },
     {
       "id": "fingolson_regular", "speaker": "lucia",
       "text": "He stays here quite often, and has done that for many years. I wouldn't say that I know him well, though. He behaves quite reserved and formal, but he is a pleasant character.",
-      "next": "question_menu"
+      "end": true
     },
     {
       "id": "talan_practising", "speaker": "lucia",

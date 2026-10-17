@@ -160,6 +160,10 @@ def manifest_frame(game_root: Path, raw_frame: object,
         "height": frame_height,
         "offset_x": offset_x,
         "offset_y": offset_y,
+        # Full-screen artwork historically used 320x240 source pixels and is
+        # expanded by the Vircon32 presentation layer.  A larger authored
+        # rectangle is already display-resolution artwork, so preserve it.
+        "native_size": frame_width > 320 and frame_height > 240,
     }
 
 
@@ -587,6 +591,10 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
             if speaker not in speaker_ids:
                 raise ContentError(f"{path}: node {node_id} refers to unknown speaker {speaker!r}")
         dialogue_start_cases(document, path, node_ids)
+        nodes_by_id = {
+            identifier(node.get("id"), f"{path} node id"): node
+            for node in nodes
+        }
         for node in nodes:
             node_id = identifier(node.get("id"), f"{path} node id")
             speaker_id = identifier(node.get("speaker"), f"{path} node {node_id} speaker")
@@ -594,9 +602,33 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                 identifier(node["on_end"], f"{path} node {node_id} on_end")
             if "next" in node and identifier(node["next"], f"{path} node next") not in node_ids:
                 raise ContentError(f"{path}: node {node_id!r} refers to an unknown next node")
-            if speaker_roles[speaker_id] == "player" and node.get("choices"):
+            raw_choices = node.get("choices", [])
+            if isinstance(raw_choices, str):
+                choice_source = identifier(
+                    raw_choices, f"{path} node {node_id} choices reference")
+                if choice_source == node_id:
+                    raise ContentError(
+                        f"{path}: node {node_id!r} cannot reference its own choices")
+                if choice_source not in nodes_by_id:
+                    raise ContentError(
+                        f"{path}: node {node_id!r} refers to unknown choices node "
+                        f"{choice_source!r}")
+                if "choices" not in nodes_by_id[choice_source]:
+                    raise ContentError(
+                        f"{path}: choices node {choice_source!r} must contain a literal array")
+                raw_choices = nodes_by_id[choice_source]["choices"]
+                if isinstance(raw_choices, str):
+                    raise ContentError(
+                        f"{path}: choices reference {node_id!r} -> {choice_source!r} "
+                        "must target a literal choices array")
+                if not isinstance(raw_choices, list):
+                    raise ContentError(
+                        f"{path}: choices node {choice_source!r} must contain an array")
+            else:
+                raw_choices = expect(raw_choices, list, f"{path} node {node_id} choices")
+            if speaker_roles[speaker_id] == "player" and raw_choices:
                 raise ContentError(f"{path}: player response node {node_id!r} cannot contain choices")
-            for choice in node.get("choices", []):
+            for choice in raw_choices:
                 choice = expect(choice, dict, f"{path} choice")
                 if "next" in choice and identifier(choice["next"], f"{path} choice next") not in node_ids:
                     raise ContentError(f"{path}: choice refers to an unknown next node")
@@ -1503,33 +1535,51 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
             raise ContentError(f"{path}: dialogue must contain at least one node")
         node_index = {identifier(expect(node, dict, f"{path}.node").get("id"), f"{path} node id"): index
                       for index, node in enumerate(raw_nodes)}
+        choices_owner: list[int] = []
+        for index, raw_node in enumerate(raw_nodes):
+            node = expect(raw_node, dict, f"{path}.node")
+            raw_choices = node.get("choices", [])
+            if isinstance(raw_choices, str):
+                choices_owner.append(node_index[identifier(
+                    raw_choices, f"{path} node choices reference")])
+            else:
+                choices_owner.append(index)
         starts = dialogue_start_cases(document, path, set(node_index))
         for start in starts:
             if start["flag"] is not None:
                 flags.add(str(start["flag"]))
         nodes: list[dict[str, object]] = []
+        compiled_choices: dict[int, list[dict[str, object]]] = {}
         for index, raw_node in enumerate(raw_nodes):
             node = expect(raw_node, dict, f"{path}.node")
-            choices: list[dict[str, object]] = []
-            for raw_choice in expect(node.get("choices", []), list, f"{path} choices"):
-                choice = expect(raw_choice, dict, f"{path} choice")
-                conditions = dialogue_conditions(
-                    choice.get("when"), f"{path} choice condition")
-                for condition in conditions:
-                    flags.add(str(condition["flag"]))
-                actions: list[dict[str, int]] = []
-                for raw_action in expect(choice.get("actions", []), list, f"{path} choice actions"):
-                    action = expect(raw_action, dict, f"{path} choice action")
-                    flag = identifier(action.get("flag"), f"{path} choice action flag")
-                    flags.add(flag)
-                    actions.append({"flag": flag, "value": integer(action.get("value"), f"{path} choice action value")})
-                choices.append({
-                    "text": expect(choice.get("text"), str, f"{path} choice text"),
-                    "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
-                    "actions": actions,
-                    "conditions": conditions,
-                    "repeatable": bool(choice.get("repeatable", False)),
-                })
+            owner = choices_owner[index]
+            if owner not in compiled_choices:
+                owner_node = expect(raw_nodes[owner], dict, f"{path}.node")
+                owner_choices: list[dict[str, object]] = []
+                for raw_choice in expect(owner_node.get("choices", []), list, f"{path} choices"):
+                    choice = expect(raw_choice, dict, f"{path} choice")
+                    conditions = dialogue_conditions(
+                        choice.get("when"), f"{path} choice condition")
+                    for condition in conditions:
+                        flags.add(str(condition["flag"]))
+                    actions: list[dict[str, int]] = []
+                    for raw_action in expect(choice.get("actions", []), list, f"{path} choice actions"):
+                        action = expect(raw_action, dict, f"{path} choice action")
+                        flag = identifier(action.get("flag"), f"{path} choice action flag")
+                        flags.add(flag)
+                        actions.append({
+                            "flag": flag,
+                            "value": integer(action.get("value"), f"{path} choice action value"),
+                        })
+                    owner_choices.append({
+                        "text": expect(choice.get("text"), str, f"{path} choice text"),
+                        "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
+                        "actions": actions,
+                        "conditions": conditions,
+                        "repeatable": bool(choice.get("repeatable", False)),
+                    })
+                compiled_choices[owner] = owner_choices
+            choices = compiled_choices[owner]
             explicit_next = node.get("next")
             if explicit_next is not None:
                 next_node = node_index[identifier(explicit_next, f"{path} node next")]
@@ -1561,6 +1611,7 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 "text": expect(node.get("text"), str, f"{path} node text"),
                 "speaker": speaker_index[speaker_id],
                 "choices": choices,
+                "choices_owner": owner if choices else -1,
                 "next": next_node,
                 "auto_advance_frames": auto_advance_frames,
                 "hold_at_end": int(hold_at_end),
@@ -1801,11 +1852,16 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 script_dialogues[script_id] = dialogue_id
                 break
     flag_index = {flag: index for index, flag in enumerate(sorted(flags))}
+    converted_choice_lists: set[int] = set()
     for dialogue in dialogues:
         for start in dialogue["starts"]:
             if start["flag"] is not None:
                 start["flag"] = flag_index[str(start["flag"])]
         for node in dialogue["nodes"]:
+            choice_list_identity = id(node["choices"])
+            if choice_list_identity in converted_choice_lists:
+                continue
+            converted_choice_lists.add(choice_list_identity)
             for choice in node["choices"]:
                 for condition in choice["conditions"]:
                     condition["flag"] = flag_index[str(condition["flag"])]
@@ -2107,6 +2163,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                     f"{description}: object visual {visual_key!r} uses inconsistent animation_delay")
             return visual_key
         frames: list[dict[str, object]] = []
+        frame_delays: list[int] = []
         candidates: list[tuple[int, dict[str, object]]] = []
         for candidate in tiles.values():
             candidate_properties = expect(candidate["properties"], dict,
@@ -2129,13 +2186,40 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 "offset_x": integer(candidate_properties.get("offset_x", 0), f"{description} object offset_x"),
                 "offset_y": integer(candidate_properties.get("offset_y", 0), f"{description} object offset_y"),
             }
+            frame_delay = integer(candidate_properties.get("animation_delay", animation_delay),
+                                  f"{description} object animation_delay")
+            if animation_delay > 0 and frame_delay <= 0:
+                raise ContentError(
+                    f"{description}: animated object {source_object!r} frame "
+                    f"{image_index} delay must be positive")
             frames.append(frame)
+            frame_delays.append(frame_delay)
             resources.add(str(frame["image"]))
         if not frames:
             raise ContentError(f"{description}: object visual {visual_key!r} has no frames")
+        if animation_delay > 0:
+            first_properties = expect(candidates[0][1]["properties"], dict,
+                                      f"{description} object tile properties")
+            raw_sequence = first_properties.get("animation_sequence")
+            if raw_sequence is not None:
+                if not isinstance(raw_sequence, str):
+                    raise ContentError(
+                        f"{description}: object animation_sequence must be a string")
+                try:
+                    sequence = [int(part.strip()) for part in raw_sequence.split(",")]
+                except ValueError as error:
+                    raise ContentError(
+                        f"{description}: object animation_sequence must contain integers") from error
+                if not sequence or any(index < 0 or index >= len(frames)
+                                       for index in sequence):
+                    raise ContentError(
+                        f"{description}: object animation_sequence references a missing frame")
+                frames = [frames[index] for index in sequence]
+                frame_delays = [frame_delays[index] for index in sequence]
         raw_object_visuals[visual_key] = {
             "frames": frames,
             "animation_delay": animation_delay if len(frames) > 1 else 0,
+            "frame_delays": frame_delays,
         }
         return visual_key
 
@@ -2732,7 +2816,10 @@ def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: i
 #ifndef WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 #define WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 
-struct generated_runtime_frame { int texture, source_x, source_y, width, height, offset_x, offset_y; };
+struct generated_runtime_frame {
+    int texture, source_x, source_y, width, height, offset_x, offset_y;
+    int native_size;
+};
 struct generated_runtime_actor_visual {
     int base_x, base_y;
     struct generated_runtime_frame standing[4][4];
@@ -2749,7 +2836,12 @@ struct generated_runtime_actor {
 struct generated_runtime_collision { int x, y, width, height, walkability; };
 struct generated_runtime_navigation_blocker { int x, y, width, height; };
 struct generated_runtime_background { struct generated_runtime_frame frame; int x, y; };
-struct generated_runtime_object_visual { const struct generated_runtime_frame *frames; int frame_count; int frame_delay; };
+struct generated_runtime_object_visual {
+    const struct generated_runtime_frame *frames;
+    const int *frame_delays;
+    int frame_count;
+    int cycle_delay;
+};
 struct generated_runtime_scenery { struct generated_runtime_frame frame; int x, y, depth, alpha, definition, state_slot, initial_state, visual; };
 struct generated_runtime_entity { int visual, tile_x, tile_y, facing, blocks_movement, player_controlled, interaction_dialogue, definition, initially_present; };
 struct generated_runtime_spawn { int tile_x, tile_y, facing; };
@@ -2921,14 +3013,15 @@ extern const int generated_runtime_cutscene_image_count;
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
     if frame is None:
-        return "{ -1, 0, 0, 0, 0, 0, 0 }"
+        return "{ -1, 0, 0, 0, 0, 0, 0, 0 }"
     frame = expect(frame, dict, "runtime frame")
-    return "{ %d, %d, %d, %d, %d, %d, %d }" % (
+    return "{ %d, %d, %d, %d, %d, %d, %d, %d }" % (
         resource_index[str(frame["image"])], integer(frame.get("source_x", 0), "runtime frame source_x"),
         integer(frame.get("source_y", 0), "runtime frame source_y"),
         integer(frame["width"], "runtime frame width"),
         integer(frame["height"], "runtime frame height"), integer(frame["offset_x"], "runtime frame offset_x"),
         integer(frame["offset_y"], "runtime frame offset_y"),
+        1 if frame.get("native_size", False) else 0,
     )
 
 
@@ -3052,9 +3145,15 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append(f"static const struct generated_runtime_frame generated_runtime_object_frames_{index}[] = {{")
         lines.extend("    %s," % frame_initializer(frame, resource_index) for frame in visual["frames"])
         lines.append("};")
+        lines.append(f"static const int generated_runtime_object_delays_{index}[] = {{ " +
+                     ", ".join(str(value) for value in visual["frame_delays"]) + " };")
     lines.append("const struct generated_runtime_object_visual generated_runtime_object_visuals[] = {")
     for index, visual in enumerate(object_visuals):
-        lines.append(f"    {{ generated_runtime_object_frames_{index}, {len(visual['frames'])}, {int(visual.get('animation_delay', 0))} }},")
+        cycle_delay = sum(int(value) for value in visual["frame_delays"])
+        lines.append(
+            f"    {{ generated_runtime_object_frames_{index}, "
+            f"generated_runtime_object_delays_{index}, {len(visual['frames'])}, "
+            f"{cycle_delay} }},")
     lines.append("};")
     lines.append(f"const int generated_runtime_object_visual_count = {len(object_visuals)};\n")
     for index, script in enumerate(scripts):
@@ -3206,6 +3305,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         for node_index, node in enumerate(dialogue["nodes"]):
             lines.append(f"static const int generated_runtime_dialogue_node_glyphs_{dialogue_index}_{node_index}[] = {{ " +
                          ", ".join(str(glyph) for glyph in node["text_glyphs"]) + " };")
+            if node["choices_owner"] != node_index:
+                continue
             for choice_index, choice in enumerate(node["choices"]):
                 lines.append(f"static const int generated_runtime_dialogue_choice_glyphs_{dialogue_index}_{node_index}_{choice_index}[] = {{ " +
                              ", ".join(str(glyph) for glyph in choice["text_glyphs"]) + " };")
@@ -3236,7 +3337,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                 lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_node generated_runtime_dialogue_nodes_{dialogue_index}[] = {{")
         for node_index, node in enumerate(dialogue["nodes"]):
-            choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node_index}"
+            choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node['choices_owner']}"
                             if node["choices"] else "0")
             lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d }, %s, "
                          "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
@@ -3373,6 +3474,9 @@ def compile_content(project_root: Path) -> None:
             "source_y": source_y,
             "offset_x": 0,
             "offset_y": 0,
+            # Keep high-resolution cutscene frames at their authored display
+            # size instead of applying the legacy 320x240 presentation scale.
+            "native_size": frame_width > 320 and frame_height > 240,
         })
     cutscene_images.sort(key=lambda item: str(item["id"]))
     cutscene_image_index = {

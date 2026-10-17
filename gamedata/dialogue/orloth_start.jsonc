@@ -173,7 +173,7 @@
       "id": "silverhair_released_help",
       "speaker": "orloth",
       "text": "Very well. Is there something else you wish to know then, Banec?",
-      "next": "help_menu"
+      "choices": "help_menu"
     },
     {
       "id": "repeat_greeting",
@@ -345,7 +345,7 @@
           "next": "dwarves" },
         { "text": "Thank you Master Redwyne. I think I have heard enough of this.",
           "actions": [{ "op": "set", "flag": "know_aleks_room", "value": 1 }],
-          "next": "help_menu" }
+          "next": "goodbye" }
       ]
     },
     {
@@ -360,7 +360,7 @@
       "text": "I still wonder why he became a tradesman, what with that aversion to other people. However, he is as honourable as a Dwarf can be. That's why I'm still a bit surprised about his behaviour towards Lady Silverhair.",
       "choices": [
         { "text": "An impolite Dwarf isn't the most pressing problem right now. So please go on.", "next": "other_guests" },
-        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
+        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "goodbye" }
       ]
     },
     {
@@ -390,7 +390,7 @@
       "text": "I hope I've given you an idea of the people at Waste's Edge. A colourful crowd for sure, but if you'd ask me to point out the thief, I couldn't. I'll support your efforts as good as I can, though.",
       "choices": [
         { "text": "I'd like to know what exactly happened.", "next": "events_intro" },
-        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
+        { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "goodbye" }
       ]
     },
     {
@@ -435,7 +435,7 @@
           "actions": [{ "op": "set", "flag": "know_bjarns_insult", "value": 1 }],
           "next": "silverhair_arrival" },
         { "text": "Could you tell me something about your guests?", "next": "frostbloom" },
-        { "text": "I think you were finished.", "next": "help_menu" }
+        { "text": "I think you were finished.", "next": "goodbye" }
       ]
     },
     {
@@ -469,7 +469,7 @@
         { "text": "How was the theft discovered?",
           "actions": [{ "op": "set", "flag": "know_erek", "value": 1 }],
           "next": "theft_discovery" },
-        { "text": "I think you were finished.", "next": "help_menu" }
+        { "text": "I think you were finished.", "next": "goodbye" }
       ]
     },
     {
@@ -508,7 +508,7 @@
       "text": "I have never seen Master Fingolson so enraged and emotional. He was practically fuming with anger. Whatever the argument was about, it must have hurt him deeply.",
       "choices": [
         { "text": "And what about the theft? How was that discovered, then?", "next": "theft_discovery" },
-        { "text": "Thank you Master Redwyne, that's all I wanted to hear.", "next": "help_menu" }
+        { "text": "Thank you Master Redwyne, that's all I wanted to hear.", "next": "goodbye" }
       ]
     },
     {
@@ -535,7 +535,7 @@
       "text": "That was creepy, I tell you. To know that the thief was amongst us at that moment. But I had never thought that it would be the Lady Silverhair!",
       "choices": [
         { "text": "Why was the Lady Silverhair accused of the theft?", "next": "not_argument_alone" },
-        { "text": "Thank you Master Redwyne, that's all I wanted to hear.", "next": "help_menu" }
+        { "text": "Thank you Master Redwyne, that's all I wanted to hear.", "next": "goodbye" }
       ]
     },
     {
@@ -554,7 +554,7 @@
       "id": "lucia_wastesedge_end",
       "speaker": "orloth",
       "text": "But I am forgetting myself. Lucia's right when she says I'd talk too much. Not that she is much better in that respect. Excuse my rambling, Banec. There must be other things you want to know.",
-      "next": "help_menu"
+      "choices": "help_menu"
     }
   ]
 }
