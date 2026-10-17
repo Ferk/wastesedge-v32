@@ -94,6 +94,11 @@
       "id": "question_menu", "speaker": "alek",
       "text": "Now do you have any dumb questions left, or can I go back to my drink?",
       "choices": [
+        {
+          "text": "I daresay being caught eavesdropping on the victim just before his gems are stolen is unwise as well.",
+          "when": { "flag": "know_alek_eavesdrop", "equals": 1 },
+          "next": "alek_eavesdrop_accusation"
+        },
         { "text": "So what is your business here, then?", "next": "business_answer" },
         { "text": "Master Orloth says your chamber is below ground, next to the Dwarf's. So did you hear anything unusual in the night of the theft?",
           "when": { "flag": "know_aleks_room", "equals": 1 },
@@ -104,6 +109,24 @@
         { "text": "Perhaps it's just me, but I'd ask myself why the thief hasn't left Waste's Edge.", "next": "good_question" },
         { "text": "Actually, there is nothing you could possibly tell me.", "next": "leave" }
       ]
+    },
+    {
+      "id": "alek_eavesdrop_accusation", "speaker": "alek",
+      "text": "Who told you? The little gritsucker? He'll say what his master tells him to say, haven't you noticed?",
+      "choices": [
+        { "text": "Leave the thinking to me and simply answer my questions, will you?", "next": "alek_eavesdrop_admits" },
+        { "text": "I certainly don't need your help. For all I know, you may well be the thief.", "next": "alek_eavesdrop_threat" }
+      ]
+    },
+    {
+      "id": "alek_eavesdrop_admits", "speaker": "alek",
+      "text": "Come on, don't make a face like that, Half-Elf. Of course I was there. I was on my way to see what all the shouting was about. Looked like my skills might have been needed.",
+      "next": "question_menu"
+    },
+    {
+      "id": "alek_eavesdrop_threat", "speaker": "alek",
+      "text": "Even if I was, I bet you could never prove it, Half-Elf. You wouldn't recognise a clue if someone pushed your pretty nose into it.",
+      "next": "question_menu"
     },
     {
       "id": "business_answer", "speaker": "alek",

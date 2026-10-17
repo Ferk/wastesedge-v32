@@ -1570,6 +1570,8 @@ int main(void)
     /* First contact uses the introduction; setting its persistent flag makes
      * the next interaction begin with Orloth's ordinary inquiry. */
     orloth->schedule = -1;
+    world.flags[generated_runtime_dialogues[GENERATED_DIALOGUE_ORLOTH_START]
+                    .starts[0].flag] = 0;
     world.active_script = GENERATED_SCRIPT_ENTER_REDWYNE_INN;
     world.script_action = 0;
     world.script_wait = 0;

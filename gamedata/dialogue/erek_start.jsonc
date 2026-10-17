@@ -106,6 +106,12 @@
             { "op": "set", "flag": "know_argument", "value": 1 }
           ],
           "next": "argument_intro" },
+        { "text": "Master Orloth told me of an impolite remark Fingolson made towards Lady Silverhair on her arrival.",
+          "when": { "flag": "know_bjarns_insult", "equals": 1 },
+          "next": "erek_insult_surprise" },
+        { "text": "You found out that I work for Lady Silverhair. I should have told you earlier.",
+          "when": { "flag": "orloth_told_about_silverhair", "equals": 1 },
+          "next": "erek_employer_confrontation" },
         { "text": "Did you pack Master Fingolson's gems that evening, Erek?",
           "when": { "flag": "ask_packed_gems", "equals": 1 },
           "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 2 }],
@@ -180,7 +186,13 @@
     {
       "id": "erek_end_argument", "speaker": "erek",
       "text": "And with that, she left us alone.",
-      "next": "main_menu"
+      "choices": [
+        { "text": "Wait a moment! What exactly is a Catseye?", "next": "erek_catseye_question" },
+        { "text": "You suspect somebody else?",
+          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "next": "erek_alek_eavesdrop" },
+        { "text": "Thank you Erek. That is all I needed to know.", "next": "main_menu" }
+      ]
     },
     {
       "id": "packed_answer", "speaker": "erek",
@@ -326,6 +338,75 @@
           "actions": [{ "op": "set", "flag": "gem_worthless", "value": 3 }],
           "next": "erek_gem_thanks" }
       ]
+    },
+    {
+      "id": "erek_insult_surprise", "speaker": "erek",
+      "text": "I ... I'm sorry, but that is news to me. It must have happened while I was unpacking our luggage. Although to tell the truth, it does not sound like Master Fingolson at all.",
+      "next": "erek_insult_reflection"
+    },
+    {
+      "id": "erek_insult_reflection", "speaker": "erek",
+      "text": "He can be tough when it gets down to business, but why would he want to insult Lady Silverhair before? This makes no sense to me.",
+      "next": "main_menu"
+    },
+    {
+      "id": "erek_catseye_question", "speaker": "erek",
+      "text": "Sometimes, a thin narrow band runs across the length of a gem, glowing in the light, see? That gives them the appearance of a cat's eye, hence the name.",
+      "choices": [
+        { "text": "I see. And Fingolson's stones were truly of such nature?", "next": "erek_catseye_uncertain" },
+        { "text": "Thank you Erek. That is all I needed to know.", "next": "main_menu" }
+      ]
+    },
+    {
+      "id": "erek_catseye_uncertain", "speaker": "erek",
+      "text": "Well ... yes ... when looked at in a certain way, under the right light. No wonder your mistress mistook them for Cymophanes.",
+      "next": "main_menu"
+    },
+    {
+      "id": "erek_alek_eavesdrop", "speaker": "erek",
+      "text": "Between you and me, this mercenary, Alek, was creeping outside the parlour during negotiations. Lady Silverhair nearly bumped into him when she rushed out.",
+      "next": "erek_alek_eavesdrop_note"
+    },
+    {
+      "id": "erek_alek_eavesdrop_note", "speaker": "player",
+      "text": "That is unlikely perhaps, but not impossible.",
+      "next": "main_menu"
+    },
+    {
+      "id": "erek_employer_confrontation", "speaker": "erek",
+      "text": "Why haven't you told me that you work for Lady Silverhair!?",
+      "choices": [
+        { "text": "I did not know that this was of any importance to you, Erek.", "next": "erek_truth_rebuke" },
+        { "text": "Look Erek, I'm sorry that I said nothing about being Lady Silverhair's man. But believe me, I just want to find out the truth, nothing else.", "next": "erek_truth_apology" }
+      ]
+    },
+    {
+      "id": "erek_truth_rebuke", "speaker": "erek",
+      "text": "You ..., you ... didn't know!? It's the truth! Of course it is important to me! You are familiar with the prime suspect, but you deem it unnecessary to tell me!",
+      "next": "erek_truth_creed"
+    },
+    {
+      "id": "erek_truth_apology", "speaker": "erek",
+      "text": "The truth! How do you expect to uncover the truth, if you don't carry it within yourself!? Every evil begins with a lie, and as long as you conceal the truth, you are no better than the thief.",
+      "next": "erek_truth_creed"
+    },
+    {
+      "id": "erek_truth_creed", "speaker": "erek",
+      "text": "You should know that to a Dwarf, the truth is a virtue; it is practically carved into his bones. The day a lie parts the lips of a Dwarf is the day the world comes to its end!",
+      "choices": [
+        { "text": "I don't understand much of dwarvish philosophy, but if the truth is so important to you, Erek, then I am sorry.", "next": "erek_truth_accepts" },
+        { "text": "I don't know in what world you are living, Erek, but I doubt that it is the real one.", "next": "erek_truth_argument" }
+      ]
+    },
+    {
+      "id": "erek_truth_accepts", "speaker": "erek",
+      "text": "I hope you don't think poorly of me now, Banec. I didn't mean to insult you. But to say nothing about it would have meant to hide the truth. And by now you should know how I think about that.",
+      "next": "main_menu"
+    },
+    {
+      "id": "erek_truth_argument", "speaker": "erek",
+      "text": "Ha! The Master is right, then. Elves and their likes are no company for an upright Dwarf! All you care for is worthless knowledge and useless trinkets.",
+      "next": "main_menu"
     },
     {
       "id": "erek_gem_thanks", "speaker": "player",

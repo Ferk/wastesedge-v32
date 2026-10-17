@@ -2,6 +2,10 @@
   "id": "talan_start",
   "start": [
     {
+      "node": "reconciliation_greeting",
+      "when": { "flag": "told_on_talan", "equals": 1 }
+    },
+    {
       "node": "repeat_greeting",
       "when": { "flag": "talan_apologised", "equals": 1 }
     },
@@ -23,6 +27,28 @@
     }
   ],
   "nodes": [
+    {
+      "id": "reconciliation_greeting",
+      "speaker": "talan",
+      "text": "Ah, Banec, hello.",
+      "choices": [{
+        "text": "Hi there, Talan. Look, I am sorry that I got you into trouble with Jelom.",
+        "actions": [{ "op": "set", "flag": "told_on_talan", "value": 2 }],
+        "next": "talan_forgives"
+      }]
+    },
+    {
+      "id": "talan_forgives",
+      "speaker": "talan",
+      "text": "No, you did what you had to do, and it was only right that I got in trouble for leaving my post. And I owe you a big favour for covering for me!",
+      "next": "player_thanks_talan"
+    },
+    {
+      "id": "player_thanks_talan",
+      "speaker": "player",
+      "text": "All the same, I am still sorry for getting you into trouble with Jelom. Thank you for understanding.",
+      "end": true
+    },
     {
       "id": "gate_apology",
       "speaker": "talan",
@@ -93,6 +119,16 @@
       "text": "Oh... that. Yes, how may I help you?",
       "choices": [
         {
+          "text": "What do you make of Master Fingolson's unusual visit?",
+          "when": { "flag": "know_argument", "equals": 1 },
+          "next": "talan_bjarn_visit"
+        },
+        {
+          "text": "I hear that Alek Endhelm was very interested in Fingolson's business. Have you noticed him doing anything suspicious?",
+          "when": { "flag": "know_alek_eavesdrop", "equals": 1 },
+          "next": "talan_alek_busybody"
+        },
+        {
           "text": "I wish you had not lied to me about the night of the theft.",
           "when": { "flag": "know_talan_singing", "equals": 1 },
           "next": "talan_confronted"
@@ -106,6 +142,12 @@
           "next": "player_asks_night_again"
         }
       ]
+    },
+    {
+      "id": "talan_alek_busybody",
+      "speaker": "talan",
+      "text": "Oh, he's a nasty sort, he is, sir. But other than being a busybody, I haven't noticed him doing anything that would lead me to believe that he is the thief.",
+      "next": "talan_more_questions"
     },
     {
       "id": "player_asks_night",
@@ -123,6 +165,29 @@
       "id": "talan_heard_nothing",
       "speaker": "talan",
       "text": "No... no, not at all.",
+      "choices": [
+        { "text": "Couldn't it be that you missed what there was to see or hear?", "next": "talan_may_have_missed" },
+        { "text": "But Lady Frostbloom told me about a noise she heard.",
+          "when": { "flag": "know_noise", "equals": 2 }, "next": "talan_frostbloom_noise" },
+        { "text": "I see. I have another question.", "next": "talan_more_questions" }
+      ]
+    },
+    {
+      "id": "talan_may_have_missed", "speaker": "talan",
+      "text": "Well, I did not notice anything, Banec. That's the truth!",
+      "choices": [
+        { "text": "It had better be, my friend.", "next": "talan_more_questions" },
+        { "text": "If I want to prove Lady Silverhair's innocence, I have little other choice, I fear.", "next": "talan_more_questions" }
+      ]
+    },
+    {
+      "id": "talan_frostbloom_noise", "speaker": "talan",
+      "text": "Frostbloom? Then it must have been a Yeti, I suppose.",
+      "next": "talan_frostbloom_serious"
+    },
+    {
+      "id": "talan_frostbloom_serious", "speaker": "talan",
+      "text": "But seriously, I did not notice anything. I'm sorry, Banec.",
       "next": "talan_more_questions"
     },
     {
@@ -130,6 +195,16 @@
       "speaker": "talan",
       "text": "If you do not have any more questions ...",
       "choices": [
+        {
+          "text": "What do you make of Master Fingolson's unusual visit?",
+          "when": { "flag": "know_argument", "equals": 1 },
+          "next": "talan_bjarn_visit"
+        },
+        {
+          "text": "But Lady Frostbloom told me about a noise she heard.",
+          "when": { "flag": "know_noise", "equals": 2 },
+          "next": "talan_frostbloom_noise"
+        },
         {
           "text": "I wish you had not lied to me about the night of the theft.",
           "when": { "flag": "know_talan_singing", "equals": 1 },
@@ -146,6 +221,26 @@
           "next": "player_goodbye"
         }
       ]
+    },
+    {
+      "id": "talan_bjarn_visit", "speaker": "talan",
+      "text": "I don't know if there is any coincidence, but this visit of Master Fingolson is very unusual. You see, he is quite a regular here. He comes every other month or so, and usually stays for a week before going back.",
+      "next": "talan_bjarn_visits_before"
+    },
+    {
+      "id": "talan_bjarn_visits_before", "speaker": "talan",
+      "text": "Usually he shows up a few days before the client, just to relax, I guess. Until about a year ago, he would spend this time in the common room, drinking ale and talking with Erek, his apprentice.",
+      "next": "talan_bjarn_changes"
+    },
+    {
+      "id": "talan_bjarn_changes", "speaker": "talan",
+      "text": "About a year ago, things changed. When he came, he came alone. He still showed up a couple of days ahead of the client, but he no longer visited the common room much. He just stayed down in his room.",
+      "next": "talan_bjarn_recent"
+    },
+    {
+      "id": "talan_bjarn_recent", "speaker": "talan",
+      "text": "But at this most recent visit, Bjarn got here the morning of Lady Silverhair's arrival, which was a little strange. What's more, he brought Erek again, although I thought he had finished his apprenticeship and moved on long ago.",
+      "next": "talan_more_questions"
     },
     {
       "id": "talan_confronted", "speaker": "talan",

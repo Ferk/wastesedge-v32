@@ -60,6 +60,10 @@
       "text": "My name is Tristan Illig and I'm a merchant by trade, no thieftaker. All I know is that they are making a big fuss about a few worthless gems stolen from that Dwarf, Fingolson.",
       "choices": [
         {
+          "text": "That is what I am doing, Master Illig. I have a few questions for you.",
+          "next": "tristan_polite_refusal"
+        },
+        {
           "text": "Right then, sorry to bother you, Master Illig.",
           "next": "player_leave"
         },
@@ -68,6 +72,19 @@
           "next": "player_who"
         }
       ]
+    },
+    {
+      "id": "tristan_polite_refusal", "speaker": "tristan",
+      "text": "Well, Banec, I would like to be of help, but I am afraid that I know nothing that will aid you. Your time would be better spent talking to those who are involved, I would imagine.",
+      "choices": [
+        { "text": "And who says you are not amongst those?", "next": "tristan_denies_involvement" },
+        { "text": "Right then, sorry to bother you, Master Illig.", "next": "player_leave" }
+      ]
+    },
+    {
+      "id": "tristan_denies_involvement", "speaker": "tristan",
+      "text": "What? You cannot seriously consider that! Use your eyes, man! Do I look like a thief to you?",
+      "next": "tristan_warning"
     },
     {
       "id": "player_leave",

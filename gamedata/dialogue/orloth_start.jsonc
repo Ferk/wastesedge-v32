@@ -2,6 +2,10 @@
   "id": "orloth_start",
   "start": [
     {
+      "node": "silverhair_released_greeting",
+      "when": { "flag": "silverhair_free", "equals": 1 }
+    },
+    {
       "node": "repeat_greeting",
       "when": { "flag": "orloth_talked", "equals": 1 }
     },
@@ -160,6 +164,18 @@
       "end": true
     },
     {
+      "id": "silverhair_released_greeting",
+      "speaker": "player",
+      "text": "Well, it's certain that it isn't Lady Silverhair. But I need to learn more.",
+      "next": "silverhair_released_help"
+    },
+    {
+      "id": "silverhair_released_help",
+      "speaker": "orloth",
+      "text": "Very well. Is there something else you wish to know then, Banec?",
+      "next": "help_menu"
+    },
+    {
       "id": "repeat_greeting",
       "speaker": "orloth",
       "text": "Ah, any news about the thief, Banec?",
@@ -173,8 +189,22 @@
       "speaker": "orloth",
       "text": "Well, I'll do my best to be of some help. Just ask your questions.",
       "choices": [
-        { "text": "I'd like to hear about the theft again, Master Redwyne.", "next": "events_intro" },
+        { "text": "I'd like to hear about the theft again, Master Redwyne.", "next": "theft_recap_menu" },
         { "text": "Could you tell me something about your guests?", "next": "frostbloom" },
+        {
+          "text": "You don't have a spare key to the storeroom, by any chance?",
+          "when": {
+            "all": [
+              { "flag": "get_item", "equals": 1 },
+              { "flag": "pantry_locked", "equals": 1 },
+              { "flag": "lucia_refuses_key", "equals": 1 }
+            ]
+          },
+          "actions": [{ "op": "set", "flag": "soothe_lucia", "value": 1 }],
+          "next": "orloth_no_spare_key"
+        },
+        { "text": "I don't mean to pry, but I couldn't help to notice your wife's dislike of Waste's Edge.",
+          "when": { "flag": "complain_about_wastesedge", "equals": 1 }, "next": "lucia_wastesedge" },
         { "text": "That's all for now, Master Redwyne. I don't want to keep you off your work any longer.", "next": "goodbye" }
       ]
     },
@@ -189,8 +219,12 @@
       "speaker": "orloth",
       "text": "All right. So lets see: you know about Lady Silverhair's business here?",
       "choices": [
-        { "text": "Yes I do.", "next": "negotiations" },
-        { "text": "No, not yet.", "next": "gem_business" }
+        { "text": "Yes I do.",
+          "actions": [{ "op": "set", "flag": "know_argument", "value": 1 }],
+          "next": "negotiations" },
+        { "text": "No, not yet.",
+          "actions": [{ "op": "set", "flag": "know_argument", "value": 1 }],
+          "next": "gem_business" }
       ]
     },
     {
@@ -225,7 +259,9 @@
       "speaker": "orloth",
       "text": "It wasn't the argument alone. She and the Dwarf did not get along very well from the beginning. And there were other reasons of course.",
       "choices": [
-        { "text": "They didn't get along well, you say? How come?", "next": "fingolson_jest" },
+        { "text": "They didn't get along well, you say? How come?",
+          "actions": [{ "op": "set", "flag": "know_bjarns_insult", "value": 1 }],
+          "next": "fingolson_jest" },
         { "text": "Tell me about the other reasons.", "next": "night_theft" },
         { "text": "But the gems were not found on her, right?", "next": "search_refusal" }
       ]
@@ -302,7 +338,10 @@
       "text": "But what can I do about it? He's paying for his room, although he insisted on a cheap one down the cellar. And as long as he's behaving, I can but keep an eye on him. You should beware of him as well, if I may advice you, sir.",
       "choices": [
         { "text": "No worries. I've dealt with his likes before. So who else is here, then?",
-          "actions": [{ "op": "set", "flag": "know_aleks_room", "value": 1 }],
+          "actions": [
+            { "op": "set", "flag": "know_aleks_room", "value": 1 },
+            { "op": "set", "flag": "know_erek", "value": 1 }
+          ],
           "next": "dwarves" },
         { "text": "Thank you Master Redwyne. I think I have heard enough of this.",
           "actions": [{ "op": "set", "flag": "know_aleks_room", "value": 1 }],
@@ -353,6 +392,169 @@
         { "text": "I'd like to know what exactly happened.", "next": "events_intro" },
         { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "help_menu" }
       ]
+    },
+    {
+      "id": "orloth_no_spare_key",
+      "speaker": "orloth",
+      "text": "Sorry, I can't help you there. Lucia keeps the key; you'll have to ask her.",
+      "next": "orloth_key_problem"
+    },
+    {
+      "id": "orloth_key_problem",
+      "speaker": "player",
+      "text": "That is the problem, I fear. She's annoyed and refuses to hand it out.",
+      "next": "orloth_lucia_anger"
+    },
+    {
+      "id": "orloth_lucia_anger",
+      "speaker": "orloth",
+      "text": "Ah! That's Lucia. I should have warned you not to anger her, Banec. Now there is little you can do, I fear. There is no spare key, and it'll take a while before her anger wears off.",
+      "choices": [
+        { "text": "Could you not try to calm her, Master Orloth?", "next": "orloth_wont_meddle" },
+        { "text": "Is there nothing I can do?", "next": "orloth_set_things_right" }
+      ]
+    },
+    {
+      "id": "orloth_wont_meddle",
+      "speaker": "orloth",
+      "text": "Me? I want to sleep in my bed tonight, thank you! I'm not going to meddle. That you have upset her is bad enough already.",
+      "end": true
+    },
+    {
+      "id": "orloth_set_things_right",
+      "speaker": "orloth",
+      "text": "Well, I don't know what you did to anger my dear Lucia, and I don't wanna know, but unless you set things right, she'll be giving you a hard time.",
+      "end": true
+    },
+    {
+      "id": "theft_recap_menu",
+      "speaker": "orloth",
+      "text": "Sure. Where shall I begin?",
+      "choices": [
+        { "text": "I'd like to know what happened before the theft.",
+          "actions": [{ "op": "set", "flag": "know_bjarns_insult", "value": 1 }],
+          "next": "silverhair_arrival" },
+        { "text": "Could you tell me something about your guests?", "next": "frostbloom" },
+        { "text": "I think you were finished.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "silverhair_arrival",
+      "speaker": "orloth",
+      "text": "She came shortly before lunchhour, so a number of guests were gathered in the common room. Silverhair took place next to the Dwarfs and Fingolson leaned over to talk to her.",
+      "next": "silverhair_arrival_jest"
+    },
+    {
+      "id": "silverhair_arrival_jest",
+      "speaker": "orloth",
+      "text": "As I have said already, I don't know what he said. But that Alek fellow burst out laughing, so it must have been a jest of some sort. Whatever it was, Lady Silverhair didn't enjoy it.",
+      "next": "silverhair_arrival_reflection"
+    },
+    {
+      "id": "silverhair_arrival_reflection",
+      "speaker": "orloth",
+      "text": "The more I think about it, the less the outcome surprises me. I have never noticed Dwarves and Elves getting along any worse than other people here, but in the case of Fingolson and Silverhair, the cliche seems to fit.",
+      "next": "theft_recap_where"
+    },
+    {
+      "id": "theft_recap_where",
+      "speaker": "orloth",
+      "text": "But it's too late to think about this. The theft already happened and talking won't convict the thief. So ... where was I?",
+      "choices": [
+        { "text": "The argument between the two.",
+          "actions": [
+            { "op": "set", "flag": "know_argument", "value": 1 },
+            { "op": "set", "flag": "know_erek", "value": 1 }
+          ], "next": "argument_recap" },
+        { "text": "How was the theft discovered?",
+          "actions": [{ "op": "set", "flag": "know_erek", "value": 1 }],
+          "next": "theft_discovery" },
+        { "text": "I think you were finished.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "argument_recap",
+      "speaker": "orloth",
+      "text": "Ah, the argument; let's see. Master Fingolson and Lady Silverhair sat together in the parlour to discuss their business in private. I don't know what they talked first but it didn't take long before we heard them shouting.",
+      "next": "argument_silverhair_leaves"
+    },
+    {
+      "id": "argument_silverhair_leaves",
+      "speaker": "orloth",
+      "text": "Suddenly the door burst open and Silverhair swept out of the room. She vanished upstairs without another word and nobody felt like bothering her at that moment, I tell you!",
+      "next": "argument_dwarves_leave"
+    },
+    {
+      "id": "argument_dwarves_leave",
+      "speaker": "orloth",
+      "text": "Shortly afterwards the Dwarves appeared. Fingolson headed straight for his room, but that nosy Kezular threw himself at Erek. They didn't talk long though, as Fingolson returned and sent the apprentice to pack their luggage.",
+      "next": "argument_fingolson_leaves"
+    },
+    {
+      "id": "argument_fingolson_leaves",
+      "speaker": "orloth",
+      "text": "Fingolson did not keep his voice down, so everyone could hear that he would leave with the first light of dawn, \"without selling to the greedy Elf\", as he said.",
+      "next": "argument_rant"
+    },
+    {
+      "id": "argument_rant",
+      "speaker": "orloth",
+      "text": "Then he turned to us others, let out a rant about Elves and their unseemly manners and marched off down the stairs.",
+      "next": "argument_reflection"
+    },
+    {
+      "id": "argument_reflection",
+      "speaker": "orloth",
+      "text": "I have never seen Master Fingolson so enraged and emotional. He was practically fuming with anger. Whatever the argument was about, it must have hurt him deeply.",
+      "choices": [
+        { "text": "And what about the theft? How was that discovered, then?", "next": "theft_discovery" },
+        { "text": "Thank you Master Redwyne, that's all I wanted to hear.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "theft_discovery",
+      "speaker": "orloth",
+      "text": "That was in the morning. As I told you, Fingolson was going to leave early. As he told us, he and Erek were going through their luggage to see whether everything was well packed up, and there they found the gems gone.",
+      "next": "theft_discovery_details"
+    },
+    {
+      "id": "theft_discovery_details",
+      "speaker": "orloth",
+      "text": "Perhaps you better speak with Fingolson or Erek yourself, since I can only tell what I heard of them. But it seems that somebody sneaked into their room during the night and took them away.",
+      "next": "theft_discovery_gathering"
+    },
+    {
+      "id": "theft_discovery_gathering",
+      "speaker": "orloth",
+      "text": "However, once the guards were fetched and everyone gathered in the common room, it turned out that nobody had noticed anything, and nobody had left Waste's Edge either.",
+      "next": "theft_discovery_fear"
+    },
+    {
+      "id": "theft_discovery_fear",
+      "speaker": "orloth",
+      "text": "That was creepy, I tell you. To know that the thief was amongst us at that moment. But I had never thought that it would be the Lady Silverhair!",
+      "choices": [
+        { "text": "Why was the Lady Silverhair accused of the theft?", "next": "not_argument_alone" },
+        { "text": "Thank you Master Redwyne, that's all I wanted to hear.", "next": "help_menu" }
+      ]
+    },
+    {
+      "id": "lucia_wastesedge",
+      "speaker": "orloth",
+      "text": "That's Lucia, all right. Did she go on about Lenhart again? He's my elder brother. Inherited the business from our father, although he never really liked it out here. So he asked me to buy the Inn.",
+      "next": "lucia_wastesedge_purchase"
+    },
+    {
+      "id": "lucia_wastesedge_purchase",
+      "speaker": "orloth",
+      "text": "See, I was a carter's apprentice in Erinsford back then, and the prospect of taking over at Waste's Edge instead was very appealing. Lucia and I had just married, and the dowry would have nearly paid for the Inn.",
+      "next": "lucia_wastesedge_end"
+    },
+    {
+      "id": "lucia_wastesedge_end",
+      "speaker": "orloth",
+      "text": "But I am forgetting myself. Lucia's right when she says I'd talk too much. Not that she is much better in that respect. Excuse my rambling, Banec. There must be other things you want to know.",
+      "next": "help_menu"
     }
   ]
 }
