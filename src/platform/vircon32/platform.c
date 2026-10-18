@@ -313,18 +313,24 @@ static void record_runtime_text_centered_lines(
         return;
     for (index = 0; index <= text->glyph_count && y < bottom; ++index) {
         if (index == text->glyph_count || text->glyphs[index] == -2) {
-            struct generated_runtime_text line;
-            int width = 0;
-            int scan;
-            line.glyphs = text->glyphs + start;
-            line.glyph_count = index - start;
-            for (scan = start; scan < index; ++scan) {
-                int glyph = text->glyphs[scan];
-                width += glyph < 0 ? generated_runtime_space_advance
-                                   : generated_runtime_glyphs[glyph].advance;
+            /* Do not measure or submit complete lines that have already
+             * scrolled above the display. The hardware would clip their
+             * pixels, but processing the whole accumulated credits roll each
+             * frame eventually exhausts the Vircon32 frame budget. */
+            if (y + DIALOG_LINE_HEIGHT > 0) {
+                struct generated_runtime_text line;
+                int width = 0;
+                int scan;
+                line.glyphs = text->glyphs + start;
+                line.glyph_count = index - start;
+                for (scan = start; scan < index; ++scan) {
+                    int glyph = text->glyphs[scan];
+                    width += glyph < 0 ? generated_runtime_space_advance
+                                       : generated_runtime_glyphs[glyph].advance;
+                }
+                record_runtime_text(center_x - width / 2, y, width + 1,
+                                    y + DIALOG_LINE_HEIGHT, &line, color);
             }
-            record_runtime_text(center_x - width / 2, y, width + 1,
-                                y + DIALOG_LINE_HEIGHT, &line, color);
             y += DIALOG_LINE_HEIGHT;
             start = index + 1;
         }
