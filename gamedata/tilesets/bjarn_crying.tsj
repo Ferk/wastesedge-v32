@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_north_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_north_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -72,7 +72,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_north_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_north_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -131,7 +131,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_south_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_south_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -190,7 +190,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_south_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_south_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -249,7 +249,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_west_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_west_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -308,7 +308,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_west_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_west_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -367,7 +367,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_east_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -426,7 +426,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_stand_east_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_stand_east_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -485,7 +485,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_north_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_north_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -544,7 +544,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_north_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_north_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -603,7 +603,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_south_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_south_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -662,7 +662,7 @@
     },
     {
       "id": 11,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_south_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_south_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -721,7 +721,7 @@
     },
     {
       "id": 12,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_west_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_west_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -780,7 +780,7 @@
     },
     {
       "id": 13,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_west_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_west_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -839,7 +839,7 @@
     },
     {
       "id": 14,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_east_i0.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -898,7 +898,7 @@
     },
     {
       "id": 15,
-      "image": "../assets/tiles/bjarn_crying/bjarn_crying_walk_east_i1.png",
+      "image": "../assets/actors/bjarn/bjarn_crying_walk_east_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [

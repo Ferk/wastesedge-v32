@@ -7,7 +7,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_ground_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -31,7 +31,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_0_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_ground_0_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -55,7 +55,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_1_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_ground_1_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -79,7 +79,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_ground_1_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_ground_1_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -103,7 +103,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_medium_height_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__grass_medium_height_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -127,7 +127,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_sandy_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_sandy_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -151,7 +151,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_sandy_to_grass_bot_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_sandy_to_grass_bot_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_sandy_to_grass_top_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_sandy_to_grass_top_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -199,7 +199,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_to_stone_left_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -223,7 +223,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_0_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_to_stone_left_0_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -247,7 +247,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_1_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_to_stone_left_1_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -271,7 +271,7 @@
     },
     {
       "id": 11,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__road_to_stone_left_1_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__road_to_stone_left_1_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -295,7 +295,7 @@
     },
     {
       "id": 12,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_to_grass_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -319,7 +319,7 @@
     },
     {
       "id": 13,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_0_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_to_grass_0_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -343,7 +343,7 @@
     },
     {
       "id": 14,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_1_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_to_grass_1_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -367,7 +367,7 @@
     },
     {
       "id": 15,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__stone_to_grass_1_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__stone_to_grass_1_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -391,7 +391,7 @@
     },
     {
       "id": 16,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_0_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__grass_to_stone_0_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -415,7 +415,7 @@
     },
     {
       "id": 17,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_0_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__grass_to_stone_0_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -439,7 +439,7 @@
     },
     {
       "id": 18,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_1_0.png",
+      "image": "../assets/world/redwyne_exterior/terrains__grass_to_stone_1_0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -463,7 +463,7 @@
     },
     {
       "id": 19,
-      "image": "../assets/tiles/redwyne_exterior_background/terrains__grass_to_stone_1_1.png",
+      "image": "../assets/world/redwyne_exterior/terrains__grass_to_stone_1_1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [

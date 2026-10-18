@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_back.png",
+      "image": "../assets/world/redwyne_exterior/houses__redwyne_inn__entrance_back.png",
       "imagewidth": 20,
       "imageheight": 53,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/tiles/redwyne_exterior/houses__redwyne_inn__entrance_fore.png",
+      "image": "../assets/world/redwyne_exterior/houses__redwyne_inn__entrance_fore.png",
       "imagewidth": 20,
       "imageheight": 68,
       "properties": [

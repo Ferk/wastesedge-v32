@@ -1,6 +1,7 @@
 # Reproducible host and ROM build output.
 /build/
 /generated/
+content.stamp
 **/__pycache__/
 
 # Optional read-only research material; never a project build input.
@@ -11,7 +12,9 @@
 
 CMakeCache.txt
 CMakeFiles/
+Testing/
 Makefile
+cmake_install.cmake
 
 *.o
 *.vtex

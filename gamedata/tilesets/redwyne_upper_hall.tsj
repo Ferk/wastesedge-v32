@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_face_back_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_face_back_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 39,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_tr1_back_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_tr1_back_a0_i0.png",
       "imagewidth": 3,
       "imageheight": 5,
       "properties": [
@@ -121,7 +121,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_tl1_back_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_tl1_back_a0_i0.png",
       "imagewidth": 3,
       "imageheight": 5,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_v_r_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_v_r_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -229,7 +229,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_v_l_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_v_l_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -283,7 +283,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_br1_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_br1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -337,7 +337,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_bl1_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_bl1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -391,7 +391,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_face_front_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_face_front_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 39,
       "properties": [
@@ -445,7 +445,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__doorframe_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__doorframe_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 14,
       "properties": [
@@ -499,7 +499,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__doorframe_back_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__doorframe_back_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 34,
       "properties": [
@@ -553,7 +553,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/maps/redwyne_first_floor/walls__inside__wall_tl2_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/walls__inside__wall_tl2_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 39,
       "properties": [
@@ -607,7 +607,7 @@
     },
     {
       "id": 11,
-      "image": "../assets/tiles/redwyne_exterior/icons__arrows__red_left_a0_i0.png",
+      "image": "../assets/world/redwyne_exterior/icons__arrows__red_left_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -661,7 +661,7 @@
     },
     {
       "id": 12,
-      "image": "../assets/maps/redwyne_first_floor/icons__arrows__red_right_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/icons__arrows__red_right_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -715,7 +715,7 @@
     },
     {
       "id": 13,
-      "image": "../assets/maps/redwyne_first_floor/floorings__woodenplanks_2_1_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/floorings__woodenplanks_2_1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -769,7 +769,7 @@
     },
     {
       "id": 14,
-      "image": "../assets/maps/redwyne_first_floor/floorings__woodenplanks_2_2_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/floorings__woodenplanks_2_2_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -823,7 +823,7 @@
     },
     {
       "id": 15,
-      "image": "../assets/maps/redwyne_first_floor/stairs__red_carpet_tr_bl_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/stairs__red_carpet_tr_bl_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [

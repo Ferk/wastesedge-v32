@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/maps/redwyne_barn_loft/floorings__barn_loft_main_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/floorings__barn_loft_main_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 80,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/maps/redwyne_barn_loft/floorings__barn_loft_front_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/floorings__barn_loft_front_a0_i0.png",
       "imagewidth": 80,
       "imageheight": 20,
       "properties": [
@@ -121,7 +121,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/maps/redwyne_barn_loft/walls__barn_loft_main_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/walls__barn_loft_main_a0_i0.png",
       "imagewidth": 80,
       "imageheight": 80,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/maps/redwyne_barn_loft/stairs__barn_loft_ground_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/stairs__barn_loft_ground_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -229,7 +229,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/maps/redwyne_barn_loft/furnitures__barn_loft_clutter_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/furnitures__barn_loft_clutter_a0_i0.png",
       "imagewidth": 80,
       "imageheight": 120,
       "properties": [
@@ -283,7 +283,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/maps/redwyne_barn_loft/walls__barn_loft_main_top_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/walls__barn_loft_main_top_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 16,
       "properties": [
@@ -337,7 +337,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/maps/redwyne_barn_loft/walls__barn_loft_main_front_a0_i0.png",
+      "image": "../assets/world/redwyne_barn_loft/walls__barn_loft_main_front_a0_i0.png",
       "imagewidth": 80,
       "imageheight": 80,
       "properties": [

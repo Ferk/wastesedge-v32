@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_face_back_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_face_back_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 39,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_tr1_back_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_tr1_back_a0_i0.png",
       "imagewidth": 3,
       "imageheight": 5,
       "properties": [
@@ -121,7 +121,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_tl1_back_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_tl1_back_a0_i0.png",
       "imagewidth": 3,
       "imageheight": 5,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_v_r_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_v_r_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -229,7 +229,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_v_l_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_v_l_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -283,7 +283,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_br1_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_br1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -337,7 +337,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_bl1_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_bl1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -391,7 +391,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__wall_face_front_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__wall_face_front_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 39,
       "properties": [
@@ -445,7 +445,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__doorframe_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__doorframe_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 14,
       "properties": [
@@ -499,7 +499,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/maps/redwyne_kitchen/walls__inside__doorframe_back_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/walls__inside__doorframe_back_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 34,
       "properties": [
@@ -553,7 +553,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/maps/redwyne_kitchen/icons__arrows__green_right_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/icons__arrows__green_right_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -607,7 +607,7 @@
     },
     {
       "id": 11,
-      "image": "../assets/maps/redwyne_kitchen/floorings__terracotta_tiles_1_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/floorings__terracotta_tiles_1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -661,7 +661,7 @@
     },
     {
       "id": 12,
-      "image": "../assets/maps/redwyne_kitchen/floorings__terracotta_tiles_2_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/floorings__terracotta_tiles_2_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -715,7 +715,7 @@
     },
     {
       "id": 13,
-      "image": "../assets/maps/redwyne_kitchen/floorings__terracotta_tiles_3_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/floorings__terracotta_tiles_3_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -769,7 +769,7 @@
     },
     {
       "id": 14,
-      "image": "../assets/maps/redwyne_kitchen/stairs__red_carpet_front_tl_br_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/stairs__red_carpet_front_tl_br_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -823,7 +823,7 @@
     },
     {
       "id": 15,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__barrel_wooden_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__barrel_wooden_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -877,7 +877,7 @@
     },
     {
       "id": 16,
-      "image": "../assets/maps/redwyne_kitchen/floorings__terracotta_trans_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/floorings__terracotta_trans_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -931,7 +931,7 @@
     },
     {
       "id": 17,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__stove_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__stove_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 48,
       "properties": [
@@ -985,7 +985,7 @@
     },
     {
       "id": 18,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__oven_flame_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__oven_flame_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 20,
       "properties": [
@@ -1044,7 +1044,7 @@
     },
     {
       "id": 19,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__oven_flame_a0_i1.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__oven_flame_a0_i1.png",
       "imagewidth": 40,
       "imageheight": 20,
       "properties": [
@@ -1098,7 +1098,7 @@
     },
     {
       "id": 20,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__oven_flame_a0_i2.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__oven_flame_a0_i2.png",
       "imagewidth": 40,
       "imageheight": 20,
       "properties": [
@@ -1152,7 +1152,7 @@
     },
     {
       "id": 21,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__oven_flame_a0_i3.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__oven_flame_a0_i3.png",
       "imagewidth": 40,
       "imageheight": 20,
       "properties": [
@@ -1206,7 +1206,7 @@
     },
     {
       "id": 22,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1270,7 +1270,7 @@
     },
     {
       "id": 23,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i1.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i1.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1324,7 +1324,7 @@
     },
     {
       "id": 24,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i2.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i2.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1378,7 +1378,7 @@
     },
     {
       "id": 25,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i3.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i3.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1432,7 +1432,7 @@
     },
     {
       "id": 26,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i4.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i4.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1486,7 +1486,7 @@
     },
     {
       "id": 27,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i5.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i5.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1540,7 +1540,7 @@
     },
     {
       "id": 28,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i6.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i6.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1594,7 +1594,7 @@
     },
     {
       "id": 29,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i7.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i7.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1648,7 +1648,7 @@
     },
     {
       "id": 30,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i8.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i8.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1702,7 +1702,7 @@
     },
     {
       "id": 31,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i9.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i9.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1756,7 +1756,7 @@
     },
     {
       "id": 32,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_a0_i10.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_a0_i10.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -1810,7 +1810,7 @@
     },
     {
       "id": 33,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i0.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -1874,7 +1874,7 @@
     },
     {
       "id": 34,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i1.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i1.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -1928,7 +1928,7 @@
     },
     {
       "id": 35,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i2.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i2.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -1982,7 +1982,7 @@
     },
     {
       "id": 36,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i3.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i3.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2036,7 +2036,7 @@
     },
     {
       "id": 37,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i4.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i4.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2090,7 +2090,7 @@
     },
     {
       "id": 38,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i5.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i5.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2144,7 +2144,7 @@
     },
     {
       "id": 39,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i6.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i6.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2198,7 +2198,7 @@
     },
     {
       "id": 40,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i7.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i7.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2252,7 +2252,7 @@
     },
     {
       "id": 41,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i8.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i8.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2306,7 +2306,7 @@
     },
     {
       "id": 42,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i9.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i9.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [
@@ -2360,7 +2360,7 @@
     },
     {
       "id": 43,
-      "image": "../assets/maps/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i10.png",
+      "image": "../assets/world/redwyne_kitchen/furnitures__kitchen_smoke_top_a0_i10.png",
       "imagewidth": 20,
       "imageheight": 4,
       "properties": [

@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_stand_north_i0.png",
+      "image": "../assets/actors/player/player_stand_north_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_stand_south_i0.png",
+      "image": "../assets/actors/player/player_stand_south_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -121,7 +121,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_stand_west_i0.png",
+      "image": "../assets/actors/player/player_stand_west_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_stand_east_i0.png",
+      "image": "../assets/actors/player/player_stand_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -229,7 +229,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_north_i0.png",
+      "image": "../assets/actors/player/player_walk_north_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -283,7 +283,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_north_i1.png",
+      "image": "../assets/actors/player/player_walk_north_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -337,7 +337,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_north_i2.png",
+      "image": "../assets/actors/player/player_walk_north_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -391,7 +391,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_north_i3.png",
+      "image": "../assets/actors/player/player_walk_north_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -445,7 +445,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_south_i0.png",
+      "image": "../assets/actors/player/player_walk_south_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -499,7 +499,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_south_i1.png",
+      "image": "../assets/actors/player/player_walk_south_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -553,7 +553,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_south_i2.png",
+      "image": "../assets/actors/player/player_walk_south_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -607,7 +607,7 @@
     },
     {
       "id": 11,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_south_i3.png",
+      "image": "../assets/actors/player/player_walk_south_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -661,7 +661,7 @@
     },
     {
       "id": 12,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_west_i0.png",
+      "image": "../assets/actors/player/player_walk_west_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -715,7 +715,7 @@
     },
     {
       "id": 13,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_west_i1.png",
+      "image": "../assets/actors/player/player_walk_west_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -769,7 +769,7 @@
     },
     {
       "id": 14,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_west_i2.png",
+      "image": "../assets/actors/player/player_walk_west_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -823,7 +823,7 @@
     },
     {
       "id": 15,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_west_i3.png",
+      "image": "../assets/actors/player/player_walk_west_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -877,7 +877,7 @@
     },
     {
       "id": 16,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_east_i0.png",
+      "image": "../assets/actors/player/player_walk_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -931,7 +931,7 @@
     },
     {
       "id": 17,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_east_i1.png",
+      "image": "../assets/actors/player/player_walk_east_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -985,7 +985,7 @@
     },
     {
       "id": 18,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_east_i2.png",
+      "image": "../assets/actors/player/player_walk_east_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1039,7 +1039,7 @@
     },
     {
       "id": 19,
-      "image": "../assets/tiles/redwyne_exterior_characters/player_walk_east_i3.png",
+      "image": "../assets/actors/player/player_walk_east_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1093,7 +1093,7 @@
     },
     {
       "id": 20,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_stand_north_i0.png",
+      "image": "../assets/actors/talan/talan_stand_north_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1147,7 +1147,7 @@
     },
     {
       "id": 21,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_stand_south_i0.png",
+      "image": "../assets/actors/talan/talan_stand_south_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1201,7 +1201,7 @@
     },
     {
       "id": 22,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_stand_west_i0.png",
+      "image": "../assets/actors/talan/talan_stand_west_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1255,7 +1255,7 @@
     },
     {
       "id": 23,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_stand_east_i0.png",
+      "image": "../assets/actors/talan/talan_stand_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1309,7 +1309,7 @@
     },
     {
       "id": 24,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_north_i0.png",
+      "image": "../assets/actors/talan/talan_walk_north_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1363,7 +1363,7 @@
     },
     {
       "id": 25,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_north_i1.png",
+      "image": "../assets/actors/talan/talan_walk_north_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1417,7 +1417,7 @@
     },
     {
       "id": 26,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_north_i2.png",
+      "image": "../assets/actors/talan/talan_walk_north_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1471,7 +1471,7 @@
     },
     {
       "id": 27,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_north_i3.png",
+      "image": "../assets/actors/talan/talan_walk_north_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1525,7 +1525,7 @@
     },
     {
       "id": 28,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_south_i0.png",
+      "image": "../assets/actors/talan/talan_walk_south_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1579,7 +1579,7 @@
     },
     {
       "id": 29,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_south_i1.png",
+      "image": "../assets/actors/talan/talan_walk_south_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1633,7 +1633,7 @@
     },
     {
       "id": 30,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_south_i2.png",
+      "image": "../assets/actors/talan/talan_walk_south_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1687,7 +1687,7 @@
     },
     {
       "id": 31,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_south_i3.png",
+      "image": "../assets/actors/talan/talan_walk_south_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1741,7 +1741,7 @@
     },
     {
       "id": 32,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_west_i0.png",
+      "image": "../assets/actors/talan/talan_walk_west_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1795,7 +1795,7 @@
     },
     {
       "id": 33,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_west_i1.png",
+      "image": "../assets/actors/talan/talan_walk_west_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1849,7 +1849,7 @@
     },
     {
       "id": 34,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_west_i2.png",
+      "image": "../assets/actors/talan/talan_walk_west_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1903,7 +1903,7 @@
     },
     {
       "id": 35,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_west_i3.png",
+      "image": "../assets/actors/talan/talan_walk_west_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -1957,7 +1957,7 @@
     },
     {
       "id": 36,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_east_i0.png",
+      "image": "../assets/actors/talan/talan_walk_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -2011,7 +2011,7 @@
     },
     {
       "id": 37,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_east_i1.png",
+      "image": "../assets/actors/talan/talan_walk_east_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -2065,7 +2065,7 @@
     },
     {
       "id": 38,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_east_i2.png",
+      "image": "../assets/actors/talan/talan_walk_east_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -2119,7 +2119,7 @@
     },
     {
       "id": 39,
-      "image": "../assets/tiles/redwyne_exterior_characters/talan_walk_east_i3.png",
+      "image": "../assets/actors/talan/talan_walk_east_i3.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [

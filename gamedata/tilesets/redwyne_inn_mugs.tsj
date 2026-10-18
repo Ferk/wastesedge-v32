@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/tiles/redwyne_inn_mugs/furnitures__mug_on_table_1_a0_i0.png",
+      "image": "../assets/world/redwyne_inn/furnitures__mug_on_table_1_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/tiles/redwyne_inn_mugs/furnitures__mug_on_table_2_a0_i0.png",
+      "image": "../assets/world/redwyne_inn/furnitures__mug_on_table_2_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [

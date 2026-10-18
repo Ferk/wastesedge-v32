@@ -154,6 +154,17 @@ foreach(texture IN LISTS all_content_textures)
   math(EXPR texture_index "${texture_index} + 1")
 endforeach()
 
+# A regenerated content manifest may need fewer texture slots than the
+# previous build. Remove obsolete converted files so the build directory does
+# not retain resources that are no longer part of the cartridge.
+file(GLOB existing_texture_outputs
+     "${CMAKE_CURRENT_BINARY_DIR}/texture-*.vtex")
+foreach(existing_texture IN LISTS existing_texture_outputs)
+  if(NOT existing_texture IN_LIST project_texture_outputs)
+    file(REMOVE "${existing_texture}")
+  endif()
+endforeach()
+
 set(project_sound_outputs)
 set(rom_sound_entries "")
 set(sound_index 0)

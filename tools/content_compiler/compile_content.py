@@ -21,6 +21,10 @@ DIALOGUE_TEXT_LINE_HEIGHT = 19
 DIALOGUE_ATLAS_WIDTH = 512
 DIALOGUE_ATLAS_HEIGHT = 512
 CHARACTER_SHEET_WIDTHS = (256, 512, 1024)
+RUNTIME_ATLAS_SIZE = 1024
+RUNTIME_ATLAS_PADDING = 1
+RUNTIME_ATLAS_WIDTH_STEP = 16
+RUNTIME_ATLAS_PAGE_PENALTY = 16 * 1024
 
 
 class ContentError(Exception):
@@ -992,6 +996,240 @@ def write_generated_png(path: Path, image: object) -> None:
         image.save(path)
     except OSError as error:
         raise ContentError(f"cannot write generated image {path}: {error}") from error
+
+
+def runtime_image_path(image: str, game_root: Path, output_root: Path) -> Path:
+    """Resolve one runtime image reference to its authored or generated PNG."""
+    if image.startswith(GENERATED_RESOURCE_PREFIX):
+        return output_root / image.removeprefix(GENERATED_RESOURCE_PREFIX)
+    return game_root / image
+
+
+def materialize_runtime_atlases(
+        references: list[tuple[dict[str, object], str, str, str]],
+        game_root: Path, output_root: Path, directory: str,
+        stem: str) -> tuple[int, int, int]:
+    """Pack referenced PNGs into deterministic atlases and intern equal pixels.
+
+    Each reference names its image, source-X and source-Y dictionary fields.
+    Existing source rectangles remain valid because their coordinates are
+    translated by the packed image's atlas origin.
+    """
+    try:
+        from PIL import Image
+    except ImportError as error:
+        raise ContentError("Pillow is required to build runtime atlases") from error
+
+    original_references = [
+        (owner, image_key, source_x_key, source_y_key,
+         expect(owner.get(image_key), str, "runtime atlas image"))
+        for owner, image_key, source_x_key, source_y_key in references
+    ]
+    image_paths = sorted({image for _, _, _, _, image in original_references})
+    if not image_paths:
+        return 0, 0, 0
+
+    content_key_by_path: dict[str, tuple[int, int, bytes]] = {}
+    image_size_by_path: dict[str, tuple[int, int]] = {}
+    unique_images: dict[tuple[int, int, bytes], tuple[str, object]] = {}
+    for image in image_paths:
+        source_path = runtime_image_path(image, game_root, output_root)
+        try:
+            with Image.open(source_path) as source:
+                rgba = source.convert("RGBA")
+        except OSError as error:
+            raise ContentError(f"cannot read runtime atlas image {source_path}: {error}") from error
+        key = (rgba.width, rgba.height, hashlib.sha256(rgba.tobytes()).digest())
+        content_key_by_path[image] = key
+        image_size_by_path[image] = rgba.size
+        unique_images.setdefault(key, (image, rgba))
+
+    # Tall images first make the shelf layout deterministic and avoid wasting
+    # rows below large scenery sheets. Equal sizes retain lexical path order.
+    ordered_images = sorted(
+        unique_images.items(),
+        key=lambda item: (-item[0][1], -item[0][0], item[1][0]),
+    )
+    def shelf_layout(items: list[tuple[tuple[int, int, bytes], tuple[str, object]]],
+                     width_limit: int) -> tuple[list[dict[str, int]],
+                                                dict[tuple[int, int, bytes],
+                                                     tuple[int, int, int]]]:
+        """Lay out images on cropped shelf-packed pages of one trial width."""
+        trial_pages: list[dict[str, int]] = []
+        trial_placements: dict[tuple[int, int, bytes], tuple[int, int, int]] = {}
+        for item_key, (_, item_image) in items:
+            padded_width = item_image.width + RUNTIME_ATLAS_PADDING * 2
+            padded_height = item_image.height + RUNTIME_ATLAS_PADDING * 2
+            if not trial_pages:
+                trial_pages.append({"x": 0, "y": 0, "row_height": 0,
+                                    "used_width": 0, "used_height": 0})
+            trial_page = trial_pages[-1]
+            if trial_page["x"] > 0 and trial_page["x"] + padded_width > width_limit:
+                trial_page["x"] = 0
+                trial_page["y"] += trial_page["row_height"]
+                trial_page["row_height"] = 0
+            if trial_page["y"] + padded_height > RUNTIME_ATLAS_SIZE:
+                trial_pages.append({"x": 0, "y": 0, "row_height": 0,
+                                    "used_width": 0, "used_height": 0})
+                trial_page = trial_pages[-1]
+            origin_x = trial_page["x"] + RUNTIME_ATLAS_PADDING
+            origin_y = trial_page["y"] + RUNTIME_ATLAS_PADDING
+            trial_placements[item_key] = (
+                len(trial_pages) - 1, origin_x, origin_y)
+            trial_page["x"] += padded_width
+            trial_page["row_height"] = max(
+                trial_page["row_height"], padded_height)
+            trial_page["used_width"] = max(
+                trial_page["used_width"], trial_page["x"])
+            trial_page["used_height"] = max(
+                trial_page["used_height"],
+                trial_page["y"] + trial_page["row_height"])
+        return trial_pages, trial_placements
+
+    # A nearly page-sized image cannot share a useful shelf with small sprites.
+    # Give it a tightly cropped page, then optimize the trial width used for
+    # the remaining images. This avoids trading texture slots for large areas
+    # of transparent cartridge data.
+    large_edge = RUNTIME_ATLAS_SIZE * 3 // 4
+    large_images = [item for item in ordered_images
+                    if item[0][0] > large_edge or item[0][1] > large_edge]
+    large_keys = {key for key, _ in large_images}
+    regular_images = [item for item in ordered_images if item[0] not in large_keys]
+    pages: list[dict[str, int]] = []
+    placement_by_key: dict[tuple[int, int, bytes], tuple[int, int, int]] = {}
+    for key, (_, image) in large_images:
+        padded_width = image.width + RUNTIME_ATLAS_PADDING * 2
+        padded_height = image.height + RUNTIME_ATLAS_PADDING * 2
+        if padded_width > RUNTIME_ATLAS_SIZE or padded_height > RUNTIME_ATLAS_SIZE:
+            raise ContentError(
+                f"runtime atlas image is {image.width}x{image.height}, exceeding the "
+                f"{RUNTIME_ATLAS_SIZE}x{RUNTIME_ATLAS_SIZE} atlas limit"
+            )
+        placement_by_key[key] = (
+            len(pages), RUNTIME_ATLAS_PADDING, RUNTIME_ATLAS_PADDING)
+        pages.append({"x": padded_width, "y": 0,
+                      "row_height": padded_height,
+                      "used_width": padded_width,
+                      "used_height": padded_height})
+
+    if regular_images:
+        minimum_width = max(
+            image.width + RUNTIME_ATLAS_PADDING * 2
+            for _, (_, image) in regular_images)
+        trial_widths = list(range(
+            minimum_width, RUNTIME_ATLAS_SIZE + 1, RUNTIME_ATLAS_WIDTH_STEP))
+        if trial_widths[-1] != RUNTIME_ATLAS_SIZE:
+            trial_widths.append(RUNTIME_ATLAS_SIZE)
+        candidates = [shelf_layout(regular_images, width) for width in trial_widths]
+        regular_pages, regular_placements = min(
+            candidates,
+            key=lambda candidate: (
+                sum(page["used_width"] * page["used_height"]
+                    for page in candidate[0]) +
+                len(candidate[0]) * RUNTIME_ATLAS_PAGE_PENALTY,
+                len(candidate[0]),
+            ),
+        )
+        page_offset = len(pages)
+        pages.extend(regular_pages)
+        placement_by_key.update({
+            key: (page + page_offset, x, y)
+            for key, (page, x, y) in regular_placements.items()
+        })
+
+    atlas_root = output_root / directory
+    used_outputs: set[Path] = set()
+    for page_index, page in enumerate(pages):
+        atlas = Image.new(
+            "RGBA", (page["used_width"], page["used_height"]), (0, 0, 0, 0))
+        for key, (_, image) in ordered_images:
+            placed_page, origin_x, origin_y = placement_by_key[key]
+            if placed_page == page_index:
+                atlas.alpha_composite(image, (origin_x, origin_y))
+        relative_output = Path(directory) / f"{stem}-{page_index:03d}.png"
+        write_generated_png(output_root / relative_output, atlas)
+        used_outputs.add(relative_output)
+
+    if atlas_root.is_dir():
+        for existing in atlas_root.glob(f"{stem}-*.png"):
+            if existing.relative_to(output_root) not in used_outputs:
+                existing.unlink()
+
+    rewritten: set[tuple[int, str]] = set()
+    for owner, image_key, source_x_key, source_y_key, image in original_references:
+        reference_key = (id(owner), image_key)
+        if reference_key in rewritten:
+            continue
+        rewritten.add(reference_key)
+        source_x = integer(owner.get(source_x_key, 0), "runtime atlas source x")
+        source_y = integer(owner.get(source_y_key, 0), "runtime atlas source y")
+        if image_key == "portrait":
+            width = integer(owner.get("portrait_width"), "runtime portrait width")
+            height = integer(owner.get("portrait_height"), "runtime portrait height")
+        else:
+            width = integer(owner.get("width"), "runtime atlas frame width")
+            height = integer(owner.get("height"), "runtime atlas frame height")
+        image_width, image_height = image_size_by_path[image]
+        if (source_x < 0 or source_y < 0 or width <= 0 or height <= 0 or
+                source_x + width > image_width or source_y + height > image_height):
+            raise ContentError(
+                f"runtime frame {source_x},{source_y} {width}x{height} lies outside "
+                f"atlas input {image!r} ({image_width}x{image_height})"
+            )
+        page_index, origin_x, origin_y = placement_by_key[content_key_by_path[image]]
+        owner[image_key] = (
+            GENERATED_RESOURCE_PREFIX +
+            (Path(directory) / f"{stem}-{page_index:03d}.png").as_posix()
+        )
+        owner[source_x_key] = source_x + origin_x
+        owner[source_y_key] = source_y + origin_y
+
+    return len(image_paths), len(unique_images), len(pages)
+
+
+def background_atlas_references(
+        scenes: list[dict[str, object]]) -> list[tuple[dict[str, object], str, str, str]]:
+    """Return mutable frame references for every baked scene background chunk."""
+    return [
+        (expect(item, dict, "runtime background"), "image", "source_x", "source_y")
+        for scene in scenes
+        for item in expect(scene["background"], list, "runtime background")
+    ]
+
+
+def sprite_atlas_references(
+        scenes: list[dict[str, object]], visuals: list[dict[str, object]],
+        object_visuals: list[dict[str, object]], dialogues: list[dict[str, object]],
+        glyphs: list[dict[str, object]]) -> list[tuple[dict[str, object], str, str, str]]:
+    """Return mutable references for scenery, actors, objects, portraits and glyphs."""
+    references: list[tuple[dict[str, object], str, str, str]] = []
+    for scene in scenes:
+        references.extend(
+            (expect(item, dict, "runtime scenery"), "image", "source_x", "source_y")
+            for item in expect(scene["scenery"], list, "runtime scenery")
+        )
+    for visual in visuals:
+        for frame_group in expect(visual["frames"], list, "runtime actor frames"):
+            for frame in expect(frame_group, list, "runtime actor frame group"):
+                if frame is not None:
+                    references.append((expect(frame, dict, "runtime actor frame"),
+                                       "image", "source_x", "source_y"))
+    for visual in object_visuals:
+        for frame in expect(visual["frames"], list, "runtime object frames"):
+            if frame is not None:
+                references.append((expect(frame, dict, "runtime object frame"),
+                                   "image", "source_x", "source_y"))
+    for dialogue in dialogues:
+        for speaker in expect(dialogue["speakers"], list, "runtime dialogue speakers"):
+            speaker = expect(speaker, dict, "runtime dialogue speaker")
+            if speaker.get("portrait") is not None:
+                references.append((speaker, "portrait", "portrait_source_x",
+                                   "portrait_source_y"))
+    references.extend(
+        (expect(glyph, dict, "runtime glyph"), "image", "x", "y")
+        for glyph in glyphs
+    )
+    return references
 
 
 def materialize_background_chunks(scenes: list[dict[str, object]], game_root: Path, output_root: Path) -> None:
@@ -3290,6 +3528,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             if speaker["portrait"] is not None:
                 portrait = {
                     "image": speaker["portrait"],
+                    "source_x": speaker.get("portrait_source_x", 0),
+                    "source_y": speaker.get("portrait_source_y", 0),
                     "width": speaker["portrait_width"],
                     "height": speaker["portrait_height"],
                     "offset_x": 0,
@@ -3583,6 +3823,14 @@ def compile_content(project_root: Path) -> None:
     materialize_character_sheets(runtime_visuals, game_root, output_root)
     runtime_glyphs, runtime_space_advance = materialize_dialogue_glyph_atlas(
         runtime_dialogue, runtime_schedule_data, runtime_script_data, game_root, output_root)
+    background_logical, background_unique, background_atlases = materialize_runtime_atlases(
+        background_atlas_references(runtime_scenes), game_root, output_root,
+        "background-atlases", "backgrounds")
+    sprite_logical, sprite_unique, sprite_atlases = materialize_runtime_atlases(
+        sprite_atlas_references(runtime_scenes, runtime_visuals,
+                                runtime_object_visuals, runtime_dialogue,
+                                runtime_glyphs),
+        game_root, output_root, "runtime-atlases", "sprites")
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
                                                   runtime_dialogue, runtime_glyphs,
@@ -3649,7 +3897,9 @@ def compile_content(project_root: Path) -> None:
     print(f"content compiler: {len(scenes)} scenes, {len(tilesets)} tilesets, "
           f"{len(entities)} entities, {len(music)} music, {len(dialogue)} dialogue, "
           f"{len(scripts)} scripts, {len(schedules)} schedules, {len(runtime_resources)}/"
-          f"{maximum_cartridge_textures} textures")
+          f"{maximum_cartridge_textures} textures; "
+          f"backgrounds {background_logical}->{background_unique}->{background_atlases}, "
+          f"sprites {sprite_logical}->{sprite_unique}->{sprite_atlases}")
 
 
 def main() -> int:

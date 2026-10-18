@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/tiles/redwyne_exterior/floorings__woodenplanks_a0_i0.png",
+      "image": "../assets/world/redwyne_exterior/floorings__woodenplanks_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/maps/redwyne_first_floor/icons__arrows__red_right_a0_i0.png",
+      "image": "../assets/world/redwyne_first_floor/icons__arrows__red_right_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -121,7 +121,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_column_b_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_column_b_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 40,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_column_f_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_column_f_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 40,
       "properties": [
@@ -229,7 +229,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_h_b_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_h_b_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -283,7 +283,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_h_f_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_h_f_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -337,7 +337,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_v_l_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_v_l_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -391,7 +391,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_v_r_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_v_r_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -445,7 +445,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tl_rb_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_tl_rb_a0_i0.png",
       "imagewidth": 24,
       "imageheight": 46,
       "properties": [
@@ -499,7 +499,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_bl_rf_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_bl_rf_a0_i0.png",
       "imagewidth": 4,
       "imageheight": 60,
       "properties": [
@@ -553,7 +553,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_bl_rf_a1_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_bl_rf_a1_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -607,7 +607,7 @@
     },
     {
       "id": 11,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tr_lb_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_tr_lb_a0_i0.png",
       "imagewidth": 24,
       "imageheight": 46,
       "properties": [
@@ -661,7 +661,7 @@
     },
     {
       "id": 12,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_br_lf_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_br_lf_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -715,7 +715,7 @@
     },
     {
       "id": 13,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_br_lf_a1_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_br_lf_a1_i0.png",
       "imagewidth": 4,
       "imageheight": 60,
       "properties": [
@@ -769,7 +769,7 @@
     },
     {
       "id": 14,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tl_lf_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_tl_lf_a0_i0.png",
       "imagewidth": 4,
       "imageheight": 40,
       "properties": [
@@ -823,7 +823,7 @@
     },
     {
       "id": 15,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_tl_lf_a1_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_tl_lf_a1_i0.png",
       "imagewidth": 16,
       "imageheight": 40,
       "properties": [
@@ -877,7 +877,7 @@
     },
     {
       "id": 16,
-      "image": "../assets/maps/redwyne_cellar/walls__cellar__cellar_bl_lb_a0_i0.png",
+      "image": "../assets/world/redwyne_cellar/walls__cellar__cellar_bl_lb_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 54,
       "properties": [
@@ -931,7 +931,7 @@
     },
     {
       "id": 17,
-      "image": "../assets/maps/redwyne_fingolson_room/furnitures__stool_a0_i0.png",
+      "image": "../assets/world/redwyne_fingolson_room/furnitures__stool_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -985,7 +985,7 @@
     },
     {
       "id": 18,
-      "image": "../assets/maps/redwyne_fingolson_room/furnitures__stone_bed_a0_i0.png",
+      "image": "../assets/world/redwyne_fingolson_room/furnitures__stone_bed_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 40,
       "properties": [
@@ -1039,7 +1039,7 @@
     },
     {
       "id": 19,
-      "image": "../assets/maps/redwyne_fingolson_room/furnitures__stone_v_a0_i0.png",
+      "image": "../assets/world/redwyne_fingolson_room/furnitures__stone_v_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 34,
       "properties": [
@@ -1093,7 +1093,7 @@
     },
     {
       "id": 20,
-      "image": "../assets/maps/redwyne_alek_room/furnitures__chest_wooden_a0_i0.png",
+      "image": "../assets/world/redwyne_alek_room/furnitures__chest_wooden_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [

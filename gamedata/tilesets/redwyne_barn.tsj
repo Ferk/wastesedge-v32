@@ -13,7 +13,7 @@
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/maps/redwyne_barn/walls__barn_back_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_back_a0_i0.png",
       "imagewidth": 80,
       "imageheight": 60,
       "properties": [
@@ -67,7 +67,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/maps/redwyne_barn/stairs__barn_ground_cellar_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/stairs__barn_ground_cellar_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -121,7 +121,7 @@
     },
     {
       "id": 2,
-      "image": "../assets/maps/redwyne_barn/stairs__barn_ground_loft_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/stairs__barn_ground_loft_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 40,
       "properties": [
@@ -175,7 +175,7 @@
     },
     {
       "id": 3,
-      "image": "../assets/maps/redwyne_barn/floorings__barn_ground_inside_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/floorings__barn_ground_inside_a0_i0.png",
       "imagewidth": 40,
       "imageheight": 80,
       "properties": [
@@ -229,7 +229,7 @@
     },
     {
       "id": 4,
-      "image": "../assets/maps/redwyne_barn/walls__barn_ground_back_top_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_ground_back_top_a0_i0.png",
       "imagewidth": 21,
       "imageheight": 11,
       "properties": [
@@ -283,7 +283,7 @@
     },
     {
       "id": 5,
-      "image": "../assets/maps/redwyne_barn/walls__barn_left_back_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_left_back_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -337,7 +337,7 @@
     },
     {
       "id": 6,
-      "image": "../assets/maps/redwyne_barn/walls__barn_right_back_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_right_back_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -391,7 +391,7 @@
     },
     {
       "id": 7,
-      "image": "../assets/maps/redwyne_barn/walls__barn_left_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_left_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -445,7 +445,7 @@
     },
     {
       "id": 8,
-      "image": "../assets/maps/redwyne_barn/walls__barn_right_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_right_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -499,7 +499,7 @@
     },
     {
       "id": 9,
-      "image": "../assets/maps/redwyne_barn/walls__barn_left_front_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_left_front_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
@@ -553,7 +553,7 @@
     },
     {
       "id": 10,
-      "image": "../assets/maps/redwyne_barn/walls__barn_right_front_a0_i0.png",
+      "image": "../assets/world/redwyne_barn/walls__barn_right_front_a0_i0.png",
       "imagewidth": 20,
       "imageheight": 20,
       "properties": [
