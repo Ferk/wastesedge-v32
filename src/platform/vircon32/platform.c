@@ -33,6 +33,7 @@
 #define SAVE_PREVIEW_TILES 6
 #define SAVE_PREVIEW_SIZE 60
 #define WALK_ANIMATION_SLOWDOWN 2
+#define CUTSCENE_RANGE_CATCH_UP_STEP 8
 
 /* Vircon32 colors use AABBGGRR ordering. Keep every authored renderer color
  * named here so alpha values and palette choices remain easy to audit. */
@@ -133,6 +134,7 @@ static int cinematic_sequence_frame;
 static int cinematic_visible_glyphs;
 static int cinematic_text_tick;
 static int cinematic_text_hold;
+static int cinematic_pending_node = -1;
 static int cinematic_node_started_at[GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT];
 static int active_music_track = -1;
 static game_signature game_card_signature;
@@ -871,15 +873,33 @@ void platform_stop_audio(void)
     active_music_track = -1;
 }
 
-/* Snap active range-clock tracks to their authored final keyframes. */
-static void finish_cinematic_ranges(
+/* Return the last authored frame used by one cutscene layer. */
+static int cinematic_layer_last_frame(
+    const struct generated_runtime_cutscene_layer *layer)
+{
+    int last_frame = layer->alpha_frames;
+    if (layer->x_keyframe_count > 0 &&
+        layer->x_keyframes[layer->x_keyframe_count - 1].frame > last_frame)
+        last_frame = layer->x_keyframes[layer->x_keyframe_count - 1].frame;
+    if (layer->y_keyframe_count > 0 &&
+        layer->y_keyframes[layer->y_keyframe_count - 1].frame > last_frame)
+        last_frame = layer->y_keyframes[layer->y_keyframe_count - 1].frame;
+    if (layer->alpha_keyframe_count > 0 &&
+        layer->alpha_keyframes[layer->alpha_keyframe_count - 1].frame > last_frame)
+        last_frame = layer->alpha_keyframes[layer->alpha_keyframe_count - 1].frame;
+    return last_frame;
+}
+
+/* Return how many frames active range-clock layers still need to finish. */
+static int cinematic_range_frames_remaining(
     const struct generated_runtime_dialogue *dialogue, int node)
 {
     int index;
+    int remaining = 0;
     for (index = 0; index < dialogue->cutscene_layer_count; ++index) {
         const struct generated_runtime_cutscene_layer *layer =
             &dialogue->cutscene_layers[index];
-        int last_frame = layer->alpha_frames;
+        int last_frame;
         int started;
         int elapsed;
         if (layer->clock_mode != GENERATED_CUTSCENE_CLOCK_RANGE ||
@@ -888,18 +908,34 @@ static void finish_cinematic_ranges(
         started = cinematic_node_started_at[layer->first_node];
         if (started < 0)
             continue;
-        if (layer->x_keyframe_count > 0 &&
-            layer->x_keyframes[layer->x_keyframe_count - 1].frame > last_frame)
-            last_frame = layer->x_keyframes[layer->x_keyframe_count - 1].frame;
-        if (layer->y_keyframe_count > 0 &&
-            layer->y_keyframes[layer->y_keyframe_count - 1].frame > last_frame)
-            last_frame = layer->y_keyframes[layer->y_keyframe_count - 1].frame;
-        if (layer->alpha_keyframe_count > 0 &&
-            layer->alpha_keyframes[layer->alpha_keyframe_count - 1].frame > last_frame)
-            last_frame = layer->alpha_keyframes[layer->alpha_keyframe_count - 1].frame;
+        last_frame = cinematic_layer_last_frame(layer);
         elapsed = cinematic_sequence_frame - started;
-        if (elapsed < last_frame)
-            cinematic_node_started_at[layer->first_node] -= last_frame - elapsed;
+        if (last_frame - elapsed > remaining)
+            remaining = last_frame - elapsed;
+    }
+    return remaining;
+}
+
+/* Snap active range-clock tracks to their authored final keyframes. */
+static void finish_cinematic_ranges(
+    const struct generated_runtime_dialogue *dialogue, int node)
+{
+    int index;
+    for (index = 0; index < dialogue->cutscene_layer_count; ++index) {
+        const struct generated_runtime_cutscene_layer *layer =
+            &dialogue->cutscene_layers[index];
+        int started;
+        int remaining;
+        if (layer->clock_mode != GENERATED_CUTSCENE_CLOCK_RANGE ||
+            node < layer->first_node || node > layer->last_node)
+            continue;
+        started = cinematic_node_started_at[layer->first_node];
+        if (started < 0)
+            continue;
+        remaining = cinematic_layer_last_frame(layer) -
+                    (cinematic_sequence_frame - started);
+        if (remaining > 0)
+            cinematic_node_started_at[layer->first_node] -= remaining;
     }
 }
 
@@ -926,13 +962,24 @@ static void enter_cinematic_node(int node)
 /* Finish the current node, or the whole cutscene at its last node. */
 static int advance_cinematic_node(void)
 {
+    const struct generated_runtime_dialogue *dialogue =
+        &generated_runtime_dialogues[cinematic_dialogue];
     const struct generated_runtime_dialogue_node *node =
-        &generated_runtime_dialogues[cinematic_dialogue].nodes[cinematic_node];
+        &dialogue->nodes[cinematic_node];
     if (node->next_node >= 0) {
+        const struct generated_runtime_dialogue_node *next =
+            &dialogue->nodes[node->next_node];
+        if (next->cutscene_finish_ranges &&
+            cinematic_range_frames_remaining(dialogue, cinematic_node) > 0) {
+            cinematic_pending_node = node->next_node;
+            cinematic_visible_glyphs = node->display.glyph_count;
+            return 0;
+        }
         enter_cinematic_node(node->next_node);
         return 0;
     }
     cinematic_dialogue = -1;
+    cinematic_pending_node = -1;
     return 1;
 }
 
@@ -950,6 +997,7 @@ void platform_begin_cutscene(int dialogue, int start_node)
         return;
     cinematic_dialogue = dialogue;
     cinematic_sequence_frame = 0;
+    cinematic_pending_node = -1;
     for (node = 0; node < GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT; ++node)
         cinematic_node_started_at[node] = -1;
     enter_cinematic_node(start_node);
@@ -984,12 +1032,40 @@ static void update_cinematic_music(
 /* Advance the shared paused cutscene player. A reveals or advances one line. */
 int platform_update_cutscene(const struct world_actions *actions)
 {
+    const struct generated_runtime_dialogue *dialogue;
     const struct generated_runtime_dialogue_node *node;
     const struct generated_runtime_text *text;
+    int remaining;
     if (cinematic_dialogue < 0)
         return 1;
-    node = &generated_runtime_dialogues[cinematic_dialogue].nodes[cinematic_node];
+    dialogue = &generated_runtime_dialogues[cinematic_dialogue];
+    node = &dialogue->nodes[cinematic_node];
     text = &node->display;
+    if (actions->cancel_pressed || actions->menu_pressed) {
+        cinematic_dialogue = -1;
+        cinematic_pending_node = -1;
+        return 1;
+    }
+    if (cinematic_pending_node >= 0) {
+        int step;
+        remaining = cinematic_range_frames_remaining(dialogue, cinematic_node);
+        if (remaining <= 0) {
+            int pending = cinematic_pending_node;
+            cinematic_pending_node = -1;
+            enter_cinematic_node(pending);
+            return 0;
+        }
+        step = actions->interact_pressed ? remaining
+                                        : CUTSCENE_RANGE_CATCH_UP_STEP;
+        if (step > remaining)
+            step = remaining;
+        cinematic_node_frame += step;
+        cinematic_sequence_frame += step;
+        update_cinematic_music(node);
+        /* Leave the completed endpoint visible for this render. The next
+         * update enters the pending node, avoiding a one-frame visual skip. */
+        return 0;
+    }
     if (node->hold_at_end) {
         if (actions->interact_pressed || actions->cancel_pressed ||
             actions->menu_pressed) {
@@ -1001,10 +1077,6 @@ int platform_update_cutscene(const struct world_actions *actions)
         }
         update_cinematic_music(node);
         return 0;
-    }
-    if (actions->cancel_pressed || actions->menu_pressed) {
-        cinematic_dialogue = -1;
-        return 1;
     }
     if (actions->interact_pressed) {
         if (node->cutscene_text_mode == GENERATED_CUTSCENE_TEXT_TYPEOVER &&
