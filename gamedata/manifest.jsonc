@@ -50,7 +50,6 @@
     { "id": "extro_alek_3", "source": "assets/cutscene/extro/alek_atlas.png", "rect": [270, 0, 90, 117] }
   ],
   "maps": [
-    "maps/intro_exterior.tmj",
     "maps/redwyne_exterior.tmj",
     "maps/redwyne_inn.tmj",
     "maps/redwyne_parlour.tmj",

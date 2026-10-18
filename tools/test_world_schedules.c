@@ -225,7 +225,7 @@ int main(void)
     int found_smoke_animation = 0;
 
     world_initialize(&world);
-    assert(generated_runtime_scene_count == 23);
+    assert(generated_runtime_scene_count == 22);
     assert(strcmp(generated_runtime_game_title, "Waste's Edge") == 0);
     assert(generated_runtime_title_music == GENERATED_MUSIC_TITLE_THEME);
     assert(generated_runtime_save_magic == 0x57455356);
