@@ -5,7 +5,6 @@
 
 #define GAME_WIDTH 427
 #define GAME_HEIGHT 240
-#define GAME_SCALE 1.5f
 #define DISPLAY_WIDTH 640
 #define DISPLAY_HEIGHT 360
 #define VIEW_WIDTH DISPLAY_WIDTH
@@ -177,62 +176,70 @@ static int view_y(int y)
     return (y * 3) / 2;
 }
 
+/* Record a native-resolution world texture at a logical map coordinate. */
 static void record_texture_color(int texture, int texture_x, int texture_y,
-                                 int width, int height, int x, int y, int color)
+                                 int width, int height, int world_x, int world_y,
+                                 int camera_x, int camera_y, int color)
 {
     int source_x = texture_x;
     int source_y = texture_y;
     int visible_width = width;
     int visible_height = height;
+    int display_x = view_x(world_x) - view_x(camera_x);
+    int display_y = view_y(world_y) - view_y(camera_y);
 
-    if (texture < 0 || x >= GAME_WIDTH || y >= GAME_HEIGHT ||
-        x + width <= 0 || y + height <= 0)
+    if (texture < 0 || display_x >= DISPLAY_WIDTH || display_y >= DISPLAY_HEIGHT ||
+        display_x + width <= 0 || display_y + height <= 0)
         return;
 
-    /* Vircon32 charges a draw by its complete scaled source rectangle, even
+    /* Vircon32 charges a draw by its complete source rectangle, even
      * when most of it lies outside the screen. Change the texture region so
      * large scenery at a viewport edge only consumes pixels that can appear. */
-    if (x < 0) {
-        int clipped = -x;
+    if (display_x < 0) {
+        int clipped = -display_x;
         source_x += clipped;
         visible_width -= clipped;
-        x = 0;
+        display_x = 0;
     }
-    if (y < 0) {
-        int clipped = -y;
+    if (display_y < 0) {
+        int clipped = -display_y;
         source_y += clipped;
         visible_height -= clipped;
-        y = 0;
+        display_y = 0;
     }
-    if (x + visible_width > GAME_WIDTH)
-        visible_width = GAME_WIDTH - x;
-    if (y + visible_height > GAME_HEIGHT)
-        visible_height = GAME_HEIGHT - y;
+    if (display_x + visible_width > DISPLAY_WIDTH)
+        visible_width = DISPLAY_WIDTH - display_x;
+    if (display_y + visible_height > DISPLAY_HEIGHT)
+        visible_height = DISPLAY_HEIGHT - display_y;
 
     record_draw(texture, 0, source_x, source_y, visible_width, visible_height,
-                view_x(x), view_y(y),
-                GAME_SCALE, GAME_SCALE, color);
+                display_x, display_y, 1.0f, 1.0f, color);
 }
 
 static void record_texture(int texture, int texture_x, int texture_y,
-                           int width, int height, int x, int y)
+                           int width, int height, int world_x, int world_y,
+                           int camera_x, int camera_y)
 {
     record_texture_color(texture, texture_x, texture_y, width, height,
-                         x, y, COLOR_WHITE);
+                         world_x, world_y, camera_x, camera_y, COLOR_WHITE);
 }
 
-static void record_frame(const struct generated_runtime_frame *frame, int x, int y)
+static void record_frame(const struct generated_runtime_frame *frame,
+                         int world_x, int world_y, int camera_x, int camera_y)
 {
     record_texture(frame->texture, frame->source_x, frame->source_y,
-                   frame->width, frame->height, x, y);
+                   frame->width, frame->height,
+                   world_x, world_y, camera_x, camera_y);
 }
 
 static void record_scenery_frame(const struct generated_runtime_frame *frame,
-                                 int x, int y, int alpha)
+                                 int world_x, int world_y, int camera_x, int camera_y,
+                                 int alpha)
 {
     int color = (int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK);
     record_texture_color(frame->texture, frame->source_x, frame->source_y,
-                         frame->width, frame->height, x, y, color);
+                         frame->width, frame->height,
+                         world_x, world_y, camera_x, camera_y, color);
 }
 
 static void record_solid_rect(int x, int y, int width, int height, int color)
@@ -573,10 +580,23 @@ static void draw_background(const struct world_state *world, int camera_x, int c
     for (index = 0; index < scene->background_count; ++index) {
         const struct generated_runtime_background *item = &scene->background[index];
         if (item->x >= camera_x + GAME_WIDTH || item->y >= camera_y + GAME_HEIGHT ||
-            item->x + item->frame.width <= camera_x || item->y + item->frame.height <= camera_y)
+            item->x + item->frame.logical_width <= camera_x ||
+            item->y + item->frame.logical_height <= camera_y)
             continue;
-        record_frame(&item->frame, item->x - camera_x, item->y - camera_y);
+        record_frame(&item->frame, item->x, item->y, camera_x, camera_y);
     }
+}
+
+/* Return the forward/backward pose for a compact walking animation. */
+static int walking_frame_index(int frame_count, int animation_frame)
+{
+    int period;
+    int phase;
+    if (frame_count <= 1)
+        return 0;
+    period = (frame_count - 1) * 2;
+    phase = animation_frame % period;
+    return phase < frame_count ? phase : period - phase;
 }
 
 static const struct generated_runtime_frame *entity_frame(const struct world_state *world, int definition)
@@ -589,7 +609,8 @@ static const struct generated_runtime_frame *entity_frame(const struct world_sta
          * two source steps slows only the gait, never character movement. */
         int animation_frame = world_actor_animation_frame(world, definition) /
                               WALK_ANIMATION_SLOWDOWN;
-        return &visual->walking[facing][animation_frame % visual->walking_count[facing]];
+        return &visual->walking[facing][walking_frame_index(
+            visual->walking_count[facing], animation_frame)];
     }
     if (visual->standing_count[facing] > 1 && visual->standing_delay[facing] > 0)
         return &visual->standing[facing][
@@ -613,8 +634,10 @@ static void draw_entity(const struct world_state *world, int definition, int cam
     const struct generated_runtime_frame *frame = entity_frame(world, definition);
     int x = world_actor_pixel_x(world, definition);
     int y = world_actor_pixel_y(world, definition);
-    record_frame(frame, x - visual->base_x * world->scene->tile_size + frame->offset_x - camera_x,
-                 y - visual->base_y * world->scene->tile_size + frame->offset_y - camera_y);
+    record_frame(frame,
+                 x - visual->base_x * world->scene->tile_size + frame->offset_x,
+                 y - visual->base_y * world->scene->tile_size + frame->offset_y,
+                 camera_x, camera_y);
 }
 
 static void draw_depth_sorted_objects(const struct world_state *world, int camera_x, int camera_y)
@@ -646,7 +669,7 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
                scene->scenery[scenery_index].depth <= selected_y) {
             const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
             record_scenery_frame(world_scenery_frame(world, item),
-                                 item->x - camera_x, item->y - camera_y,
+                                 item->x, item->y, camera_x, camera_y,
                                  item->alpha);
         }
         draw_entity(world, selected, camera_x, camera_y);
@@ -657,7 +680,7 @@ static void draw_depth_sorted_objects(const struct world_state *world, int camer
     while (scenery_index < scene->scenery_count) {
         const struct generated_runtime_scenery *item = &scene->scenery[scenery_index++];
         record_scenery_frame(world_scenery_frame(world, item),
-                             item->x - camera_x, item->y - camera_y,
+                             item->x, item->y, camera_x, camera_y,
                              item->alpha);
     }
 }
@@ -1772,8 +1795,8 @@ static void draw_preview_frame(const struct generated_runtime_frame *frame,
 {
     int left = world_x > crop_x ? world_x : crop_x;
     int top = world_y > crop_y ? world_y : crop_y;
-    int right = world_x + frame->width;
-    int bottom = world_y + frame->height;
+    int right = world_x + frame->logical_width;
+    int bottom = world_y + frame->logical_height;
     int crop_right = crop_x + crop_size;
     int crop_bottom = crop_y + crop_size;
     int output_left;
@@ -1790,14 +1813,18 @@ static void draw_preview_frame(const struct generated_runtime_frame *frame,
     output_top = destination_y + ((top - crop_y) * SAVE_PREVIEW_SIZE) / crop_size;
     output_right = destination_x + ((right - crop_x) * SAVE_PREVIEW_SIZE) / crop_size;
     output_bottom = destination_y + ((bottom - crop_y) * SAVE_PREVIEW_SIZE) / crop_size;
-    source_width = right - left;
-    source_height = bottom - top;
+    source_width = ((right - world_x) * frame->width) / frame->logical_width -
+                   ((left - world_x) * frame->width) / frame->logical_width;
+    source_height = ((bottom - world_y) * frame->height) / frame->logical_height -
+                    ((top - world_y) * frame->height) / frame->logical_height;
     if (output_right <= output_left || output_bottom <= output_top)
         return;
     select_texture(frame->texture);
     select_region(0);
-    define_region_rectangle(frame->source_x + left - world_x,
-                            frame->source_y + top - world_y,
+    define_region_rectangle(frame->source_x +
+                                ((left - world_x) * frame->width) / frame->logical_width,
+                            frame->source_y +
+                                ((top - world_y) * frame->height) / frame->logical_height,
                             source_width, source_height);
     set_multiply_color((int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK));
     set_drawing_scale((float)(output_right - output_left) / (float)source_width,

@@ -6,7 +6,7 @@
     "width": 20
   },
   "name": "redwyne_exterior_oliver",
-  "tilecount": 20,
+  "tilecount": 16,
   "tiledversion": "1.11.0",
   "tileheight": 30,
   "tilewidth": 20,
@@ -390,60 +390,6 @@
       "type": "character_frame"
     },
     {
-      "id": 7,
-      "image": "../assets/actors/oliver/oliver_walk_north_i3.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "oliver.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_north"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 3
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
       "id": 8,
       "image": "../assets/actors/oliver/oliver_walk_south_i0.png",
       "imagewidth": 20,
@@ -571,60 +517,6 @@
           "name": "source_image",
           "type": "int",
           "value": 2
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 11,
-      "image": "../assets/actors/oliver/oliver_walk_south_i3.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "oliver.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_south"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 3
         },
         {
           "name": "offset_x",
@@ -822,60 +714,6 @@
       "type": "character_frame"
     },
     {
-      "id": 15,
-      "image": "../assets/actors/oliver/oliver_walk_west_i3.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "oliver.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_west"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 3
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
       "id": 16,
       "image": "../assets/actors/oliver/oliver_walk_east_i0.png",
       "imagewidth": 20,
@@ -1003,60 +841,6 @@
           "name": "source_image",
           "type": "int",
           "value": 2
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 19,
-      "image": "../assets/actors/oliver/oliver_walk_east_i3.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "oliver.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_east"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 3
         },
         {
           "name": "offset_x",

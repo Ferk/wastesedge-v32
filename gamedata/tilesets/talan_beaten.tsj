@@ -6,14 +6,14 @@
     "width": 20
   },
   "name": "talan_beaten",
-  "tilecount": 11,
+  "tilecount": 5,
   "tiledversion": "1.11.0",
   "tileheight": 30,
   "tilewidth": 20,
   "tiles": [
     {
       "id": 0,
-      "image": "../assets/actors/talan/talan_beaten_stand_north_i0.png",
+      "image": "../assets/actors/talan/talan_beaten_any_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -25,7 +25,7 @@
         {
           "name": "source_move",
           "type": "string",
-          "value": "stand_north"
+          "value": "stand_any"
         },
         {
           "name": "source_image",
@@ -72,7 +72,7 @@
     },
     {
       "id": 1,
-      "image": "../assets/actors/talan/talan_beaten_stand_south_i0.png",
+      "image": "../assets/actors/talan/talan_beaten_any_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
       "properties": [
@@ -84,7 +84,7 @@
         {
           "name": "source_move",
           "type": "string",
-          "value": "stand_south"
+          "value": "walk_any"
         },
         {
           "name": "source_image",
@@ -131,301 +131,6 @@
     },
     {
       "id": 2,
-      "image": "../assets/actors/talan/talan_beaten_stand_west_i0.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "talan_beaten.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "stand_west"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "frame_delay",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 3,
-      "image": "../assets/actors/talan/talan_beaten_stand_east_i0.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "talan_beaten.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "stand_east"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "frame_delay",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 4,
-      "image": "../assets/actors/talan/talan_beaten_walk_north_i0.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "talan_beaten.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_north"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "frame_delay",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 5,
-      "image": "../assets/actors/talan/talan_beaten_walk_south_i0.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "talan_beaten.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_south"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "frame_delay",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 6,
-      "image": "../assets/actors/talan/talan_beaten_walk_west_i0.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "talan_beaten.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_west"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "frame_delay",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 7,
       "image": "../assets/actors/talan/talan_beaten_walk_east_i0.png",
       "imagewidth": 20,
       "imageheight": 30,
@@ -484,7 +189,7 @@
       "type": "character_frame"
     },
     {
-      "id": 8,
+      "id": 3,
       "image": "../assets/actors/talan/talan_beaten_walk_east_i1.png",
       "imagewidth": 20,
       "imageheight": 30,
@@ -543,7 +248,7 @@
       "type": "character_frame"
     },
     {
-      "id": 9,
+      "id": 4,
       "image": "../assets/actors/talan/talan_beaten_walk_east_i2.png",
       "imagewidth": 20,
       "imageheight": 30,
@@ -562,65 +267,6 @@
           "name": "source_image",
           "type": "int",
           "value": 2
-        },
-        {
-          "name": "frame_delay",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "offset_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "offset_y",
-          "type": "int",
-          "value": 10
-        },
-        {
-          "name": "base_x",
-          "type": "int",
-          "value": 0
-        },
-        {
-          "name": "base_y",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_width",
-          "type": "int",
-          "value": 1
-        },
-        {
-          "name": "walkability_height",
-          "type": "int",
-          "value": 2
-        }
-      ],
-      "type": "character_frame"
-    },
-    {
-      "id": 10,
-      "image": "../assets/actors/talan/talan_beaten_walk_east_i3.png",
-      "imagewidth": 20,
-      "imageheight": 30,
-      "properties": [
-        {
-          "name": "source_character",
-          "type": "string",
-          "value": "talan_beaten.mchar"
-        },
-        {
-          "name": "source_move",
-          "type": "string",
-          "value": "walk_east"
-        },
-        {
-          "name": "source_image",
-          "type": "int",
-          "value": 3
         },
         {
           "name": "frame_delay",

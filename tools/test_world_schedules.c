@@ -848,19 +848,22 @@ int main(void)
             }
             if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
                 scenery->x == 360 && scenery->y == 200 &&
-                scenery->frame.width == 20 && scenery->frame.height == 53) {
+                scenery->frame.logical_width == 20 &&
+                scenery->frame.logical_height == 53) {
                 assert(scenery->depth == 240);
                 ++entrance_back_pieces;
             }
             if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
                 scenery->x == 360 && scenery->y == 244 &&
-                scenery->frame.width == 20 && scenery->frame.height == 68) {
+                scenery->frame.logical_width == 20 &&
+                scenery->frame.logical_height == 68) {
                 assert(scenery->depth == 280);
                 ++entrance_fore_pieces;
             }
             if (scene_index == GENERATED_SCENE_REDWYNE_EXTERIOR &&
                 scenery->x == 340 && scenery->y == 260 &&
-                scenery->frame.width == 60 && scenery->frame.height == 60) {
+                scenery->frame.logical_width == 60 &&
+                scenery->frame.logical_height == 60) {
                 /* The broad eave belongs to the rear wall of the doorway.
                  * Keep it behind a player standing on its Y=260 row; the
                  * separate narrow entrance-top-fore gable remains in front. */

@@ -14,6 +14,8 @@ from pathlib import Path
 
 
 GENERATED_RESOURCE_PREFIX = "@generated/"
+WORLD_PIXEL_SCALE_NUMERATOR = 3
+WORLD_PIXEL_SCALE_DENOMINATOR = 2
 BACKGROUND_CHUNK_TILES_X = 8
 BACKGROUND_CHUNK_TILES_Y = 6
 DIALOGUE_TEXT_FONT_SIZE = 15
@@ -21,6 +23,7 @@ DIALOGUE_TEXT_LINE_HEIGHT = 19
 DIALOGUE_ATLAS_WIDTH = 512
 DIALOGUE_ATLAS_HEIGHT = 512
 CHARACTER_SHEET_WIDTHS = (256, 512, 1024)
+SCENERY_REPEAT_CHUNK_TILES = 8
 RUNTIME_ATLAS_SIZE = 1024
 RUNTIME_ATLAS_PADDING = 1
 RUNTIME_ATLAS_WIDTH_STEP = 16
@@ -794,6 +797,45 @@ def path_inside(root: Path, path: Path, description: str) -> Path:
     return path
 
 
+def png_dimensions(path: Path, description: str) -> tuple[int, int]:
+    """Return PNG dimensions without decoding the image pixels."""
+    image_data = path.read_bytes()
+    if image_data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ContentError(f"{description}: expected a PNG image: {path}")
+    return (int.from_bytes(image_data[16:20], "big"),
+            int.from_bytes(image_data[20:24], "big"))
+
+
+def world_pixel_dimension(logical_dimension: int) -> int:
+    """Convert one logical world dimension to its native display-pixel size."""
+    return ((logical_dimension * WORLD_PIXEL_SCALE_NUMERATOR) + 1) // \
+        WORLD_PIXEL_SCALE_DENOMINATOR
+
+
+def world_pixel_coordinate(logical_coordinate: int) -> int:
+    """Convert a signed logical world coordinate using the renderer's rounding."""
+    numerator = logical_coordinate * WORLD_PIXEL_SCALE_NUMERATOR
+    if numerator < 0:
+        return -((-numerator) // WORLD_PIXEL_SCALE_DENOMINATOR)
+    return numerator // WORLD_PIXEL_SCALE_DENOMINATOR
+
+
+def world_tile_pixel_dimensions(tile: dict[str, object], image_path: Path,
+                                description: str) -> tuple[int, int]:
+    """Validate and return a display-resolution world tile's PNG dimensions."""
+    logical_width = expect(tile.get("imagewidth"), int, f"{description} imagewidth")
+    logical_height = expect(tile.get("imageheight"), int, f"{description} imageheight")
+    actual_width, actual_height = png_dimensions(image_path, description)
+    expected_width = world_pixel_dimension(logical_width)
+    expected_height = world_pixel_dimension(logical_height)
+    if actual_width != expected_width or actual_height != expected_height:
+        raise ContentError(
+            f"{description}: PNG is {actual_width}x{actual_height}, expected native "
+            f"{expected_width}x{expected_height} for its {logical_width}x{logical_height} "
+            "logical Tiled dimensions")
+    return actual_width, actual_height
+
+
 def validate_tilesets(map_path: Path, document: dict[str, object], game_root: Path) -> tuple[set[str], set[int]]:
     result: set[str] = set()
     valid_gids: set[int] = set()
@@ -821,21 +863,8 @@ def validate_tilesets(map_path: Path, document: dict[str, object], game_root: Pa
                 raise ContentError(f"{tileset_path}: missing tile image {image_source!r}")
             if image_path.suffix.lower() != ".png":
                 raise ContentError(f"{tileset_path}: unsupported tile image format {image_path.suffix!r}")
-            image_data = image_path.read_bytes()
-            if image_data[:8] != b"\x89PNG\r\n\x1a\n":
-                raise ContentError(f"{tileset_path}: tile image is not a PNG: {image_source!r}")
-            actual_width = int.from_bytes(image_data[16:20], "big")
-            actual_height = int.from_bytes(image_data[20:24], "big")
-            declared_width = tile.get("imagewidth")
-            declared_height = tile.get("imageheight")
-            if declared_width is not None and declared_width != actual_width:
-                raise ContentError(
-                    f"{tileset_path}: tile image {image_source!r} declares width "
-                    f"{declared_width}, but the PNG is {actual_width} pixels wide")
-            if declared_height is not None and declared_height != actual_height:
-                raise ContentError(
-                    f"{tileset_path}: tile image {image_source!r} declares height "
-                    f"{declared_height}, but the PNG is {actual_height} pixels high")
+            world_tile_pixel_dimensions(tile, image_path,
+                                        f"{tileset_path}: tile image {image_source!r}")
         if tile_entries:
             for tile in tile_entries:
                 tile = expect(tile, dict, f"{tileset_path} tile")
@@ -1005,10 +1034,114 @@ def runtime_image_path(image: str, game_root: Path, output_root: Path) -> Path:
     return game_root / image
 
 
+def rectangles_intersect(first: tuple[int, int, int, int],
+                         second: tuple[int, int, int, int]) -> bool:
+    """Return whether two atlas rectangles overlap with positive area."""
+    first_x, first_y, first_width, first_height = first
+    second_x, second_y, second_width, second_height = second
+    return not (first_x + first_width <= second_x or
+                second_x + second_width <= first_x or
+                first_y + first_height <= second_y or
+                second_y + second_height <= first_y)
+
+
+def split_free_rectangles(free_rectangles: list[tuple[int, int, int, int]],
+                          placed: tuple[int, int, int, int]
+                          ) -> list[tuple[int, int, int, int]]:
+    """Subtract one placed image from a MaxRects free-rectangle collection."""
+    placed_x, placed_y, placed_width, placed_height = placed
+    split: list[tuple[int, int, int, int]] = []
+    for free in free_rectangles:
+        free_x, free_y, free_width, free_height = free
+        if not rectangles_intersect(free, placed):
+            split.append(free)
+            continue
+        free_right = free_x + free_width
+        free_bottom = free_y + free_height
+        placed_right = placed_x + placed_width
+        placed_bottom = placed_y + placed_height
+        if placed_x > free_x:
+            split.append((free_x, free_y, placed_x - free_x, free_height))
+        if placed_right < free_right:
+            split.append((placed_right, free_y, free_right - placed_right, free_height))
+        if placed_y > free_y:
+            split.append((free_x, free_y, free_width, placed_y - free_y))
+        if placed_bottom < free_bottom:
+            split.append((free_x, placed_bottom, free_width, free_bottom - placed_bottom))
+
+    # Overlapping free rectangles are valid, but fully contained rectangles
+    # provide no extra placement options and substantially increase work.
+    pruned: list[tuple[int, int, int, int]] = []
+    for index, candidate in enumerate(split):
+        candidate_x, candidate_y, candidate_width, candidate_height = candidate
+        contained = False
+        for other_index, other in enumerate(split):
+            if index == other_index:
+                continue
+            other_x, other_y, other_width, other_height = other
+            if (candidate_x >= other_x and candidate_y >= other_y and
+                    candidate_x + candidate_width <= other_x + other_width and
+                    candidate_y + candidate_height <= other_y + other_height):
+                contained = True
+                break
+        if not contained and candidate_width > 0 and candidate_height > 0:
+            pruned.append(candidate)
+    return pruned
+
+
+def maxrects_layout(items: list[tuple[tuple[int, int, bytes], tuple[str, object]]],
+                    width_limit: int) -> tuple[list[dict[str, object]],
+                                               dict[tuple[int, int, bytes],
+                                                    tuple[int, int, int]]]:
+    """Pack images into cropped pages while filling two-dimensional gaps."""
+    pages: list[dict[str, object]] = []
+    placements: dict[tuple[int, int, bytes], tuple[int, int, int]] = {}
+    for item_key, (_, item_image) in items:
+        padded_width = item_image.width + RUNTIME_ATLAS_PADDING * 2
+        padded_height = item_image.height + RUNTIME_ATLAS_PADDING * 2
+        best: tuple[int, int, int, int, int, int] | None = None
+        for page_index, page in enumerate(pages):
+            for free_x, free_y, free_width, free_height in page["free"]:
+                if padded_width > free_width or padded_height > free_height:
+                    continue
+                new_width = max(int(page["used_width"]), free_x + padded_width)
+                new_height = max(int(page["used_height"]), free_y + padded_height)
+                area_growth = (new_width * new_height -
+                               int(page["used_width"]) * int(page["used_height"]))
+                leftover_x = free_width - padded_width
+                leftover_y = free_height - padded_height
+                score = (area_growth, free_width * free_height - padded_width * padded_height,
+                         min(leftover_x, leftover_y), page_index, free_y, free_x)
+                if best is None or score < best:
+                    best = score
+        if best is None:
+            page_index = len(pages)
+            pages.append({
+                "free": [(0, 0, width_limit, RUNTIME_ATLAS_SIZE)],
+                "used_width": 0,
+                "used_height": 0,
+            })
+            placed_x = 0
+            placed_y = 0
+        else:
+            _, _, _, page_index, placed_y, placed_x = best
+        page = pages[page_index]
+        placed = (placed_x, placed_y, padded_width, padded_height)
+        page["free"] = split_free_rectangles(page["free"], placed)
+        page["used_width"] = max(int(page["used_width"]), placed_x + padded_width)
+        page["used_height"] = max(int(page["used_height"]), placed_y + padded_height)
+        placements[item_key] = (
+            page_index,
+            placed_x + RUNTIME_ATLAS_PADDING,
+            placed_y + RUNTIME_ATLAS_PADDING,
+        )
+    return pages, placements
+
+
 def materialize_runtime_atlases(
         references: list[tuple[dict[str, object], str, str, str]],
         game_root: Path, output_root: Path, directory: str,
-        stem: str) -> tuple[int, int, int]:
+        stem: str, prefer_fewer_pages: bool = False) -> tuple[int, int, int]:
     """Pack referenced PNGs into deterministic atlases and intern equal pixels.
 
     Each reference names its image, source-X and source-Y dictionary fields.
@@ -1044,60 +1177,8 @@ def materialize_runtime_atlases(
         image_size_by_path[image] = rgba.size
         unique_images.setdefault(key, (image, rgba))
 
-    # Tall images first make the shelf layout deterministic and avoid wasting
-    # rows below large scenery sheets. Equal sizes retain lexical path order.
-    ordered_images = sorted(
-        unique_images.items(),
-        key=lambda item: (-item[0][1], -item[0][0], item[1][0]),
-    )
-    def shelf_layout(items: list[tuple[tuple[int, int, bytes], tuple[str, object]]],
-                     width_limit: int) -> tuple[list[dict[str, int]],
-                                                dict[tuple[int, int, bytes],
-                                                     tuple[int, int, int]]]:
-        """Lay out images on cropped shelf-packed pages of one trial width."""
-        trial_pages: list[dict[str, int]] = []
-        trial_placements: dict[tuple[int, int, bytes], tuple[int, int, int]] = {}
-        for item_key, (_, item_image) in items:
-            padded_width = item_image.width + RUNTIME_ATLAS_PADDING * 2
-            padded_height = item_image.height + RUNTIME_ATLAS_PADDING * 2
-            if not trial_pages:
-                trial_pages.append({"x": 0, "y": 0, "row_height": 0,
-                                    "used_width": 0, "used_height": 0})
-            trial_page = trial_pages[-1]
-            if trial_page["x"] > 0 and trial_page["x"] + padded_width > width_limit:
-                trial_page["x"] = 0
-                trial_page["y"] += trial_page["row_height"]
-                trial_page["row_height"] = 0
-            if trial_page["y"] + padded_height > RUNTIME_ATLAS_SIZE:
-                trial_pages.append({"x": 0, "y": 0, "row_height": 0,
-                                    "used_width": 0, "used_height": 0})
-                trial_page = trial_pages[-1]
-            origin_x = trial_page["x"] + RUNTIME_ATLAS_PADDING
-            origin_y = trial_page["y"] + RUNTIME_ATLAS_PADDING
-            trial_placements[item_key] = (
-                len(trial_pages) - 1, origin_x, origin_y)
-            trial_page["x"] += padded_width
-            trial_page["row_height"] = max(
-                trial_page["row_height"], padded_height)
-            trial_page["used_width"] = max(
-                trial_page["used_width"], trial_page["x"])
-            trial_page["used_height"] = max(
-                trial_page["used_height"],
-                trial_page["y"] + trial_page["row_height"])
-        return trial_pages, trial_placements
-
-    # A nearly page-sized image cannot share a useful shelf with small sprites.
-    # Give it a tightly cropped page, then optimize the trial width used for
-    # the remaining images. This avoids trading texture slots for large areas
-    # of transparent cartridge data.
-    large_edge = RUNTIME_ATLAS_SIZE * 3 // 4
-    large_images = [item for item in ordered_images
-                    if item[0][0] > large_edge or item[0][1] > large_edge]
-    large_keys = {key for key, _ in large_images}
-    regular_images = [item for item in ordered_images if item[0] not in large_keys]
-    pages: list[dict[str, int]] = []
-    placement_by_key: dict[tuple[int, int, bytes], tuple[int, int, int]] = {}
-    for key, (_, image) in large_images:
+    image_items = list(unique_images.items())
+    for _, (_, image) in image_items:
         padded_width = image.width + RUNTIME_ATLAS_PADDING * 2
         padded_height = image.height + RUNTIME_ATLAS_PADDING * 2
         if padded_width > RUNTIME_ATLAS_SIZE or padded_height > RUNTIME_ATLAS_SIZE:
@@ -1105,43 +1186,52 @@ def materialize_runtime_atlases(
                 f"runtime atlas image is {image.width}x{image.height}, exceeding the "
                 f"{RUNTIME_ATLAS_SIZE}x{RUNTIME_ATLAS_SIZE} atlas limit"
             )
-        placement_by_key[key] = (
-            len(pages), RUNTIME_ATLAS_PADDING, RUNTIME_ATLAS_PADDING)
-        pages.append({"x": padded_width, "y": 0,
-                      "row_height": padded_height,
-                      "used_width": padded_width,
-                      "used_height": padded_height})
 
-    if regular_images:
-        minimum_width = max(
-            image.width + RUNTIME_ATLAS_PADDING * 2
-            for _, (_, image) in regular_images)
-        trial_widths = list(range(
-            minimum_width, RUNTIME_ATLAS_SIZE + 1, RUNTIME_ATLAS_WIDTH_STEP))
-        if trial_widths[-1] != RUNTIME_ATLAS_SIZE:
-            trial_widths.append(RUNTIME_ATLAS_SIZE)
-        candidates = [shelf_layout(regular_images, width) for width in trial_widths]
-        regular_pages, regular_placements = min(
-            candidates,
-            key=lambda candidate: (
-                sum(page["used_width"] * page["used_height"]
-                    for page in candidate[0]) +
-                len(candidate[0]) * RUNTIME_ATLAS_PAGE_PENALTY,
-                len(candidate[0]),
-            ),
-        )
-        page_offset = len(pages)
-        pages.extend(regular_pages)
-        placement_by_key.update({
-            key: (page + page_offset, x, y)
-            for key, (page, x, y) in regular_placements.items()
-        })
+    # Greedy MaxRects depends on input order, so try several stable orders and
+    # width limits. Score the actual cropped atlas area rather than an assumed
+    # full 1024-square page, with a small cost for each cartridge texture.
+    orderings = [
+        sorted(image_items,
+               key=lambda item: (-(item[0][0] * item[0][1]),
+                                 -max(item[0][0], item[0][1]), item[1][0])),
+        sorted(image_items,
+               key=lambda item: (-max(item[0][0], item[0][1]),
+                                 -(item[0][0] * item[0][1]), item[1][0])),
+        sorted(image_items,
+               key=lambda item: (-item[0][1], -item[0][0], item[1][0])),
+        sorted(image_items,
+               key=lambda item: (-item[0][0], -item[0][1], item[1][0])),
+    ]
+    minimum_width = max(
+        image.width + RUNTIME_ATLAS_PADDING * 2
+        for _, (_, image) in image_items)
+    trial_widths = list(range(
+        minimum_width, RUNTIME_ATLAS_SIZE + 1, RUNTIME_ATLAS_WIDTH_STEP))
+    if trial_widths[-1] != RUNTIME_ATLAS_SIZE:
+        trial_widths.append(RUNTIME_ATLAS_SIZE)
+    candidates = [maxrects_layout(ordering, width)
+                  for ordering in orderings for width in trial_widths]
+    def candidate_score(candidate: tuple[list[dict[str, object]],
+                                         dict[tuple[int, int, bytes], tuple[int, int, int]]]
+                        ) -> tuple[int, int]:
+        """Score one layout by semantic page preference and stored pixels."""
+        candidate_pages = candidate[0]
+        stored_area = sum(
+            int(page["used_width"]) * int(page["used_height"])
+            for page in candidate_pages)
+        if prefer_fewer_pages:
+            return len(candidate_pages), stored_area
+        return stored_area + len(candidate_pages) * RUNTIME_ATLAS_PAGE_PENALTY, \
+            len(candidate_pages)
+
+    pages, placement_by_key = min(candidates, key=candidate_score)
+    ordered_images = sorted(image_items, key=lambda item: item[1][0])
 
     atlas_root = output_root / directory
     used_outputs: set[Path] = set()
     for page_index, page in enumerate(pages):
         atlas = Image.new(
-            "RGBA", (page["used_width"], page["used_height"]), (0, 0, 0, 0))
+            "RGBA", (int(page["used_width"]), int(page["used_height"])), (0, 0, 0, 0))
         for key, (_, image) in ordered_images:
             placed_page, origin_x, origin_y = placement_by_key[key]
             if placed_page == page_index:
@@ -1197,34 +1287,43 @@ def background_atlas_references(
     ]
 
 
-def sprite_atlas_references(
-        scenes: list[dict[str, object]], visuals: list[dict[str, object]],
-        object_visuals: list[dict[str, object]], dialogues: list[dict[str, object]],
-        glyphs: list[dict[str, object]]) -> list[tuple[dict[str, object], str, str, str]]:
-    """Return mutable references for scenery, actors, objects, portraits and glyphs."""
+def actor_atlas_references(
+        visuals: list[dict[str, object]],
+        dialogues: list[dict[str, object]]
+        ) -> list[tuple[dict[str, object], str, str, str]]:
+    """Return mutable references for actor animation sheets and portraits."""
     references: list[tuple[dict[str, object], str, str, str]] = []
-    for scene in scenes:
-        references.extend(
-            (expect(item, dict, "runtime scenery"), "image", "source_x", "source_y")
-            for item in expect(scene["scenery"], list, "runtime scenery")
-        )
     for visual in visuals:
         for frame_group in expect(visual["frames"], list, "runtime actor frames"):
             for frame in expect(frame_group, list, "runtime actor frame group"):
                 if frame is not None:
                     references.append((expect(frame, dict, "runtime actor frame"),
                                        "image", "source_x", "source_y"))
-    for visual in object_visuals:
-        for frame in expect(visual["frames"], list, "runtime object frames"):
-            if frame is not None:
-                references.append((expect(frame, dict, "runtime object frame"),
-                                   "image", "source_x", "source_y"))
     for dialogue in dialogues:
         for speaker in expect(dialogue["speakers"], list, "runtime dialogue speakers"):
             speaker = expect(speaker, dict, "runtime dialogue speaker")
             if speaker.get("portrait") is not None:
                 references.append((speaker, "portrait", "portrait_source_x",
                                    "portrait_source_y"))
+    return references
+
+
+def world_atlas_references(
+        scenes: list[dict[str, object]], object_visuals: list[dict[str, object]],
+        glyphs: list[dict[str, object]]
+        ) -> list[tuple[dict[str, object], str, str, str]]:
+    """Return mutable references for scenery, objects, and text glyphs."""
+    references: list[tuple[dict[str, object], str, str, str]] = []
+    for scene in scenes:
+        references.extend(
+            (expect(item, dict, "runtime scenery"), "image", "source_x", "source_y")
+            for item in expect(scene["scenery"], list, "runtime scenery")
+        )
+    for visual in object_visuals:
+        for frame in expect(visual["frames"], list, "runtime object frames"):
+            if frame is not None:
+                references.append((expect(frame, dict, "runtime object frame"),
+                                   "image", "source_x", "source_y"))
     references.extend(
         (expect(glyph, dict, "runtime glyph"), "image", "x", "y")
         for glyph in glyphs
@@ -1245,7 +1344,9 @@ def materialize_background_chunks(scenes: list[dict[str, object]], game_root: Pa
         height = integer(scene["height"], "runtime scene height")
         tile_size = integer(scene["tile_size"], "runtime scene tile size")
         terrain = expect(scene["terrain"], list, "runtime terrain")
-        map_image = Image.new("RGBA", (width * tile_size, height * tile_size), (0, 0, 0, 0))
+        map_pixel_width = world_pixel_dimension(width * tile_size)
+        map_pixel_height = world_pixel_dimension(height * tile_size)
+        map_image = Image.new("RGBA", (map_pixel_width, map_pixel_height), (0, 0, 0, 0))
         image_cache: dict[str, object] = {}
         for placement in terrain:
             placement = expect(placement, dict, "runtime terrain placement")
@@ -1259,78 +1360,117 @@ def materialize_background_chunks(scenes: list[dict[str, object]], game_root: Pa
                     raise ContentError(f"cannot read terrain tile {image}: {error}") from error
             map_image.alpha_composite(
                 image_cache[image],
-                (integer(placement["x"], "runtime terrain x"),
-                 integer(placement["y"], "runtime terrain y")),
+                (world_pixel_coordinate(integer(placement["x"], "runtime terrain x")),
+                 world_pixel_coordinate(integer(placement["y"], "runtime terrain y"))),
             )
         background: list[dict[str, object]] = []
         for tile_y in range(0, height, BACKGROUND_CHUNK_TILES_Y):
             for tile_x in range(0, width, BACKGROUND_CHUNK_TILES_X):
                 chunk_columns = min(BACKGROUND_CHUNK_TILES_X, width - tile_x)
                 chunk_rows = min(BACKGROUND_CHUNK_TILES_Y, height - tile_y)
-                chunk_width = chunk_columns * tile_size
-                chunk_height = chunk_rows * tile_size
-                canvas = map_image.crop((tile_x * tile_size, tile_y * tile_size,
-                                         tile_x * tile_size + chunk_width,
-                                         tile_y * tile_size + chunk_height))
+                logical_width = chunk_columns * tile_size
+                logical_height = chunk_rows * tile_size
+                logical_x = tile_x * tile_size
+                logical_y = tile_y * tile_size
+                pixel_x = world_pixel_coordinate(logical_x)
+                pixel_y = world_pixel_coordinate(logical_y)
+                pixel_right = world_pixel_coordinate(logical_x + logical_width)
+                pixel_bottom = world_pixel_coordinate(logical_y + logical_height)
+                canvas = map_image.crop((pixel_x, pixel_y, pixel_right, pixel_bottom))
                 if canvas.getbbox() is None:
                     continue
                 relative_output = Path("backgrounds") / f"{scene_id}-{tile_x:03d}-{tile_y:03d}.png"
                 write_generated_png(output_root / relative_output, canvas)
                 background.append({
                     "image": GENERATED_RESOURCE_PREFIX + relative_output.as_posix(),
-                    "width": chunk_width,
-                    "height": chunk_height,
-                    "x": tile_x * tile_size,
-                    "y": tile_y * tile_size,
+                    "width": pixel_right - pixel_x,
+                    "height": pixel_bottom - pixel_y,
+                    "logical_width": logical_width,
+                    "logical_height": logical_height,
+                    "x": logical_x,
+                    "y": logical_y,
                 })
         scene["background"] = background
 
 
 def materialize_scenery_strips(scenes: list[dict[str, object]], game_root: Path,
                                output_root: Path) -> None:
-    """Bake repeated tile runs, sharing identical strip textures between rows."""
+    """Split repeated tile runs into reusable bounded-width texture chunks."""
     try:
         from PIL import Image
     except ImportError as error:
         raise ContentError("Pillow is required to build scenery strips") from error
 
-    generated_strips: dict[tuple[str, int, int], Path] = {}
+    maximum_repeats: dict[tuple[str, int], int] = {}
+    for scene in scenes:
+        tile_size = integer(scene["tile_size"], "runtime scene tile size")
+        for item in expect(scene["scenery"], list, "runtime scenery"):
+            if "repeat_count" not in item:
+                continue
+            source_image = expect(item["image"], str, "runtime scenery image")
+            repeat_count = integer(item["repeat_count"], "runtime scenery repeat count")
+            key = (source_image, tile_size)
+            maximum_repeats[key] = max(maximum_repeats.get(key, 0), repeat_count)
+
+    generated_strips: dict[tuple[str, int], tuple[Path, int, int]] = {}
     used_outputs: set[Path] = set()
     for scene in scenes:
+        expanded_scenery: list[dict[str, object]] = []
         for item in expect(scene["scenery"], list, "runtime scenery"):
             repeat_count = item.pop("repeat_count", None)
             if repeat_count is None:
+                expanded_scenery.append(item)
                 continue
             repeat_count = integer(repeat_count, "runtime scenery repeat count")
             item.pop("repeat_key", None)
             source_image = expect(item["image"], str, "runtime scenery image")
             tile_size = integer(scene["tile_size"], "runtime scene tile size")
-            strip_key = (source_image, repeat_count, tile_size)
-            relative_output = generated_strips.get(strip_key)
-            if relative_output is None:
+            strip_key = (source_image, tile_size)
+            generated_strip = generated_strips.get(strip_key)
+            if generated_strip is None:
                 source_path = game_root / source_image
                 try:
                     with Image.open(source_path) as source:
                         tile = source.convert("RGBA")
                 except OSError as error:
                     raise ContentError(f"cannot read scenery tile {source_path}: {error}") from error
-                if tile.size != (tile_size, tile_size):
+                expected_size = (world_pixel_dimension(tile_size),
+                                 world_pixel_dimension(tile_size))
+                if tile.size != expected_size:
                     raise ContentError(
                         f"tiled occluder image {source_path} is {tile.width}x{tile.height}, expected "
-                        f"{tile_size}x{tile_size}"
+                        f"{expected_size[0]}x{expected_size[1]}"
                     )
-                strip = Image.new("RGBA", (repeat_count * tile_size, tile_size), (0, 0, 0, 0))
-                for column in range(repeat_count):
-                    strip.alpha_composite(tile, (column * tile_size, 0))
+                chunk_tiles = min(SCENERY_REPEAT_CHUNK_TILES, maximum_repeats[strip_key])
+                strip = Image.new(
+                    "RGBA", (chunk_tiles * tile.width, tile.height), (0, 0, 0, 0))
+                for column in range(chunk_tiles):
+                    strip.alpha_composite(tile, (column * tile.width, 0))
                 source_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", Path(source_image).stem)
                 source_hash = hashlib.sha256(source_image.encode("utf-8")).hexdigest()[:8]
-                relative_output = Path("scenery") / f"{source_stem}-{source_hash}-x{repeat_count}.png"
+                relative_output = Path("scenery") / f"{source_stem}-{source_hash}-x{chunk_tiles}.png"
                 write_generated_png(output_root / relative_output, strip)
-                generated_strips[strip_key] = relative_output
+                generated_strip = (relative_output, chunk_tiles, tile.width)
+                generated_strips[strip_key] = generated_strip
+            relative_output, chunk_tiles, tile_pixel_width = generated_strip
             used_outputs.add(relative_output)
-            item["image"] = GENERATED_RESOURCE_PREFIX + relative_output.as_posix()
-            item["width"] = repeat_count * tile_size
-            item["height"] = tile_size
+            remaining = repeat_count
+            column = 0
+            while remaining > 0:
+                current_tiles = min(chunk_tiles, remaining)
+                chunk = dict(item)
+                chunk["image"] = GENERATED_RESOURCE_PREFIX + relative_output.as_posix()
+                chunk["source_x"] = 0
+                chunk["source_y"] = 0
+                chunk["width"] = current_tiles * tile_pixel_width
+                chunk["height"] = world_pixel_dimension(tile_size)
+                chunk["logical_width"] = current_tiles * tile_size
+                chunk["logical_height"] = tile_size
+                chunk["x"] = integer(item["x"], "runtime scenery x") + column * tile_size
+                expanded_scenery.append(chunk)
+                column += current_tiles
+                remaining -= current_tiles
+        scene["scenery"] = expanded_scenery
     scenery_root = output_root / "scenery"
     if scenery_root.is_dir():
         for existing in scenery_root.glob("*.png"):
@@ -1708,10 +1848,14 @@ def scene_tiles(map_path: Path, document: dict[str, object], game_root: Path) ->
                 continue
             image = expect(image, str, f"{tileset_path} tile image")
             image_path = path_inside(game_root, (tileset_path.parent / image).resolve(), f"{tileset_path} tile image")
+            pixel_width, pixel_height = world_tile_pixel_dimensions(
+                tile, image_path, f"{tileset_path}: tile image {image!r}")
             result[first_gid + expect(tile.get("id"), int, f"{tileset_path} tile id")] = {
                 "image": image_path.relative_to(game_root).as_posix(),
                 "imagewidth": expect(tile.get("imagewidth"), int, f"{tileset_path} tile imagewidth"),
                 "imageheight": expect(tile.get("imageheight"), int, f"{tileset_path} tile imageheight"),
+                "pixel_width": pixel_width,
+                "pixel_height": pixel_height,
                 "properties": properties(tile.get("properties"), f"{tileset_path} tile"),
             }
     return result
@@ -1734,12 +1878,16 @@ def character_tileset_tiles(tileset_path: Path, game_root: Path) -> list[dict[st
             f"{tileset_path} tile image")
         if not image_path.is_file():
             raise ContentError(f"{tileset_path}: missing tile image {image!r}")
+        pixel_width, pixel_height = world_tile_pixel_dimensions(
+            tile, image_path, f"{tileset_path}: tile image {image!r}")
         result.append({
             "image": image_path.relative_to(game_root).as_posix(),
             "imagewidth": expect(tile.get("imagewidth"), int,
                                  f"{tileset_path} tile imagewidth"),
             "imageheight": expect(tile.get("imageheight"), int,
                                   f"{tileset_path} tile imageheight"),
+            "pixel_width": pixel_width,
+            "pixel_height": pixel_height,
             "properties": properties(tile.get("properties"), f"{tileset_path} tile"),
         })
     if not result:
@@ -2388,6 +2536,7 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     move_index = {
         "stand_north": 0, "stand_south": 1, "stand_west": 2, "stand_east": 3,
         "walk_north": 0, "walk_south": 1, "walk_west": 2, "walk_east": 3,
+        "stand_any": 4, "walk_any": 4,
     }
 
     def object_visual(tiles: dict[int, dict[str, object]], source_object: str, source_animation: int,
@@ -2419,8 +2568,10 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                                           f"{description} object tile properties")
             frame = {
                 "image": str(candidate["image"]),
-                "width": integer(candidate["imagewidth"], f"{description} object frame width"),
-                "height": integer(candidate["imageheight"], f"{description} object frame height"),
+                "width": integer(candidate["pixel_width"], f"{description} object frame pixel width"),
+                "height": integer(candidate["pixel_height"], f"{description} object frame pixel height"),
+                "logical_width": integer(candidate["imagewidth"], f"{description} object frame width"),
+                "logical_height": integer(candidate["imageheight"], f"{description} object frame height"),
                 "offset_x": integer(candidate_properties.get("offset_x", 0), f"{description} object offset_x"),
                 "offset_y": integer(candidate_properties.get("offset_y", 0), f"{description} object offset_y"),
             }
@@ -2466,10 +2617,12 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                              description: str) -> None:
         if source_character not in raw_visuals:
             raw_visuals[source_character] = {
-                "frames": [[None] * 16, [None] * 16],
-                "standing_count": [0, 0, 0, 0],
-                "standing_delay": [0, 0, 0, 0],
-                "walk_count": [0, 0, 0, 0],
+                # The fifth direction is an authoring-only fallback. It is
+                # expanded into missing cardinal directions before emission.
+                "frames": [[None] * 20, [None] * 20],
+                "standing_count": [0, 0, 0, 0, 0],
+                "standing_delay": [0, 0, 0, 0, 0],
+                "walk_count": [0, 0, 0, 0, 0],
                 "base_x": None,
                 "base_y": None,
             }
@@ -2495,10 +2648,14 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 raise ContentError(f"{description}: inconsistent actor base point")
             frame = {
                 "image": str(candidate["image"]),
-                "width": integer(candidate["imagewidth"],
-                                 f"{description} actor frame width"),
-                "height": integer(candidate["imageheight"],
-                                  f"{description} actor frame height"),
+                "width": integer(candidate["pixel_width"],
+                                 f"{description} actor frame pixel width"),
+                "height": integer(candidate["pixel_height"],
+                                  f"{description} actor frame pixel height"),
+                "logical_width": integer(candidate["imagewidth"],
+                                         f"{description} actor frame width"),
+                "logical_height": integer(candidate["imageheight"],
+                                          f"{description} actor frame height"),
                 "offset_x": integer(candidate_properties.get("offset_x"),
                                     f"{description} actor offset_x"),
                 "offset_y": integer(candidate_properties.get("offset_y"),
@@ -2729,6 +2886,10 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                                           f"{map_path} tiled occluder imagewidth")
                     image_height = integer(tile["imageheight"],
                                            f"{map_path} tiled occluder imageheight")
+                    pixel_width = integer(tile["pixel_width"],
+                                          f"{map_path} tiled occluder pixel width")
+                    pixel_height = integer(tile["pixel_height"],
+                                           f"{map_path} tiled occluder pixel height")
                     if image_width != tile_size or image_height != tile_size:
                         raise ContentError(
                             f"{map_path}: tiled occluder {object_id!r} image must be "
@@ -2744,8 +2905,10 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                         visual_y = area_y + row * tile_size
                         scenery.append({
                             "image": image,
-                            "width": tile_size,
-                            "height": tile_size,
+                            "width": pixel_width,
+                            "height": pixel_height,
+                            "logical_width": tile_size,
+                            "logical_height": tile_size,
                             "x": area_x,
                             "y": visual_y,
                             # Sort just after an actor whose footing is at the
@@ -2769,6 +2932,8 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 image = str(tile["image"])
                 image_width = integer(tile["imagewidth"], f"{map_path} object imagewidth")
                 image_height = integer(tile["imageheight"], f"{map_path} object imageheight")
+                pixel_width = integer(tile["pixel_width"], f"{map_path} object pixel width")
+                pixel_height = integer(tile["pixel_height"], f"{map_path} object pixel height")
                 offset_x = integer(tile_properties.get("offset_x", 0), f"{map_path} object offset_x")
                 offset_y = integer(tile_properties.get("offset_y", 0), f"{map_path} object offset_y")
                 if kind != "entity":
@@ -2804,8 +2969,10 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                                                  f"{map_path} object base_y")) * tile_size)
                     scenery.append({
                         "image": image,
-                        "width": image_width,
-                        "height": image_height,
+                        "width": pixel_width,
+                        "height": pixel_height,
+                        "logical_width": image_width,
+                        "logical_height": image_height,
                         "x": integer(obj.get("x"), f"{map_path} scenery x"),
                         "y": baseline - image_height,
                         # Explicit sort_y remains available for authored
@@ -2868,8 +3035,10 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                     scenery.append({
                         "id": object_id,
                         "image": image,
-                        "width": image_width,
-                        "height": image_height,
+                        "width": pixel_width,
+                        "height": pixel_height,
+                        "logical_width": image_width,
+                        "logical_height": image_height,
                         "x": integer(obj.get("x"), f"{map_path} scenery x"),
                         "y": baseline - image_height,
                         "depth": integer(values.get("sort_y", source_depth),
@@ -2963,6 +3132,33 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     visuals = []
     for source_character in sorted(raw_visuals):
         visual = raw_visuals[source_character]
+        for group, count_key in ((0, "standing_count"), (1, "walk_count")):
+            fallback_count = visual[count_key][4]
+            fallback_offset = 16
+            if any(visual["frames"][group][fallback_offset + index] is None
+                   for index in range(fallback_count)):
+                raise ContentError(
+                    f"actor tileset {source_character!r} {count_key.removesuffix('_count')} "
+                    "fallback has a frame gap")
+            for direction in range(4):
+                if visual[count_key][direction] > 0 or fallback_count <= 0:
+                    continue
+                direction_offset = direction * 4
+                fallback_frames = visual["frames"][group][fallback_offset:fallback_offset + 4]
+                visual["frames"][group][direction_offset:direction_offset + 4] = [
+                    None if frame is None else dict(frame) for frame in fallback_frames
+                ]
+                visual[count_key][direction] = fallback_count
+                if group == 0:
+                    visual["standing_delay"][direction] = visual["standing_delay"][4]
+
+        # The runtime knows only cardinal directions; discard the authoring
+        # fallback slots after resolving them at compile time.
+        visual["frames"][0] = visual["frames"][0][:16]
+        visual["frames"][1] = visual["frames"][1][:16]
+        visual["standing_count"] = visual["standing_count"][:4]
+        visual["standing_delay"] = visual["standing_delay"][:4]
+        visual["walk_count"] = visual["walk_count"][:4]
         for direction in range(4):
             if visual["standing_count"][direction] <= 0 or \
                     visual["frames"][0][direction * 4] is None:
@@ -2972,6 +3168,19 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
                 raise ContentError(
                     f"actor tileset {source_character!r} standing direction {direction} "
                     "needs a positive frame_delay")
+            walk_offset = direction * 4
+            walking_count = visual["walk_count"][direction]
+            if any(visual["frames"][1][walk_offset + index] is None
+                   for index in range(walking_count)):
+                raise ContentError(
+                    f"actor tileset {source_character!r} walking direction {direction} "
+                    "has a frame gap")
+            if walking_count == 4:
+                # Waste's Edge walking sheets conventionally duplicate the
+                # second stride as frame four. Store only the first three
+                # unique poses; the renderer plays them as 0, 1, 2, 1.
+                visual["frames"][1][walk_offset + 3] = None
+                visual["walk_count"][direction] = 3
         visuals.append({"source_character": source_character, **visual})
     visual_index = {str(visual["source_character"]): index for index, visual in enumerate(visuals)}
     for scene in raw_scenes:
@@ -3055,7 +3264,8 @@ def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: i
 #define WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 
 struct generated_runtime_frame {
-    int texture, source_x, source_y, width, height, offset_x, offset_y;
+    int texture, source_x, source_y, width, height, logical_width, logical_height;
+    int offset_x, offset_y;
     int native_size;
 };
 struct generated_runtime_actor_visual {
@@ -3251,13 +3461,16 @@ extern const int generated_runtime_cutscene_image_count;
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
     if frame is None:
-        return "{ -1, 0, 0, 0, 0, 0, 0, 0 }"
+        return "{ -1, 0, 0, 0, 0, 0, 0, 0, 0, 0 }"
     frame = expect(frame, dict, "runtime frame")
-    return "{ %d, %d, %d, %d, %d, %d, %d, %d }" % (
+    return "{ %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }" % (
         resource_index[str(frame["image"])], integer(frame.get("source_x", 0), "runtime frame source_x"),
         integer(frame.get("source_y", 0), "runtime frame source_y"),
         integer(frame["width"], "runtime frame width"),
-        integer(frame["height"], "runtime frame height"), integer(frame["offset_x"], "runtime frame offset_x"),
+        integer(frame["height"], "runtime frame height"),
+        integer(frame.get("logical_width", frame["width"]), "runtime frame logical width"),
+        integer(frame.get("logical_height", frame["height"]), "runtime frame logical height"),
+        integer(frame["offset_x"], "runtime frame offset_x"),
         integer(frame["offset_y"], "runtime frame offset_y"),
         1 if frame.get("native_size", False) else 0,
     )
@@ -3310,7 +3523,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         for item in scene["background"]:
             frame = {"image": item["image"], "source_x": item.get("source_x", 0),
                      "source_y": item.get("source_y", 0), "width": item["width"],
-                     "height": item["height"], "offset_x": 0, "offset_y": 0}
+                     "height": item["height"], "logical_width": item["logical_width"],
+                     "logical_height": item["logical_height"], "offset_x": 0, "offset_y": 0}
             lines.append("    { %s, %d, %d }," % (frame_initializer(frame, resource_index), integer(item["x"], "runtime background x"), integer(item["y"], "runtime background y")))
         lines.append("};")
         lines.append(f"static const struct generated_runtime_collision generated_runtime_collisions_{index}[] = {{")
@@ -3326,7 +3540,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         for item in scene["scenery"]:
             frame = {"image": item["image"], "source_x": item.get("source_x", 0),
                      "source_y": item.get("source_y", 0), "width": item["width"],
-                     "height": item["height"], "offset_x": 0, "offset_y": 0}
+                     "height": item["height"], "logical_width": item["logical_width"],
+                     "logical_height": item["logical_height"], "offset_x": 0, "offset_y": 0}
             lines.append("    { %s, %d, %d, %d, %d, %d, %d, %d, %d }," % (
                 frame_initializer(frame, resource_index), integer(item["x"], "runtime scenery x"),
                 integer(item["y"], "runtime scenery y"), integer(item["depth"], "runtime scenery depth"),
@@ -3826,11 +4041,16 @@ def compile_content(project_root: Path) -> None:
     background_logical, background_unique, background_atlases = materialize_runtime_atlases(
         background_atlas_references(runtime_scenes), game_root, output_root,
         "background-atlases", "backgrounds")
-    sprite_logical, sprite_unique, sprite_atlases = materialize_runtime_atlases(
-        sprite_atlas_references(runtime_scenes, runtime_visuals,
-                                runtime_object_visuals, runtime_dialogue,
-                                runtime_glyphs),
-        game_root, output_root, "runtime-atlases", "sprites")
+    runtime_atlas_root = output_root / "runtime-atlases"
+    if runtime_atlas_root.is_dir():
+        for obsolete in runtime_atlas_root.glob("sprites-*.png"):
+            obsolete.unlink()
+    actor_logical, actor_unique, actor_atlases = materialize_runtime_atlases(
+        actor_atlas_references(runtime_visuals, runtime_dialogue),
+        game_root, output_root, "runtime-atlases", "actors", prefer_fewer_pages=True)
+    world_logical, world_unique, world_atlases = materialize_runtime_atlases(
+        world_atlas_references(runtime_scenes, runtime_object_visuals, runtime_glyphs),
+        game_root, output_root, "runtime-atlases", "world")
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
                                                   runtime_dialogue, runtime_glyphs,
@@ -3899,7 +4119,8 @@ def compile_content(project_root: Path) -> None:
           f"{len(scripts)} scripts, {len(schedules)} schedules, {len(runtime_resources)}/"
           f"{maximum_cartridge_textures} textures; "
           f"backgrounds {background_logical}->{background_unique}->{background_atlases}, "
-          f"sprites {sprite_logical}->{sprite_unique}->{sprite_atlases}")
+          f"actors {actor_logical}->{actor_unique}->{actor_atlases}, "
+          f"world {world_logical}->{world_unique}->{world_atlases}")
 
 
 def main() -> int:
