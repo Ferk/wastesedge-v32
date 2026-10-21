@@ -15,6 +15,12 @@
 #define DIALOG_BOTTOM (DISPLAY_HEIGHT - 12)
 #define DIALOG_LINE_HEIGHT 19
 #define DIALOG_CHOICE_GAP 5
+#define DIALOG_PORTRAIT_SIZE 64
+#define DIALOG_PORTRAIT_X 18
+#define DIALOG_PORTRAIT_Y 20
+#define DIALOG_PORTRAIT_TEXT_GAP 12
+#define DIALOG_PORTRAIT_CHOICE_TOP 110
+#define DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM 92
 #define SPEECH_MAX_TEXT_WIDTH 300
 #define SPEECH_PADDING_X 6
 #define SPEECH_PADDING_Y 3
@@ -399,10 +405,13 @@ static void record_dialogue_panel(const struct world_state *world)
     int choice_count = world_dialogue_choice_count(world);
     int selected_choice = world_dialogue_choice_selected(world);
     int has_portrait = speaker != 0 && speaker->portrait.texture >= 0;
-    int text_x = has_portrait ? DIALOG_X + 128 : DIALOG_X + 24;
+    int text_x = has_portrait ? DIALOG_X + DIALOG_PORTRAIT_X +
+                               DIALOG_PORTRAIT_SIZE + DIALOG_PORTRAIT_TEXT_GAP :
+                               DIALOG_X + 24;
     int text_width = DIALOG_X + DIALOG_WIDTH - 20 - text_x;
     int choice_text_x = DIALOG_X + 36;
     int choice_text_width = DIALOG_WIDTH - 70;
+    int choice_top = has_portrait ? DIALOG_PORTRAIT_CHOICE_TOP : 138;
     int speech_width;
     int speech_height;
     int selected_top = 0;
@@ -433,20 +442,20 @@ static void record_dialogue_panel(const struct world_state *world)
     choice_content_height = choices_height;
 
     if (choice_count > 0) {
-        /* Portrait conversations put answers below the portrait, matching the
-         * original layout. Short answer lists now stop the panel early. */
-        dialog_height = 138 + choice_content_height + 10;
+        /* Keep answers below portraits while letting their native 64-pixel
+         * footprint leave more room for the speaker's text and the scene. */
+        dialog_height = choice_top + choice_content_height + 10;
     } else {
         int content_bottom = 44 + speech_height;
-        if (has_portrait && content_bottom < 126)
-            content_bottom = 126;
+        if (has_portrait && content_bottom < DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM)
+            content_bottom = DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM;
         dialog_height = content_bottom + 10;
     }
     if (dialog_height > DIALOG_MAX_HEIGHT)
         dialog_height = DIALOG_MAX_HEIGHT;
     dialog_y = DIALOG_BOTTOM - dialog_height;
     choice_view_bottom = dialog_y + dialog_height - 10;
-    choice_view_top = choice_count > 0 ? dialog_y + 138 : choice_view_bottom;
+    choice_view_top = choice_count > 0 ? dialog_y + choice_top : choice_view_bottom;
     choice_view_height = choice_view_bottom - choice_view_top;
 
     /* The original conversation UI leaves the scene visible beneath a dark,
@@ -458,9 +467,12 @@ static void record_dialogue_panel(const struct world_state *world)
                       DIALOG_WIDTH - 4, dialog_height - 4, COLOR_DIALOG_BACKGROUND);
 
     if (has_portrait) {
-        record_solid_rect(DIALOG_X + 18, dialog_y + 22, 96, 96,
+        record_solid_rect(DIALOG_X + DIALOG_PORTRAIT_X,
+                          dialog_y + DIALOG_PORTRAIT_Y,
+                          DIALOG_PORTRAIT_SIZE, DIALOG_PORTRAIT_SIZE,
                           COLOR_DIALOG_PORTRAIT_BACKGROUND);
-        record_ui_frame(&speaker->portrait, DIALOG_X + 18, dialog_y + 22, 1.5f);
+        record_ui_frame(&speaker->portrait, DIALOG_X + DIALOG_PORTRAIT_X,
+                        dialog_y + DIALOG_PORTRAIT_Y, 1.0f);
     }
     if (speaker != 0)
         record_runtime_text(text_x, dialog_y + 16, text_width, dialog_y + 42,
