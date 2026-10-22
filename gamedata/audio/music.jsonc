@@ -57,7 +57,7 @@
       "source": "assets/audio/extro_forest.ogg",
       "sample_rate": 11025,
       "volume": 0.5,
-      "loop": false
+      "loop": true
     },
     {
       "id": "extro_credits",
