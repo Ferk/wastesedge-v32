@@ -108,10 +108,12 @@
         {
           "text": "I was wondering whether you noticed anything unusual during the night of the theft.",
           "repeatable": true,
+          "actions": [{ "op": "set", "flag": "lucia_asked_about_theft", "value": 1 }],
           "next": "rooms_apart"
         },
         {
           "text": "You said Master Fingolson is a regular guest. What can you tell me about him?",
+          "when": { "flag": "lucia_asked_about_theft", "equals": 1 },
           "repeatable": true,
           "next": "fingolson_regular"
         },

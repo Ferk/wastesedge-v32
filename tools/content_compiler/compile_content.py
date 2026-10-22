@@ -543,12 +543,13 @@ def dialogue_start_cases(document: dict[str, object], path: Path,
 
 
 def dialogue_conditions(raw_when: object, description: str) -> list[dict[str, object]]:
-    """Return the equality comparisons in a dialogue `when` clause.
+    """Return the simple comparisons in a dialogue `when` clause.
 
-    The compact form remains `{ "flag": ..., "equals": ... }`. Content that
-    needs several facts at once uses `{ "all": [compact-condition, ...] }`.
-    Keeping this deliberately conjunctive matches the first compound condition
-    required by Waste's Edge without introducing an expression evaluator.
+    A condition compares a flag through exactly one of `equals`, `not_equals`,
+    or `less_than`. Content needing several facts at once uses
+    `{ "all": [condition, ...] }`. Keeping this deliberately conjunctive
+    matches Waste's Edge's concrete needs without introducing an expression
+    evaluator.
     """
     if raw_when is None:
         return []
@@ -566,12 +567,17 @@ def dialogue_conditions(raw_when: object, description: str) -> list[dict[str, ob
         item_description = (description if len(raw_conditions) == 1 else
                             f"{description} all entry {index}")
         item = expect(raw_condition, dict, item_description)
-        if set(item) != {"flag", "equals"}:
+        comparison_keys = set(item) - {"flag"}
+        if len(comparison_keys) != 1 or not comparison_keys <= {
+                "equals", "not_equals", "less_than"} or "flag" not in item:
             raise ContentError(
-                f"{item_description}: condition must contain only 'flag' and 'equals'")
+                f"{item_description}: condition must contain 'flag' and exactly one of "
+                "'equals', 'not_equals', or 'less_than'")
+        comparison = comparison_keys.pop()
         result.append({
             "flag": identifier(item.get("flag"), f"{item_description} flag"),
-            "value": integer(item.get("equals"), f"{item_description} equals"),
+            "value": integer(item.get(comparison), f"{item_description} {comparison}"),
+            "comparison": comparison,
         })
     return result
 
@@ -3315,7 +3321,12 @@ struct generated_runtime_schedule {
     int speech_delay_min, speech_delay_max, speech_duration;
 };
 struct generated_runtime_dialogue_action { int flag, value; };
-struct generated_runtime_dialogue_condition { int flag, value; };
+enum generated_runtime_dialogue_comparison {
+    GENERATED_RUNTIME_DIALOGUE_EQUALS,
+    GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS,
+    GENERATED_RUNTIME_DIALOGUE_LESS_THAN
+};
+struct generated_runtime_dialogue_condition { int flag, value, comparison; };
 struct generated_runtime_glyph { int texture, min_x, min_y, max_x, max_y, hotspot_x, advance; };
 struct generated_runtime_dialogue_speaker {
     const char *name;
@@ -3768,7 +3779,12 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                 conditions = choice["conditions"]
                 if conditions:
                     lines.append(f"static const struct generated_runtime_dialogue_condition generated_runtime_dialogue_conditions_{dialogue_index}_{node_index}_{choice_index}[] = {{")
-                    lines.extend("    { %d, %d }," % (condition["flag"], condition["value"])
+                    lines.extend("    { %d, %d, %s }," % (
+                        condition["flag"], condition["value"], {
+                            "equals": "GENERATED_RUNTIME_DIALOGUE_EQUALS",
+                            "not_equals": "GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS",
+                            "less_than": "GENERATED_RUNTIME_DIALOGUE_LESS_THAN",
+                        }[str(condition["comparison"])])
                                  for condition in conditions)
                     lines.append("};")
                 actions = choice["actions"]

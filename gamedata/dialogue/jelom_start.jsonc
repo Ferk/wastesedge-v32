@@ -22,11 +22,13 @@
       "choices": [
         {
           "text": "And just who are you to prevent me from entering, sir?",
+          "when": { "flag": "know_jelom", "equals": 0 },
           "actions": [{ "op": "set", "flag": "know_jelom", "value": 2 }],
           "next": "challenge_identity"
         },
         {
           "text": "Ah, you must be Jelom. Talan told me that I could find you here.",
+          "when": { "flag": "know_jelom", "equals": 1 },
           "actions": [{ "op": "set", "flag": "know_jelom", "value": 2 }],
           "next": "known_identity"
         }
@@ -139,6 +141,7 @@
         },
         {
           "text": "Can you tell me what happened on the night of the theft?",
+          "when": { "flag": "know_talan_singing", "not_equals": 2 },
           "next": "ask_night"
         },
         {

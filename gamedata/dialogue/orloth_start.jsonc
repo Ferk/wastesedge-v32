@@ -127,7 +127,11 @@
       "text": "Really? Now that's a relief to hear. The sooner everything returns to normal, the better I say! So I for one shall help you as good as I can.",
       "choices": [
         { "text": "Thank you, Master Redwyne. I will come back to you when I need some help.", "next": "ask_name" },
-        { "text": "First of all I'd like to know what exactly happened.", "next": "events_intro" },
+        {
+          "text": "First of all I'd like to know what exactly happened.",
+          "actions": [{ "op": "set", "flag": "orloth_explained_events", "value": 1 }],
+          "next": "events_intro"
+        },
         { "text": "Could you tell me something about your guests then?", "next": "frostbloom" }
       ]
     },
@@ -137,7 +141,11 @@
       "text": "That may be as it will. I for one will be glad if only this business gets sorted out, either way. So I shall do my best to support your efforts.",
       "choices": [
         { "text": "Thank you, Master Redwyne. I will come back to you when I need some help.", "next": "ask_name" },
-        { "text": "First of all I'd like to know what exactly happened.", "next": "events_intro" },
+        {
+          "text": "First of all I'd like to know what exactly happened.",
+          "actions": [{ "op": "set", "flag": "orloth_explained_events", "value": 1 }],
+          "next": "events_intro"
+        },
         { "text": "Could you tell me something about your guests then?", "next": "frostbloom" }
       ]
     },
@@ -146,7 +154,11 @@
       "speaker": "orloth",
       "text": "I wish you luck with your inquiries then, uh ... I didn't catch your name, sir?",
       "choices": [
-        { "text": "I am Banec, Lady Silverhair's clerk.", "next": "room_offer" },
+        {
+          "text": "I am Banec, Lady Silverhair's clerk.",
+          "when": { "flag": "orloth_told_about_silverhair", "equals": 0 },
+          "next": "room_offer"
+        },
         { "text": "Banec, from Cirdanth.", "next": "room_offer" }
       ]
     },
@@ -180,7 +192,11 @@
       "speaker": "orloth",
       "text": "Ah, any news about the thief, Banec?",
       "choices": [
-        { "text": "I'm making progress, but I still need more information.", "next": "help_menu" },
+        {
+          "text": "I'm making progress, but I still need more information.",
+          "when": { "flag": "know_noise", "equals": 2 },
+          "next": "help_menu"
+        },
         { "text": "I fear there aren't. I'm still at the beginning of my investigations.", "next": "help_menu" }
       ]
     },
@@ -189,7 +205,17 @@
       "speaker": "orloth",
       "text": "Well, I'll do my best to be of some help. Just ask your questions.",
       "choices": [
-        { "text": "I'd like to hear about the theft again, Master Redwyne.", "next": "theft_recap_menu" },
+        {
+          "text": "I'd like to hear about the theft again, Master Redwyne.",
+          "when": { "flag": "orloth_explained_events", "equals": 1 },
+          "next": "theft_recap_menu"
+        },
+        {
+          "text": "I'd like to know what happened before the theft.",
+          "when": { "flag": "orloth_explained_events", "equals": 0 },
+          "actions": [{ "op": "set", "flag": "know_bjarns_insult", "value": 1 }],
+          "next": "silverhair_arrival"
+        },
         { "text": "Could you tell me something about your guests?", "next": "frostbloom" },
         {
           "text": "You don't have a spare key to the storeroom, by any chance?",
@@ -389,7 +415,12 @@
       "speaker": "orloth",
       "text": "I hope I've given you an idea of the people at Waste's Edge. A colourful crowd for sure, but if you'd ask me to point out the thief, I couldn't. I'll support your efforts as good as I can, though.",
       "choices": [
-        { "text": "I'd like to know what exactly happened.", "next": "events_intro" },
+        {
+          "text": "I'd like to know what exactly happened.",
+          "when": { "flag": "orloth_explained_events", "equals": 0 },
+          "actions": [{ "op": "set", "flag": "orloth_explained_events", "value": 1 }],
+          "next": "events_intro"
+        },
         { "text": "Thank you Master Redwyne. I think I have heard enough of this.", "next": "goodbye" }
       ]
     },
@@ -431,9 +462,6 @@
       "speaker": "orloth",
       "text": "Sure. Where shall I begin?",
       "choices": [
-        { "text": "I'd like to know what happened before the theft.",
-          "actions": [{ "op": "set", "flag": "know_bjarns_insult", "value": 1 }],
-          "next": "silverhair_arrival" },
         { "text": "Could you tell me something about your guests?", "next": "frostbloom" },
         { "text": "I think you were finished.", "next": "goodbye" }
       ]

@@ -85,7 +85,11 @@
           "when": { "flag": "know_aleks_room", "equals": 1 },
           "next": "ask_about_cellar" },
         { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
-          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "when": { "all": [
+            { "flag": "know_alek_eavesdrop", "equals": 1 },
+            { "flag": "asked_alek_eavesdrop", "equals": 0 }
+          ] },
+          "actions": [{ "op": "set", "flag": "asked_alek_eavesdrop", "value": 1 }],
           "next": "not_spying" }
       ]
     },
@@ -109,7 +113,11 @@
           "when": { "flag": "know_aleks_room", "equals": 1 },
           "next": "ask_about_cellar" },
         { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
-          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "when": { "all": [
+            { "flag": "know_alek_eavesdrop", "equals": 1 },
+            { "flag": "asked_alek_eavesdrop", "equals": 0 }
+          ] },
+          "actions": [{ "op": "set", "flag": "asked_alek_eavesdrop", "value": 1 }],
           "next": "not_spying" }
       ]
     },
@@ -122,7 +130,11 @@
           "when": { "flag": "know_aleks_room", "equals": 1 },
           "next": "ask_about_cellar" },
         { "text": "What were you doing outside the parlour during negotiations? Trying to spy on Master Fingolson?",
-          "actions": [{ "op": "set", "flag": "know_alek_eavesdrop", "value": 1 }],
+          "when": { "all": [
+            { "flag": "know_alek_eavesdrop", "equals": 1 },
+            { "flag": "asked_alek_eavesdrop", "equals": 0 }
+          ] },
+          "actions": [{ "op": "set", "flag": "asked_alek_eavesdrop", "value": 1 }],
           "next": "not_spying" }
       ]
     },

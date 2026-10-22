@@ -139,6 +139,7 @@
         },
         {
           "text": "Are you sure you haven't noticed anything out of place that night?",
+          "when": { "flag": "know_talan_singing", "not_equals": 2 },
           "next": "player_asks_night_again"
         }
       ]
@@ -166,7 +167,14 @@
       "speaker": "talan",
       "text": "No... no, not at all.",
       "choices": [
-        { "text": "Couldn't it be that you missed what there was to see or hear?", "next": "talan_may_have_missed" },
+        {
+          "text": "Couldn't it be that you missed what there was to see or hear?",
+          "when": { "all": [
+            { "flag": "know_talan_singing", "equals": 1 },
+            { "flag": "know_olivers_noise", "equals": 0 }
+          ] },
+          "next": "talan_may_have_missed"
+        },
         { "text": "But Lady Frostbloom told me about a noise she heard.",
           "when": { "flag": "know_noise", "equals": 2 }, "next": "talan_frostbloom_noise" },
         { "text": "I see. I have another question.", "next": "talan_more_questions" }

@@ -236,9 +236,18 @@ static int dialogue_choice_is_visible(
     for (index = 0; index < choice->condition_count; ++index) {
         const struct generated_runtime_dialogue_condition *condition =
             &choice->conditions[index];
-        if (condition->flag < 0 ||
-            condition->flag >= GENERATED_RUNTIME_FLAG_COUNT ||
-            world->flags[condition->flag] != condition->value)
+        int actual_value;
+        int matches;
+        if (condition->flag < 0 || condition->flag >= GENERATED_RUNTIME_FLAG_COUNT)
+            return 0;
+        actual_value = world->flags[condition->flag];
+        matches = condition->comparison == GENERATED_RUNTIME_DIALOGUE_EQUALS ?
+                      actual_value == condition->value :
+                  condition->comparison == GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS ?
+                      actual_value != condition->value :
+                  condition->comparison == GENERATED_RUNTIME_DIALOGUE_LESS_THAN &&
+                      actual_value < condition->value;
+        if (!matches)
             return 0;
     }
     return 1;
