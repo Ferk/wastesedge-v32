@@ -1262,19 +1262,11 @@ static void flush_prepared_frame(void)
     set_drawing_scale(1.0f, 1.0f);
 }
 
-/* Return a cutscene image width expressed in legacy 320-pixel source space. */
-static int cutscene_logical_width(const struct generated_runtime_frame *frame)
-{
-    if (frame->native_size)
-        return (frame->width + 1) / 2;
-    return frame->width;
-}
-
 /* Record one cutscene image in the Vircon32 display space.
  *
- * Legacy artwork uses 320x240 source pixels and receives the original
- * 2x/1.5x display transform. Larger manifest rectangles are authored at
- * display resolution, so they retain their native pixel dimensions. */
+ * Artwork is native-sized by default. An explicit frame scale transforms both
+ * the image and its placement coordinates, preserving source-space authoring
+ * for older artwork when requested by game data. */
 static void record_cutscene_image(int image, int x, int y, int alpha)
 {
     const struct generated_runtime_frame *frame;
@@ -1291,9 +1283,9 @@ static void record_cutscene_image(int image, int x, int y, int alpha)
     width = frame->width;
     height = frame->height;
 
-    if (frame->native_size) {
-        int display_x = x * 2;
-        int display_y = (y * 3) / 2;
+    if (frame->scale_x == 1.0f && frame->scale_y == 1.0f) {
+        int display_x = x;
+        int display_y = y;
 
         if (display_x < 0) {
             source_x -= display_x;
@@ -1318,9 +1310,8 @@ static void record_cutscene_image(int image, int x, int y, int alpha)
         return;
     }
 
-    /* The approach artwork is taller than the viewport and moves through
-     * negative coordinates. Crop it explicitly so partially visible images
-     * keep drawing after their origin has moved above or left of the screen. */
+    /* Crop in the scaled image's source coordinate space so partially visible
+     * images remain drawable after their origin moves above or left. */
     if (x < 0) {
         source_x -= x;
         width += x;
@@ -1331,17 +1322,19 @@ static void record_cutscene_image(int image, int x, int y, int alpha)
         height += y;
         y = 0;
     }
-    if (x + width > 320)
-        width = 320 - x;
-    if (y + height > 240)
-        height = 240 - y;
+    if ((float)(x + width) * frame->scale_x > (float)DISPLAY_WIDTH)
+        width = (int)((float)DISPLAY_WIDTH / frame->scale_x) - x;
+    if ((float)(y + height) * frame->scale_y > (float)DISPLAY_HEIGHT)
+        height = (int)((float)DISPLAY_HEIGHT / frame->scale_y) - y;
     if (width <= 0 || height <= 0)
         return;
 
     color = (int)(((unsigned int)alpha << 24) | COLOR_RGB_MASK);
     record_draw(frame->texture, 0, source_x, source_y,
-                width, height, x * 2, (y * 3) / 2,
-                2.0f, 1.5f, color);
+                width, height,
+                (int)((float)x * frame->scale_x),
+                (int)((float)y * frame->scale_y),
+                frame->scale_x, frame->scale_y, color);
 }
 
 /* Evaluate a linearly interpolated integer track at the requested frame. */
@@ -1409,7 +1402,8 @@ static void record_cutscene_layer(
     if (layer->alpha_frames > 0 && clock < layer->alpha_frames)
         alpha = clock * 255 / layer->alpha_frames;
     if (layer->wrap_x_delay > 0) {
-        int logical_width = cutscene_logical_width(source);
+        int logical_width = source->width;
+        int viewport_width = (int)((float)DISPLAY_WIDTH / source->scale_x);
         x += ((clock / layer->wrap_x_delay) * layer->wrap_x_step) % logical_width;
         while (x <= -logical_width)
             x += logical_width;
@@ -1418,7 +1412,7 @@ static void record_cutscene_layer(
         record_cutscene_image(image, x, y, alpha);
         if (x > 0)
             record_cutscene_image(image, x - logical_width, y, alpha);
-        else if (x + logical_width < 320)
+        else if (x + logical_width < viewport_width)
             record_cutscene_image(image, x + logical_width, y, alpha);
         return;
     }
@@ -1968,18 +1962,14 @@ static void draw_title_background(void)
         define_region_rectangle(frame->source_x, frame->source_y,
                                 frame->width, frame->height);
         set_multiply_color(COLOR_WHITE);
-        if (frame->native_size)
-            set_drawing_scale(1.0f, 1.0f);
-        else
-            set_drawing_scale((float)DISPLAY_WIDTH / (float)frame->width,
-                              (float)DISPLAY_HEIGHT / (float)frame->height);
+        set_drawing_scale(frame->scale_x, frame->scale_y);
         set_drawing_point(0, 0);
         draw_region_zoomed();
         set_drawing_scale(1.0f, 1.0f);
     }
 }
 
-/* Draw the optional manifest-authored logo in original 320x240 coordinates. */
+/* Draw the optional logo using its manifest-authored position and scale. */
 static void draw_title_logo(void)
 {
     const struct generated_runtime_frame *frame = &generated_runtime_title_logo;
@@ -1990,11 +1980,9 @@ static void draw_title_logo(void)
     define_region_rectangle(frame->source_x, frame->source_y,
                             frame->width, frame->height);
     set_multiply_color(COLOR_WHITE);
-    if (frame->native_size)
-        set_drawing_scale(1.0f, 1.0f);
-    else
-        set_drawing_scale(2.0f, 1.5f);
-    set_drawing_point(frame->offset_x * 2, (frame->offset_y * 3) / 2);
+    set_drawing_scale(frame->scale_x, frame->scale_y);
+    set_drawing_point((int)((float)frame->offset_x * frame->scale_x),
+                      (int)((float)frame->offset_y * frame->scale_y));
     draw_region_zoomed();
     set_drawing_scale(1.0f, 1.0f);
 }

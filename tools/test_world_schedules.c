@@ -235,7 +235,8 @@ int main(void)
     assert(generated_runtime_title_background.source_y == 360);
     assert(generated_runtime_title_background.width == 640);
     assert(generated_runtime_title_background.height == 360);
-    assert(generated_runtime_title_background.native_size);
+    assert(generated_runtime_title_background.scale_x == 1.0f);
+    assert(generated_runtime_title_background.scale_y == 1.0f);
     assert(generated_runtime_title_logo.source_x == 239);
     assert(generated_runtime_title_logo.offset_x == 88);
     /* Animated scenery retains source-specific frame holds and sequences.

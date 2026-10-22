@@ -124,6 +124,22 @@ def relative_input(root: Path, raw_path: object, category: str) -> Path:
     return candidate
 
 
+def image_scale(raw_value: object, description: str) -> tuple[float, float]:
+    """Validate an optional two-axis image scale, which defaults to native size."""
+    if raw_value is None:
+        return 1.0, 1.0
+    values = expect(raw_value, list, f"{description} scale")
+    if len(values) != 2:
+        raise ContentError(f"{description} scale must be [x, y]")
+    if not all(isinstance(value, (int, float)) and not isinstance(value, bool)
+               for value in values):
+        raise ContentError(f"{description} scale factors must be numbers")
+    scale_x, scale_y = float(values[0]), float(values[1])
+    if scale_x <= 0.0 or scale_y <= 0.0:
+        raise ContentError(f"{description} scale factors must be positive")
+    return scale_x, scale_y
+
+
 def manifest_frame(game_root: Path, raw_frame: object,
                    description: str, optional: bool = False) -> dict[str, object] | None:
     """Load one manifest image or atlas rectangle into runtime frame metadata."""
@@ -133,12 +149,14 @@ def manifest_frame(game_root: Path, raw_frame: object,
         source = raw_frame
         source_rect = None
         offset_x = offset_y = 0
+        scale_x = scale_y = 1.0
     else:
         frame = expect(raw_frame, dict, f"manifest {description}")
         source = frame.get("source")
         source_rect = frame.get("rect")
         offset_x = integer(frame.get("x", 0), f"manifest {description} x")
         offset_y = integer(frame.get("y", 0), f"manifest {description} y")
+        scale_x, scale_y = image_scale(frame.get("scale"), f"manifest {description}")
     image_path = relative_input(game_root, source, description)
     try:
         from PIL import Image
@@ -167,10 +185,8 @@ def manifest_frame(game_root: Path, raw_frame: object,
         "height": frame_height,
         "offset_x": offset_x,
         "offset_y": offset_y,
-        # Full-screen artwork historically used 320x240 source pixels and is
-        # expanded by the Vircon32 presentation layer.  A larger authored
-        # rectangle is already display-resolution artwork, so preserve it.
-        "native_size": frame_width > 320 and frame_height > 240,
+        "scale_x": scale_x,
+        "scale_y": scale_y,
     }
 
 
@@ -3280,7 +3296,7 @@ def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: i
 struct generated_runtime_frame {
     int texture, source_x, source_y, width, height, logical_width, logical_height;
     int offset_x, offset_y;
-    int native_size;
+    float scale_x, scale_y;
 };
 struct generated_runtime_actor_visual {
     int base_x, base_y;
@@ -3481,9 +3497,9 @@ extern const int generated_runtime_cutscene_image_count;
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
     if frame is None:
-        return "{ -1, 0, 0, 0, 0, 0, 0, 0, 0, 0 }"
+        return "{ -1, 0, 0, 0, 0, 0, 0, 0, 0, 1.0f, 1.0f }"
     frame = expect(frame, dict, "runtime frame")
-    return "{ %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }" % (
+    return "{ %d, %d, %d, %d, %d, %d, %d, %d, %d, %.8ff, %.8ff }" % (
         resource_index[str(frame["image"])], integer(frame.get("source_x", 0), "runtime frame source_x"),
         integer(frame.get("source_y", 0), "runtime frame source_y"),
         integer(frame["width"], "runtime frame width"),
@@ -3492,7 +3508,7 @@ def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
         integer(frame.get("logical_height", frame["height"]), "runtime frame logical height"),
         integer(frame["offset_x"], "runtime frame offset_x"),
         integer(frame["offset_y"], "runtime frame offset_y"),
-        1 if frame.get("native_size", False) else 0,
+        float(frame.get("scale_x", 1.0)), float(frame.get("scale_y", 1.0)),
     )
 
 
@@ -3945,6 +3961,8 @@ def compile_content(project_root: Path) -> None:
             if (source_x < 0 or source_y < 0 or frame_width <= 0 or frame_height <= 0 or
                     source_x + frame_width > image_width or source_y + frame_height > image_height):
                 raise ContentError(f"cutscene image {image_id} rect lies outside {image_path}")
+        scale_x, scale_y = image_scale(
+            image_entry.get("scale"), f"manifest cutscene image {image_id}")
         cutscene_images.append({
             "id": image_id,
             "image": image_path.relative_to(game_root).as_posix(),
@@ -3954,9 +3972,8 @@ def compile_content(project_root: Path) -> None:
             "source_y": source_y,
             "offset_x": 0,
             "offset_y": 0,
-            # Keep high-resolution cutscene frames at their authored display
-            # size instead of applying the legacy 320x240 presentation scale.
-            "native_size": frame_width > 320 and frame_height > 240,
+            "scale_x": scale_x,
+            "scale_y": scale_y,
         })
     cutscene_images.sort(key=lambda item: str(item["id"]))
     cutscene_image_index = {
