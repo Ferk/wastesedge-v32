@@ -745,30 +745,6 @@
       ]
     },
     {
-      "id": "player_face_talan",
-      "entity": "player",
-      "loop": false,
-      "steps": [{ "op": "face", "facing": "west" }]
-    },
-    {
-      "id": "erek_face_talan",
-      "entity": "erek",
-      "loop": false,
-      "steps": [{ "op": "face", "facing": "west" }]
-    },
-    {
-      "id": "jelom_face_talan",
-      "entity": "jelom",
-      "loop": false,
-      "steps": [{ "op": "face", "facing": "west" }]
-    },
-    {
-      "id": "silverhair_face_talan",
-      "entity": "silverhair",
-      "loop": false,
-      "steps": [{ "op": "face", "facing": "west" }]
-    },
-    {
       "id": "bjarn_extro_crying",
       "entity": "bjarn",
       "loop": false,

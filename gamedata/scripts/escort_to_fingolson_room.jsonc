@@ -5,7 +5,7 @@
     { "op": "change_scene", "scene": "redwyne_fingolson_room", "spawn": "cellar_upper" },
     { "op": "start_schedule", "entity": "erek", "schedule": "erek_fingolson_escort" },
     { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_await_player" },
-    { "op": "wait", "frames": 1 },
+    { "op": "wait", "frames": 20 },
     { "op": "show_dialogue", "dialogue": "bjarn_start" }
   ]
 }

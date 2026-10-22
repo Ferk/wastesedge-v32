@@ -1248,7 +1248,7 @@
             {
               "name": "facing",
               "type": "string",
-              "value": "west"
+              "value": "east"
             }
           ],
           "x": 20,
@@ -1272,7 +1272,7 @@
             {
               "name": "facing",
               "type": "string",
-              "value": "west"
+              "value": "east"
             }
           ],
           "x": 20,

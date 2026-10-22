@@ -820,6 +820,18 @@ static int restore_actor_state(struct world_state *world, int definition)
     return 1;
 }
 
+/* Turn an actor immediately, using the player render state for its definition. */
+static void face_actor(struct world_state *world, int definition, int facing)
+{
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return;
+    if (definition == player_definition(world))
+        world->player_facing = facing;
+    else
+        world->actors[definition].facing = facing;
+    ++world->visual_revision;
+}
+
 static void finish_schedule_step(struct world_state *world, int definition,
                                  const struct generated_runtime_schedule_step *step)
 {
@@ -932,11 +944,7 @@ static void update_actor_schedule(struct world_state *world, int definition)
         return;
     }
     if (step->op == GENERATED_SCHEDULE_FACE) {
-        if (definition == player_definition(world))
-            world->player_facing = step->facing;
-        else
-            actor->facing = step->facing;
-        ++world->visual_revision;
+        face_actor(world, definition, step->facing);
         finish_schedule_step(world, definition, step);
         return;
     }
@@ -1265,6 +1273,11 @@ static void update_script(struct world_state *world)
         }
         if (action->op == GENERATED_SCRIPT_START_SCHEDULE) {
             start_actor_schedule(world, action->a, action->b, action->c);
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_FACE) {
+            face_actor(world, action->a, action->b);
             ++world->script_action;
             continue;
         }

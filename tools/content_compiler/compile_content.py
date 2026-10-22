@@ -710,7 +710,7 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
     allowed = {"set", "set_control", "set_entity_state", "set_walkability", "show_dialogue", "speak",
                "change_scene", "move_entity", "wait", "play_music",
                "start_schedule", "stop_schedule", "set_entity_dialogue",
-               "set_actor_visual", "save_actor_state", "wait_schedule"}
+               "set_actor_visual", "save_actor_state", "wait_schedule", "face"}
     for path in paths:
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
@@ -732,12 +732,12 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                 raise ContentError(f"{path}: unknown music track {action.get('track')!r}")
             if operation in {"set_entity_state", "move_entity", "start_schedule",
                              "stop_schedule", "set_entity_dialogue", "set_actor_visual",
-                             "save_actor_state", "wait_schedule"}:
+                             "save_actor_state", "wait_schedule", "face"}:
                 entity_id = identifier(action.get("entity"), f"{path} entity")
                 if entity_id not in entities:
                     raise ContentError(f"{path}: unknown entity {entity_id!r}")
                 if operation in {"set_entity_dialogue", "set_actor_visual",
-                                 "save_actor_state", "wait_schedule"} and \
+                                 "save_actor_state", "wait_schedule", "face"} and \
                         entities[entity_id]["kind"] != "actor":
                     raise ContentError(f"{path}: {operation} requires an actor entity")
                 if operation == "set_entity_state":
@@ -750,6 +750,10 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     facing = identifier(action.get("facing"), f"{path} move_entity facing")
                     if facing not in {"north", "south", "west", "east"}:
                         raise ContentError(f"{path}: unsupported move_entity facing {facing!r}")
+                elif operation == "face":
+                    facing = identifier(action.get("facing"), f"{path} face facing")
+                    if facing not in {"north", "south", "west", "east"}:
+                        raise ContentError(f"{path}: unsupported face direction {facing!r}")
                 elif operation == "start_schedule":
                     schedule_id = identifier(action.get("schedule"), f"{path} schedule")
                     if schedule_id not in schedules:
@@ -2425,6 +2429,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "set_actor_visual": 13,
         "save_actor_state": 14,
         "wait_schedule": 15,
+        "face": 16,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -2512,6 +2517,9 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 a = entity_index[identifier(action.get("entity"), f"{path} entity")]
             elif operation == "wait_schedule":
                 a = entity_index[identifier(action.get("entity"), f"{path} entity")]
+            elif operation == "face":
+                a = entity_index[identifier(action.get("entity"), f"{path} entity")]
+                b = facing_index[identifier(action.get("facing"), f"{path} face facing")]
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
             "id": script_id,
@@ -3453,6 +3461,7 @@ extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_SCRIPT_SET_ACTOR_VISUAL 13
 #define GENERATED_SCRIPT_SAVE_ACTOR_STATE 14
 #define GENERATED_SCRIPT_WAIT_SCHEDULE 15
+#define GENERATED_SCRIPT_FACE 16
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
