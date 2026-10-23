@@ -9,10 +9,12 @@
     "layers": [
       { "image": "title_closed_bag", "from_node": "closed_fade",
         "to_node": "open_fade", "clock": "sequence" },
-      { "image": "title_version", "from_node": "closed_hold",
-        "to_node": "open_fade", "x": 33, "y": 86, "clock": "range" },
+      { "image": "adonthell_logo", "from_node": "closed_hold",
+        "to_node": "open_fade", "x": 80, "y": 80, "clock": "range" },
+      { "image": "vircon_logo", "from_node": "closed_hold",
+        "to_node": "open_fade", "x": 284, "y": 180, "clock": "range" },
       { "image": "title_open_bag", "from_node": "open_fade",
-        "to_node": "open_fade", "fade_in_frames": 255 }
+        "to_node": "open_fade", "fade_in_frames": 200 }
     ]
   },
   "start": "closed_fade",
@@ -21,7 +23,7 @@
   ],
   "nodes": [
     { "id": "closed_fade", "speaker": "title", "text": "",
-      "auto_advance_frames": 150, "next": "closed_hold" },
+      "auto_advance_frames": 120, "next": "closed_hold" },
     { "id": "closed_hold", "speaker": "title", "text": "",
       "auto_advance_frames": 210, "next": "open_fade" },
     { "id": "open_fade", "speaker": "title", "text": "",

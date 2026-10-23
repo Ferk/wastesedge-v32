@@ -1981,8 +1981,7 @@ static void draw_title_logo(void)
                             frame->width, frame->height);
     set_multiply_color(COLOR_WHITE);
     set_drawing_scale(frame->scale_x, frame->scale_y);
-    set_drawing_point((int)((float)frame->offset_x * frame->scale_x),
-                      (int)((float)frame->offset_y * frame->scale_y));
+    set_drawing_point(frame->offset_x, frame->offset_y);
     draw_region_zoomed();
     set_drawing_scale(1.0f, 1.0f);
 }
