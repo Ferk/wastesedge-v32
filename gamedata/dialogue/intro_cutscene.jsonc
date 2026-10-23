@@ -20,7 +20,7 @@
           { "frame": 60, "alpha": 255 }] },
       { "image": "intro_inn", "from_node": "approach", "to_node": "closed_gate",
         "clock": "range",
-        "y_keyframes": [{ "frame": 0, "y": 765 }, { "frame": 100, "y": 765 },
+        "y_keyframes": [{ "frame": 0, "y": 700 }, { "frame": 100, "y": 700 },
           { "frame": 1400, "y": -129 }] },
       { "image": "intro_player_walking", "from_node": "approach", "to_node": "closed_gate",
         "clock": "range", "x": 330,
