@@ -73,7 +73,10 @@
               { "flag": "told_on_talan", "equals": 1 }
             ]
           },
-          "actions": [{ "op": "set", "flag": "lucia_refuses_key", "value": 1 }],
+          "actions": [
+            { "op": "set", "flag": "lucia_refuses_key", "value": 1 },
+            { "op": "set", "flag": "soothe_lucia", "value": 1 }
+          ],
           "next": "lucia_angry_key"
         },
         {
@@ -85,6 +88,7 @@
               { "flag": "told_on_talan", "equals": 0 }
             ]
           },
+          "actions": [{ "op": "set", "flag": "pantry_locked", "value": 2 }],
           "next": "lucia_heard_silverhair"
         },
         {
@@ -98,6 +102,11 @@
               { "flag": "told_on_talan", "equals": 2 }
             ]
           },
+          "actions": [
+            { "op": "set", "flag": "soothe_lucia", "value": 0 },
+            { "op": "set", "flag": "told_on_talan", "value": 3 },
+            { "op": "set", "flag": "pantry_locked", "value": 2 }
+          ],
           "next": "lucia_talan_reconciled"
         },
         {
@@ -161,7 +170,7 @@
     {
       "id": "lucia_reconciled_hands_key", "speaker": "narrator",
       "text": "Without any further words, Lucia reaches into her apron and hands you the key to the storeroom.",
-      "on_end": "grant_pantry_key", "end": true
+      "end": true
     },
     {
       "id": "lucia_heard_silverhair", "speaker": "lucia",
@@ -181,7 +190,7 @@
     {
       "id": "lucia_hands_key", "speaker": "narrator",
       "text": "Lucia rambles on some more, but finally she reaches into her apron and hands you the key to the storeroom.",
-      "on_end": "grant_pantry_key", "end": true
+      "end": true
     },
     {
       "id": "rooms_apart", "speaker": "lucia",
