@@ -19,7 +19,9 @@
     { "op": "set_walkability", "scene": "redwyne_exterior", "x": 7, "y": 17, "mask": 14 },
     { "op": "set_walkability", "scene": "redwyne_exterior", "x": 6, "y": 18, "mask": 15 },
     { "op": "set_walkability", "scene": "redwyne_exterior", "x": 6, "y": 19, "mask": 15 },
-    { "op": "move_entity", "entity": "player", "x": 10, "y": 18, "facing": "east" },
+    { "op": "walk_actor", "entity": "player", "scene": "redwyne_exterior",
+      "x": 10, "y": 18, "facing": "east" },
+    { "op": "wait_actor", "entity": "player" },
     { "op": "start_schedule", "entity": "talan", "schedule": "talan_gate_patrol", "delay_frames": 18 },
     { "op": "start_schedule", "entity": "tristan", "schedule": "tristan_inn_and_gate", "delay_frames": 450 },
     { "op": "start_schedule", "entity": "orloth", "schedule": "orloth_common_room", "delay_frames": 960 },
@@ -49,7 +51,9 @@
     { "op": "set_walkability", "scene": "redwyne_exterior", "x": 6, "y": 18, "mask": 7 },
     { "op": "set_walkability", "scene": "redwyne_exterior", "x": 6, "y": 19, "mask": 7 },
     { "op": "set_walkability", "scene": "redwyne_exterior", "x": 6, "y": 20, "mask": 5 },
-    { "op": "move_entity", "entity": "player", "x": 11, "y": 18, "facing": "east" },
+    { "op": "walk_actor", "entity": "player", "scene": "redwyne_exterior",
+      "x": 11, "y": 18, "facing": "east" },
+    { "op": "wait_actor", "entity": "player" },
     { "op": "set_control", "enabled": true }
   ]
 }

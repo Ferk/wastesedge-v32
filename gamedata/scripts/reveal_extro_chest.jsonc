@@ -1,8 +1,9 @@
 {
   "id": "reveal_extro_chest",
   "actions": [
-    { "op": "start_schedule", "entity": "bjarn", "schedule": "bjarn_extro_chest" },
-    { "op": "wait_schedule", "entity": "bjarn" },
+    { "op": "walk_actor", "entity": "bjarn", "scene": "redwyne_fingolson_room",
+      "x": 7, "y": 3, "facing": "north" },
+    { "op": "wait_actor", "entity": "bjarn" },
     { "op": "show_dialogue", "dialogue": "extro_chest" }
   ]
 }

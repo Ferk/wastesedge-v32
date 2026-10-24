@@ -3,6 +3,8 @@
   "actions": [
     { "op": "set", "flag": "bjarn_door_open", "value": 1 },
     { "op": "show_dialogue", "dialogue": "bjarn_door" },
-    { "op": "move_entity", "entity": "player", "x": 9, "y": 7, "facing": "west" }
+    { "op": "walk_actor", "entity": "player", "scene": "redwyne_cellar",
+      "x": 9, "y": 7, "facing": "west" },
+    { "op": "wait_actor", "entity": "player" }
   ]
 }

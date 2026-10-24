@@ -8,8 +8,7 @@
 #define PATH_MAX_WIDTH 64
 #define PATH_MAX_HEIGHT 64
 #define PATH_MAX_TILES (PATH_MAX_WIDTH * PATH_MAX_HEIGHT)
-#define PATH_PLAYER_SLOT GENERATED_RUNTIME_ENTITY_STORAGE_COUNT
-#define PATH_ROUTE_SLOT_COUNT (GENERATED_RUNTIME_ENTITY_STORAGE_COUNT + 1)
+#define PATH_ROUTE_SLOT_COUNT GENERATED_RUNTIME_ENTITY_STORAGE_COUNT
 #define PATH_UNSEEN 0
 #define PATH_OPEN 1
 #define PATH_CLOSED 2
@@ -288,9 +287,6 @@ static void start_script(struct world_state *world, int script)
     world->active_script = script;
     world->script_action = 0;
     world->script_wait = 0;
-    world->script_path_action = -1;
-    world->script_path_length = 0;
-    world->script_path_index = 0;
 }
 
 static int select_player_entity(struct world_state *world)
@@ -333,9 +329,6 @@ static void apply_scene_change(struct world_state *world, int scene_index, int s
     world->move_progress = 0;
     world->animation_frame = 0;
     world->trigger_latch = -1;
-    world->script_path_action = -1;
-    world->script_path_length = 0;
-    world->script_path_index = 0;
     ++world->visual_revision;
 }
 
@@ -1331,50 +1324,6 @@ static void set_entity_state(struct world_state *world, int definition, int stat
     }
 }
 
-static int begin_script_step(struct world_state *world, int target_x, int target_y, int facing)
-{
-    int move_x = 0;
-    int move_y = 0;
-    if (world->player_x == target_x && world->player_y == target_y) {
-        world->player_facing = facing;
-        world->script_path_action = -1;
-        world->script_path_length = 0;
-        world->script_path_index = 0;
-        return 1;
-    }
-    if (world->script_path_action != world->script_action ||
-        world->script_path_index >= world->script_path_length) {
-        world->script_path_length = calculate_path(
-            world, -1, world->scene_index, world->player_x, world->player_y,
-            target_x, target_y, PATH_PLAYER_SLOT);
-        world->script_path_index = 0;
-        world->script_path_action = world->script_action;
-        if (world->script_path_length <= 0)
-            return 0;
-    }
-    path_direction(path_routes[PATH_PLAYER_SLOT][world->script_path_index],
-                   &move_x, &move_y);
-    world->player_facing = facing_for_direction(move_x, move_y);
-    if (!can_move(world, move_x, move_y)) {
-        world->script_path_length = calculate_path(
-            world, -1, world->scene_index, world->player_x, world->player_y,
-            target_x, target_y, PATH_PLAYER_SLOT);
-        world->script_path_index = 0;
-        if (world->script_path_length <= 0)
-            return 0;
-        path_direction(path_routes[PATH_PLAYER_SLOT][0], &move_x, &move_y);
-        world->player_facing = facing_for_direction(move_x, move_y);
-        if (!can_move(world, move_x, move_y))
-            return 0;
-    }
-    world->move_x = move_x;
-    world->move_y = move_y;
-    world->moving = 1;
-    world->move_progress = 0;
-    ++world->script_path_index;
-    return 0;
-}
-
 static void update_script(struct world_state *world)
 {
     const struct generated_runtime_script *script;
@@ -1396,23 +1345,6 @@ static void update_script(struct world_state *world)
             set_entity_state(world, action->a, action->b);
             ++world->script_action;
             continue;
-        }
-        if (action->op == GENERATED_SCRIPT_MOVE_ENTITY) {
-            int player_definition = world->scene->entities[world->player_entity].definition;
-            if (action->a != player_definition) {
-                ++world->script_action;
-                continue;
-            }
-            if (world->moving) {
-                if (advance_player_motion(world))
-                    continue;
-                return;
-            }
-            if (begin_script_step(world, action->b, action->c, action->d)) {
-                ++world->script_action;
-                continue;
-            }
-            return;
         }
         if (action->op == GENERATED_SCRIPT_WAIT) {
             world->script_wait = action->a;
@@ -1556,9 +1488,6 @@ static void update_script(struct world_state *world)
         ++world->script_action;
     }
     world->active_script = -1;
-    world->script_path_action = -1;
-    world->script_path_length = 0;
-    world->script_path_index = 0;
 }
 
 /* Player lines are the selectable answers themselves. The original dialogue
@@ -1699,9 +1628,6 @@ void world_initialize(struct world_state *world)
     world->active_script = -1;
     world->script_action = 0;
     world->script_wait = 0;
-    world->script_path_action = -1;
-    world->script_path_length = 0;
-    world->script_path_index = 0;
     world->collision_override_count = 0;
     world->trigger_latch = -1;
     world->control_enabled = 1;

@@ -1,7 +1,9 @@
 {
   "id": "leave_silverhair_hallway_refused",
   "actions": [
+    { "op": "walk_actor", "entity": "player", "scene": "redwyne_silverhair_room",
+      "x": 5, "y": 2, "facing": "south" },
     { "op": "speak", "entity": "player", "text": "I better leave the way I came." },
-    { "op": "move_entity", "entity": "player", "x": 5, "y": 2, "facing": "south" }
+    { "op": "wait_actor", "entity": "player" }
   ]
 }

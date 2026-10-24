@@ -409,9 +409,6 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
     restored_world.scene = (restored_world.scene_index >= 0 &&
                             restored_world.scene_index < generated_runtime_scene_count) ?
                            &generated_runtime_scenes[restored_world.scene_index] : 0;
-    restored_world.script_path_action = -1;
-    restored_world.script_path_length = 0;
-    restored_world.script_path_index = 0;
     restored_world.visual_revision = 1;
     restored_world.music_revision = 1;
     if (restored_world.game_time < 0 || restored_world.game_time_subticks < 0 ||

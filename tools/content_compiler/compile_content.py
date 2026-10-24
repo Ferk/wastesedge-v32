@@ -724,7 +724,7 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     schedules: dict[str, dict[str, object]]) -> dict[str, list[dict[str, object]]]:
     scripts: dict[str, list[dict[str, object]]] = {}
     allowed = {"set", "set_control", "set_entity_state", "set_walkability", "show_dialogue", "speak",
-               "change_scene", "move_entity", "wait", "play_music",
+               "change_scene", "wait", "play_music",
                "start_schedule", "stop_schedule", "set_entity_dialogue",
                "set_actor_visual", "save_actor_state", "wait_schedule", "face",
                "place_actor", "place_actor_random", "walk_actor",
@@ -748,7 +748,7 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                 raise ContentError(f"{path}: unknown dialogue {action.get('dialogue')!r}")
             if operation == "play_music" and identifier(action.get("track"), f"{path} music track") not in music:
                 raise ContentError(f"{path}: unknown music track {action.get('track')!r}")
-            if operation in {"set_entity_state", "move_entity", "start_schedule",
+            if operation in {"set_entity_state", "start_schedule",
                              "stop_schedule", "set_entity_dialogue", "set_actor_visual",
                              "save_actor_state", "wait_schedule", "face",
                              "place_actor", "place_actor_random", "walk_actor",
@@ -766,12 +766,6 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     state = identifier(action.get("state"), f"{path} entity state")
                     if state not in entities[entity_id]["states"]:
                         raise ContentError(f"{path}: entity {entity_id!r} has no state {state!r}")
-                elif operation == "move_entity":
-                    integer(action.get("x"), f"{path} move_entity x")
-                    integer(action.get("y"), f"{path} move_entity y")
-                    facing = identifier(action.get("facing"), f"{path} move_entity facing")
-                    if facing not in {"north", "south", "west", "east"}:
-                        raise ContentError(f"{path}: unsupported move_entity facing {facing!r}")
                 elif operation == "face":
                     facing = identifier(action.get("facing"), f"{path} face facing")
                     if facing not in {"north", "south", "west", "east"}:
@@ -2471,26 +2465,25 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
     opcodes = {
         "set_control": 0,
         "set_entity_state": 1,
-        "move_entity": 2,
-        "wait": 3,
-        "show_dialogue": 4,
-        "change_scene": 5,
-        "play_music": 6,
-        "start_schedule": 7,
-        "stop_schedule": 8,
-        "set_entity_dialogue": 9,
-        "set_walkability": 10,
-        "speak": 11,
-        "set": 12,
-        "set_actor_visual": 13,
-        "save_actor_state": 14,
-        "wait_schedule": 15,
-        "face": 16,
-        "place_actor": 17,
-        "place_actor_random": 18,
-        "walk_actor": 19,
-        "walk_actor_random": 20,
-        "wait_actor": 21,
+        "wait": 2,
+        "show_dialogue": 3,
+        "change_scene": 4,
+        "play_music": 5,
+        "start_schedule": 6,
+        "stop_schedule": 7,
+        "set_entity_dialogue": 8,
+        "set_walkability": 9,
+        "speak": 10,
+        "set": 11,
+        "set_actor_visual": 12,
+        "save_actor_state": 13,
+        "wait_schedule": 14,
+        "face": 15,
+        "place_actor": 16,
+        "place_actor_random": 17,
+        "walk_actor": 18,
+        "walk_actor_random": 19,
+        "wait_actor": 20,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -2519,12 +2512,6 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 state = identifier(action.get("state"), f"{path} entity state")
                 a = entity_index[entity_id]
                 b = list(entity_definitions[entity_id]["states"]).index(state)
-            elif operation == "move_entity":
-                entity_id = identifier(action.get("entity"), f"{path} entity")
-                a = entity_index[entity_id]
-                b = integer(action.get("x"), f"{path} move x")
-                c = integer(action.get("y"), f"{path} move y")
-                d = facing_index[identifier(action.get("facing"), f"{path} move facing")]
             elif operation == "wait":
                 a = integer(action.get("frames"), f"{path} wait frames")
             elif operation == "show_dialogue":
@@ -3552,26 +3539,25 @@ extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT (GENERATED_RUNTIME_DIALOGUE_USED_COUNT > 0 ? GENERATED_RUNTIME_DIALOGUE_USED_COUNT : 1)
 #define GENERATED_SCRIPT_SET_CONTROL 0
 #define GENERATED_SCRIPT_SET_ENTITY_STATE 1
-#define GENERATED_SCRIPT_MOVE_ENTITY 2
-#define GENERATED_SCRIPT_WAIT 3
-#define GENERATED_SCRIPT_SHOW_DIALOGUE 4
-#define GENERATED_SCRIPT_CHANGE_SCENE 5
-#define GENERATED_SCRIPT_PLAY_MUSIC 6
-#define GENERATED_SCRIPT_START_SCHEDULE 7
-#define GENERATED_SCRIPT_STOP_SCHEDULE 8
-#define GENERATED_SCRIPT_SET_ENTITY_DIALOGUE 9
-#define GENERATED_SCRIPT_SET_WALKABILITY 10
-#define GENERATED_SCRIPT_SPEAK 11
-#define GENERATED_SCRIPT_SET_FLAG 12
-#define GENERATED_SCRIPT_SET_ACTOR_VISUAL 13
-#define GENERATED_SCRIPT_SAVE_ACTOR_STATE 14
-#define GENERATED_SCRIPT_WAIT_SCHEDULE 15
-#define GENERATED_SCRIPT_FACE 16
-#define GENERATED_SCRIPT_PLACE_ACTOR 17
-#define GENERATED_SCRIPT_PLACE_ACTOR_RANDOM 18
-#define GENERATED_SCRIPT_WALK_ACTOR 19
-#define GENERATED_SCRIPT_WALK_ACTOR_RANDOM 20
-#define GENERATED_SCRIPT_WAIT_ACTOR 21
+#define GENERATED_SCRIPT_WAIT 2
+#define GENERATED_SCRIPT_SHOW_DIALOGUE 3
+#define GENERATED_SCRIPT_CHANGE_SCENE 4
+#define GENERATED_SCRIPT_PLAY_MUSIC 5
+#define GENERATED_SCRIPT_START_SCHEDULE 6
+#define GENERATED_SCRIPT_STOP_SCHEDULE 7
+#define GENERATED_SCRIPT_SET_ENTITY_DIALOGUE 8
+#define GENERATED_SCRIPT_SET_WALKABILITY 9
+#define GENERATED_SCRIPT_SPEAK 10
+#define GENERATED_SCRIPT_SET_FLAG 11
+#define GENERATED_SCRIPT_SET_ACTOR_VISUAL 12
+#define GENERATED_SCRIPT_SAVE_ACTOR_STATE 13
+#define GENERATED_SCRIPT_WAIT_SCHEDULE 14
+#define GENERATED_SCRIPT_FACE 15
+#define GENERATED_SCRIPT_PLACE_ACTOR 16
+#define GENERATED_SCRIPT_PLACE_ACTOR_RANDOM 17
+#define GENERATED_SCRIPT_WALK_ACTOR 18
+#define GENERATED_SCRIPT_WALK_ACTOR_RANDOM 19
+#define GENERATED_SCRIPT_WAIT_ACTOR 20
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -3781,7 +3767,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append(f"static const struct generated_runtime_script_action generated_runtime_script_actions_{index}[] = {{")
         for action in script["actions"]:
             emitted_action = action
-            if action[0] in (17, 18, 19, 20):
+            if action[0] in (16, 17, 18, 19):
                 emitted_action = (action[0], action[1],
                                   action[2] + script_position_offsets[index],
                                   action[3], action[4])

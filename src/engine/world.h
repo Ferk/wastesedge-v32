@@ -110,9 +110,6 @@ struct world_state {
     int active_script;
     int script_action;
     int script_wait;
-    int script_path_action;
-    int script_path_length;
-    int script_path_index;
     struct world_collision_override collision_overrides[WORLD_COLLISION_OVERRIDE_CAPACITY];
     int collision_override_count;
     int trigger_latch;

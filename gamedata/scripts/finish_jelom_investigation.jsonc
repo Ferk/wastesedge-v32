@@ -9,7 +9,7 @@
     { "op": "change_scene", "scene": "redwyne_fingolson_room",
       "spawn": "extro_group", "player_hidden": true },
     { "op": "place_actor", "entity": "bjarn", "scene": "redwyne_fingolson_room",
-      "x": 3, "y": 6, "facing": "south" },
+      "x": 3, "y": 6, "facing": "west" },
     { "op": "wait", "frames": 15 },
     { "op": "place_actor", "entity": "jelom", "scene": "redwyne_fingolson_room",
       "x": 1, "y": 7, "facing": "east" },

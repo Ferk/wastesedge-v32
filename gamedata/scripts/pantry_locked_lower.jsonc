@@ -2,7 +2,9 @@
   "id": "pantry_locked_lower",
   "actions": [
     { "op": "set", "flag": "pantry_locked", "value": 1 },
+    { "op": "walk_actor", "entity": "player", "scene": "redwyne_cellar",
+      "x": 1, "y": 10, "facing": "east" },
     { "op": "speak", "entity": "player", "text": "The door to the pantry is locked." },
-    { "op": "move_entity", "entity": "player", "x": 1, "y": 10, "facing": "east" }
+    { "op": "wait_actor", "entity": "player" }
   ]
 }
