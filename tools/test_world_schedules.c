@@ -225,6 +225,28 @@ int main(void)
     int found_smoke_animation = 0;
 
     world_initialize(&world);
+    /* Inline actor walks run concurrently, reserve distinct random goals, and
+     * let the extro begin as soon as the player reaches the gathering. */
+    {
+        struct world_state extro_world;
+        struct world_actions idle = { 0, 0, 0, 0, 0, 0 };
+        world_initialize(&extro_world);
+        extro_world.dialogue = -1;
+        extro_world.dialogue_actor = -1;
+        extro_world.active_script = GENERATED_SCRIPT_FINISH_JELOM_INVESTIGATION;
+        extro_world.script_action = 0;
+        extro_world.script_wait = 0;
+        for (frame = 0;
+             frame < 1200 && extro_world.dialogue != GENERATED_DIALOGUE_EXTRO;
+             ++frame)
+            world_update(&extro_world, &idle);
+        assert(extro_world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
+        assert(extro_world.dialogue == GENERATED_DIALOGUE_EXTRO);
+        assert(!extro_world.actors[GENERATED_ENTITY_PLAYER].scripted_walk);
+        assert(extro_world.actors[GENERATED_ENTITY_BJARN].x == 3);
+        assert(extro_world.actors[GENERATED_ENTITY_BJARN].y == 6);
+        assert(extro_world.actors[GENERATED_ENTITY_BJARN].facing == WORLD_WEST);
+    }
     assert(generated_runtime_scene_count == 22);
     assert(strcmp(generated_runtime_game_title, "Waste's Edge") == 0);
     assert(generated_runtime_title_music == GENERATED_MUSIC_TITLE_THEME);
@@ -430,6 +452,33 @@ int main(void)
     assert(world.dialogue == GENERATED_DIALOGUE_JELOM_2ND);
     assert(strcmp(world_dialogue_text(&world),
                   "What's going on now? What are you doing here, Erek Stonebreaker?") == 0);
+
+    /* Hidden scene changes may establish the destination camera before the
+     * player arrives. The later explicit placement reveals the player without
+     * exposing the camera-anchor spawn or blocking arriving actors. */
+    {
+        struct world_state staging_world;
+        struct world_actions idle = { 0, 0, 0, 0, 0, 0 };
+        int guard = 200;
+        world_initialize(&staging_world);
+        staging_world.dialogue = -1;
+        staging_world.active_script = GENERATED_SCRIPT_FINISH_JELOM_INVESTIGATION;
+        staging_world.script_action = 0;
+        staging_world.script_wait = 0;
+        world_update(&staging_world, &idle);
+        while (staging_world.transition_phase != WORLD_TRANSITION_NONE)
+            world_update(&staging_world, &idle);
+        world_update(&staging_world, &idle);
+        assert(staging_world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
+        assert(staging_world.player_x == 4 && staging_world.player_y == 8);
+        assert(staging_world.player_hidden);
+        assert(!world_actor_is_present(&staging_world, GENERATED_ENTITY_PLAYER));
+        while (staging_world.player_hidden && guard-- > 0)
+            world_update(&staging_world, &idle);
+        assert(guard > 0);
+        assert(staging_world.player_x == 1 && staging_world.player_y == 7);
+        assert(world_actor_is_present(&staging_world, GENERATED_ENTITY_PLAYER));
+    }
 
     /* Once Fingolson's lie is known, Erek corroborates Banec's evidence and
      * Jelom advances the original quest flags to the final gathering. */
@@ -2177,10 +2226,9 @@ int main(void)
         assert(choice_has_condition(key_request, get_item_flag, 1));
         assert(choice_has_condition(key_request, pantry_flag, 1));
     }
-    world.active_script = GENERATED_SCRIPT_GRANT_PANTRY_KEY;
-    world.script_action = 0;
-    world.script_wait = 0;
-    tick(&world, 1);
+    /* Lucia's dialogue now grants the key directly instead of launching a
+     * one-action helper script; begin this transition check after that effect. */
+    world.flags[pantry_flag] = 2;
     assert(world.flags[pantry_flag] == 2);
     world.active_script = GENERATED_SCRIPT_ENTER_REDWYNE_PANTRY_UPPER;
     world.script_action = 0;
@@ -2572,6 +2620,8 @@ int main(void)
         world.object_states[0] = 2;
         world.game_time = 8117;
         world.game_time_subticks = 9;
+        world.player_hidden = 1;
+        world.transition_player_hidden = 1;
         world.actors[GENERATED_ENTITY_TALAN].path_schedule_step = 4;
         world.actors[GENERATED_ENTITY_TALAN].path_length = 7;
         world.actors[GENERATED_ENTITY_TALAN].speech_override =
@@ -2597,6 +2647,8 @@ int main(void)
         assert(loaded.flags[0] == 73);
         assert(loaded.object_states[0] == 2);
         assert(loaded.game_time == 8117 && loaded.game_time_subticks == 9);
+        assert(loaded.player_hidden == 1);
+        assert(loaded.transition_player_hidden == 1);
         assert(loaded.actors[GENERATED_ENTITY_TALAN].path_schedule_step == -1);
         assert(loaded.actors[GENERATED_ENTITY_TALAN].path_length == 0);
         assert(loaded.actors[GENERATED_ENTITY_TALAN].speech_override == 0);
@@ -2614,7 +2666,7 @@ int main(void)
          * resumes at the original noon start rather than becoming corrupt. */
         save_words[0] = 1;
         assert(savegame_decode(&loaded, save_words,
-                               word_count - 3 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
+                               word_count - 5 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
         assert(loaded.game_time == generated_runtime_initial_game_time);
         save_words[0] = SAVEGAME_FORMAT_VERSION;
         assert(!savegame_decode(&loaded, save_words, word_count - 1));

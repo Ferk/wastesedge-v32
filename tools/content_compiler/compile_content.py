@@ -727,7 +727,8 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                "change_scene", "move_entity", "wait", "play_music",
                "start_schedule", "stop_schedule", "set_entity_dialogue",
                "set_actor_visual", "save_actor_state", "wait_schedule", "face",
-               "place_actor", "place_actor_random"}
+               "place_actor", "place_actor_random", "walk_actor",
+               "walk_actor_random", "wait_actor"}
     for path in paths:
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
@@ -750,13 +751,15 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
             if operation in {"set_entity_state", "move_entity", "start_schedule",
                              "stop_schedule", "set_entity_dialogue", "set_actor_visual",
                              "save_actor_state", "wait_schedule", "face",
-                             "place_actor", "place_actor_random"}:
+                             "place_actor", "place_actor_random", "walk_actor",
+                             "walk_actor_random", "wait_actor"}:
                 entity_id = identifier(action.get("entity"), f"{path} entity")
                 if entity_id not in entities:
                     raise ContentError(f"{path}: unknown entity {entity_id!r}")
                 if operation in {"set_entity_dialogue", "set_actor_visual",
                                  "save_actor_state", "wait_schedule", "face",
-                                 "place_actor", "place_actor_random"} and \
+                                 "place_actor", "place_actor_random", "walk_actor",
+                                 "walk_actor_random", "wait_actor"} and \
                         entities[entity_id]["kind"] != "actor":
                     raise ContentError(f"{path}: {operation} requires an actor entity")
                 if operation == "set_entity_state":
@@ -773,37 +776,37 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     facing = identifier(action.get("facing"), f"{path} face facing")
                     if facing not in {"north", "south", "west", "east"}:
                         raise ContentError(f"{path}: unsupported face direction {facing!r}")
-                elif operation == "place_actor":
-                    identifier(action.get("scene"), f"{path} place_actor scene")
-                    integer(action.get("x"), f"{path} place_actor x")
-                    integer(action.get("y"), f"{path} place_actor y")
-                    facing = identifier(action.get("facing"), f"{path} place_actor facing")
+                elif operation in {"place_actor", "walk_actor"}:
+                    identifier(action.get("scene"), f"{path} {operation} scene")
+                    integer(action.get("x"), f"{path} {operation} x")
+                    integer(action.get("y"), f"{path} {operation} y")
+                    facing = identifier(action.get("facing"), f"{path} {operation} facing")
                     if facing not in {"north", "south", "west", "east"}:
-                        raise ContentError(f"{path}: unsupported place_actor facing {facing!r}")
-                elif operation == "place_actor_random":
-                    identifier(action.get("scene"), f"{path} place_actor_random scene")
+                        raise ContentError(f"{path}: unsupported {operation} facing {facing!r}")
+                elif operation in {"place_actor_random", "walk_actor_random"}:
+                    identifier(action.get("scene"), f"{path} {operation} scene")
                     positions = expect(
                         action.get("positions"), list,
-                        f"{path} place_actor_random positions")
+                        f"{path} {operation} positions")
                     if not positions:
                         raise ContentError(
-                            f"{path}: place_actor_random needs at least one position")
+                            f"{path}: {operation} needs at least one position")
                     for position_number, raw_position in enumerate(positions):
                         position = expect(
                             raw_position, dict,
-                            f"{path} place_actor_random position {position_number}")
+                            f"{path} {operation} position {position_number}")
                         integer(
                             position.get("x"),
-                            f"{path} place_actor_random position {position_number} x")
+                            f"{path} {operation} position {position_number} x")
                         integer(
                             position.get("y"),
-                            f"{path} place_actor_random position {position_number} y")
+                            f"{path} {operation} position {position_number} y")
                         facing = identifier(
                             position.get("facing"),
-                            f"{path} place_actor_random position {position_number} facing")
+                            f"{path} {operation} position {position_number} facing")
                         if facing not in {"north", "south", "west", "east"}:
                             raise ContentError(
-                                f"{path}: unsupported place_actor_random facing {facing!r}")
+                                f"{path}: unsupported {operation} facing {facing!r}")
                 elif operation == "start_schedule":
                     schedule_id = identifier(action.get("schedule"), f"{path} schedule")
                     if schedule_id not in schedules:
@@ -822,6 +825,9 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                             f"{path}: actor {entity_id!r} has no visual {visual!r}")
             if operation == "set_control" and not isinstance(action.get("enabled"), bool):
                 raise ContentError(f"{path}: set_control enabled must be a bool")
+            if operation == "change_scene" and \
+                    not isinstance(action.get("player_hidden", False), bool):
+                raise ContentError(f"{path}: change_scene player_hidden must be a bool")
             if operation == "set":
                 identifier(action.get("flag"), f"{path} flag")
                 integer(action.get("value"), f"{path} flag value")
@@ -2482,6 +2488,9 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "face": 16,
         "place_actor": 17,
         "place_actor_random": 18,
+        "walk_actor": 19,
+        "walk_actor_random": 20,
+        "wait_actor": 21,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -2525,6 +2534,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 spawn_id = identifier(action.get("spawn"), f"{path} spawn")
                 a = scene_index[scene_id]
                 b = spawn_index[scene_id][spawn_id]
+                c = int(action.get("player_hidden", False))
                 if not any(int(entity["player_controlled"]) for entity in scenes[a]["entities"]):
                     raise ContentError(
                         f"{path}: change_scene target {scene_id!r} has no player-controlled entity")
@@ -2573,16 +2583,17 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
             elif operation == "face":
                 a = entity_index[identifier(action.get("entity"), f"{path} entity")]
                 b = facing_index[identifier(action.get("facing"), f"{path} face facing")]
-            elif operation in {"place_actor", "place_actor_random"}:
+            elif operation in {"place_actor", "place_actor_random",
+                              "walk_actor", "walk_actor_random"}:
                 entity_id = identifier(action.get("entity"), f"{path} entity")
                 scene_id = identifier(action.get("scene"), f"{path} placement scene")
                 if scene_id not in scene_index:
                     raise ContentError(
                         f"{path}: {operation} refers to unknown scene {scene_id!r}")
                 scene = scenes[scene_index[scene_id]]
-                authored_positions = ([action] if operation == "place_actor" else
+                authored_positions = ([action] if operation in {"place_actor", "walk_actor"} else
                                       expect(action.get("positions"), list,
-                                             f"{path} place_actor_random positions"))
+                                             f"{path} {operation} positions"))
                 compiled_positions: list[tuple[int, int, int, int]] = []
                 for position_number, raw_position in enumerate(authored_positions):
                     position = expect(
@@ -2609,6 +2620,8 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 a = entity_index[entity_id]
                 b = first_position
                 c = len(authored_positions)
+            elif operation == "wait_actor":
+                a = entity_index[identifier(action.get("entity"), f"{path} entity")]
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
             "id": script_id,
@@ -3556,6 +3569,9 @@ extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_SCRIPT_FACE 16
 #define GENERATED_SCRIPT_PLACE_ACTOR 17
 #define GENERATED_SCRIPT_PLACE_ACTOR_RANDOM 18
+#define GENERATED_SCRIPT_WALK_ACTOR 19
+#define GENERATED_SCRIPT_WALK_ACTOR_RANDOM 20
+#define GENERATED_SCRIPT_WAIT_ACTOR 21
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -3765,7 +3781,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
         lines.append(f"static const struct generated_runtime_script_action generated_runtime_script_actions_{index}[] = {{")
         for action in script["actions"]:
             emitted_action = action
-            if action[0] in (17, 18):
+            if action[0] in (17, 18, 19, 20):
                 emitted_action = (action[0], action[1],
                                   action[2] + script_position_offsets[index],
                                   action[3], action[4])

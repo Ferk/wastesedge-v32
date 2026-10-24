@@ -172,6 +172,8 @@ int savegame_encode(const struct world_state *world, int *words, int capacity)
         write_word(&writer, checkpoint->dialogue);
     }
     write_word(&writer, world->dialogue_auto_frame);
+    write_word(&writer, world->player_hidden);
+    write_word(&writer, world->transition_player_hidden);
 
     return writer.failed ? 0 : writer.count;
 }
@@ -190,7 +192,10 @@ static int validate_restored_world(const struct world_state *world)
         world->player_entity >= generated_runtime_scenes[world->scene_index].entity_count ||
         !generated_runtime_scenes[world->scene_index]
              .entities[world->player_entity].player_controlled ||
-        !valid_facing(world->player_facing))
+        !valid_facing(world->player_facing) ||
+        (world->player_hidden != 0 && world->player_hidden != 1) ||
+        (world->transition_player_hidden != 0 &&
+         world->transition_player_hidden != 1))
         return 0;
     if (world->dialogue < -1 || world->dialogue >= generated_runtime_dialogue_count)
         return 0;
@@ -396,6 +401,10 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
     }
     if (version >= 4)
         restored_world.dialogue_auto_frame = read_word(&reader);
+    if (version >= 5) {
+        restored_world.player_hidden = read_word(&reader);
+        restored_world.transition_player_hidden = read_word(&reader);
+    }
 
     restored_world.scene = (restored_world.scene_index >= 0 &&
                             restored_world.scene_index < generated_runtime_scene_count) ?

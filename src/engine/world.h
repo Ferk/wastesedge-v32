@@ -52,6 +52,8 @@ struct world_actor_state {
     int schedule;
     int schedule_step;
     int schedule_wait;
+    int scripted_walk;
+    int scripted_walk_facing;
     int path_schedule_step;
     int path_scene;
     int path_target_x;
@@ -89,6 +91,7 @@ struct world_state {
     int player_x;
     int player_y;
     int player_facing;
+    int player_hidden;
     int moving;
     int move_x;
     int move_y;
@@ -121,6 +124,7 @@ struct world_state {
     int transition_frame;
     int transition_scene;
     int transition_spawn;
+    int transition_player_hidden;
     int schedule_random;
     int speech_random;
     /* Tenths of an in-world minute, matching the original clock units. */

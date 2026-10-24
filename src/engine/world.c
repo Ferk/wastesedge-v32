@@ -306,7 +306,10 @@ static int select_player_entity(struct world_state *world)
     return 0;
 }
 
-static void apply_scene_change(struct world_state *world, int scene_index, int spawn_index)
+/* Install a destination scene at its camera spawn, optionally withholding the
+ * player from rendering and collision until an explicit scripted placement. */
+static void apply_scene_change(struct world_state *world, int scene_index, int spawn_index,
+                               int player_hidden)
 {
     const struct generated_runtime_scene *scene;
     const struct generated_runtime_spawn *spawn;
@@ -323,6 +326,7 @@ static void apply_scene_change(struct world_state *world, int scene_index, int s
     world->player_x = spawn->tile_x;
     world->player_y = spawn->tile_y;
     world->player_facing = spawn->facing;
+    world->player_hidden = player_hidden;
     world->moving = 0;
     world->move_x = 0;
     world->move_y = 0;
@@ -335,7 +339,9 @@ static void apply_scene_change(struct world_state *world, int scene_index, int s
     ++world->visual_revision;
 }
 
-static void begin_scene_change(struct world_state *world, int scene_index, int spawn_index)
+/* Begin a faded scene transition and retain its requested player visibility. */
+static void begin_scene_change(struct world_state *world, int scene_index, int spawn_index,
+                               int player_hidden)
 {
     if (scene_index < 0 || scene_index >= generated_runtime_scene_count)
         return;
@@ -345,6 +351,7 @@ static void begin_scene_change(struct world_state *world, int scene_index, int s
     world->transition_frame = 0;
     world->transition_scene = scene_index;
     world->transition_spawn = spawn_index;
+    world->transition_player_hidden = player_hidden;
     ++world->visual_revision;
 }
 
@@ -354,7 +361,8 @@ static void update_scene_transition(struct world_state *world)
         ++world->transition_frame;
         if (world->transition_frame >= WORLD_TRANSITION_FRAMES) {
             world->transition_frame = WORLD_TRANSITION_FRAMES;
-            apply_scene_change(world, world->transition_scene, world->transition_spawn);
+            apply_scene_change(world, world->transition_scene, world->transition_spawn,
+                               world->transition_player_hidden);
             world->transition_phase = WORLD_TRANSITION_FADE_IN;
         }
         ++world->visual_revision;
@@ -487,12 +495,21 @@ static int actor_anchor_blocked(const struct world_state *world, int definition,
                                 int scene_index, int x, int y)
 {
     int other;
-    if (definition != player_definition(world) && scene_index == world->scene_index &&
+    if (definition != player_definition(world) && !world->player_hidden &&
+        scene_index == world->scene_index &&
         x == world->player_x && y == world->player_y)
         return 1;
     for (other = 0; other < GENERATED_RUNTIME_ENTITY_COUNT; ++other) {
         const struct world_actor_state *actor = &world->actors[other];
-        if (other != definition && actor->scene == scene_index && actor->x == x && actor->y == y)
+        if (other == definition)
+            continue;
+        if (actor->scene == scene_index && actor->x == x && actor->y == y)
+            return 1;
+        /* A non-blocking random walk has already claimed its destination even
+         * before the actor reaches it. Reserving that square prevents a later
+         * walker from selecting the same final position and deadlocking both. */
+        if (actor->scripted_walk && actor->path_scene == scene_index &&
+            actor->path_target_x == x && actor->path_target_y == y)
             return 1;
     }
     return 0;
@@ -806,6 +823,8 @@ static int restore_actor_state(struct world_state *world, int definition)
     actor->schedule = checkpoint->schedule;
     actor->schedule_step = checkpoint->schedule_step;
     actor->schedule_wait = checkpoint->schedule_wait;
+    actor->scripted_walk = 0;
+    actor->scripted_walk_facing = actor->facing;
     actor->path_schedule_step = -1;
     actor->path_scene = -1;
     actor->path_length = 0;
@@ -842,6 +861,7 @@ static void stop_actor_schedule(struct world_state *world, int definition)
     if (actor->moving || actor->speech_line >= 0)
         ++world->visual_revision;
     actor->schedule = -1;
+    actor->scripted_walk = 0;
     actor->moving = 0;
     actor->move_progress = 0;
     actor->path_schedule_step = -1;
@@ -852,6 +872,10 @@ static void stop_actor_schedule(struct world_state *world, int definition)
     actor->speech_wait = 0;
     actor->speech_frames = 0;
     actor->speech_override = 0;
+    if (definition == player_definition(world)) {
+        world->moving = 0;
+        world->move_progress = 0;
+    }
 }
 
 /* Place one actor instantly; scripts cancel its old schedule while schedule
@@ -875,6 +899,7 @@ static int place_actor_immediately(
         world->player_x = position->x;
         world->player_y = position->y;
         world->player_facing = position->facing;
+        world->player_hidden = 0;
         world->moving = 0;
         world->move_progress = 0;
     }
@@ -926,6 +951,131 @@ static const struct generated_runtime_actor_position *select_actor_position(
     return 0;
 }
 
+/* Advance one actor toward an exact target using the same A* route and
+ * collision checks for authored schedules and inline scripted walks. */
+static int advance_actor_walk(
+    struct world_state *world, int definition,
+    const struct generated_runtime_actor_position *target)
+{
+    struct world_actor_state *actor;
+    int is_player;
+    int scene;
+    int x;
+    int y;
+    int move_x = 0;
+    int move_y = 0;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT || target == 0)
+        return 0;
+    actor = &world->actors[definition];
+    is_player = definition == player_definition(world);
+    scene = is_player ? world->scene_index : actor->scene;
+    x = is_player ? world->player_x : actor->x;
+    y = is_player ? world->player_y : actor->y;
+    if (scene != target->scene)
+        return 0;
+    if (is_player ? world->moving : actor->moving) {
+        if (is_player) {
+            if (!advance_player_motion(world)) {
+                ++world->visual_revision;
+                return 0;
+            }
+        }
+        else {
+            actor->move_progress += WALK_PIXELS_PER_FRAME;
+            if ((actor->move_progress & 3) == 0)
+                ++actor->animation_frame;
+            if (actor->move_progress < generated_runtime_scenes[scene].tile_size) {
+                ++world->visual_revision;
+                return 0;
+            }
+            actor->x += actor->move_x;
+            actor->y += actor->move_y;
+            actor->moving = 0;
+            actor->move_progress = 0;
+        }
+        ++world->visual_revision;
+        /* Preserve the original schedule cadence: completing one tile and
+         * choosing the following step happen on consecutive updates. */
+        return 0;
+    }
+    if (x == target->x && y == target->y) {
+        face_actor(world, definition, target->facing);
+        actor->path_scene = -1;
+        actor->path_length = 0;
+        actor->path_index = 0;
+        return 1;
+    }
+    if (actor->path_scene != scene || actor->path_target_x != target->x ||
+        actor->path_target_y != target->y || actor->path_index >= actor->path_length) {
+        actor->path_length = calculate_path(
+            world, is_player ? -1 : definition, scene, x, y,
+            target->x, target->y, definition);
+        actor->path_index = 0;
+        actor->path_scene = scene;
+        actor->path_target_x = target->x;
+        actor->path_target_y = target->y;
+        if (actor->path_length <= 0)
+            return 0;
+    }
+    path_direction(path_routes[definition][actor->path_index], &move_x, &move_y);
+    face_actor(world, definition, facing_for_direction(move_x, move_y));
+    if (is_player ? !can_move(world, move_x, move_y) :
+                    !scheduled_actor_can_move(world, definition, move_x, move_y)) {
+        actor->path_length = calculate_path(
+            world, is_player ? -1 : definition, scene, x, y,
+            target->x, target->y, definition);
+        actor->path_index = 0;
+        if (actor->path_length <= 0)
+            return 0;
+        path_direction(path_routes[definition][0], &move_x, &move_y);
+        face_actor(world, definition, facing_for_direction(move_x, move_y));
+        if (is_player ? !can_move(world, move_x, move_y) :
+                        !scheduled_actor_can_move(world, definition, move_x, move_y))
+            return 0;
+    }
+    if (is_player) {
+        world->move_x = move_x;
+        world->move_y = move_y;
+        world->moving = 1;
+        world->move_progress = 0;
+    }
+    else {
+        actor->move_x = move_x;
+        actor->move_y = move_y;
+        actor->moving = 1;
+        actor->move_progress = 0;
+    }
+    ++actor->path_index;
+    ++world->visual_revision;
+    return 0;
+}
+
+/* Start a non-blocking scripted walk. The actor's existing schedule is
+ * cancelled, while its final facing and target reuse transient route fields. */
+static int start_scripted_actor_walk(
+    struct world_state *world, int definition,
+    const struct generated_runtime_actor_position *target)
+{
+    struct world_actor_state *actor;
+    int scene;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT || target == 0)
+        return 0;
+    actor = &world->actors[definition];
+    scene = definition == player_definition(world) ? world->scene_index : actor->scene;
+    if (scene != target->scene)
+        return 0;
+    stop_actor_schedule(world, definition);
+    actor->scene = scene;
+    actor->scripted_walk = 1;
+    actor->scripted_walk_facing = target->facing;
+    actor->path_scene = scene;
+    actor->path_target_x = target->x;
+    actor->path_target_y = target->y;
+    actor->path_length = 0;
+    actor->path_index = 0;
+    return 1;
+}
+
 static void finish_schedule_step(struct world_state *world, int definition,
                                  const struct generated_runtime_schedule_step *step)
 {
@@ -953,8 +1103,15 @@ static void update_actor_schedule(struct world_state *world, int definition)
     struct world_actor_state *actor = &world->actors[definition];
     const struct generated_runtime_schedule *schedule;
     const struct generated_runtime_schedule_step *step;
-    int move_x = 0;
-    int move_y = 0;
+    if (actor->scripted_walk) {
+        const struct generated_runtime_actor_position target = {
+            actor->path_scene, actor->path_target_x, actor->path_target_y,
+            actor->scripted_walk_facing
+        };
+        if (advance_actor_walk(world, definition, &target))
+            actor->scripted_walk = 0;
+        return;
+    }
     if (actor->schedule < 0 || actor->schedule >= generated_runtime_schedule_count ||
         definition == world->dialogue_actor)
         return;
@@ -969,16 +1126,11 @@ static void update_actor_schedule(struct world_state *world, int definition)
     }
     step = &schedule->steps[actor->schedule_step];
     if (actor->moving) {
-        actor->move_progress += WALK_PIXELS_PER_FRAME;
-        if ((actor->move_progress & 3) == 0)
-            ++actor->animation_frame;
-        if (actor->move_progress >= generated_runtime_scenes[actor->scene].tile_size) {
-            actor->x += actor->move_x;
-            actor->y += actor->move_y;
-            actor->moving = 0;
-            actor->move_progress = 0;
-        }
-        ++world->visual_revision;
+        const struct generated_runtime_actor_position target = {
+            actor->scene, step->x, step->y, step->facing
+        };
+        if (advance_actor_walk(world, definition, &target))
+            finish_schedule_step(world, definition, step);
         return;
     }
     if (step->op == GENERATED_SCHEDULE_WAIT) {
@@ -1067,51 +1219,14 @@ static void update_actor_schedule(struct world_state *world, int definition)
         finish_schedule_step(world, definition, step);
         return;
     }
-    if (actor->scene != step->scene)
+    {
+        const struct generated_runtime_actor_position target = {
+            step->scene, step->x, step->y, step->facing
+        };
+        if (advance_actor_walk(world, definition, &target))
+            finish_schedule_step(world, definition, step);
         return;
-    if (actor->x == step->x && actor->y == step->y) {
-        actor->facing = step->facing;
-        ++world->visual_revision;
-        finish_schedule_step(world, definition, step);
-        return;
     }
-    if (actor->path_schedule_step != actor->schedule_step ||
-        actor->path_scene != actor->scene || actor->path_target_x != step->x ||
-        actor->path_target_y != step->y ||
-        actor->path_index >= actor->path_length) {
-        actor->path_length = calculate_path(
-            world, definition, actor->scene, actor->x, actor->y,
-            step->x, step->y, definition);
-        actor->path_index = 0;
-        actor->path_schedule_step = actor->schedule_step;
-        actor->path_scene = actor->scene;
-        actor->path_target_x = step->x;
-        actor->path_target_y = step->y;
-        if (actor->path_length <= 0)
-            return;
-    }
-    path_direction(path_routes[definition][actor->path_index], &move_x, &move_y);
-    actor->facing = facing_for_direction(move_x, move_y);
-    if (!scheduled_actor_can_move(world, definition, move_x, move_y)) {
-        /* mapcharacter::follow_path recalculated immediately when another
-         * character occupied its next mapsquare. Preserve that behavior. */
-        actor->path_length = calculate_path(
-            world, definition, actor->scene, actor->x, actor->y,
-            step->x, step->y, definition);
-        actor->path_index = 0;
-        if (actor->path_length <= 0)
-            return;
-        path_direction(path_routes[definition][0], &move_x, &move_y);
-        actor->facing = facing_for_direction(move_x, move_y);
-        if (!scheduled_actor_can_move(world, definition, move_x, move_y))
-            return;
-    }
-    actor->move_x = move_x;
-    actor->move_y = move_y;
-    actor->moving = 1;
-    actor->move_progress = 0;
-    ++actor->path_index;
-    ++world->visual_revision;
 }
 
 static void update_actor_speech(struct world_state *world, int definition)
@@ -1183,6 +1298,7 @@ static void start_actor_schedule(struct world_state *world, int definition,
     if (actor->speech_line >= 0)
         ++world->visual_revision;
     actor->schedule = schedule;
+    actor->scripted_walk = 0;
     actor->schedule_step = 0;
     actor->schedule_wait = delay;
     actor->path_schedule_step = -1;
@@ -1309,7 +1425,7 @@ static void update_script(struct world_state *world)
             return;
         }
         if (action->op == GENERATED_SCRIPT_CHANGE_SCENE) {
-            begin_scene_change(world, action->a, action->b);
+            begin_scene_change(world, action->a, action->b, action->c);
             ++world->script_action;
             return;
         }
@@ -1345,6 +1461,31 @@ static void update_script(struct world_state *world)
             }
             if (position == 0 ||
                 !place_actor_immediately(world, action->a, position, 1))
+                return;
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_WALK_ACTOR ||
+            action->op == GENERATED_SCRIPT_WALK_ACTOR_RANDOM) {
+            const struct generated_runtime_actor_position *position = 0;
+            if (action->b >= 0 && action->c > 0 &&
+                action->b + action->c <= generated_runtime_script_position_count) {
+                if (action->op == GENERATED_SCRIPT_WALK_ACTOR)
+                    position = &generated_runtime_script_positions[action->b];
+                else
+                    position = select_actor_position(
+                        world, action->a,
+                        &generated_runtime_script_positions[action->b], action->c);
+            }
+            if (position == 0 ||
+                !start_scripted_actor_walk(world, action->a, position))
+                return;
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_WAIT_ACTOR) {
+            if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT &&
+                world->actors[action->a].scripted_walk)
                 return;
             ++world->script_action;
             continue;
@@ -1479,6 +1620,7 @@ void world_initialize(struct world_state *world)
     world->player_x = 0;
     world->player_y = 0;
     world->player_facing = WORLD_SOUTH;
+    world->player_hidden = 0;
     world->moving = 0;
     world->move_x = 0;
     world->move_y = 0;
@@ -1504,6 +1646,8 @@ void world_initialize(struct world_state *world)
         world->actors[index].schedule = -1;
         world->actors[index].schedule_step = 0;
         world->actors[index].schedule_wait = 0;
+        world->actors[index].scripted_walk = 0;
+        world->actors[index].scripted_walk_facing = WORLD_SOUTH;
         world->actors[index].path_schedule_step = -1;
         world->actors[index].path_scene = -1;
         world->actors[index].path_target_x = 0;
@@ -1568,6 +1712,7 @@ void world_initialize(struct world_state *world)
     world->transition_frame = 0;
     world->transition_scene = -1;
     world->transition_spawn = -1;
+    world->transition_player_hidden = 0;
     world->schedule_random = 1;
     world->speech_random = 17;
     world->game_time = generated_runtime_initial_game_time;
@@ -1807,7 +1952,7 @@ int world_actor_is_moving(const struct world_state *world, int definition)
 int world_actor_is_present(const struct world_state *world, int definition)
 {
     if (definition == player_definition(world))
-        return 1;
+        return !world->player_hidden;
     return definition >= 0 && definition < GENERATED_RUNTIME_ENTITY_COUNT &&
            world->actors[definition].scene == world->scene_index;
 }
