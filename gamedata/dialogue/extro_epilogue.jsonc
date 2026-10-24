@@ -8,7 +8,7 @@
       { "image": "extro_forest_back", "clock": "sequence", "wrap_x_delay": 5 },
       { "image": "extro_forest_middle", "clock": "sequence", "wrap_x_delay": 3 },
       { "images": ["extro_alek_0", "extro_alek_1", "extro_alek_2", "extro_alek_3"],
-        "clock": "sequence", "frame_delay": 14, "x": 110, "y": 120 },
+        "clock": "sequence", "frame_delay": 14, "x": 250, "y": 180 },
       { "image": "extro_forest_front", "clock": "sequence", "wrap_x_delay": 2 }
     ]
   },
