@@ -257,15 +257,6 @@
       ]
     },
     {
-      "id": "oliver_player_room",
-      "entity": "oliver",
-      "loop": false,
-      "steps": [
-        { "op": "place", "scene": "redwyne_player_room", "x": 5, "y": 4,
-          "facing": "north" }
-      ]
-    },
-    {
       "id": "oliver_return_to_yard",
       "entity": "oliver",
       "loop": false,
@@ -517,15 +508,6 @@
       ]
     },
     {
-      "id": "erek_fingolson_escort",
-      "entity": "erek",
-      "loop": false,
-      "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 2, "y": 7,
-          "facing": "north" }
-      ]
-    },
-    {
       "id": "erek_leave_fingolson",
       "entity": "erek",
       "loop": false,
@@ -543,15 +525,6 @@
         { "op": "place", "scene": "redwyne_inn", "x": 9, "y": 2,
           "facing": "south" },
         { "op": "restore_actor_state" }
-      ]
-    },
-    {
-      "id": "bjarn_await_player",
-      "entity": "bjarn",
-      "loop": false,
-      "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 7, "y": 3,
-          "facing": "west" }
       ]
     },
     {
@@ -584,155 +557,6 @@
         { "op": "move", "label": "table", "scene": "redwyne_fingolson_room",
           "x": 3, "y": 6, "facing": "west" },
         { "op": "jump", "target": "choose_place" }
-      ]
-    },
-    {
-      "id": "erek_jelom_evidence",
-      "entity": "erek",
-      "loop": false,
-      "steps": [
-        { "op": "place", "scene": "redwyne_first_floor", "x": 2, "y": 4,
-          "facing": "north" }
-      ]
-    },
-    {
-      "id": "jelom_evidence",
-      "entity": "jelom",
-      "loop": false,
-      "steps": [
-        { "op": "place", "scene": "redwyne_first_floor", "x": 2, "y": 3,
-          "facing": "south" }
-      ]
-    },
-    {
-      "id": "bjarn_extro_group",
-      "entity": "bjarn",
-      "loop": false,
-      "steps": [
-        { "op": "place", "scene": "redwyne_fingolson_room", "x": 3, "y": 6,
-          "facing": "west" }
-      ]
-    },
-    {
-      "id": "player_extro_group",
-      "entity": "player",
-      "loop": false,
-      "steps": [
-        { "op": "place_random", "scene": "redwyne_fingolson_room",
-          "positions": [
-            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
-            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
-            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
-            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
-            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
-            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
-            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
-            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
-            { "x": 5, "y": 9, "facing": "north" }
-          ] }
-      ]
-    },
-    {
-      "id": "erek_extro_group",
-      "entity": "erek",
-      "loop": false,
-      "steps": [
-        { "op": "place_random", "scene": "redwyne_fingolson_room",
-          "positions": [
-            { "x": 2, "y": 5, "facing": "east" },
-            { "x": 2, "y": 6, "facing": "east" },
-            { "x": 3, "y": 6, "facing": "east" },
-            { "x": 4, "y": 6, "facing": "west" },
-            { "x": 5, "y": 6, "facing": "west" },
-            { "x": 2, "y": 7, "facing": "east" },
-            { "x": 3, "y": 7, "facing": "north" },
-            { "x": 4, "y": 7, "facing": "west" },
-            { "x": 5, "y": 7, "facing": "west" },
-            { "x": 2, "y": 8, "facing": "north" },
-            { "x": 3, "y": 8, "facing": "north" },
-            { "x": 4, "y": 8, "facing": "north" },
-            { "x": 5, "y": 8, "facing": "west" },
-            { "x": 2, "y": 9, "facing": "north" },
-            { "x": 3, "y": 9, "facing": "north" },
-            { "x": 4, "y": 9, "facing": "north" },
-            { "x": 5, "y": 9, "facing": "north" }
-          ] }
-      ]
-    },
-    {
-      "id": "jelom_extro_group",
-      "entity": "jelom",
-      "loop": false,
-      "steps": [
-        { "op": "place_random", "scene": "redwyne_fingolson_room",
-          "positions": [
-            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
-            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
-            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
-            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
-            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
-            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
-            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
-            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
-            { "x": 5, "y": 9, "facing": "north" }
-          ] }
-      ]
-    },
-    {
-      "id": "silverhair_extro_group",
-      "entity": "silverhair",
-      "loop": false,
-      "steps": [
-        { "op": "place_random", "scene": "redwyne_fingolson_room",
-          "positions": [
-            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
-            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
-            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
-            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
-            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
-            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
-            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
-            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
-            { "x": 5, "y": 9, "facing": "north" }
-          ] }
-      ]
-    },
-    {
-      "id": "tristan_extro_group",
-      "entity": "tristan",
-      "loop": false,
-      "steps": [
-        { "op": "place_random", "scene": "redwyne_fingolson_room",
-          "positions": [
-            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
-            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
-            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
-            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
-            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
-            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
-            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
-            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
-            { "x": 5, "y": 9, "facing": "north" }
-          ] }
-      ]
-    },
-    {
-      "id": "fellnir_extro_group",
-      "entity": "fellnir",
-      "loop": false,
-      "steps": [
-        { "op": "place_random", "scene": "redwyne_fingolson_room",
-          "positions": [
-            { "x": 2, "y": 5, "facing": "east" }, { "x": 2, "y": 6, "facing": "east" },
-            { "x": 3, "y": 6, "facing": "east" }, { "x": 4, "y": 6, "facing": "west" },
-            { "x": 5, "y": 6, "facing": "west" }, { "x": 2, "y": 7, "facing": "east" },
-            { "x": 3, "y": 7, "facing": "north" }, { "x": 4, "y": 7, "facing": "west" },
-            { "x": 5, "y": 7, "facing": "west" }, { "x": 2, "y": 8, "facing": "north" },
-            { "x": 3, "y": 8, "facing": "north" }, { "x": 4, "y": 8, "facing": "north" },
-            { "x": 5, "y": 8, "facing": "west" }, { "x": 2, "y": 9, "facing": "north" },
-            { "x": 3, "y": 9, "facing": "north" }, { "x": 4, "y": 9, "facing": "north" },
-            { "x": 5, "y": 9, "facing": "north" }
-          ] }
       ]
     },
     {

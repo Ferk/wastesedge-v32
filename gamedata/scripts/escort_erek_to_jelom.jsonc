@@ -2,8 +2,10 @@
   "id": "escort_erek_to_jelom",
   "actions": [
     { "op": "change_scene", "scene": "redwyne_first_floor", "spawn": "jelom_evidence" },
-    { "op": "start_schedule", "entity": "erek", "schedule": "erek_jelom_evidence" },
-    { "op": "start_schedule", "entity": "jelom", "schedule": "jelom_evidence" },
+    { "op": "place_actor", "entity": "erek", "scene": "redwyne_first_floor",
+      "x": 2, "y": 4, "facing": "north" },
+    { "op": "place_actor", "entity": "jelom", "scene": "redwyne_first_floor",
+      "x": 2, "y": 3, "facing": "south" },
     { "op": "wait", "frames": 1 },
     { "op": "show_dialogue", "dialogue": "jelom_2nd" }
   ]

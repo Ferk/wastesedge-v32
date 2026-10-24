@@ -4,7 +4,8 @@
     { "op": "stop_schedule", "entity": "oliver" },
     { "op": "set_entity_dialogue", "entity": "oliver", "dialogue": "oliver_room" },
     { "op": "change_scene", "scene": "redwyne_player_room", "spawn": "orloth_escort" },
-    { "op": "start_schedule", "entity": "oliver", "schedule": "oliver_player_room" },
+    { "op": "place_actor", "entity": "oliver", "scene": "redwyne_player_room",
+      "x": 5, "y": 4, "facing": "north" },
     { "op": "wait", "frames": 1 },
     { "op": "show_dialogue", "dialogue": "oliver_room" }
   ]

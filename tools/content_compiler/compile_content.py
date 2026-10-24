@@ -726,7 +726,8 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
     allowed = {"set", "set_control", "set_entity_state", "set_walkability", "show_dialogue", "speak",
                "change_scene", "move_entity", "wait", "play_music",
                "start_schedule", "stop_schedule", "set_entity_dialogue",
-               "set_actor_visual", "save_actor_state", "wait_schedule", "face"}
+               "set_actor_visual", "save_actor_state", "wait_schedule", "face",
+               "place_actor", "place_actor_random"}
     for path in paths:
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
@@ -748,12 +749,14 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                 raise ContentError(f"{path}: unknown music track {action.get('track')!r}")
             if operation in {"set_entity_state", "move_entity", "start_schedule",
                              "stop_schedule", "set_entity_dialogue", "set_actor_visual",
-                             "save_actor_state", "wait_schedule", "face"}:
+                             "save_actor_state", "wait_schedule", "face",
+                             "place_actor", "place_actor_random"}:
                 entity_id = identifier(action.get("entity"), f"{path} entity")
                 if entity_id not in entities:
                     raise ContentError(f"{path}: unknown entity {entity_id!r}")
                 if operation in {"set_entity_dialogue", "set_actor_visual",
-                                 "save_actor_state", "wait_schedule", "face"} and \
+                                 "save_actor_state", "wait_schedule", "face",
+                                 "place_actor", "place_actor_random"} and \
                         entities[entity_id]["kind"] != "actor":
                     raise ContentError(f"{path}: {operation} requires an actor entity")
                 if operation == "set_entity_state":
@@ -770,6 +773,37 @@ def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
                     facing = identifier(action.get("facing"), f"{path} face facing")
                     if facing not in {"north", "south", "west", "east"}:
                         raise ContentError(f"{path}: unsupported face direction {facing!r}")
+                elif operation == "place_actor":
+                    identifier(action.get("scene"), f"{path} place_actor scene")
+                    integer(action.get("x"), f"{path} place_actor x")
+                    integer(action.get("y"), f"{path} place_actor y")
+                    facing = identifier(action.get("facing"), f"{path} place_actor facing")
+                    if facing not in {"north", "south", "west", "east"}:
+                        raise ContentError(f"{path}: unsupported place_actor facing {facing!r}")
+                elif operation == "place_actor_random":
+                    identifier(action.get("scene"), f"{path} place_actor_random scene")
+                    positions = expect(
+                        action.get("positions"), list,
+                        f"{path} place_actor_random positions")
+                    if not positions:
+                        raise ContentError(
+                            f"{path}: place_actor_random needs at least one position")
+                    for position_number, raw_position in enumerate(positions):
+                        position = expect(
+                            raw_position, dict,
+                            f"{path} place_actor_random position {position_number}")
+                        integer(
+                            position.get("x"),
+                            f"{path} place_actor_random position {position_number} x")
+                        integer(
+                            position.get("y"),
+                            f"{path} place_actor_random position {position_number} y")
+                        facing = identifier(
+                            position.get("facing"),
+                            f"{path} place_actor_random position {position_number} facing")
+                        if facing not in {"north", "south", "west", "east"}:
+                            raise ContentError(
+                                f"{path}: unsupported place_actor_random facing {facing!r}")
                 elif operation == "start_schedule":
                     schedule_id = identifier(action.get("schedule"), f"{path} schedule")
                     if schedule_id not in schedules:
@@ -2446,6 +2480,8 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         "save_actor_state": 14,
         "wait_schedule": 15,
         "face": 16,
+        "place_actor": 17,
+        "place_actor_random": 18,
     }
     facing_index = {"north": 0, "south": 1, "west": 2, "east": 3}
     entity_index = {entity_id: index for index, entity_id in enumerate(sorted(entity_definitions))}
@@ -2459,6 +2495,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
         document = expect(load_jsonc(path), dict, str(path))
         script_id = identifier(document.get("id"), f"{path} script id")
         actions: list[tuple[int, int, int, int, int]] = []
+        positions: list[tuple[int, int, int, int]] = []
         speech_lines: list[str] = []
         for raw_action in expect(document.get("actions"), list, f"{path}.actions"):
             action = expect(raw_action, dict, f"{path} action")
@@ -2536,10 +2573,47 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
             elif operation == "face":
                 a = entity_index[identifier(action.get("entity"), f"{path} entity")]
                 b = facing_index[identifier(action.get("facing"), f"{path} face facing")]
+            elif operation in {"place_actor", "place_actor_random"}:
+                entity_id = identifier(action.get("entity"), f"{path} entity")
+                scene_id = identifier(action.get("scene"), f"{path} placement scene")
+                if scene_id not in scene_index:
+                    raise ContentError(
+                        f"{path}: {operation} refers to unknown scene {scene_id!r}")
+                scene = scenes[scene_index[scene_id]]
+                authored_positions = ([action] if operation == "place_actor" else
+                                      expect(action.get("positions"), list,
+                                             f"{path} place_actor_random positions"))
+                compiled_positions: list[tuple[int, int, int, int]] = []
+                for position_number, raw_position in enumerate(authored_positions):
+                    position = expect(
+                        raw_position, dict,
+                        f"{path} {operation} position {position_number}")
+                    x = integer(position.get("x"), f"{path} {operation} x")
+                    y = integer(position.get("y"), f"{path} {operation} y")
+                    if x < 0 or y < 0 or x >= int(scene["width"]) or y >= int(scene["height"]):
+                        raise ContentError(
+                            f"{path}: {operation} position ({x}, {y}) is outside "
+                            f"scene {scene_id!r}")
+                    facing = identifier(
+                        position.get("facing"), f"{path} {operation} facing")
+                    compiled_positions.append(
+                        (scene_index[scene_id], x, y, facing_index[facing]))
+                first_position = -1
+                for candidate in range(len(positions) - len(compiled_positions) + 1):
+                    if positions[candidate:candidate + len(compiled_positions)] == compiled_positions:
+                        first_position = candidate
+                        break
+                if first_position < 0:
+                    first_position = len(positions)
+                    positions.extend(compiled_positions)
+                a = entity_index[entity_id]
+                b = first_position
+                c = len(authored_positions)
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
             "id": script_id,
             "actions": actions,
+            "positions": positions,
             "speech": None if not speech_lines else {"lines": speech_lines},
         })
     scripts.sort(key=lambda item: str(item["id"]))
@@ -3328,17 +3402,17 @@ struct generated_runtime_hotspot { int x, y, width, height, script, facing, prio
 struct generated_runtime_music { int sound, loop; float speed, volume; };
 struct generated_runtime_text { const int *glyphs; int glyph_count; };
 struct generated_runtime_script_action { int op, a, b, c, d; };
+struct generated_runtime_actor_position { int scene, x, y, facing; };
 struct generated_runtime_script {
     const struct generated_runtime_script_action *actions;
     const struct generated_runtime_text *speech;
     int action_count, speech_count;
 };
 struct generated_runtime_schedule_step { int op, scene, x, y, facing, delay_min, delay_max, target, value; };
-struct generated_runtime_schedule_position { int scene, x, y, facing; };
 struct generated_runtime_schedule {
     const struct generated_runtime_schedule_step *steps;
     const int *branches;
-    const struct generated_runtime_schedule_position *positions;
+    const struct generated_runtime_actor_position *positions;
     const struct generated_runtime_text *speech;
     int step_count, branch_count, position_count, entity, loop, next_schedule;
     int speech_count, ambient_speech_count;
@@ -3430,6 +3504,8 @@ extern const struct generated_runtime_object_visual generated_runtime_object_vis
 extern const int generated_runtime_object_visual_count;
 extern const struct generated_runtime_script generated_runtime_scripts[];
 extern const int generated_runtime_script_count;
+extern const struct generated_runtime_actor_position generated_runtime_script_positions[];
+extern const int generated_runtime_script_position_count;
 extern const struct generated_runtime_schedule generated_runtime_schedules[];
 extern const int generated_runtime_schedule_count;
 extern const struct generated_runtime_music generated_runtime_music[];
@@ -3478,6 +3554,8 @@ extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_SCRIPT_SAVE_ACTOR_STATE 14
 #define GENERATED_SCRIPT_WAIT_SCHEDULE 15
 #define GENERATED_SCRIPT_FACE 16
+#define GENERATED_SCRIPT_PLACE_ACTOR 17
+#define GENERATED_SCRIPT_PLACE_ACTOR_RANDOM 18
 #define GENERATED_SCHEDULE_MOVE 0
 #define GENERATED_SCHEDULE_PLACE 1
 #define GENERATED_SCHEDULE_WAIT 2
@@ -3645,6 +3723,33 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             f"{cycle_delay} }},")
     lines.append("};")
     lines.append(f"const int generated_runtime_object_visual_count = {len(object_visuals)};\n")
+    script_position_offsets: list[int] = []
+    shared_script_positions: list[tuple[int, int, int, int]] = []
+    for script in scripts:
+        script_positions = list(script["positions"])
+        position_offset = -1
+        for candidate in range(len(shared_script_positions) - len(script_positions) + 1):
+            if shared_script_positions[candidate:candidate + len(script_positions)] == script_positions:
+                position_offset = candidate
+                break
+        if position_offset < 0:
+            position_offset = len(shared_script_positions)
+            shared_script_positions.extend(script_positions)
+        script_position_offsets.append(position_offset)
+    if shared_script_positions:
+        lines.append(
+            "const struct generated_runtime_actor_position "
+            "generated_runtime_script_positions[] = {")
+        lines.extend("    { %d, %d, %d, %d }," % position
+                     for position in shared_script_positions)
+        lines.append("};")
+    else:
+        lines.append(
+            "const struct generated_runtime_actor_position "
+            "generated_runtime_script_positions[1] = { { 0, 0, 0, 0 } };")
+    lines.append(
+        f"const int generated_runtime_script_position_count = "
+        f"{len(shared_script_positions)};\n")
     for index, script in enumerate(scripts):
         speech = script.get("speech")
         if speech is not None:
@@ -3658,7 +3763,13 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                     f"    {{ generated_runtime_script_speech_glyphs_{index}_{line_index}, {len(line_glyphs)} }},")
             lines.append("};")
         lines.append(f"static const struct generated_runtime_script_action generated_runtime_script_actions_{index}[] = {{")
-        lines.extend("    { %d, %d, %d, %d, %d }," % action for action in script["actions"])
+        for action in script["actions"]:
+            emitted_action = action
+            if action[0] in (17, 18):
+                emitted_action = (action[0], action[1],
+                                  action[2] + script_position_offsets[index],
+                                  action[3], action[4])
+            lines.append("    { %d, %d, %d, %d, %d }," % emitted_action)
         lines.append("};")
     lines.append("const struct generated_runtime_script generated_runtime_scripts[] = {")
     for index, script in enumerate(scripts):
@@ -3680,7 +3791,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                          ", ".join(str(branch) for branch in schedule["branches"]) + " };")
         if schedule["positions"]:
             lines.append(
-                f"static const struct generated_runtime_schedule_position "
+                f"static const struct generated_runtime_actor_position "
                 f"generated_runtime_schedule_positions_{index}[] = {{")
             lines.extend("    { %d, %d, %d, %d }," % position
                          for position in schedule["positions"])

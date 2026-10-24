@@ -832,6 +832,100 @@ static void face_actor(struct world_state *world, int definition, int facing)
     ++world->visual_revision;
 }
 
+/* Stop an actor's route and discard movement and ambient-speech progress. */
+static void stop_actor_schedule(struct world_state *world, int definition)
+{
+    struct world_actor_state *actor;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT)
+        return;
+    actor = &world->actors[definition];
+    if (actor->moving || actor->speech_line >= 0)
+        ++world->visual_revision;
+    actor->schedule = -1;
+    actor->moving = 0;
+    actor->move_progress = 0;
+    actor->path_schedule_step = -1;
+    actor->path_scene = -1;
+    actor->path_length = 0;
+    actor->path_index = 0;
+    actor->speech_line = -1;
+    actor->speech_wait = 0;
+    actor->speech_frames = 0;
+    actor->speech_override = 0;
+}
+
+/* Place one actor instantly; scripts cancel its old schedule while schedule
+ * steps retain their own route until that step has been completed. */
+static int place_actor_immediately(
+    struct world_state *world, int definition,
+    const struct generated_runtime_actor_position *position,
+    int cancel_schedule)
+{
+    struct world_actor_state *actor;
+    if (definition < 0 || definition >= GENERATED_RUNTIME_ENTITY_COUNT ||
+        position == 0 || position->scene < 0 ||
+        position->scene >= generated_runtime_scene_count)
+        return 0;
+    if (definition == player_definition(world) && position->scene != world->scene_index)
+        return 0;
+    if (cancel_schedule)
+        stop_actor_schedule(world, definition);
+    actor = &world->actors[definition];
+    if (definition == player_definition(world)) {
+        world->player_x = position->x;
+        world->player_y = position->y;
+        world->player_facing = position->facing;
+        world->moving = 0;
+        world->move_progress = 0;
+    }
+    else {
+        actor->scene = position->scene;
+        actor->x = position->x;
+        actor->y = position->y;
+        actor->facing = position->facing;
+        actor->moving = 0;
+        actor->move_progress = 0;
+    }
+    ++world->visual_revision;
+    return 1;
+}
+
+/* Choose one walkable, currently unoccupied placement from a position list. */
+static const struct generated_runtime_actor_position *select_actor_position(
+    struct world_state *world, int definition,
+    const struct generated_runtime_actor_position *positions, int position_count)
+{
+    int index;
+    int free_count = 0;
+    int selected;
+    if (positions == 0 || position_count <= 0)
+        return 0;
+    for (index = 0; index < position_count; ++index) {
+        const struct generated_runtime_actor_position *candidate = &positions[index];
+        if (candidate->scene >= 0 && candidate->scene < generated_runtime_scene_count &&
+            path_tile_can_be_used(&generated_runtime_scenes[candidate->scene],
+                                  candidate->x, candidate->y) &&
+            !actor_anchor_blocked(world, definition, candidate->scene,
+                                  candidate->x, candidate->y))
+            ++free_count;
+    }
+    if (free_count == 0)
+        return 0;
+    selected = schedule_random_delay(world, 0, free_count - 1);
+    for (index = 0; index < position_count; ++index) {
+        const struct generated_runtime_actor_position *candidate = &positions[index];
+        if (candidate->scene < 0 || candidate->scene >= generated_runtime_scene_count ||
+            !path_tile_can_be_used(&generated_runtime_scenes[candidate->scene],
+                                   candidate->x, candidate->y) ||
+            actor_anchor_blocked(world, definition, candidate->scene,
+                                 candidate->x, candidate->y))
+            continue;
+        if (selected-- == 0)
+            return candidate;
+    }
+    return 0;
+}
+
 static void finish_schedule_step(struct world_state *world, int definition,
                                  const struct generated_runtime_schedule_step *step)
 {
@@ -949,71 +1043,27 @@ static void update_actor_schedule(struct world_state *world, int definition)
         return;
     }
     if (step->op == GENERATED_SCHEDULE_PLACE_RANDOM) {
-        int index;
-        int free_count = 0;
-        int selected;
-        const struct generated_runtime_schedule_position *position = 0;
+        const struct generated_runtime_actor_position *position;
         if (step->target < 0 || step->value <= 0 ||
             step->target + step->value > schedule->position_count) {
             actor->schedule = -1;
             return;
         }
-        for (index = 0; index < step->value; ++index) {
-            const struct generated_runtime_schedule_position *candidate =
-                &schedule->positions[step->target + index];
-            if (candidate->scene >= 0 && candidate->scene < generated_runtime_scene_count &&
-                path_tile_can_be_used(&generated_runtime_scenes[candidate->scene],
-                                      candidate->x, candidate->y) &&
-                !actor_anchor_blocked(world, definition, candidate->scene,
-                                      candidate->x, candidate->y))
-                ++free_count;
-        }
-        if (free_count == 0)
-            return;
-        selected = schedule_random_delay(world, 0, free_count - 1);
-        for (index = 0; index < step->value; ++index) {
-            const struct generated_runtime_schedule_position *candidate =
-                &schedule->positions[step->target + index];
-            if (candidate->scene < 0 || candidate->scene >= generated_runtime_scene_count ||
-                !path_tile_can_be_used(&generated_runtime_scenes[candidate->scene],
-                                       candidate->x, candidate->y) ||
-                actor_anchor_blocked(world, definition, candidate->scene,
-                                     candidate->x, candidate->y))
-                continue;
-            if (selected-- == 0) {
-                position = candidate;
-                break;
-            }
-        }
+        position = select_actor_position(
+            world, definition, &schedule->positions[step->target], step->value);
         if (position == 0)
             return;
-        if (definition == player_definition(world)) {
-            if (position->scene != world->scene_index)
-                return;
-            world->player_x = position->x;
-            world->player_y = position->y;
-            world->player_facing = position->facing;
-            world->moving = 0;
-            world->move_progress = 0;
-        }
-        else {
-            actor->scene = position->scene;
-            actor->x = position->x;
-            actor->y = position->y;
-            actor->facing = position->facing;
-            actor->move_progress = 0;
-        }
-        ++world->visual_revision;
+        if (!place_actor_immediately(world, definition, position, 0))
+            return;
         finish_schedule_step(world, definition, step);
         return;
     }
     if (step->op == GENERATED_SCHEDULE_PLACE) {
-        actor->scene = step->scene;
-        actor->x = step->x;
-        actor->y = step->y;
-        actor->facing = step->facing;
-        actor->move_progress = 0;
-        ++world->visual_revision;
+        const struct generated_runtime_actor_position position = {
+            step->scene, step->x, step->y, step->facing
+        };
+        if (!place_actor_immediately(world, definition, &position, 0))
+            return;
         finish_schedule_step(world, definition, step);
         return;
     }
@@ -1281,23 +1331,26 @@ static void update_script(struct world_state *world)
             ++world->script_action;
             continue;
         }
-        if (action->op == GENERATED_SCRIPT_STOP_SCHEDULE) {
-            if (action->a >= 0 && action->a < GENERATED_RUNTIME_ENTITY_COUNT) {
-                if (world->actors[action->a].moving ||
-                    world->actors[action->a].speech_line >= 0)
-                    ++world->visual_revision;
-                world->actors[action->a].schedule = -1;
-                world->actors[action->a].moving = 0;
-                world->actors[action->a].move_progress = 0;
-                world->actors[action->a].path_schedule_step = -1;
-                world->actors[action->a].path_scene = -1;
-                world->actors[action->a].path_length = 0;
-                world->actors[action->a].path_index = 0;
-                world->actors[action->a].speech_line = -1;
-                world->actors[action->a].speech_wait = 0;
-                world->actors[action->a].speech_frames = 0;
-                world->actors[action->a].speech_override = 0;
+        if (action->op == GENERATED_SCRIPT_PLACE_ACTOR ||
+            action->op == GENERATED_SCRIPT_PLACE_ACTOR_RANDOM) {
+            const struct generated_runtime_actor_position *position = 0;
+            if (action->b >= 0 && action->c > 0 &&
+                action->b + action->c <= generated_runtime_script_position_count) {
+                if (action->op == GENERATED_SCRIPT_PLACE_ACTOR)
+                    position = &generated_runtime_script_positions[action->b];
+                else
+                    position = select_actor_position(
+                        world, action->a,
+                        &generated_runtime_script_positions[action->b], action->c);
             }
+            if (position == 0 ||
+                !place_actor_immediately(world, action->a, position, 1))
+                return;
+            ++world->script_action;
+            continue;
+        }
+        if (action->op == GENERATED_SCRIPT_STOP_SCHEDULE) {
+            stop_actor_schedule(world, action->a);
             ++world->script_action;
             continue;
         }
