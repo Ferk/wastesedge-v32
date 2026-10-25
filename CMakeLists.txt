@@ -43,6 +43,7 @@ file(GLOB_RECURSE gamedata_inputs CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/schedules/*"
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/scripts/*"
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/tilesets/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/translations/*"
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/ui/*"
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/manifest.jsonc")
 execute_process(

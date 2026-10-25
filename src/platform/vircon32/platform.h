@@ -38,11 +38,14 @@ void platform_render_world(const struct world_state *world);
 void platform_begin_menu(void);
 void platform_invalidate_world(void);
 void platform_render_title_menu(int selected, int storage_result);
+void platform_render_language_menu(int selected);
 void platform_render_pause_menu(int selected, int storage_result);
 void platform_render_slot_menu(int from_title, int saving, int selected,
                                const int slot_states[PLATFORM_SAVE_SLOT_COUNT],
                                int storage_result);
 int platform_query_save_slots(int slot_states[PLATFORM_SAVE_SLOT_COUNT]);
+int platform_load_language(void);
+int platform_store_language(int language);
 int platform_save_slot(const struct world_state *world, int slot);
 int platform_load_slot(struct world_state *world, int slot);
 void platform_present(void);

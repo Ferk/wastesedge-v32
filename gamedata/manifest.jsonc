@@ -7,6 +7,44 @@
   "new_game_cutscene": "intro_cutscene",
   "game_title": "Waste's Edge",
   "font": "ui/font.jsonc",
+  "languages": [
+    { "id": "en", "name": "English" },
+    { "id": "da", "name": "Dansk", "catalog": "translations/da.po" },
+    { "id": "es", "name": "Español", "catalog": "translations/es.po" },
+    { "id": "fr", "name": "Français", "catalog": "translations/fr.po" },
+    { "id": "it", "name": "Italiano", "catalog": "translations/it.po" },
+    { "id": "nl", "name": "Nederlands", "catalog": "translations/nl.po" },
+    { "id": "pt_br", "name": "Português do Brasil", "catalog": "translations/pt_BR.po" },
+    { "id": "sv", "name": "Svenska", "catalog": "translations/sv.po" }
+  ],
+  "translation_variables": {
+    "$name": "Banec"
+  },
+  "translation_variants": {
+    "fm": 1
+  },
+  "ui_text": {
+    "new_game": "New Game",
+    "load_game": "Load Game",
+    "language": "Language",
+    "select_language": "Select Language",
+    "game_paused": "Game Paused",
+    "continue": "Continue",
+    "save_game": "Save Game",
+    "back_to_title": "Back to Title",
+    "no_memory_card": "No Memory Card",
+    "foreign_card": "Card Belongs to Another Game",
+    "empty_slot": "Empty Slot",
+    "corrupt_save": "Save Data Is Corrupt",
+    "incompatible_save": "Save Is from Another Build",
+    "save_failed": "Could Not Save Game",
+    "game_saved": "Game Saved",
+    "error": "Error",
+    "empty": "Empty",
+    "incompatible": "Incompatible Save",
+    "day": "Day",
+    "slot": "Slot"
+  },
   "title_music": "title_theme",
   "ui_sounds": {
     "move": "ui_switch",

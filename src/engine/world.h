@@ -166,6 +166,12 @@ const struct generated_runtime_frame *world_scenery_frame(
     const struct world_state *world,
     const struct generated_runtime_scenery *scenery);
 int world_dialogue_is_open(const struct world_state *world);
+void world_set_language(int language);
+int world_language(void);
+const struct generated_runtime_text *world_localized_text(
+    const struct generated_runtime_text *text);
+const struct generated_runtime_text *world_ui_text(int role);
+const struct generated_runtime_text *world_language_name(int language);
 const char *world_dialogue_text(const struct world_state *world);
 const char *world_dialogue_choice_text(const struct world_state *world);
 const char *world_dialogue_choice_at(const struct world_state *world, int index);

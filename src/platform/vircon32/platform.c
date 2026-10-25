@@ -35,6 +35,10 @@
 #define UI_SOUND_CHANNEL 1
 #define SAVE_SLOT_STRIDE 1024
 #define SAVE_SLOT_HEADER_WORDS 8
+#define LANGUAGE_SETTING_OFFSET \
+    (game_signature_words + PLATFORM_SAVE_SLOT_COUNT * SAVE_SLOT_STRIDE)
+#define LANGUAGE_SETTING_MAGIC 0x57454C47u
+#define LANGUAGE_SETTING_VERSION 1
 #define SAVE_PREVIEW_TILES 6
 #define SAVE_PREVIEW_SIZE 60
 #define WALK_ANIMATION_SLOWDOWN 2
@@ -477,7 +481,8 @@ static void record_dialogue_panel(const struct world_state *world)
     }
     if (speaker != 0)
         record_runtime_text(text_x, dialog_y + 16, text_width, dialog_y + 42,
-                            &speaker->name_text, COLOR_ACCENT_GOLD);
+                            world_localized_text(&speaker->name_text),
+                            COLOR_ACCENT_GOLD);
     record_runtime_text(text_x, dialog_y + 44, text_width,
                         choice_count > 0 ? choice_view_top - 6
                                          : dialog_y + dialog_height - 10,
@@ -1040,7 +1045,8 @@ static int advance_cinematic_node(void)
         if (next->cutscene_finish_ranges &&
             cinematic_range_frames_remaining(dialogue, cinematic_node) > 0) {
             cinematic_pending_node = node->next_node;
-            cinematic_visible_glyphs = node->display.glyph_count;
+            cinematic_visible_glyphs =
+                world_localized_text(&node->display)->glyph_count;
             return 0;
         }
         enter_cinematic_node(node->next_node);
@@ -1108,7 +1114,7 @@ int platform_update_cutscene(const struct world_actions *actions)
         return 1;
     dialogue = &generated_runtime_dialogues[cinematic_dialogue];
     node = &dialogue->nodes[cinematic_node];
-    text = &node->display;
+    text = world_localized_text(&node->display);
     if (actions->cancel_pressed || actions->menu_pressed) {
         cinematic_dialogue = -1;
         cinematic_pending_node = -1;
@@ -1452,7 +1458,8 @@ static void record_cutscene_text(const struct generated_runtime_dialogue *dialog
                                  int visible_glyphs)
 {
     const struct generated_runtime_dialogue_node *node = &dialogue->nodes[node_index];
-    const struct generated_runtime_text *text = &node->display;
+    const struct generated_runtime_text *text =
+        world_localized_text(&node->display);
     const struct generated_runtime_dialogue_speaker *speaker =
         &dialogue->speakers[node->speaker];
     unsigned int color = speaker->speech_color;
@@ -1694,6 +1701,66 @@ static int storage_card_status(void)
         return PLATFORM_STORAGE_OK;
     if (!card_signature_matches(&game_card_signature))
         return PLATFORM_STORAGE_FOREIGN_CARD;
+    return PLATFORM_STORAGE_OK;
+}
+
+/* Match the stable game-name portion while ignoring the save-format word. */
+static int storage_card_game_matches(void)
+{
+    int index;
+    for (index = 0; index < game_signature_words - 1; ++index)
+        if (card_read_word(index) != game_card_signature[index])
+            return 0;
+    return 1;
+}
+
+/* Read the global language preference stored after the four save slots. */
+int platform_load_language(void)
+{
+    unsigned int checksum;
+    int language;
+    if (!card_is_connected() || card_is_empty() ||
+        !storage_card_game_matches())
+        return 0;
+    if ((unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET) !=
+            LANGUAGE_SETTING_MAGIC ||
+        card_read_word(LANGUAGE_SETTING_OFFSET + 1) !=
+            LANGUAGE_SETTING_VERSION)
+        return 0;
+    language = card_read_word(LANGUAGE_SETTING_OFFSET + 2);
+    checksum = LANGUAGE_SETTING_MAGIC ^ LANGUAGE_SETTING_VERSION ^
+               (unsigned int)language;
+    if ((unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET + 3) != checksum ||
+        language < 0 || language >= generated_runtime_language_count)
+        return 0;
+    return language;
+}
+
+/* Persist a global language preference independently of save-slot versions. */
+int platform_store_language(int language)
+{
+    unsigned int checksum;
+    if (language < 0 || language >= generated_runtime_language_count)
+        return PLATFORM_STORAGE_WRITE_FAILED;
+    if (!card_is_connected())
+        return PLATFORM_STORAGE_NO_CARD;
+    if (card_is_empty()) {
+        card_write_signature(&game_card_signature);
+        if (!card_signature_matches(&game_card_signature))
+            return PLATFORM_STORAGE_WRITE_FAILED;
+    } else if (!storage_card_game_matches())
+        return PLATFORM_STORAGE_FOREIGN_CARD;
+    checksum = LANGUAGE_SETTING_MAGIC ^ LANGUAGE_SETTING_VERSION ^
+               (unsigned int)language;
+    card_write_word(LANGUAGE_SETTING_OFFSET, 0);
+    card_write_word(LANGUAGE_SETTING_OFFSET + 1, LANGUAGE_SETTING_VERSION);
+    card_write_word(LANGUAGE_SETTING_OFFSET + 2, language);
+    card_write_word(LANGUAGE_SETTING_OFFSET + 3, (int)checksum);
+    card_write_word(LANGUAGE_SETTING_OFFSET, (int)LANGUAGE_SETTING_MAGIC);
+    if ((unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET) !=
+            LANGUAGE_SETTING_MAGIC ||
+        (unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET + 3) != checksum)
+        return PLATFORM_STORAGE_WRITE_FAILED;
     return PLATFORM_STORAGE_OK;
 }
 
@@ -1967,16 +2034,72 @@ static void draw_direct_text_centered(int y, const char *text, int color)
     print_at((DISPLAY_WIDTH - width) / 2, y, text);
 }
 
-static const char *storage_message(int result)
+/* Measure one unwrapped compiled text line for menu centering. */
+static int direct_runtime_text_width(const struct generated_runtime_text *text)
 {
-    if (result == PLATFORM_STORAGE_NO_CARD) return "NO MEMORY CARD";
-    if (result == PLATFORM_STORAGE_FOREIGN_CARD) return "CARD BELONGS TO ANOTHER GAME";
-    if (result == PLATFORM_STORAGE_EMPTY_SLOT) return "EMPTY SLOT";
-    if (result == PLATFORM_STORAGE_CORRUPT_SLOT) return "SAVE DATA IS CORRUPT";
-    if (result == PLATFORM_STORAGE_INCOMPATIBLE_SAVE) return "SAVE IS FROM ANOTHER BUILD";
-    if (result == PLATFORM_STORAGE_WRITE_FAILED) return "COULD NOT SAVE GAME";
-    if (result == PLATFORM_STORAGE_SAVED) return "GAME SAVED";
-    return "";
+    int width = 0;
+    int index;
+    if (text == 0)
+        return 0;
+    for (index = 0; index < text->glyph_count; ++index) {
+        int glyph = text->glyphs[index];
+        if (glyph == -2)
+            break;
+        width += glyph < 0 ? generated_runtime_space_advance
+                           : generated_runtime_glyphs[glyph].advance;
+    }
+    return width;
+}
+
+/* Draw one compiled text line immediately, outside the world display list. */
+static void draw_direct_runtime_text(int x, int y,
+                                     const struct generated_runtime_text *text,
+                                     int color)
+{
+    int index;
+    if (text == 0)
+        return;
+    set_drawing_scale(1.0f, 1.0f);
+    set_multiply_color(color);
+    for (index = 0; index < text->glyph_count; ++index) {
+        int glyph_index = text->glyphs[index];
+        const struct generated_runtime_glyph *glyph;
+        if (glyph_index == -2)
+            break;
+        if (glyph_index < 0) {
+            x += generated_runtime_space_advance;
+            continue;
+        }
+        glyph = &generated_runtime_glyphs[glyph_index];
+        select_texture(glyph->texture);
+        select_region(LAST_GLYPH_REGION - glyph_index);
+        set_drawing_point(x, y);
+        draw_region_zoomed();
+        x += glyph->advance;
+    }
+    set_multiply_color(COLOR_WHITE);
+}
+
+/* Draw one compiled text line centered on the display. */
+static void draw_direct_runtime_text_centered(
+    int y, const struct generated_runtime_text *text, int color)
+{
+    draw_direct_runtime_text(
+        (DISPLAY_WIDTH - direct_runtime_text_width(text)) / 2, y, text, color);
+}
+
+/* Map storage results onto localized UI message roles. */
+static int storage_message(int result)
+{
+    if (result == PLATFORM_STORAGE_NO_CARD) return GENERATED_UI_TEXT_NO_MEMORY_CARD;
+    if (result == PLATFORM_STORAGE_FOREIGN_CARD) return GENERATED_UI_TEXT_FOREIGN_CARD;
+    if (result == PLATFORM_STORAGE_EMPTY_SLOT) return GENERATED_UI_TEXT_EMPTY_SLOT;
+    if (result == PLATFORM_STORAGE_CORRUPT_SLOT) return GENERATED_UI_TEXT_CORRUPT_SAVE;
+    if (result == PLATFORM_STORAGE_INCOMPATIBLE_SAVE)
+        return GENERATED_UI_TEXT_INCOMPATIBLE_SAVE;
+    if (result == PLATFORM_STORAGE_WRITE_FAILED) return GENERATED_UI_TEXT_SAVE_FAILED;
+    if (result == PLATFORM_STORAGE_SAVED) return GENERATED_UI_TEXT_GAME_SAVED;
+    return -1;
 }
 
 static void draw_title_background(void)
@@ -2020,20 +2143,22 @@ static void draw_menu_panel(void)
     draw_direct_rectangle(112, 32, 416, 296, COLOR_PANEL_BACKGROUND);
 }
 
-static void draw_menu_option(int y, const char *text, int selected)
+static void draw_menu_option(int y, const struct generated_runtime_text *text,
+                             int selected)
 {
     if (selected)
         draw_direct_rectangle(174, y - 4, 292, 28, COLOR_MENU_SELECTION);
-    draw_direct_text_centered(y, text, selected ? COLOR_ACCENT_GOLD : COLOR_WHITE);
+    draw_direct_runtime_text_centered(
+        y, text, selected ? COLOR_ACCENT_GOLD : COLOR_WHITE);
 }
 
 static void draw_menu_status(int result)
 {
-    const char *message = storage_message(result);
-    if (message[0] != 0)
-        draw_direct_text_centered(298, message,
-                                  result == PLATFORM_STORAGE_SAVED ?
-                                  COLOR_STATUS_SUCCESS : COLOR_STATUS_INFO);
+    int message = storage_message(result);
+    if (message >= 0)
+        draw_direct_runtime_text_centered(
+            298, world_ui_text(message), result == PLATFORM_STORAGE_SAVED ?
+            COLOR_STATUS_SUCCESS : COLOR_STATUS_INFO);
 }
 
 static void draw_two_digits(int x, int y, unsigned int value)
@@ -2052,7 +2177,8 @@ static void draw_save_time(int x, int y, int game_time)
     unsigned int day = time / (600u * 24u);
     unsigned int hour = (time / 600u) % 24u;
     unsigned int minute = (time / 10u) % 60u;
-    print_at(x, y, "DAY");
+    draw_direct_runtime_text(x, y, world_ui_text(GENERATED_UI_TEXT_DAY),
+                             COLOR_WHITE);
     print_uint_at(x + bios_character_width * 4, y, day);
     print_at(x + bios_character_width * 9, y, "-");
     draw_two_digits(x + bios_character_width * 11, y, hour);
@@ -2110,20 +2236,45 @@ void platform_render_title_menu(int selected, int storage_result)
     draw_title_background();
     draw_title_logo();
     draw_direct_text_centered(96, generated_runtime_game_title, COLOR_ACCENT_GOLD);
-    draw_menu_option(164, "NEW GAME", selected == 0);
-    draw_menu_option(204, "LOAD GAME", selected == 1);
+    draw_menu_option(154, world_ui_text(GENERATED_UI_TEXT_NEW_GAME),
+                     selected == 0);
+    draw_menu_option(194, world_ui_text(GENERATED_UI_TEXT_LOAD_GAME),
+                     selected == 1);
+    draw_menu_option(234, world_ui_text(GENERATED_UI_TEXT_LANGUAGE),
+                     selected == 2);
     draw_menu_status(storage_result);
+    set_multiply_color(COLOR_WHITE);
+}
+
+/* Draw the title-accessible language picker using native language names. */
+void platform_render_language_menu(int selected)
+{
+    int language;
+    draw_title_background();
+    draw_direct_rectangle(108, 18, 424, 324, COLOR_PANEL_BORDER);
+    draw_direct_rectangle(112, 22, 416, 316, COLOR_PANEL_BACKGROUND);
+    draw_direct_runtime_text_centered(
+        34, world_ui_text(GENERATED_UI_TEXT_SELECT_LANGUAGE),
+        COLOR_ACCENT_GOLD);
+    for (language = 0; language < generated_runtime_language_count; ++language)
+        draw_menu_option(68 + language * 33,
+                         world_language_name(language), language == selected);
     set_multiply_color(COLOR_WHITE);
 }
 
 void platform_render_pause_menu(int selected, int storage_result)
 {
     draw_menu_panel();
-    draw_direct_text_centered(58, "GAME PAUSED", COLOR_ACCENT_GOLD);
-    draw_menu_option(112, "CONTINUE", selected == 0);
-    draw_menu_option(152, "SAVE GAME", selected == 1);
-    draw_menu_option(192, "LOAD GAME", selected == 2);
-    draw_menu_option(232, "BACK TO TITLE", selected == 3);
+    draw_direct_runtime_text_centered(
+        58, world_ui_text(GENERATED_UI_TEXT_GAME_PAUSED), COLOR_ACCENT_GOLD);
+    draw_menu_option(112, world_ui_text(GENERATED_UI_TEXT_CONTINUE),
+                     selected == 0);
+    draw_menu_option(152, world_ui_text(GENERATED_UI_TEXT_SAVE_GAME),
+                     selected == 1);
+    draw_menu_option(192, world_ui_text(GENERATED_UI_TEXT_LOAD_GAME),
+                     selected == 2);
+    draw_menu_option(232, world_ui_text(GENERATED_UI_TEXT_BACK_TO_TITLE),
+                     selected == 3);
     draw_menu_status(storage_result);
     set_multiply_color(COLOR_WHITE);
 }
@@ -2133,7 +2284,7 @@ void platform_render_slot_menu(int from_title, int saving, int selected,
                                int storage_result)
 {
     int slot;
-    const char *message;
+    int message;
     if (slot_menu_matches(from_title, saving, selected, slot_states, storage_result))
         return;
     if (from_title)
@@ -2141,7 +2292,10 @@ void platform_render_slot_menu(int from_title, int saving, int selected,
     set_blending_mode(0x20);
     draw_direct_rectangle(36, 6, 568, 348, COLOR_PANEL_BORDER);
     draw_direct_rectangle(40, 10, 560, 340, COLOR_PANEL_BACKGROUND);
-    draw_direct_text_centered(28, saving ? "SAVE GAME" : "LOAD GAME", COLOR_ACCENT_GOLD);
+    draw_direct_runtime_text_centered(
+        28, world_ui_text(saving ? GENERATED_UI_TEXT_SAVE_GAME
+                                  : GENERATED_UI_TEXT_LOAD_GAME),
+        COLOR_ACCENT_GOLD);
     for (slot = 0; slot < PLATFORM_SAVE_SLOT_COUNT; ++slot) {
         int y = 56 + slot * 64;
         int used = slot_states[slot] == PLATFORM_SAVE_SLOT_USED &&
@@ -2158,26 +2312,41 @@ void platform_render_slot_menu(int from_title, int saving, int selected,
         else {
             draw_direct_rectangle(63, y + 1, SAVE_PREVIEW_SIZE,
                                   SAVE_PREVIEW_SIZE, COLOR_SAVE_PREVIEW_BACKGROUND);
-            set_multiply_color(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
-                               COLOR_STATUS_ERROR : COLOR_SLOT_SELECTED_METADATA);
-            print_at(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? 65 : 73,
-                     y + 23,
-                     slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? "ERROR" : "EMPTY");
+            draw_direct_runtime_text(
+                slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ? 65 : 73,
+                y + 23,
+                world_ui_text(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
+                              GENERATED_UI_TEXT_ERROR : GENERATED_UI_TEXT_EMPTY),
+                slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
+                COLOR_STATUS_ERROR : COLOR_SLOT_SELECTED_METADATA);
         }
+        if (used) {
+            set_multiply_color(slot == selected ?
+                               COLOR_SLOT_SELECTED_TEXT : COLOR_WHITE);
+            print_at(138, y + 9, save_slot_previews[slot].scene->display_name);
+        } else {
+            draw_direct_runtime_text(
+                138, y + 9,
+                world_ui_text(slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
+                              GENERATED_UI_TEXT_INCOMPATIBLE :
+                              GENERATED_UI_TEXT_EMPTY_SLOT),
+                slot == selected ? COLOR_SLOT_SELECTED_TEXT : COLOR_WHITE);
+        }
+        draw_direct_runtime_text(508, y + 9,
+                                 world_ui_text(GENERATED_UI_TEXT_SLOT),
+                                 slot == selected ?
+                                 COLOR_SLOT_SELECTED_TEXT : COLOR_WHITE);
         set_multiply_color(slot == selected ? COLOR_SLOT_SELECTED_TEXT : COLOR_WHITE);
-        print_at(138, y + 9, used ? save_slot_previews[slot].scene->display_name :
-                 (slot_states[slot] == PLATFORM_SAVE_SLOT_INVALID ?
-                  "INCOMPATIBLE SAVE" : "EMPTY SLOT"));
-        print_at(508, y + 9, "SLOT");
         print_uint_at(556, y + 9, (unsigned)(slot + 1));
         if (used)
             draw_save_time(138, y + 33, save_slot_previews[slot].game_time);
     }
     message = storage_message(storage_result);
-    if (message[0] != 0)
-        draw_direct_text_centered(330, message,
-                                  storage_result == PLATFORM_STORAGE_SAVED ?
-                                  COLOR_STATUS_SUCCESS : COLOR_STATUS_INFO);
+    if (message >= 0)
+        draw_direct_runtime_text_centered(
+            330, world_ui_text(message),
+            storage_result == PLATFORM_STORAGE_SAVED ?
+            COLOR_STATUS_SUCCESS : COLOR_STATUS_INFO);
     set_multiply_color(COLOR_WHITE);
     set_drawing_scale(1.0f, 1.0f);
     remember_slot_menu(from_title, saving, selected, slot_states, storage_result);

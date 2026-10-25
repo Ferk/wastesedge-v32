@@ -260,6 +260,15 @@ int main(void)
     assert(generated_runtime_space_advance == 4);
     assert(generated_runtime_line_height == 19);
     assert(generated_runtime_glyphs['A'].advance > 0);
+    assert(generated_runtime_language_count == 8);
+    assert(generated_runtime_localized_message_count > 900);
+    assert(world_language() == 0);
+    world_set_language(3);
+    assert(world_language() == 3);
+    assert(world_ui_text(GENERATED_UI_TEXT_NEW_GAME)->glyph_count == 15);
+    assert(world_ui_text(GENERATED_UI_TEXT_NEW_GAME)->glyphs[0] == 'N');
+    assert(world_language_name(3)->glyphs[4] == 0xE7);
+    world_set_language(0);
     assert(generated_runtime_save_magic == 0x57455356);
     assert(generated_runtime_save_signature[19] == 1);
     assert(generated_runtime_title_cutscene == GENERATED_DIALOGUE_TITLE_CUTSCENE);

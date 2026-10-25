@@ -22,7 +22,8 @@ enum application_mode {
     APPLICATION_LOAD_FROM_TITLE = 3,
     APPLICATION_LOAD_FROM_PAUSE = 4,
     APPLICATION_SAVE_FROM_PAUSE = 5,
-    APPLICATION_CUTSCENE = 6
+    APPLICATION_CUTSCENE = 6,
+    APPLICATION_LANGUAGE = 7
 };
 
 static int moved_choice(int current, int movement, int count)
@@ -52,6 +53,7 @@ int main(void)
     int slot_states[PLATFORM_SAVE_SLOT_COUNT];
     int mode = APPLICATION_TITLE;
     int menu_choice = 0;
+    int language_choice = 0;
     int slot_choice = 0;
     int storage_result;
     int simulation_frame;
@@ -60,6 +62,7 @@ int main(void)
 
     world_initialize(&world);
     platform_initialize();
+    world_set_language(platform_load_language());
     platform_play_music_track(generated_runtime_title_music);
     if (generated_runtime_title_cutscene >= 0) {
         int dialogue = generated_runtime_title_cutscene;
@@ -111,7 +114,7 @@ int main(void)
                 }
             }
         } else if (mode == APPLICATION_TITLE) {
-            menu_choice = moved_choice(menu_choice, actions.choice_move, 2);
+            menu_choice = moved_choice(menu_choice, actions.choice_move, 3);
             if (actions.interact_pressed) {
                 platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
                 if (menu_choice == 0) {
@@ -131,11 +134,32 @@ int main(void)
                     } else {
                         mode = APPLICATION_PLAYING;
                     }
-                } else {
+                } else if (menu_choice == 1) {
                     storage_result = platform_query_save_slots(slot_states);
                     slot_choice = 0;
                     mode = APPLICATION_LOAD_FROM_TITLE;
+                } else {
+                    language_choice = world_language();
+                    storage_result = PLATFORM_STORAGE_OK;
+                    mode = APPLICATION_LANGUAGE;
                 }
+            }
+        } else if (mode == APPLICATION_LANGUAGE) {
+            language_choice = moved_choice(
+                language_choice, actions.choice_move,
+                generated_runtime_language_count);
+            if (actions.cancel_pressed || actions.menu_pressed) {
+                platform_play_ui_sound(WORLD_UI_SOUND_CANCEL);
+                menu_choice = 2;
+                mode = APPLICATION_TITLE;
+            } else if (actions.interact_pressed) {
+                platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
+                world_set_language(language_choice);
+                storage_result = platform_store_language(language_choice);
+                platform_invalidate_world();
+                platform_begin_menu();
+                menu_choice = 2;
+                mode = APPLICATION_TITLE;
             }
         } else if (mode == APPLICATION_CUTSCENE) {
             if (platform_update_cutscene(&actions)) {
@@ -233,6 +257,8 @@ int main(void)
             platform_render_cutscene();
         } else if (mode == APPLICATION_TITLE) {
             platform_render_title_menu(menu_choice, storage_result);
+        } else if (mode == APPLICATION_LANGUAGE) {
+            platform_render_language_menu(language_choice);
         } else if (mode == APPLICATION_PAUSED) {
             platform_render_pause_menu(menu_choice, storage_result);
         } else {

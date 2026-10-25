@@ -25,6 +25,16 @@ RUNTIME_ATLAS_PADDING = 1
 RUNTIME_ATLAS_WIDTH_STEP = 16
 RUNTIME_ATLAS_PAGE_PENALTY = 16 * 1024
 
+# Platform menus use stable semantic roles, but their English source strings
+# remain editable game data in the manifest.
+UI_TEXT_ROLES = (
+    "NEW_GAME", "LOAD_GAME", "LANGUAGE", "SELECT_LANGUAGE", "GAME_PAUSED",
+    "CONTINUE", "SAVE_GAME", "BACK_TO_TITLE", "NO_MEMORY_CARD",
+    "FOREIGN_CARD", "EMPTY_SLOT", "CORRUPT_SAVE", "INCOMPATIBLE_SAVE",
+    "SAVE_FAILED", "GAME_SAVED", "ERROR", "EMPTY", "INCOMPATIBLE", "DAY",
+    "SLOT",
+)
+
 
 class ContentError(Exception):
     pass
@@ -82,6 +92,182 @@ def load_jsonc(path: Path) -> object:
         raise ContentError(f"{path}: cannot read file: {error}") from error
     except json.JSONDecodeError as error:
         raise ContentError(f"{path}:{error.lineno}:{error.colno}: {error.msg}") from error
+
+
+def load_po(path: Path) -> dict[str, str]:
+    """Read singular, non-fuzzy translations from one gettext catalog."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        raise ContentError(f"{path}: cannot read catalog: {error}") from error
+
+    translations: dict[str, str] = {}
+    msgid: list[str] = []
+    msgstr: list[str] = []
+    field: list[str] | None = None
+    fuzzy = False
+    plural = False
+
+    def quoted(value: str, line_number: int) -> str:
+        """Decode one PO quoted fragment with JSON-compatible escapes."""
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError as error:
+            raise ContentError(
+                f"{path}:{line_number}: malformed PO string: {error.msg}") from error
+        if not isinstance(decoded, str):
+            raise ContentError(f"{path}:{line_number}: PO fragment must be a string")
+        return decoded
+
+    def finish() -> None:
+        """Commit the current entry unless gettext marks it unusable."""
+        nonlocal msgid, msgstr, field, fuzzy, plural
+        source = "".join(msgid)
+        translated = "".join(msgstr)
+        if source and translated and not fuzzy and not plural:
+            previous = translations.get(source)
+            if previous is not None and previous != translated:
+                raise ContentError(f"{path}: conflicting translations for {source!r}")
+            translations[source] = translated
+        msgid = []
+        msgstr = []
+        field = None
+        fuzzy = False
+        plural = False
+
+    for line_number, line in enumerate(lines, 1):
+        if not line:
+            finish()
+        elif line.startswith("#~"):
+            continue
+        elif line.startswith("#"):
+            if line.startswith("#,") and "fuzzy" in {
+                    flag.strip() for flag in line[2:].split(",")}:
+                fuzzy = True
+        elif line.startswith("msgid "):
+            if msgid or msgstr:
+                finish()
+            msgid = [quoted(line[6:].strip(), line_number)]
+            field = msgid
+        elif line.startswith("msgid_plural "):
+            plural = True
+            field = None
+        elif line.startswith("msgstr "):
+            msgstr = [quoted(line[7:].strip(), line_number)]
+            field = msgstr
+        elif line.startswith("msgstr["):
+            plural = True
+            field = None
+        elif line.startswith("msgctxt "):
+            # The imported catalogs have no contexts. Refuse them explicitly
+            # rather than silently merging distinct gettext entries.
+            context = quoted(line[8:].strip(), line_number)
+            if context:
+                raise ContentError(f"{path}:{line_number}: msgctxt is not supported")
+            field = None
+        elif line.startswith('"'):
+            if field is None:
+                if not plural:
+                    raise ContentError(
+                        f"{path}:{line_number}: PO continuation has no field")
+            else:
+                field.append(quoted(line, line_number))
+        else:
+            raise ContentError(f"{path}:{line_number}: unsupported PO syntax")
+    finish()
+    return translations
+
+
+def collect_languages(manifest: dict[str, object], game_root: Path
+                      ) -> list[dict[str, object]]:
+    """Validate language metadata and load optional gettext catalogs."""
+    definitions = expect(manifest.get("languages"), list, "manifest languages")
+    if not definitions:
+        raise ContentError("manifest languages must contain English")
+    languages: list[dict[str, object]] = []
+    seen: set[str] = set()
+    for index, raw in enumerate(definitions):
+        raw = expect(raw, dict, f"manifest languages[{index}]")
+        language_id = identifier(raw.get("id"), f"manifest languages[{index}] id")
+        if language_id in seen:
+            raise ContentError(f"manifest languages contains duplicate {language_id!r}")
+        seen.add(language_id)
+        name = expect(raw.get("name"), str, f"manifest language {language_id} name")
+        if not name:
+            raise ContentError(f"manifest language {language_id} name cannot be empty")
+        catalog_name = raw.get("catalog")
+        if index == 0:
+            if language_id != "en" or catalog_name is not None:
+                raise ContentError(
+                    "the first manifest language must be builtin English without a catalog")
+            catalog: dict[str, str] = {}
+        else:
+            catalog_path = relative_input(
+                game_root, catalog_name, f"manifest language {language_id} catalog")
+            if catalog_path.suffix != ".po":
+                raise ContentError(
+                    f"manifest language {language_id} catalog must be a .po file")
+            catalog = load_po(catalog_path)
+        languages.append({
+            "id": language_id,
+            "name": name,
+            "catalog": catalog,
+            "matched": 0,
+            "fallback": 0,
+        })
+    return languages
+
+
+def collect_translation_substitutions(
+    manifest: dict[str, object]
+) -> tuple[dict[str, str], dict[str, int]]:
+    """Validate generic gettext variables and slash-separated variants."""
+    raw_variables = expect(manifest.get("translation_variables", {}), dict,
+                           "manifest translation_variables")
+    variables: dict[str, str] = {}
+    for token, value in raw_variables.items():
+        if not isinstance(token, str) or not re.fullmatch(r"\$[A-Za-z][A-Za-z0-9_]*", token):
+            raise ContentError(
+                f"manifest translation variable {token!r} must look like '$name'")
+        value = expect(value, str, f"manifest translation variable {token}")
+        if not value:
+            raise ContentError(f"manifest translation variable {token} cannot be empty")
+        variables[token] = value
+
+    raw_variants = expect(manifest.get("translation_variants", {}), dict,
+                          "manifest translation_variants")
+    variants: dict[str, int] = {}
+    for token, value in raw_variants.items():
+        if not isinstance(token, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", token):
+            raise ContentError(
+                f"manifest translation variant {token!r} must be an identifier")
+        variants[token] = integer(value, f"manifest translation variant {token}")
+        if variants[token] < 0:
+            raise ContentError(
+                f"manifest translation variant {token} cannot be negative")
+    return variables, variants
+
+
+def collect_ui_texts(manifest: dict[str, object]) -> dict[str, str]:
+    """Validate the game-authored source text for every platform UI role."""
+    raw = expect(manifest.get("ui_text"), dict, "manifest ui_text")
+    expected = {role.lower() for role in UI_TEXT_ROLES}
+    unknown = set(raw) - expected
+    missing = expected - set(raw)
+    if unknown:
+        raise ContentError(
+            "manifest ui_text has unsupported roles: " + ", ".join(sorted(unknown)))
+    if missing:
+        raise ContentError(
+            "manifest ui_text is missing roles: " + ", ".join(sorted(missing)))
+    result: dict[str, str] = {}
+    for role in UI_TEXT_ROLES:
+        key = role.lower()
+        value = expect(raw[key], str, f"manifest ui_text {key}")
+        if not value:
+            raise ContentError(f"manifest ui_text {key} cannot be empty")
+        result[role] = value
+    return result
 
 
 def expect(value: object, expected: type, description: str) -> object:
@@ -1743,8 +1929,13 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                                      schedules: list[dict[str, object]],
                                      scripts: list[dict[str, object]], game_root: Path,
                                      output_root: Path,
-                                     definition_path: Path
-                                     ) -> tuple[list[dict[str, object]], int, int]:
+                                     definition_path: Path,
+                                     languages: list[dict[str, object]],
+                                     translation_variables: dict[str, str],
+                                     translation_variants: dict[str, int],
+                                     ui_texts: dict[str, str]
+                                     ) -> tuple[list[dict[str, object]], int, int,
+                                                dict[str, object]]:
     """Load a byte-indexed PNG font and encode authored Unicode as CP-1252."""
     try:
         from PIL import Image
@@ -1867,22 +2058,107 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
             encoded.append(byte)
         return encoded
 
+    def resolve_variables(text: str) -> str:
+        """Resolve manifest-defined variables and indexed text alternatives."""
+        for token, value in translation_variables.items():
+            text = text.replace(token, value)
+
+        def select_variant(match: re.Match[str]) -> str:
+            token = match.group(1)
+            options = match.group(2).split("/")
+            if token not in translation_variants:
+                raise ContentError(
+                    f"translated text uses undefined variant ${token}{{...}}")
+            selected = translation_variants[token]
+            if selected >= len(options):
+                raise ContentError(
+                    f"translation variant {token} selects {selected}, but text has "
+                    f"only {len(options)} alternatives")
+            return options[selected]
+
+        text = re.sub(r"\$([A-Za-z][A-Za-z0-9_]*)\s*\{([^}]*)\}",
+                      select_variant, text)
+        unresolved = re.search(r"\$[A-Za-z][A-Za-z0-9_]*", text)
+        if unresolved:
+            raise ContentError(
+                f"translated text contains unresolved variable {unresolved.group(0)!r}")
+        return text
+
+    messages: list[str] = []
+    message_ids: dict[str, int] = {}
+    localized_glyphs: list[list[list[int]]] = [[] for _ in languages]
+    resolved_catalogs: list[dict[str, str]] = []
+    for language_index, language in enumerate(languages):
+        resolved_catalog: dict[str, str] = {}
+        if language_index > 0:
+            catalog = expect(language["catalog"], dict, "language catalog")
+            for source, translated in catalog.items():
+                resolved_source = resolve_variables(str(source))
+                previous = resolved_catalog.get(resolved_source)
+                if previous is not None and previous != translated:
+                    raise ContentError(
+                        f"language {language['id']} has conflicting translations "
+                        f"after resolving {resolved_source!r}")
+                resolved_catalog[resolved_source] = str(translated)
+        resolved_catalogs.append(resolved_catalog)
+
+    def register(text: str) -> tuple[list[int], int]:
+        """Register one English msgid and compile every available translation."""
+        english = resolve_variables(text)
+        existing = message_ids.get(english)
+        if existing is not None:
+            return encode(english), existing
+        message = len(messages)
+        message_ids[english] = message
+        messages.append(english)
+        for language_index, language in enumerate(languages):
+            translated = english
+            if language_index > 0:
+                catalog = expect(language["catalog"], dict, "language catalog")
+                catalog_text = catalog.get(text)
+                if catalog_text is None:
+                    catalog_text = resolved_catalogs[language_index].get(english)
+                if catalog_text is None:
+                    language["fallback"] = int(language["fallback"]) + 1
+                else:
+                    translated = expect(catalog_text, str, "catalog translation")
+                    language["matched"] = int(language["matched"]) + 1
+            localized_glyphs[language_index].append(
+                encode(resolve_variables(translated)))
+        return encode(english), message
+
     for dialogue in dialogues:
         for speaker in dialogue["speakers"]:
-            speaker["name_glyphs"] = encode(str(speaker["name"]))
+            speaker["name_glyphs"], speaker["name_message"] = register(
+                str(speaker["name"]))
         for node in dialogue["nodes"]:
-            node["text_glyphs"] = encode(str(node["text"]))
+            node["text_glyphs"], node["text_message"] = register(
+                str(node["text"]))
             for choice in node["choices"]:
-                choice["text_glyphs"] = encode(str(choice["text"]))
+                choice["text_glyphs"], choice["text_message"] = register(
+                    str(choice["text"]))
     for schedule in schedules:
         speech = schedule.get("speech")
         if speech is not None:
-            speech["line_glyphs"] = [encode(str(line)) for line in speech["lines"]]
+            registered = [register(str(line)) for line in speech["lines"]]
+            speech["line_glyphs"] = [item[0] for item in registered]
+            speech["line_messages"] = [item[1] for item in registered]
     for script in scripts:
         speech = script.get("speech")
         if speech is not None:
-            speech["line_glyphs"] = [encode(str(line)) for line in speech["lines"]]
-    return entries, advances[0x20], line_height
+            registered = [register(str(line)) for line in speech["lines"]]
+            speech["line_glyphs"] = [item[0] for item in registered]
+            speech["line_messages"] = [item[1] for item in registered]
+    ui_messages = [register(ui_texts[role])[1] for role in UI_TEXT_ROLES]
+    for language in languages:
+        language["name_glyphs"] = encode(str(language["name"]))
+    localization = {
+        "languages": languages,
+        "messages": messages,
+        "glyphs": localized_glyphs,
+        "ui_messages": ui_messages,
+    }
+    return entries, advances[0x20], line_height, localization
 
 
 def collect_runtime_resources(scenes: list[dict[str, object]], visuals: list[dict[str, object]],
@@ -3427,7 +3703,11 @@ struct generated_runtime_trigger { int x, y, width, height, script, when, facing
 struct generated_runtime_hotspot { int x, y, width, height, script, facing, priority; };
 struct generated_runtime_music { int sound, loop; float speed, volume; };
 struct generated_runtime_sound { int sound, loop; float speed, volume; };
-struct generated_runtime_text { const int *glyphs; int glyph_count; };
+struct generated_runtime_text { const int *glyphs; int glyph_count, message; };
+struct generated_runtime_language {
+    const char *id;
+    struct generated_runtime_text name;
+};
 struct generated_runtime_script_action { int op, a, b, c, d; };
 struct generated_runtime_actor_position { int scene, x, y, facing; };
 struct generated_runtime_script {
@@ -3558,6 +3838,11 @@ extern const struct generated_runtime_glyph generated_runtime_glyphs[];
 extern const int generated_runtime_glyph_count;
 extern const int generated_runtime_space_advance;
 extern const int generated_runtime_line_height;
+extern const struct generated_runtime_language generated_runtime_languages[];
+extern const int generated_runtime_language_count;
+extern const struct generated_runtime_text generated_runtime_localized_texts[];
+extern const int generated_runtime_localized_message_count;
+extern const int generated_runtime_ui_text_messages[];
 extern const struct generated_runtime_frame generated_runtime_title_background;
 extern const struct generated_runtime_frame generated_runtime_title_logo;
 extern const struct generated_runtime_frame generated_runtime_cutscene_images[];
@@ -3570,6 +3855,7 @@ extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_RUNTIME_ENTITY_STORAGE_COUNT (GENERATED_RUNTIME_ENTITY_COUNT > 0 ? GENERATED_RUNTIME_ENTITY_COUNT : 1)
 #define GENERATED_RUNTIME_DIALOGUE_USED_COUNT %d
 #define GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT (GENERATED_RUNTIME_DIALOGUE_USED_COUNT > 0 ? GENERATED_RUNTIME_DIALOGUE_USED_COUNT : 1)
+%s
 #define GENERATED_SCRIPT_SET_CONTROL 0
 #define GENERATED_SCRIPT_SET_ENTITY_STATE 1
 #define GENERATED_SCRIPT_WAIT 2
@@ -3605,7 +3891,11 @@ extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_TRIGGER_ENTER 0
 #define GENERATED_TRIGGER_LEAVE 1
 #endif
-""" % (flag_count, stateful_scenery_count, entity_count, maximum_dialogue_nodes)
+""" % (flag_count, stateful_scenery_count, entity_count, maximum_dialogue_nodes,
+       "\n".join(
+           f"#define GENERATED_UI_TEXT_{name} {index}"
+           for index, name in enumerate(UI_TEXT_ROLES)) +
+       f"\n#define GENERATED_UI_TEXT_COUNT {len(UI_TEXT_ROLES)}")
 
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
@@ -3631,7 +3921,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                    initial_game_time: int,
                    dialogues: list[dict[str, object]], scripts: list[dict[str, object]],
                    glyphs: list[dict[str, object]], space_advance: int,
-                   line_height: int,
+                   line_height: int, localization: dict[str, object],
                    music: list[dict[str, object]], effects: list[dict[str, object]],
                    ui_sounds: list[int], schedules: list[dict[str, object]],
                    title_background: dict[str, object],
@@ -3808,7 +4098,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             lines.append(f"static const struct generated_runtime_text generated_runtime_script_speech_{index}[] = {{")
             for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
                 lines.append(
-                    f"    {{ generated_runtime_script_speech_glyphs_{index}_{line_index}, {len(line_glyphs)} }},")
+                    f"    {{ generated_runtime_script_speech_glyphs_{index}_{line_index}, "
+                    f"{len(line_glyphs)}, {speech['line_messages'][line_index]} }},")
             lines.append("};")
         lines.append(f"static const struct generated_runtime_script_action generated_runtime_script_actions_{index}[] = {{")
         for action in script["actions"]:
@@ -3853,7 +4144,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             lines.append(f"static const struct generated_runtime_text generated_runtime_schedule_speech_{index}[] = {{")
             for line_index, line_glyphs in enumerate(speech["line_glyphs"]):
                 lines.append(
-                    f"    {{ generated_runtime_schedule_speech_glyphs_{index}_{line_index}, {len(line_glyphs)} }},")
+                    f"    {{ generated_runtime_schedule_speech_glyphs_{index}_{line_index}, "
+                    f"{len(line_glyphs)}, {speech['line_messages'][line_index]} }},")
             lines.append("};")
     lines.append("const struct generated_runtime_schedule generated_runtime_schedules[] = {")
     for index, schedule in enumerate(schedules):
@@ -3890,6 +4182,42 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_glyph_count = {len(glyphs)};")
     lines.append(f"const int generated_runtime_space_advance = {space_advance};\n")
     lines.append(f"const int generated_runtime_line_height = {line_height};\n")
+    languages = expect(localization["languages"], list, "runtime languages")
+    localized_glyphs = expect(localization["glyphs"], list, "localized glyphs")
+    messages = expect(localization["messages"], list, "localized messages")
+    for language_index, language_texts in enumerate(localized_glyphs):
+        flattened = [glyph for text in language_texts for glyph in text]
+        lines.append(
+            f"static const int generated_runtime_language_glyphs_{language_index}[] = {{ " +
+            ", ".join(str(glyph) for glyph in flattened) + " };")
+    lines.append(
+        "const struct generated_runtime_text generated_runtime_localized_texts[] = {")
+    for language_index, language_texts in enumerate(localized_glyphs):
+        offset = 0
+        for message, text_glyphs in enumerate(language_texts):
+            lines.append(
+                f"    {{ generated_runtime_language_glyphs_{language_index} + "
+                f"{offset}, {len(text_glyphs)}, {message} }},")
+            offset += len(text_glyphs)
+    lines.append("};")
+    lines.append(
+        f"const int generated_runtime_localized_message_count = {len(messages)};\n")
+    for language_index, language in enumerate(languages):
+        name_glyphs = expect(language["name_glyphs"], list, "language name glyphs")
+        lines.append(
+            f"static const int generated_runtime_language_name_{language_index}[] = {{ " +
+            ", ".join(str(glyph) for glyph in name_glyphs) + " };")
+    lines.append("const struct generated_runtime_language generated_runtime_languages[] = {")
+    for language_index, language in enumerate(languages):
+        name_glyphs = expect(language["name_glyphs"], list, "language name glyphs")
+        lines.append(
+            "    { %s, { generated_runtime_language_name_%d, %d, -1 } }," % (
+                json.dumps(language["id"]), language_index, len(name_glyphs)))
+    lines.append("};")
+    lines.append(f"const int generated_runtime_language_count = {len(languages)};")
+    lines.append("const int generated_runtime_ui_text_messages[] = { " +
+                 ", ".join(str(value) for value in localization["ui_messages"]) +
+                 " };\n")
     for dialogue_index, dialogue in enumerate(dialogues):
         for layer_index, layer in enumerate(dialogue["cutscene_layers"]):
             lines.append(
@@ -3947,8 +4275,9 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                     "offset_x": 0,
                     "offset_y": 0,
                 }
-            lines.append("    { %s, { generated_runtime_dialogue_speaker_glyphs_%d_%d, %d }, %s, 0x%08X, %d, %d, %d }," % (
-                json.dumps(speaker["name"]), dialogue_index, speaker_index, len(speaker["name_glyphs"]),
+            lines.append("    { %s, { generated_runtime_dialogue_speaker_glyphs_%d_%d, %d, %d }, %s, 0x%08X, %d, %d, %d }," % (
+                json.dumps(speaker["name"]), dialogue_index, speaker_index,
+                len(speaker["name_glyphs"]), speaker["name_message"],
                 frame_initializer(portrait, resource_index), speaker["speech_color"],
                 int(speaker["role"] == "player"),
                 int(speaker["role"] == "narrator"), speaker["entity_index"],
@@ -3987,18 +4316,20 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                     conditions = choice["conditions"]
                     condition_name = (f"generated_runtime_dialogue_conditions_{dialogue_index}_{node_index}_{choice_index}"
                                       if conditions else "0")
-                    lines.append("    { %s, { generated_runtime_dialogue_choice_glyphs_%d_%d_%d, %d }, %s, %s, %d, %d, %d, %d }," % (
+                    lines.append("    { %s, { generated_runtime_dialogue_choice_glyphs_%d_%d_%d, %d, %d }, %s, %s, %d, %d, %d, %d }," % (
                         json.dumps(choice["text"]), dialogue_index, node_index, choice_index,
-                        len(choice["text_glyphs"]), action_name, condition_name, len(actions),
+                        len(choice["text_glyphs"]), choice["text_message"],
+                        action_name, condition_name, len(actions),
                         len(conditions), choice["next"], int(choice["repeatable"])))
                 lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_node generated_runtime_dialogue_nodes_{dialogue_index}[] = {{")
         for node_index, node in enumerate(dialogue["nodes"]):
             choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node['choices_owner']}"
                             if node["choices"] else "0")
-            lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d }, %s, "
+            lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d, %d }, %s, "
                          "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
-                json.dumps(node["text"]), dialogue_index, node_index, len(node["text_glyphs"]),
+                json.dumps(node["text"]), dialogue_index, node_index,
+                len(node["text_glyphs"]), node["text_message"],
                 choices_name, len(node["choices"]), node["next"], node["speaker"],
                 node["on_end"], node["auto_advance_frames"], node["music_track"],
                 node["hold_at_end"], node["music_delay_frames"],
@@ -4060,6 +4391,10 @@ def compile_content(project_root: Path) -> None:
               for category in ("maps", "entities", "audio", "dialogue", "scripts", "schedules")}
     font_definition = relative_input(
         game_root, manifest.get("font"), "manifest font")
+    languages = collect_languages(manifest, game_root)
+    translation_variables, translation_variants = \
+        collect_translation_substitutions(manifest)
+    ui_texts = collect_ui_texts(manifest)
     entities = collect_entities(inputs["entities"])
     schedules = collect_schedules(inputs["schedules"], entities)
     music = collect_audio(inputs["audio"], game_root)
@@ -4259,7 +4594,8 @@ def compile_content(project_root: Path) -> None:
                "effects": sorted(effect_ids),
                "dialogue": sorted(dialogue), "scripts": sorted(scripts),
                "schedules": sorted(schedules),
-               "cutscene_images": sorted(cutscene_image_ids)}
+               "cutscene_images": sorted(cutscene_image_ids),
+               "languages": [str(language["id"]) for language in languages]}
     canonical = json.dumps(ordered, separators=(",", ":"), sort_keys=True)
     digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     output_root = project_root / "generated"
@@ -4268,10 +4604,11 @@ def compile_content(project_root: Path) -> None:
     materialize_scenery_strips(runtime_scenes, game_root, output_root)
     materialize_scenery_sheets(runtime_scenes, game_root, output_root)
     materialize_character_sheets(runtime_visuals, game_root, output_root)
-    runtime_glyphs, runtime_space_advance, runtime_line_height = \
+    runtime_glyphs, runtime_space_advance, runtime_line_height, localization = \
         materialize_dialogue_glyph_atlas(
             runtime_dialogue, runtime_schedule_data, runtime_script_data,
-            game_root, output_root, font_definition)
+            game_root, output_root, font_definition, languages,
+            translation_variables, translation_variants, ui_texts)
     background_logical, background_unique, background_atlases = materialize_runtime_atlases(
         background_atlas_references(runtime_scenes), game_root, output_root,
         "background-atlases", "backgrounds")
@@ -4329,7 +4666,7 @@ def compile_content(project_root: Path) -> None:
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
         initial_scene, initial_game_time, runtime_dialogue, runtime_script_data,
-        runtime_glyphs, runtime_space_advance, runtime_line_height,
+        runtime_glyphs, runtime_space_advance, runtime_line_height, localization,
         music, effects, ui_sounds,
         runtime_schedule_data,
         title_background, title_logo, cutscene_images,
@@ -4360,7 +4697,10 @@ def compile_content(project_root: Path) -> None:
           f"{maximum_cartridge_textures} textures; "
           f"backgrounds {background_logical}->{background_unique}->{background_atlases}, "
           f"actors {actor_logical}->{actor_unique}->{actor_atlases}, "
-          f"world {world_logical}->{world_unique}->{world_atlases}")
+          f"world {world_logical}->{world_unique}->{world_atlases}; " +
+          ", ".join(
+              f"{language['id']} {language['matched']}/{language['matched'] + language['fallback']}"
+              for language in languages[1:]))
 
 
 def main() -> int:

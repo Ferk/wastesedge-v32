@@ -27,6 +27,7 @@ static int path_heap_count;
 static int path_heap_width;
 static int path_heap_target_x;
 static int path_heap_target_y;
+static int active_language;
 
 static int opposite_mask(int move_x, int move_y)
 {
@@ -2028,6 +2029,52 @@ int world_dialogue_is_open(const struct world_state *world)
     return world->dialogue >= 0;
 }
 
+/* Select the language used by all compiled text lookups. */
+void world_set_language(int language)
+{
+    if (language < 0 || language >= generated_runtime_language_count)
+        language = 0;
+    active_language = language;
+}
+
+/* Return the currently selected compiled language. */
+int world_language(void)
+{
+    return active_language;
+}
+
+/* Resolve a source text record through the active language table. */
+const struct generated_runtime_text *world_localized_text(
+    const struct generated_runtime_text *text)
+{
+    if (text == 0 || text->message < 0 ||
+        text->message >= generated_runtime_localized_message_count)
+        return text;
+    return &generated_runtime_localized_texts[
+        active_language * generated_runtime_localized_message_count + text->message];
+}
+
+/* Resolve one generated UI role through the active language table. */
+const struct generated_runtime_text *world_ui_text(int role)
+{
+    int message;
+    if (role < 0 || role >= GENERATED_UI_TEXT_COUNT)
+        return 0;
+    message = generated_runtime_ui_text_messages[role];
+    if (message < 0 || message >= generated_runtime_localized_message_count)
+        return 0;
+    return &generated_runtime_localized_texts[
+        active_language * generated_runtime_localized_message_count + message];
+}
+
+/* Return a language's native display name. */
+const struct generated_runtime_text *world_language_name(int language)
+{
+    if (language < 0 || language >= generated_runtime_language_count)
+        return 0;
+    return &generated_runtime_languages[language].name;
+}
+
 const char *world_dialogue_text(const struct world_state *world)
 {
     if (world->dialogue < 0)
@@ -2081,7 +2128,8 @@ const struct generated_runtime_text *world_dialogue_display(const struct world_s
 {
     if (world->dialogue < 0)
         return 0;
-    return &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node].display;
+    return world_localized_text(
+        &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node].display);
 }
 
 const struct generated_runtime_text *world_dialogue_choice_display(const struct world_state *world, int index)
@@ -2094,7 +2142,7 @@ const struct generated_runtime_text *world_dialogue_choice_display(const struct 
     if (index < 0)
         return 0;
     choice = dialogue_visible_choice(world, node, index);
-    return choice != 0 ? &choice->display : 0;
+    return choice != 0 ? world_localized_text(&choice->display) : 0;
 }
 
 const struct generated_runtime_text *world_entity_speech(
@@ -2112,12 +2160,12 @@ const struct generated_runtime_text *world_actor_speech(
         return 0;
     actor = &world->actors[definition];
     if (actor->speech_override != 0)
-        return actor->speech_override;
+        return world_localized_text(actor->speech_override);
     if (actor->schedule < 0 ||
         actor->schedule >= generated_runtime_schedule_count || actor->speech_line < 0)
         return 0;
     schedule = &generated_runtime_schedules[actor->schedule];
     if (actor->speech_line >= schedule->speech_count)
         return 0;
-    return &schedule->speech[actor->speech_line];
+    return world_localized_text(&schedule->speech[actor->speech_line]);
 }
