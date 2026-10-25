@@ -33,6 +33,7 @@
 #define DRAW_CYCLES_PER_COMMAND 160
 #define DRAW_SAFETY_CYCLES 20000
 #define MUSIC_CHANNEL 0
+#define UI_SOUND_CHANNEL 1
 #define SAVE_SLOT_STRIDE 1024
 #define SAVE_SLOT_HEADER_WORDS 8
 #define SAVE_PREVIEW_TILES 6
@@ -123,6 +124,7 @@ static int displayed_visual_revision;
 static int displayed_world_valid;
 static int cpu_cycles_per_frame = DEFAULT_CPU_CYCLES_PER_FRAME;
 static int applied_music_revision = -1;
+static int applied_ui_sound_revision = -1;
 static int save_words[SAVEGAME_MAX_WORDS];
 static struct world_state save_slot_previews[PLATFORM_SAVE_SLOT_COUNT];
 static int save_slot_preview_valid[PLATFORM_SAVE_SLOT_COUNT];
@@ -894,8 +896,34 @@ void platform_play_music_track(int track_index)
     active_music_track = track_index;
 }
 
+/* Play one data-mapped UI cue without interrupting background music. */
+void platform_play_ui_sound(int sound)
+{
+    const struct generated_runtime_sound *effect;
+    int effect_index;
+    if (sound < WORLD_UI_SOUND_MOVE || sound > WORLD_UI_SOUND_CANCEL)
+        return;
+    effect_index = generated_runtime_ui_sounds[sound];
+    if (effect_index < 0 || effect_index >= generated_runtime_effect_count)
+        return;
+    effect = &generated_runtime_effects[effect_index];
+    stop_channel(UI_SOUND_CHANNEL);
+    select_sound(effect->sound);
+    set_sound_loop(effect->loop);
+    assign_channel_sound(UI_SOUND_CHANNEL, effect->sound);
+    set_channel_position(0);
+    set_channel_volume(effect->volume);
+    set_channel_speed(effect->speed);
+    set_channel_loop(effect->loop);
+    play_channel(UI_SOUND_CHANNEL);
+}
+
 void platform_update_audio(const struct world_state *world)
 {
+    if (applied_ui_sound_revision != world->ui_sound_revision) {
+        applied_ui_sound_revision = world->ui_sound_revision;
+        platform_play_ui_sound(world->ui_sound);
+    }
     if (world->music_track < 0 || world->music_track >= generated_runtime_music_count)
         return;
     /* A revision represents an authored request to begin a track. Do not use

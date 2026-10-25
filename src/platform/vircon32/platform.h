@@ -27,6 +27,7 @@ int platform_random_seed(void);
 void platform_poll_actions(struct world_actions *actions);
 int platform_frame_counter(void);
 void platform_play_music_track(int track_index);
+void platform_play_ui_sound(int sound);
 void platform_update_audio(const struct world_state *world);
 void platform_stop_audio(void);
 void platform_begin_cutscene(int dialogue, int start_node);

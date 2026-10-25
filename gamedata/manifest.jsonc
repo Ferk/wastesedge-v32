@@ -7,6 +7,10 @@
   "new_game_cutscene": "intro_cutscene",
   "game_title": "Waste's Edge",
   "title_music": "title_theme",
+  "ui_sounds": {
+    "move": "ui_switch",
+    "confirm": "ui_select"
+  },
   "save_signature": "WASTESEDGE-V32-SAVE",
   "save_version": 1,
   "save_magic": "WESV",

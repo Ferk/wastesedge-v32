@@ -21,6 +21,13 @@ enum world_transition_phase {
     WORLD_TRANSITION_FADE_IN = 2
 };
 
+enum world_ui_sound {
+    WORLD_UI_SOUND_NONE = -1,
+    WORLD_UI_SOUND_MOVE = 0,
+    WORLD_UI_SOUND_CONFIRM = 1,
+    WORLD_UI_SOUND_CANCEL = 2
+};
+
 struct world_collision_override {
     int scene;
     int x;
@@ -116,6 +123,8 @@ struct world_state {
     int control_enabled;
     int music_track;
     int music_revision;
+    int ui_sound;
+    int ui_sound_revision;
     int visual_revision;
     int transition_phase;
     int transition_frame;

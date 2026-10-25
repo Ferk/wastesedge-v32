@@ -66,5 +66,19 @@
       "volume": 0.5,
       "loop": false
     }
+  ],
+  "effects": [
+    {
+      "id": "ui_select",
+      "source": "assets/audio/select.wav",
+      "sample_rate": 22050,
+      "volume": 0.5
+    },
+    {
+      "id": "ui_switch",
+      "source": "assets/audio/switch.wav",
+      "sample_rate": 22050,
+      "volume": 0.5
+    }
   ]
 }

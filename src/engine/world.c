@@ -208,6 +208,13 @@ static void enter_dialogue_node(struct world_state *world, int node_index)
     }
 }
 
+/* Publish one transient UI-audio event for the platform audio adapter. */
+static void emit_ui_sound(struct world_state *world, int sound)
+{
+    world->ui_sound = sound;
+    ++world->ui_sound_revision;
+}
+
 static void apply_dialogue_choice(struct world_state *world,
                                   const struct generated_runtime_dialogue_choice *choice)
 {
@@ -1633,6 +1640,8 @@ void world_initialize(struct world_state *world)
     world->control_enabled = 1;
     world->music_track = -1;
     world->music_revision = 0;
+    world->ui_sound = WORLD_UI_SOUND_NONE;
+    world->ui_sound_revision = 0;
     world->visual_revision = 0;
     world->transition_phase = WORLD_TRANSITION_NONE;
     world->transition_frame = 0;
@@ -1734,10 +1743,11 @@ void world_update(struct world_state *world, const struct world_actions *actions
              * target frame, then remains there. Interaction fast-forwards to
              * that final frame instead of closing the cinematic. */
             if (node->hold_at_end) {
-                if (actions->interact_pressed || actions->cancel_pressed)
+                if (actions->interact_pressed || actions->cancel_pressed) {
                     world->dialogue_auto_frame = node->auto_advance_frames;
-                else if (world->dialogue_auto_frame < node->auto_advance_frames)
+                } else if (world->dialogue_auto_frame < node->auto_advance_frames) {
                     ++world->dialogue_auto_frame;
+                }
                 return;
             }
             /* A advances one live-map balloon, matching illustrated
@@ -1763,6 +1773,8 @@ void world_update(struct world_state *world, const struct world_actions *actions
                 world->dialogue_choice = choice_count - 1;
             if (world->dialogue_choice >= choice_count)
                 world->dialogue_choice = 0;
+            if (choice_count > 1)
+                emit_ui_sound(world, WORLD_UI_SOUND_MOVE);
         }
         if (actions->interact_pressed) {
             if (choice_count > 0) {
@@ -1776,6 +1788,7 @@ void world_update(struct world_state *world, const struct world_actions *actions
             } else {
                 advance_or_close_dialogue(world, node);
             }
+            emit_ui_sound(world, WORLD_UI_SOUND_CONFIRM);
         }
         return;
     }

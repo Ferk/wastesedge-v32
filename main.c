@@ -29,6 +29,7 @@ static int moved_choice(int current, int movement, int count)
 {
     if (movement == 0)
         return current;
+    platform_play_ui_sound(WORLD_UI_SOUND_MOVE);
     current += movement;
     if (current < 0)
         current = count - 1;
@@ -112,6 +113,7 @@ int main(void)
         } else if (mode == APPLICATION_TITLE) {
             menu_choice = moved_choice(menu_choice, actions.choice_move, 2);
             if (actions.interact_pressed) {
+                platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
                 if (menu_choice == 0) {
                     platform_stop_audio();
                     world_initialize(&world);
@@ -159,6 +161,10 @@ int main(void)
             }
         } else if (mode == APPLICATION_PAUSED) {
             menu_choice = moved_choice(menu_choice, actions.choice_move, 4);
+            if (actions.interact_pressed)
+                platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
+            else if (actions.menu_pressed || actions.cancel_pressed)
+                platform_play_ui_sound(WORLD_UI_SOUND_CANCEL);
             if (actions.menu_pressed || actions.cancel_pressed ||
                 (actions.interact_pressed && menu_choice == 0)) {
                 platform_invalidate_world();
@@ -185,6 +191,7 @@ int main(void)
             slot_choice = moved_choice(slot_choice, actions.choice_move,
                                        PLATFORM_SAVE_SLOT_COUNT);
             if (actions.cancel_pressed || actions.menu_pressed) {
+                platform_play_ui_sound(WORLD_UI_SOUND_CANCEL);
                 storage_result = PLATFORM_STORAGE_OK;
                 if (from_title) {
                     menu_choice = 1;
@@ -194,6 +201,7 @@ int main(void)
                     mode = APPLICATION_PAUSED;
                 }
             } else if (actions.interact_pressed) {
+                platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
                 if (saving) {
                     int query_result;
                     storage_result = platform_save_slot(&world, slot_choice);

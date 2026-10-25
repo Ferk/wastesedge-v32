@@ -250,6 +250,12 @@ int main(void)
     assert(generated_runtime_scene_count == 22);
     assert(strcmp(generated_runtime_game_title, "Waste's Edge") == 0);
     assert(generated_runtime_title_music == GENERATED_MUSIC_TITLE_THEME);
+    assert(generated_runtime_effect_count == 2);
+    assert(generated_runtime_ui_sounds[WORLD_UI_SOUND_MOVE] ==
+           GENERATED_EFFECT_UI_SWITCH);
+    assert(generated_runtime_ui_sounds[WORLD_UI_SOUND_CONFIRM] ==
+           GENERATED_EFFECT_UI_SELECT);
+    assert(generated_runtime_ui_sounds[WORLD_UI_SOUND_CANCEL] == -1);
     assert(generated_runtime_save_magic == 0x57455356);
     assert(generated_runtime_save_signature[19] == 1);
     assert(generated_runtime_title_cutscene == GENERATED_DIALOGUE_TITLE_CUTSCENE);

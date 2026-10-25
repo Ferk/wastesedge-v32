@@ -676,47 +676,64 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
     return result
 
 
-def collect_audio(paths: list[Path], game_root: Path) -> list[dict[str, object]]:
-    tracks: list[dict[str, object]] = []
+def collect_audio_entries(paths: list[Path], game_root: Path, section: str,
+                          kind: str, default_loop: bool) -> list[dict[str, object]]:
+    """Validate one authored music/effect list and resolve its source files."""
+    entries: list[dict[str, object]] = []
     seen: set[str] = set()
     for path in paths:
         document = expect(load_jsonc(path), dict, str(path))
-        for raw_track in expect(document.get("tracks"), list, f"{path}.tracks"):
-            track = expect(raw_track, dict, f"{path} track")
-            track_id = identifier(track.get("id"), f"{path} track id")
-            if track_id in seen:
-                raise ContentError(f"duplicate music track id: {track_id}")
-            seen.add(track_id)
-            source_name = expect(track.get("source"), str, f"{path} track {track_id} source")
+        for raw_entry in expect(document.get(section, []), list, f"{path}.{section}"):
+            entry = expect(raw_entry, dict, f"{path} {kind}")
+            entry_id = identifier(entry.get("id"), f"{path} {kind} id")
+            if entry_id in seen:
+                raise ContentError(f"duplicate {kind} id: {entry_id}")
+            seen.add(entry_id)
+            source_name = expect(entry.get("source"), str,
+                                 f"{path} {kind} {entry_id} source")
             source = path_inside(game_root, (game_root / source_name).resolve(),
-                                 f"{path} track {track_id} source")
+                                 f"{path} {kind} {entry_id} source")
             if not source.is_file():
-                raise ContentError(f"{path}: missing music source {source_name!r}")
+                raise ContentError(f"{path}: missing {kind} source {source_name!r}")
             if source.suffix.lower() not in {".ogg", ".wav"}:
-                raise ContentError(f"{path}: unsupported music source format {source.suffix!r}")
-            sample_rate = integer(track.get("sample_rate", 11025), f"{path} track {track_id} sample_rate")
+                raise ContentError(
+                    f"{path}: unsupported {kind} source format {source.suffix!r}")
+            sample_rate = integer(entry.get("sample_rate", 11025),
+                                  f"{path} {kind} {entry_id} sample_rate")
             if sample_rate < 8000 or sample_rate > 44100:
-                raise ContentError(f"{path}: track {track_id!r} sample_rate must be between 8000 and 44100")
-            volume = track.get("volume", 0.5)
+                raise ContentError(
+                    f"{path}: {kind} {entry_id!r} sample_rate must be between 8000 and 44100")
+            volume = entry.get("volume", 0.5)
             if isinstance(volume, bool) or not isinstance(volume, (int, float)):
-                raise ContentError(f"{path} track {track_id} volume must be a number")
+                raise ContentError(f"{path} {kind} {entry_id} volume must be a number")
             volume = float(volume)
             if volume < 0.0 or volume > 1.0:
-                raise ContentError(f"{path}: track {track_id!r} volume must be between 0 and 1")
-            loop = track.get("loop", True)
+                raise ContentError(
+                    f"{path}: {kind} {entry_id!r} volume must be between 0 and 1")
+            loop = entry.get("loop", default_loop)
             if not isinstance(loop, bool):
-                raise ContentError(f"{path} track {track_id} loop must be a bool")
-            tracks.append({
-                "id": track_id,
+                raise ContentError(f"{path} {kind} {entry_id} loop must be a bool")
+            entries.append({
+                "id": entry_id,
                 "source": source.relative_to(game_root).as_posix(),
                 "sample_rate": sample_rate,
                 "speed": sample_rate / 44100.0,
                 "volume": volume,
                 "loop": int(loop),
-                "generated": f"generated/audio/{track_id}.wav",
+                "generated": f"generated/audio/{entry_id}.wav",
             })
-    tracks.sort(key=lambda item: str(item["id"]))
-    return tracks
+    entries.sort(key=lambda item: str(item["id"]))
+    return entries
+
+
+def collect_audio(paths: list[Path], game_root: Path) -> list[dict[str, object]]:
+    """Collect authored background music tracks."""
+    return collect_audio_entries(paths, game_root, "tracks", "music track", True)
+
+
+def collect_effects(paths: list[Path], game_root: Path) -> list[dict[str, object]]:
+    """Collect authored short sound effects from the same audio documents."""
+    return collect_audio_entries(paths, game_root, "effects", "sound effect", False)
 
 
 def collect_scripts(paths: list[Path], entities: dict[str, dict[str, object]],
@@ -1037,32 +1054,34 @@ def write_output(path: Path, text: str) -> None:
         path.write_text(text, encoding="utf-8")
 
 
-def materialize_audio(tracks: list[dict[str, object]], game_root: Path, output_root: Path) -> None:
-    if not tracks:
+def materialize_audio(entries: list[dict[str, object]], game_root: Path,
+                      output_root: Path) -> None:
+    """Convert authored music or effects into deterministic cartridge WAVs."""
+    if not entries:
         return
     ffmpeg = shutil.which("ffmpeg")
     if ffmpeg is None:
         raise ContentError("ffmpeg is required to convert authored Ogg/WAV music")
     audio_root = output_root / "audio"
     audio_root.mkdir(parents=True, exist_ok=True)
-    for track in tracks:
-        source = game_root / str(track["source"])
-        output = output_root.parent / str(track["generated"])
+    for entry in entries:
+        source = game_root / str(entry["source"])
+        output = output_root.parent / str(entry["generated"])
         temporary = output.with_suffix(".tmp.wav")
         command = [
             ffmpeg, "-v", "error", "-y", "-i", str(source), "-vn",
             "-map_metadata", "-1", "-fflags", "+bitexact", "-flags:a", "+bitexact",
-            "-ac", "2", "-ar", str(track["sample_rate"]), "-c:a", "pcm_s16le",
+            "-ac", "2", "-ar", str(entry["sample_rate"]), "-c:a", "pcm_s16le",
             str(temporary),
         ]
         try:
             completed = subprocess.run(command, check=False, stdout=subprocess.DEVNULL,
                                        stderr=subprocess.PIPE, text=True)
         except OSError as error:
-            raise ContentError(f"cannot run ffmpeg for music track {track['id']!r}: {error}") from error
+            raise ContentError(f"cannot run ffmpeg for audio {entry['id']!r}: {error}") from error
         if completed.returncode != 0:
             raise ContentError(
-                f"ffmpeg failed for music track {track['id']!r}: {completed.stderr.strip()}")
+                f"ffmpeg failed for audio {entry['id']!r}: {completed.stderr.strip()}")
         try:
             unchanged = output.is_file() and output.read_bytes() == temporary.read_bytes()
             if unchanged:
@@ -1070,7 +1089,7 @@ def materialize_audio(tracks: list[dict[str, object]], game_root: Path, output_r
             else:
                 temporary.replace(output)
         except OSError as error:
-            raise ContentError(f"cannot materialize music track {track['id']!r}: {error}") from error
+            raise ContentError(f"cannot materialize audio {entry['id']!r}: {error}") from error
 
 
 def write_generated_png(path: Path, image: object) -> None:
@@ -3400,6 +3419,7 @@ struct generated_runtime_spawn { int tile_x, tile_y, facing; };
 struct generated_runtime_trigger { int x, y, width, height, script, when, facing, condition_flag, condition_value; };
 struct generated_runtime_hotspot { int x, y, width, height, script, facing, priority; };
 struct generated_runtime_music { int sound, loop; float speed, volume; };
+struct generated_runtime_sound { int sound, loop; float speed, volume; };
 struct generated_runtime_text { const int *glyphs; int glyph_count; };
 struct generated_runtime_script_action { int op, a, b, c, d; };
 struct generated_runtime_actor_position { int scene, x, y, facing; };
@@ -3510,6 +3530,9 @@ extern const struct generated_runtime_schedule generated_runtime_schedules[];
 extern const int generated_runtime_schedule_count;
 extern const struct generated_runtime_music generated_runtime_music[];
 extern const int generated_runtime_music_count;
+extern const struct generated_runtime_sound generated_runtime_effects[];
+extern const int generated_runtime_effect_count;
+extern const int generated_runtime_ui_sounds[3];
 extern const struct generated_runtime_scene generated_runtime_scenes[];
 extern const int generated_runtime_scene_count;
 extern const int generated_runtime_initial_scene;
@@ -3598,7 +3621,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                    initial_game_time: int,
                    dialogues: list[dict[str, object]], scripts: list[dict[str, object]],
                    glyphs: list[dict[str, object]], space_advance: int,
-                   music: list[dict[str, object]], schedules: list[dict[str, object]],
+                   music: list[dict[str, object]], effects: list[dict[str, object]],
+                   ui_sounds: list[int], schedules: list[dict[str, object]],
                    title_background: dict[str, object],
                    title_logo: dict[str, object] | None,
                    cutscene_images: list[dict[str, object]],
@@ -3625,6 +3649,17 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             sound, track["loop"], track["speed"], track["volume"]))
     lines.append("};")
     lines.append(f"const int generated_runtime_music_count = {len(music)};\n")
+    lines.append("const struct generated_runtime_sound generated_runtime_effects[] = {")
+    for effect_index, effect in enumerate(effects):
+        lines.append("    { %d, %d, %.8gf, %.8gf }," % (
+            len(music) + effect_index, effect["loop"],
+            effect["speed"], effect["volume"]))
+    if not effects:
+        lines.append("    { -1, 0, 1.0f, 0.0f },")
+    lines.append("};")
+    lines.append(f"const int generated_runtime_effect_count = {len(effects)};")
+    lines.append("const int generated_runtime_ui_sounds[3] = { " +
+                 ", ".join(str(index) for index in ui_sounds) + " };\n")
     lines.append("const struct generated_runtime_actor generated_runtime_actors[] = {")
     for actor in actors:
         lines.append("    { %d, %d, %d, %d, 0x%08Xu, %d, %d, %d, %d }," % (
@@ -4013,7 +4048,14 @@ def compile_content(project_root: Path) -> None:
     entities = collect_entities(inputs["entities"])
     schedules = collect_schedules(inputs["schedules"], entities)
     music = collect_audio(inputs["audio"], game_root)
+    effects = collect_effects(inputs["audio"], game_root)
     music_ids = {str(track["id"]) for track in music}
+    effect_ids = {str(effect["id"]) for effect in effects}
+    shared_audio_ids = music_ids & effect_ids
+    if shared_audio_ids:
+        raise ContentError(
+            "audio IDs cannot be shared by music and effects: " +
+            ", ".join(sorted(shared_audio_ids)))
     dialogue = collect_dialogue(inputs["dialogue"], entities, game_root)
     scripts = collect_scripts(inputs["scripts"], entities, dialogue, music_ids, schedules)
     for path in inputs["dialogue"]:
@@ -4094,6 +4136,7 @@ def compile_content(project_root: Path) -> None:
     }
     script_index = {script_id: index for index, script_id in enumerate(sorted(scripts))}
     music_index = {str(track["id"]): index for index, track in enumerate(music)}
+    effect_index = {str(effect["id"]): index for index, effect in enumerate(effects)}
     game_title = expect(manifest.get("game_title"), str, "manifest game_title")
     if not game_title:
         raise ContentError("manifest game_title cannot be empty")
@@ -4121,6 +4164,24 @@ def compile_content(project_root: Path) -> None:
             raise ContentError(
                 f"manifest title_music refers to unknown track {title_music_id!r}")
         title_music = music_index[title_music_id]
+    raw_ui_sounds = expect(manifest.get("ui_sounds", {}), dict,
+                           "manifest ui_sounds")
+    unknown_ui_sounds = set(raw_ui_sounds) - {"move", "confirm", "cancel"}
+    if unknown_ui_sounds:
+        raise ContentError(
+            "manifest ui_sounds has unknown roles: " +
+            ", ".join(sorted(unknown_ui_sounds)))
+    ui_sounds: list[int] = []
+    for role in ("move", "confirm", "cancel"):
+        effect_id = raw_ui_sounds.get(role)
+        if effect_id is None:
+            ui_sounds.append(-1)
+            continue
+        effect_id = identifier(effect_id, f"manifest ui_sounds {role}")
+        if effect_id not in effect_index:
+            raise ContentError(
+                f"manifest ui_sounds {role} refers to unknown effect {effect_id!r}")
+        ui_sounds.append(effect_index[effect_id])
     runtime_dialogue, script_dialogues, runtime_flags = runtime_dialogues(
         inputs["dialogue"], inputs["scripts"], entities, game_root,
         script_index, music_index, cutscene_image_index)
@@ -4180,13 +4241,14 @@ def compile_content(project_root: Path) -> None:
         tilesets.update(str(path) for path in definition["visuals"].values())
     ordered = {"scenes": sorted(scenes), "tilesets": sorted(tilesets),
                "entities": sorted(entities), "music": sorted(music_ids),
+               "effects": sorted(effect_ids),
                "dialogue": sorted(dialogue), "scripts": sorted(scripts),
                "schedules": sorted(schedules),
                "cutscene_images": sorted(cutscene_image_ids)}
     canonical = json.dumps(ordered, separators=(",", ":"), sort_keys=True)
     digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     output_root = project_root / "generated"
-    materialize_audio(music, game_root, output_root)
+    materialize_audio(music + effects, game_root, output_root)
     materialize_background_chunks(runtime_scenes, game_root, output_root)
     materialize_scenery_strips(runtime_scenes, game_root, output_root)
     materialize_scenery_sheets(runtime_scenes, game_root, output_root)
@@ -4224,6 +4286,7 @@ def compile_content(project_root: Path) -> None:
     header_lines = ["/* Generated by tools/content_compiler/compile_content.py; do not edit. */", "#ifndef WASTESEDGE_GENERATED_CONTENT_IDS_H", "#define WASTESEDGE_GENERATED_CONTENT_IDS_H", ""]
     for category, prefix in (("scenes", "GENERATED_SCENE"), ("tilesets", "GENERATED_TILESET"),
                              ("entities", "GENERATED_ENTITY"), ("music", "GENERATED_MUSIC"),
+                             ("effects", "GENERATED_EFFECT"),
                              ("dialogue", "GENERATED_DIALOGUE"), ("scripts", "GENERATED_SCRIPT"),
                              ("schedules", "GENERATED_SCHEDULE"),
                              ("cutscene_images", "GENERATED_CUTSCENE_IMAGE")):
@@ -4233,7 +4296,7 @@ def compile_content(project_root: Path) -> None:
         header_lines.append("};\n")
     header_lines.extend(["extern const char generated_content_signature[];", "#endif", ""])
     c_lines = ["/* Generated by tools/content_compiler/compile_content.py; do not edit. */", "#include \"content_ids.h\"", "", f"const char generated_content_signature[] = \"{digest}\";", ""]
-    for category in ("scenes", "tilesets", "entities", "music", "dialogue", "scripts",
+    for category in ("scenes", "tilesets", "entities", "music", "effects", "dialogue", "scripts",
                      "schedules", "cutscene_images"):
         c_lines.append(f"const unsigned int generated_{category}_count = {len(ordered[category])};")
     c_lines.append("")
@@ -4249,7 +4312,8 @@ def compile_content(project_root: Path) -> None:
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
         initial_scene, initial_game_time, runtime_dialogue, runtime_script_data,
-        runtime_glyphs, runtime_space_advance, music, runtime_schedule_data,
+        runtime_glyphs, runtime_space_advance, music, effects, ui_sounds,
+        runtime_schedule_data,
         title_background, title_logo, cutscene_images,
         new_game_cutscene, title_cutscene, game_title,
         title_music, save_signature, save_magic))
@@ -4258,7 +4322,9 @@ def compile_content(project_root: Path) -> None:
     cmake_lists = {
         "WASTESEDGE_CONTENT_TEXTURES": ["gamedata/" + path for path in source_textures],
         "WASTESEDGE_GENERATED_TEXTURES": ["generated/" + path for path in generated_textures],
-        "WASTESEDGE_GENERATED_SOUNDS": [str(track["generated"]) for track in music],
+        "WASTESEDGE_GENERATED_SOUNDS": [
+            str(entry["generated"]) for entry in music + effects
+        ],
     }
     cmake_lines = ["# Generated by tools/content_compiler/compile_content.py; do not edit."]
     for variable, paths in cmake_lists.items():
@@ -4270,7 +4336,8 @@ def compile_content(project_root: Path) -> None:
     cmake_lines.append("")
     write_output(output_root / "content_assets.cmake", "\n".join(cmake_lines))
     print(f"content compiler: {len(scenes)} scenes, {len(tilesets)} tilesets, "
-          f"{len(entities)} entities, {len(music)} music, {len(dialogue)} dialogue, "
+          f"{len(entities)} entities, {len(music)} music, {len(effects)} effects, "
+          f"{len(dialogue)} dialogue, "
           f"{len(scripts)} scripts, {len(schedules)} schedules, {len(runtime_resources)}/"
           f"{maximum_cartridge_textures} textures; "
           f"backgrounds {background_logical}->{background_unique}->{background_atlases}, "
