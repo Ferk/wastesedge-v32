@@ -18,10 +18,6 @@ WORLD_PIXEL_SCALE_NUMERATOR = 3
 WORLD_PIXEL_SCALE_DENOMINATOR = 2
 BACKGROUND_CHUNK_TILES_X = 8
 BACKGROUND_CHUNK_TILES_Y = 6
-DIALOGUE_TEXT_FONT_SIZE = 15
-DIALOGUE_TEXT_LINE_HEIGHT = 19
-DIALOGUE_ATLAS_WIDTH = 512
-DIALOGUE_ATLAS_HEIGHT = 512
 CHARACTER_SHEET_WIDTHS = (256, 512, 1024)
 SCENERY_REPEAT_CHUNK_TILES = 8
 RUNTIME_ATLAS_SIZE = 1024
@@ -1746,119 +1742,130 @@ def materialize_character_sheets(visuals: list[dict[str, object]], game_root: Pa
 def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                                      schedules: list[dict[str, object]],
                                      scripts: list[dict[str, object]], game_root: Path,
-                                     output_root: Path) -> tuple[list[dict[str, object]], int]:
-    """Render each distinct UI glyph once and encode dialogue and ambient speech."""
+                                     output_root: Path,
+                                     definition_path: Path
+                                     ) -> tuple[list[dict[str, object]], int, int]:
+    """Load a byte-indexed PNG font and encode authored Unicode as CP-1252."""
     try:
-        from PIL import Image, ImageDraw, ImageFont
+        from PIL import Image
     except ImportError as error:
-        raise ContentError("Pillow is required to build the dialogue glyph atlas") from error
+        raise ContentError("Pillow is required to read the dialogue glyph atlas") from error
 
-    font_path = game_root / "assets/ui/fonts/Aclonica.ttf"
-    if not font_path.is_file():
-        raise ContentError(f"missing dialogue font: {font_path.relative_to(game_root)}")
-    try:
-        font = ImageFont.truetype(str(font_path), DIALOGUE_TEXT_FONT_SIZE)
-    except OSError as error:
-        raise ContentError(f"cannot load dialogue font: {error}") from error
-    font_ascent, font_descent = font.getmetrics()
-    if font_ascent + font_descent > DIALOGUE_TEXT_LINE_HEIGHT:
+    definition = expect(load_jsonc(definition_path), dict, str(definition_path))
+    if definition.get("format") != "wastesedge-font-v1":
         raise ContentError(
-            f"dialogue font metrics need {font_ascent + font_descent} pixels, "
-            f"but line height is {DIALOGUE_TEXT_LINE_HEIGHT}"
-        )
+            f"{definition_path}: font format must be 'wastesedge-font-v1'")
+    if definition.get("encoding") != "cp1252":
+        raise ContentError(f"{definition_path}: font encoding must be 'cp1252'")
+    source_name = expect(definition.get("source"), str,
+                         f"{definition_path} font source")
+    source_path = path_inside(
+        game_root, (game_root / source_name).resolve(),
+        f"{definition_path} font source")
+    if not source_path.is_file():
+        raise ContentError(f"{definition_path}: missing font atlas {source_name!r}")
 
-    character_set: set[str] = set()
-    for dialogue in dialogues:
-        for speaker in expect(dialogue["speakers"], list, "runtime dialogue speakers"):
-            character_set.update(expect(speaker["name"], str, "dialogue speaker name"))
-        for node in expect(dialogue["nodes"], list, "runtime dialogue nodes"):
-            character_set.update(expect(node["text"], str, "dialogue node text"))
-            for choice in expect(node["choices"], list, "runtime dialogue choices"):
-                character_set.update(expect(choice["text"], str, "dialogue choice text"))
-    for schedule in schedules:
-        speech = schedule.get("speech")
-        if speech is not None:
-            for line in expect(speech["lines"], list, "runtime schedule speech lines"):
-                character_set.update(expect(line, str, "runtime schedule speech line"))
-    for script in scripts:
-        speech = script.get("speech")
-        if speech is not None:
-            for line in expect(speech["lines"], list, "runtime script speech lines"):
-                character_set.update(expect(line, str, "runtime script speech line"))
-    character_set.discard(" ")
-    character_set.discard("\n")
-    character_set.discard("\r")
-    character_set.discard("\t")
+    grid = expect(definition.get("grid"), list, f"{definition_path} grid")
+    cell = expect(definition.get("cell"), list, f"{definition_path} cell")
+    hotspot = expect(definition.get("hotspot"), list,
+                     f"{definition_path} hotspot")
+    marker = expect(definition.get("advance_marker"), list,
+                    f"{definition_path} advance_marker")
+    if len(grid) != 2 or any(isinstance(value, bool) or not isinstance(value, int)
+                             for value in grid):
+        raise ContentError(f"{definition_path}: grid must be [columns, rows]")
+    if grid != [16, 16]:
+        raise ContentError(
+            f"{definition_path}: a CP-1252 font grid must be [16, 16]")
+    if len(cell) != 2 or any(isinstance(value, bool) or not isinstance(value, int)
+                             for value in cell):
+        raise ContentError(f"{definition_path}: cell must be [width, height]")
+    cell_width, cell_height = cell
+    glyph_height = integer(definition.get("glyph_height"),
+                           f"{definition_path} glyph_height")
+    line_height = integer(definition.get("line_height"),
+                          f"{definition_path} line_height")
+    if (cell_width <= 0 or cell_height <= 1 or glyph_height <= 0 or
+            glyph_height >= cell_height or line_height <= 0):
+        raise ContentError(
+            f"{definition_path}: invalid cell, glyph_height, or line_height")
+    if len(hotspot) != 2 or any(isinstance(value, bool) or not isinstance(value, int)
+                                for value in hotspot):
+        raise ContentError(f"{definition_path}: hotspot must be [x, y]")
+    hotspot_x, hotspot_y = hotspot
+    if not 0 <= hotspot_x < cell_width or not 0 <= hotspot_y < glyph_height:
+        raise ContentError(f"{definition_path}: hotspot lies outside the glyph cell")
+    if len(marker) != 4 or any(isinstance(value, bool) or not isinstance(value, int) or
+                               value < 0 or value > 255 for value in marker):
+        raise ContentError(
+            f"{definition_path}: advance_marker must contain four bytes")
+    marker_color = tuple(marker)
+    try:
+        with Image.open(source_path) as source:
+            atlas = source.convert("RGBA")
+    except OSError as error:
+        raise ContentError(f"cannot load dialogue font atlas: {error}") from error
+    expected_size = (grid[0] * cell_width, grid[1] * cell_height)
+    if atlas.size != expected_size:
+        raise ContentError(
+            f"{definition_path}: font atlas is {atlas.width}x{atlas.height}, "
+            f"expected {expected_size[0]}x{expected_size[1]}")
 
-    rendered: dict[str, object] = {}
-    glyph_origins: dict[str, int] = {}
-    for character in sorted(character_set):
-        advance = max(1, int(font.getlength(character) + 0.5))
-        left, _, right, _ = font.getbbox(character, anchor="ls")
-        left_edge = min(0, left)
-        width = max(advance, right) - left_edge
-        origin_x = -left_edge
-        if width + 2 > DIALOGUE_ATLAS_WIDTH:
-            raise ContentError(f"dialogue glyph is too wide for the font atlas: {character!r}")
-        image = Image.new("RGBA", (width, DIALOGUE_TEXT_LINE_HEIGHT), (0, 0, 0, 0))
-        ImageDraw.Draw(image).text(
-            (origin_x, font_ascent), character, font=font,
-            fill=(255, 255, 255, 255), anchor="ls"
-        )
-        rendered[character] = image
-        glyph_origins[character] = origin_x
-
-    pages: list[object] = []
-    page = Image.new("RGBA", (DIALOGUE_ATLAS_WIDTH, DIALOGUE_ATLAS_HEIGHT), (0, 0, 0, 0))
-    page_index = 0
-    x = 1
-    y = 1
-    used_x = 1
-    used_y = 1
+    runtime_image = source_path.relative_to(game_root).as_posix()
     entries: list[dict[str, object]] = []
-    for character in sorted(character_set):
-        image = rendered[character]
-        width, height = image.size
-        if x + width + 1 > DIALOGUE_ATLAS_WIDTH:
-            x = 1
-            y += DIALOGUE_TEXT_LINE_HEIGHT + 2
-        if y + height + 1 > DIALOGUE_ATLAS_HEIGHT:
-            pages.append((page, used_x, used_y))
-            page = Image.new("RGBA", (DIALOGUE_ATLAS_WIDTH, DIALOGUE_ATLAS_HEIGHT), (0, 0, 0, 0))
-            page_index += 1
-            x = 1
-            y = 1
-            used_x = 1
-            used_y = 1
-        page.alpha_composite(image, (x, y))
-        relative_output = Path("dialogue") / f"glyphs-{page_index:03d}.png"
+    advances: list[int] = []
+    for byte in range(256):
+        x = (byte % grid[0]) * cell_width
+        y = (byte // grid[0]) * cell_height
+        markers = [offset for offset in range(cell_width)
+                   if atlas.getpixel((x + offset, y + glyph_height)) == marker_color]
+        if len(markers) > 1:
+            raise ContentError(
+                f"{definition_path}: byte 0x{byte:02X} has multiple advance markers")
+        advance = markers[0] + 1 if markers else 0
+        advances.append(advance)
         entries.append({
-            "character": character,
-            "image": GENERATED_RESOURCE_PREFIX + relative_output.as_posix(),
+            "character": byte,
+            "image": runtime_image,
             "x": x,
             "y": y,
-            "width": width,
-            "height": height,
-            "origin_x": glyph_origins[character],
-            "advance": max(1, int(font.getlength(character) + 0.5)),
+            "width": cell_width,
+            "height": glyph_height,
+            "origin_x": hotspot_x,
+            "origin_y": hotspot_y,
+            "advance": advance,
         })
-        x += width + 2
-        used_x = max(used_x, x)
-        used_y = max(used_y, y + height + 1)
-    if character_set:
-        pages.append((page, used_x, used_y))
 
-    for index, (atlas, width, height) in enumerate(pages):
-        relative_output = Path("dialogue") / f"glyphs-{index:03d}.png"
-        write_generated_png(output_root / relative_output, atlas.crop((0, 0, width, height)))
+    old_glyph_root = output_root / "dialogue"
+    if old_glyph_root.is_dir():
+        for obsolete in old_glyph_root.glob("glyphs-*.png"):
+            obsolete.unlink()
 
-    glyph_index = {str(entry["character"]): index for index, entry in enumerate(entries)}
+    if advances[0x20] <= 0:
+        raise ContentError(f"{definition_path}: the space cell needs an advance marker")
 
     def encode(text: str) -> list[int]:
-        """Encode spaces and authored line breaks distinctly for the runtime."""
-        return [(-2 if character in "\r\n" else
-                 -1 if character.isspace() else glyph_index[character])
-                for character in text]
+        """Encode UTF-8 authoring text as byte-indexed CP-1252 glyph IDs."""
+        encoded: list[int] = []
+        for character in text:
+            if character in "\r\n":
+                encoded.append(-2)
+                continue
+            if character.isspace():
+                encoded.append(-1)
+                continue
+            try:
+                byte = character.encode("cp1252")[0]
+            except UnicodeEncodeError as error:
+                raise ContentError(
+                    f"dialogue font cannot encode {character!r} (U+{ord(character):04X}) "
+                    "as CP-1252") from error
+            if advances[byte] <= 0:
+                raise ContentError(
+                    f"dialogue font has no glyph in CP-1252 byte 0x{byte:02X} "
+                    f"for {character!r}")
+            encoded.append(byte)
+        return encoded
 
     for dialogue in dialogues:
         for speaker in dialogue["speakers"]:
@@ -1875,7 +1882,7 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
         speech = script.get("speech")
         if speech is not None:
             speech["line_glyphs"] = [encode(str(line)) for line in speech["lines"]]
-    return entries, max(1, int(font.getlength(" ") + 0.5))
+    return entries, advances[0x20], line_height
 
 
 def collect_runtime_resources(scenes: list[dict[str, object]], visuals: list[dict[str, object]],
@@ -3445,7 +3452,9 @@ enum generated_runtime_dialogue_comparison {
     GENERATED_RUNTIME_DIALOGUE_LESS_THAN
 };
 struct generated_runtime_dialogue_condition { int flag, value, comparison; };
-struct generated_runtime_glyph { int texture, min_x, min_y, max_x, max_y, hotspot_x, advance; };
+struct generated_runtime_glyph {
+    int texture, min_x, min_y, max_x, max_y, hotspot_x, hotspot_y, advance;
+};
 struct generated_runtime_dialogue_speaker {
     const char *name;
     struct generated_runtime_text name_text;
@@ -3548,6 +3557,7 @@ extern const int generated_runtime_dialogue_count;
 extern const struct generated_runtime_glyph generated_runtime_glyphs[];
 extern const int generated_runtime_glyph_count;
 extern const int generated_runtime_space_advance;
+extern const int generated_runtime_line_height;
 extern const struct generated_runtime_frame generated_runtime_title_background;
 extern const struct generated_runtime_frame generated_runtime_title_logo;
 extern const struct generated_runtime_frame generated_runtime_cutscene_images[];
@@ -3621,6 +3631,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                    initial_game_time: int,
                    dialogues: list[dict[str, object]], scripts: list[dict[str, object]],
                    glyphs: list[dict[str, object]], space_advance: int,
+                   line_height: int,
                    music: list[dict[str, object]], effects: list[dict[str, object]],
                    ui_sounds: list[int], schedules: list[dict[str, object]],
                    title_background: dict[str, object],
@@ -3868,15 +3879,17 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_schedule_count = {len(schedules)};\n")
     lines.append("const struct generated_runtime_glyph generated_runtime_glyphs[] = {")
     for glyph in glyphs:
-        lines.append("    { %d, %d, %d, %d, %d, %d, %d }," % (
+        lines.append("    { %d, %d, %d, %d, %d, %d, %d, %d }," % (
             resource_index[str(glyph["image"])], glyph["x"], glyph["y"],
             glyph["x"] + glyph["width"] - 1, glyph["y"] + glyph["height"] - 1,
             glyph["x"] + glyph["origin_x"],
+            glyph["y"] + glyph["origin_y"],
             glyph["advance"],
         ))
     lines.append("};")
     lines.append(f"const int generated_runtime_glyph_count = {len(glyphs)};")
     lines.append(f"const int generated_runtime_space_advance = {space_advance};\n")
+    lines.append(f"const int generated_runtime_line_height = {line_height};\n")
     for dialogue_index, dialogue in enumerate(dialogues):
         for layer_index, layer in enumerate(dialogue["cutscene_layers"]):
             lines.append(
@@ -4045,6 +4058,8 @@ def compile_content(project_root: Path) -> None:
         raise ContentError("manifest format must be 'wastesedge-content-v1'")
     inputs = {category: [relative_input(game_root, item, category) for item in expect(manifest.get(category), list, f"manifest {category}")]
               for category in ("maps", "entities", "audio", "dialogue", "scripts", "schedules")}
+    font_definition = relative_input(
+        game_root, manifest.get("font"), "manifest font")
     entities = collect_entities(inputs["entities"])
     schedules = collect_schedules(inputs["schedules"], entities)
     music = collect_audio(inputs["audio"], game_root)
@@ -4253,8 +4268,10 @@ def compile_content(project_root: Path) -> None:
     materialize_scenery_strips(runtime_scenes, game_root, output_root)
     materialize_scenery_sheets(runtime_scenes, game_root, output_root)
     materialize_character_sheets(runtime_visuals, game_root, output_root)
-    runtime_glyphs, runtime_space_advance = materialize_dialogue_glyph_atlas(
-        runtime_dialogue, runtime_schedule_data, runtime_script_data, game_root, output_root)
+    runtime_glyphs, runtime_space_advance, runtime_line_height = \
+        materialize_dialogue_glyph_atlas(
+            runtime_dialogue, runtime_schedule_data, runtime_script_data,
+            game_root, output_root, font_definition)
     background_logical, background_unique, background_atlases = materialize_runtime_atlases(
         background_atlas_references(runtime_scenes), game_root, output_root,
         "background-atlases", "backgrounds")
@@ -4312,7 +4329,8 @@ def compile_content(project_root: Path) -> None:
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
         initial_scene, initial_game_time, runtime_dialogue, runtime_script_data,
-        runtime_glyphs, runtime_space_advance, music, effects, ui_sounds,
+        runtime_glyphs, runtime_space_advance, runtime_line_height,
+        music, effects, ui_sounds,
         runtime_schedule_data,
         title_background, title_logo, cutscene_images,
         new_game_cutscene, title_cutscene, game_title,

@@ -256,6 +256,10 @@ int main(void)
     assert(generated_runtime_ui_sounds[WORLD_UI_SOUND_CONFIRM] ==
            GENERATED_EFFECT_UI_SELECT);
     assert(generated_runtime_ui_sounds[WORLD_UI_SOUND_CANCEL] == -1);
+    assert(generated_runtime_glyph_count == 256);
+    assert(generated_runtime_space_advance == 4);
+    assert(generated_runtime_line_height == 19);
+    assert(generated_runtime_glyphs['A'].advance > 0);
     assert(generated_runtime_save_magic == 0x57455356);
     assert(generated_runtime_save_signature[19] == 1);
     assert(generated_runtime_title_cutscene == GENERATED_DIALOGUE_TITLE_CUTSCENE);

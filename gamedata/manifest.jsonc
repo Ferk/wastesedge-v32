@@ -6,6 +6,7 @@
   "title_cutscene": "title_cutscene",
   "new_game_cutscene": "intro_cutscene",
   "game_title": "Waste's Edge",
+  "font": "ui/font.jsonc",
   "title_music": "title_theme",
   "ui_sounds": {
     "move": "ui_switch",

@@ -1,0 +1,14 @@
+// Editable byte-indexed dialogue font. Cell N represents CP-1252 byte N.
+// The final row in every cell is metadata: one opaque magenta pixel at X
+// stores an advance of X+1 pixels and is never rendered.
+{
+  "format": "wastesedge-font-v1",
+  "source": "assets/ui/fonts/aclonica-cp1252.png",
+  "encoding": "cp1252",
+  "grid": [16, 16],
+  "cell": [20, 20],
+  "glyph_height": 19,
+  "line_height": 19,
+  "hotspot": [1, 1],
+  "advance_marker": [255, 0, 255, 255]
+}

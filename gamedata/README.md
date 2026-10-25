@@ -6,7 +6,7 @@ build time into the compact resources used by the Vircon32 ROM; never edit
 
 - `maps/` and `tilesets/` are edited in Tiled. Open `WastesEdge.tiled-project`
   from this directory.
-- `entities/`, `dialogue/`, `scripts/`, `schedules/`, and `audio/` are JSONC
+- `entities/`, `dialogue/`, `scripts/`, `schedules/`, `audio/`, and `ui/` are JSONC
   game data.
 - `assets/world/` contains scenery, props, and effects; `assets/actors/`
   contains character frames.

@@ -13,7 +13,6 @@
 #define DIALOG_WIDTH (VIEW_WIDTH - 24)
 #define DIALOG_MAX_HEIGHT 260
 #define DIALOG_BOTTOM (DISPLAY_HEIGHT - 12)
-#define DIALOG_LINE_HEIGHT 19
 #define DIALOG_CHOICE_GAP 5
 #define DIALOG_PORTRAIT_SIZE 64
 #define DIALOG_PORTRAIT_X 18
@@ -279,7 +278,7 @@ static int record_runtime_text_clipped(int x, int y, int width, int top, int bot
         int glyph_index = text->glyphs[index];
         if (glyph_index == -2) {
             cursor_x = x;
-            cursor_y += DIALOG_LINE_HEIGHT;
+            cursor_y += generated_runtime_line_height;
             continue;
         }
         const struct generated_runtime_glyph *glyph;
@@ -297,17 +296,17 @@ static int record_runtime_text_clipped(int x, int y, int width, int top, int bot
             }
             if (cursor_x != x && cursor_x + word_width > x + width) {
                 cursor_x = x;
-                cursor_y += DIALOG_LINE_HEIGHT;
+                cursor_y += generated_runtime_line_height;
             }
         }
         if (cursor_y >= bottom)
             break;
-        if (cursor_y >= top && cursor_y + DIALOG_LINE_HEIGHT <= bottom)
+        if (cursor_y >= top && cursor_y + generated_runtime_line_height <= bottom)
             record_draw(glyph->texture, LAST_GLYPH_REGION - glyph_index, 0, 0, 0, 0,
                         cursor_x, cursor_y, 1.0f, 1.0f, color);
         cursor_x += glyph->advance;
     }
-    return cursor_y + DIALOG_LINE_HEIGHT;
+    return cursor_y + generated_runtime_line_height;
 }
 
 static int record_runtime_text(int x, int y, int width, int bottom,
@@ -332,7 +331,7 @@ static void record_runtime_text_centered_lines(
              * scrolled above the display. The hardware would clip their
              * pixels, but processing the whole accumulated credits roll each
              * frame eventually exhausts the Vircon32 frame budget. */
-            if (y + DIALOG_LINE_HEIGHT > 0) {
+            if (y + generated_runtime_line_height > 0) {
                 struct generated_runtime_text line;
                 int width = 0;
                 int scan;
@@ -344,9 +343,9 @@ static void record_runtime_text_centered_lines(
                                        : generated_runtime_glyphs[glyph].advance;
                 }
                 record_runtime_text(center_x - width / 2, y, width + 1,
-                                    y + DIALOG_LINE_HEIGHT, &line, color);
+                                    y + generated_runtime_line_height, &line, color);
             }
-            y += DIALOG_LINE_HEIGHT;
+            y += generated_runtime_line_height;
             start = index + 1;
         }
     }
@@ -361,7 +360,7 @@ static void measure_runtime_text(const struct generated_runtime_text *text,
     int index;
     if (text == 0 || text->glyph_count <= 0) {
         *width = 0;
-        *height = DIALOG_LINE_HEIGHT;
+        *height = generated_runtime_line_height;
         return;
     }
     for (index = 0; index < text->glyph_count; ++index) {
@@ -396,7 +395,7 @@ static void measure_runtime_text(const struct generated_runtime_text *text,
             used_width = cursor_x;
     }
     *width = used_width;
-    *height = lines * DIALOG_LINE_HEIGHT;
+    *height = lines * generated_runtime_line_height;
 }
 
 static void record_dialogue_panel(const struct world_state *world)
@@ -864,7 +863,7 @@ void platform_initialize(void)
         select_region(LAST_GLYPH_REGION - index);
         set_region_minimum(glyph->min_x, glyph->min_y);
         set_region_maximum(glyph->max_x, glyph->max_y);
-        set_region_hotspot(glyph->hotspot_x, glyph->min_y);
+        set_region_hotspot(glyph->hotspot_x, glyph->hotspot_y);
     }
 }
 

@@ -31,8 +31,20 @@ set(generated_asset_manifest "${generated_dir}/content_assets.cmake")
 # Generate once while configuring so CMake can discover the exact texture and
 # sound lists. CONFIGURE_DEPENDS causes an authoring-data change to reconfigure
 # the project before the next build, refreshing this manifest automatically.
+# Watch only normal authoring inputs. Archived extraction sources under
+# assets-original may be absent and must not trigger content regeneration.
 file(GLOB_RECURSE gamedata_inputs CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/*")
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/animations/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/assets/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/audio/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/dialogue/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/entities/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/maps/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/schedules/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/scripts/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/tilesets/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/ui/*"
+     "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/manifest.jsonc")
 execute_process(
   COMMAND "${Python3_EXECUTABLE}" "${content_compiler}"
           --project-root "${CMAKE_CURRENT_SOURCE_DIR}"
