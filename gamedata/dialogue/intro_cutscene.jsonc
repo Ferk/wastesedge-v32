@@ -108,7 +108,11 @@
     },
     {
       "id": "declare", "speaker": "player",
-      "text": "I am Banec, come as an agent for my employer. Tell me, is this the trading post of Waste's Edge?",
+      "text": "I am $name, come as an agent for my employer. Tell me, is this the trading post of Waste's Edge?",
+      "translation_parts": [
+        "I am ", "$name",
+        ", come as an agent for my employer. Tell me, is this the trading post of Waste's Edge?"
+      ],
       "auto_advance_frames": 500,
       "cutscene_text": { "mode": "bubble", "x": 260, "y": 8,
         "width": 430, "rate": 1 }

@@ -818,6 +818,14 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                 identifier(node["on_end"], f"{path} node {node_id} on_end")
             if "next" in node and identifier(node["next"], f"{path} node next") not in node_ids:
                 raise ContentError(f"{path}: node {node_id!r} refers to an unknown next node")
+            if "translation_parts" in node:
+                parts = expect(node["translation_parts"], list,
+                               f"{path} node {node_id} translation_parts")
+                if not parts:
+                    raise ContentError(
+                        f"{path}: node {node_id!r} translation_parts cannot be empty")
+                for part in parts:
+                    expect(part, str, f"{path} node {node_id} translation part")
             raw_choices = node.get("choices", [])
             if isinstance(raw_choices, str):
                 choice_source = identifier(
@@ -849,6 +857,14 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                 if "next" in choice and identifier(choice["next"], f"{path} choice next") not in node_ids:
                     raise ContentError(f"{path}: choice refers to an unknown next node")
                 expect(choice.get("text"), str, f"{path} choice text")
+                if "translation_parts" in choice:
+                    parts = expect(choice["translation_parts"], list,
+                                   f"{path} choice translation_parts")
+                    if not parts:
+                        raise ContentError(
+                            f"{path}: choice translation_parts cannot be empty")
+                    for part in parts:
+                        expect(part, str, f"{path} choice translation part")
                 if not isinstance(choice.get("repeatable", False), bool):
                     raise ContentError(f"{path}: choice repeatable must be a bool")
                 when = choice.get("when")
@@ -2090,7 +2106,9 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
         return text
 
     messages: list[str] = []
-    message_ids: dict[str, int] = {}
+    # The same rendered English text can require distinct lookup fragments in
+    # legacy catalogs, so its translation recipe is part of the cache key.
+    message_ids: dict[tuple[str, tuple[str, ...] | None], int] = {}
     localized_glyphs: list[list[list[int]]] = [[] for _ in languages]
     resolved_catalogs: list[dict[str, str]] = []
     normalized_catalogs: list[dict[str, str]] = []
@@ -2119,29 +2137,59 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
         resolved_catalogs.append(resolved_catalog)
         normalized_catalogs.append(normalized_catalog)
 
-    def register(text: str) -> tuple[list[int], int]:
+    def translated_piece(language_index: int, text: str) -> str | None:
+        """Look up one legacy gettext fragment for a compiled display string."""
+        language = languages[language_index]
+        catalog = expect(language["catalog"], dict, "language catalog")
+        catalog_text = catalog.get(text)
+        if catalog_text is None:
+            catalog_text = resolved_catalogs[language_index].get(
+                resolve_variables(text))
+        if catalog_text is None:
+            catalog_text = normalized_catalogs[language_index].get(
+                normalize_gettext_whitespace(resolve_variables(text)))
+        if catalog_text is None:
+            # A standalone variable is content supplied by the game, not a
+            # translatable gettext fragment.  It can appear between two
+            # translated fragments in legacy dialogue (for example, a player
+            # name in the opening scene).
+            variable = re.fullmatch(r"\$[A-Za-z][A-Za-z0-9_]*(?:\s*\{[^}]*\})?", text)
+            if variable is not None:
+                return resolve_variables(text)
+            return None
+        return resolve_variables(expect(catalog_text, str, "catalog translation"))
+
+    def register(text: str, translation_parts: object = None) -> tuple[list[int], int]:
         """Register one English msgid and compile every available translation."""
         english = resolve_variables(text)
-        existing = message_ids.get(english)
+        parts: list[str] | None = None
+        if translation_parts is not None:
+            parts = [expect(part, str, "translation part")
+                     for part in expect(translation_parts, list, "translation_parts")]
+            if resolve_variables("".join(parts)) != english:
+                raise ContentError(
+                    f"translation_parts do not reconstruct text {text!r}")
+        message_key = (english, tuple(parts) if parts is not None else None)
+        existing = message_ids.get(message_key)
         if existing is not None:
             return encode(english), existing
         message = len(messages)
-        message_ids[english] = message
+        message_ids[message_key] = message
         messages.append(english)
         for language_index, language in enumerate(languages):
             translated = english
             if language_index > 0:
-                catalog = expect(language["catalog"], dict, "language catalog")
-                catalog_text = catalog.get(text)
-                if catalog_text is None:
-                    catalog_text = resolved_catalogs[language_index].get(english)
-                if catalog_text is None:
-                    catalog_text = normalized_catalogs[language_index].get(
-                        normalize_gettext_whitespace(english))
+                if parts is None:
+                    catalog_text = translated_piece(language_index, text)
+                else:
+                    translated_parts = [translated_piece(language_index, part)
+                                        for part in parts]
+                    catalog_text = (None if any(part is None for part in translated_parts)
+                                    else "".join(translated_parts))
                 if catalog_text is None:
                     language["fallback"] = int(language["fallback"]) + 1
                 else:
-                    translated = expect(catalog_text, str, "catalog translation")
+                    translated = catalog_text
                     language["matched"] = int(language["matched"]) + 1
             localized_glyphs[language_index].append(
                 encode(resolve_variables(translated)))
@@ -2153,10 +2201,10 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                 str(speaker["name"]))
         for node in dialogue["nodes"]:
             node["text_glyphs"], node["text_message"] = register(
-                str(node["text"]))
+                str(node["text"]), node.get("translation_parts"))
             for choice in node["choices"]:
                 choice["text_glyphs"], choice["text_message"] = register(
-                    str(choice["text"]))
+                    str(choice["text"]), choice.get("translation_parts"))
     for schedule in schedules:
         speech = schedule.get("speech")
         if speech is not None:
@@ -2341,6 +2389,7 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                         })
                     owner_choices.append({
                         "text": expect(choice.get("text"), str, f"{path} choice text"),
+                        "translation_parts": choice.get("translation_parts"),
                         "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
                         "actions": actions,
                         "conditions": conditions,
@@ -2377,6 +2426,7 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 music_track = music_index[music_id]
             nodes.append({
                 "text": expect(node.get("text"), str, f"{path} node text"),
+                "translation_parts": node.get("translation_parts"),
                 "speaker": speaker_index[speaker_id],
                 "choices": choices,
                 "choices_owner": owner if choices else -1,
