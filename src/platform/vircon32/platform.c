@@ -39,6 +39,13 @@
     (game_signature_words + PLATFORM_SAVE_SLOT_COUNT * SAVE_SLOT_STRIDE)
 #define LANGUAGE_SETTING_MAGIC 0x57454C47u
 #define LANGUAGE_SETTING_VERSION 1
+#define BOOT_LOCALE_MAGIC 0x4C323356u
+#define BOOT_LOCALE_VERSION 1
+#define BOOT_LOCALE_MAGIC_WORD 0
+#define BOOT_LOCALE_VERSION_WORD 1
+#define BOOT_LOCALE_LANGUAGE_WORD 2
+#define BOOT_LOCALE_TERRITORY_WORD 3
+#define BOOT_LOCALE_CHECKSUM_WORD 4
 #define SAVE_PREVIEW_TILES 6
 #define SAVE_PREVIEW_SIZE 60
 #define WALK_ANIMATION_SLOWDOWN 2
@@ -1714,26 +1721,112 @@ static int storage_card_game_matches(void)
     return 1;
 }
 
-/* Read the global language preference stored after the four save slots. */
-int platform_load_language(void)
+/* Read an explicit global language preference from this game's memory card. */
+static int load_stored_language(void)
 {
     unsigned int checksum;
     int language;
     if (!card_is_connected() || card_is_empty() ||
         !storage_card_game_matches())
-        return 0;
+        return -1;
     if ((unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET) !=
             LANGUAGE_SETTING_MAGIC ||
         card_read_word(LANGUAGE_SETTING_OFFSET + 1) !=
             LANGUAGE_SETTING_VERSION)
-        return 0;
+        return -1;
     language = card_read_word(LANGUAGE_SETTING_OFFSET + 2);
     checksum = LANGUAGE_SETTING_MAGIC ^ LANGUAGE_SETTING_VERSION ^
                (unsigned int)language;
     if ((unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET + 3) != checksum ||
         language < 0 || language >= generated_runtime_language_count)
-        return 0;
+        return -1;
     return language;
+}
+
+/* Check whether one packed two-letter language or territory code is valid. */
+static int locale_tag_is_alpha(unsigned int tag, int uppercase)
+{
+    unsigned int first = tag & 0xffu;
+    unsigned int second = (tag >> 8) & 0xffu;
+    unsigned int minimum = uppercase ? 'A' : 'a';
+    unsigned int maximum = uppercase ? 'Z' : 'z';
+    return (tag & 0xffff0000u) == 0 && first >= minimum && first <= maximum &&
+           second >= minimum && second <= maximum;
+}
+
+/* Match the language part of a manifest ID such as "en" or "pt_br". */
+static int locale_id_matches_language(const char *id, unsigned int language)
+{
+    return (unsigned int)(unsigned char)id[0] == (language & 0xffu) &&
+           (unsigned int)(unsigned char)id[1] == ((language >> 8) & 0xffu) &&
+           (id[2] == '\0' || id[2] == '_');
+}
+
+/* Match a two-letter uppercase territory tag against an ID suffix like "_br". */
+static int locale_id_matches_territory(const char *id, unsigned int territory)
+{
+    return id[2] == '_' &&
+           (unsigned int)(unsigned char)id[3] ==
+               ((territory & 0xffu) + ('a' - 'A')) &&
+           (unsigned int)(unsigned char)id[4] ==
+               (((territory >> 8) & 0xffu) + ('a' - 'A')) && id[5] == '\0';
+}
+
+/* Resolve a validated system locale against this game's compiled languages. */
+static int find_locale_language(unsigned int language, unsigned int territory)
+{
+    int fallback = -1;
+    int candidate;
+    for (candidate = 0; candidate < generated_runtime_language_count;
+         ++candidate) {
+        const char *id = generated_runtime_languages[candidate].id;
+        if (!locale_id_matches_language(id, language))
+            continue;
+        if (fallback < 0)
+            fallback = candidate;
+        if (territory != 0 && locale_id_matches_territory(id, territory))
+            return candidate;
+    }
+    return fallback;
+}
+
+/* Read Waste's Edge's optional transient locale record from physical RAM. */
+static int load_boot_locale_language(void)
+{
+    unsigned int magic;
+    unsigned int language;
+    unsigned int territory;
+    unsigned int checksum;
+    int address = PLATFORM_BOOT_LOCALE_RAM_WORD;
+
+    magic = (unsigned int)ram_read_word(address + BOOT_LOCALE_MAGIC_WORD);
+    if (magic != BOOT_LOCALE_MAGIC ||
+        ram_read_word(address + BOOT_LOCALE_VERSION_WORD) !=
+            BOOT_LOCALE_VERSION)
+        return -1;
+    language = (unsigned int)ram_read_word(address + BOOT_LOCALE_LANGUAGE_WORD);
+    territory =
+        (unsigned int)ram_read_word(address + BOOT_LOCALE_TERRITORY_WORD);
+    checksum =
+        (unsigned int)ram_read_word(address + BOOT_LOCALE_CHECKSUM_WORD);
+    if (checksum != (BOOT_LOCALE_MAGIC ^ BOOT_LOCALE_VERSION ^ language ^
+                     territory) ||
+        !locale_tag_is_alpha(language, 0) ||
+        (territory != 0 && !locale_tag_is_alpha(territory, 1)))
+        return -1;
+    return find_locale_language(language, territory);
+}
+
+/* Prefer the player's stored override, then the optional boot locale, then English. */
+int platform_load_language(void)
+{
+    int language = load_stored_language();
+    if (language >= 0)
+        return language;
+    language = load_boot_locale_language();
+    if (language >= 0)
+        return language;
+    return 0;
 }
 
 /* Persist a global language preference independently of save-slot versions. */

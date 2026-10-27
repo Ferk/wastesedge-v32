@@ -5,6 +5,12 @@
 
 #define PLATFORM_SAVE_SLOT_COUNT 4
 
+/* Optional Waste's Edge boot locale record. This is a game/producer
+ * convention, not a Vircon32-reserved system record. A cooperating BIOS or
+ * emulator writes it immediately before cartridge entry. */
+#define PLATFORM_BOOT_LOCALE_RAM_WORD 0
+#define PLATFORM_BOOT_LOCALE_WORD_COUNT 5
+
 enum platform_save_slot_state {
     PLATFORM_SAVE_SLOT_INVALID = -1,
     PLATFORM_SAVE_SLOT_EMPTY = 0,

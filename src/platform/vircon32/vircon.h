@@ -148,6 +148,7 @@ void vircon__rng_set_current_value(int value) VIRCON__IMPORT("vircon_rng_set_cur
 int vircon__memcard_is_connected(void) VIRCON__IMPORT("vircon_memcard_is_connected");
 int vircon__memcard_read_word(int word_index) VIRCON__IMPORT("vircon_memcard_read_word");
 void vircon__memcard_write_word(int word_index, int value) VIRCON__IMPORT("vircon_memcard_write_word");
+int vircon__ram_read_word(int word_address) VIRCON__IMPORT("vircon_ram_read_word");
 void vircon__spu_select_channel(int value) VIRCON__IMPORT("vircon_spu_select_channel");
 void vircon__spu_select_sound(int value) VIRCON__IMPORT("vircon_spu_select_sound");
 int vircon__spu_get_selected_sound(void) VIRCON__IMPORT("vircon_spu_get_selected_sound");
@@ -625,6 +626,14 @@ static inline int play_sound(int sound) {
     }
   }
   return -1;
+}
+
+/* Physical RAM ------------------------------------------------------------
+ * This read-only escape hatch accepts a Vircon32 physical word address, not
+ * a C pointer or a Wasm byte offset. Invalid addresses return zero. */
+#define ram_word_count 4194304
+static inline int ram_read_word(int word_address) {
+  return vircon__ram_read_word(word_address);
 }
 
 /* Memory card --------------------------------------------------------------
