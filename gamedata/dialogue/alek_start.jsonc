@@ -170,8 +170,21 @@
       "id": "business_waste_of_time", "speaker": "alek",
       "text": "So? Was that of any help? I shouldn't think so. A waste of time it was!",
       "choices": [
+        { "text": "So what questions should I ask, in your opinion?", "next": "alek_suggests_question" },
+        { "text": "Who's wasting whose time here? The sooner you answer my questions, the sooner I leave you to yourself. Even you should understand this!", "next": "question_menu" },
+        { "text": "Not before I get some answers out of you. You don't have something to hide, do you?", "next": "question_menu" },
         { "text": "Well, that's it! I have enough of your useless blather. But I shall be watching you!", "next": "end_warning" }
       ]
+    },
+    {
+      "id": "alek_suggests_question", "speaker": "alek",
+      "text": "Perhaps it's just me, but I'd ask myself why the ... thief hasn't left Waste's Edge.",
+      "next": "player_asks_why_thief_stayed"
+    },
+    {
+      "id": "player_asks_why_thief_stayed", "speaker": "player",
+      "text": "Well, why hasn't he?",
+      "next": "good_question"
     },
     {
       "id": "ask_about_cellar", "speaker": "player",

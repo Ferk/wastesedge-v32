@@ -178,6 +178,11 @@ def load_po(path: Path) -> dict[str, str]:
     return translations
 
 
+def normalize_gettext_whitespace(text: str) -> str:
+    """Collapse legacy source wrapping for a fallback gettext lookup key."""
+    return " ".join(text.split())
+
+
 def collect_languages(manifest: dict[str, object], game_root: Path
                       ) -> list[dict[str, object]]:
     """Validate language metadata and load optional gettext catalogs."""
@@ -2088,8 +2093,10 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
     message_ids: dict[str, int] = {}
     localized_glyphs: list[list[list[int]]] = [[] for _ in languages]
     resolved_catalogs: list[dict[str, str]] = []
+    normalized_catalogs: list[dict[str, str]] = []
     for language_index, language in enumerate(languages):
         resolved_catalog: dict[str, str] = {}
+        normalized_catalog: dict[str, str] = {}
         if language_index > 0:
             catalog = expect(language["catalog"], dict, "language catalog")
             for source, translated in catalog.items():
@@ -2100,7 +2107,17 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                         f"language {language['id']} has conflicting translations "
                         f"after resolving {resolved_source!r}")
                 resolved_catalog[resolved_source] = str(translated)
+                normalized_source = normalize_gettext_whitespace(resolved_source)
+                normalized_translation = normalize_gettext_whitespace(
+                    str(translated))
+                previous = normalized_catalog.get(normalized_source)
+                if previous is not None and previous != normalized_translation:
+                    raise ContentError(
+                        f"language {language['id']} has conflicting translations "
+                        f"after normalizing whitespace in {resolved_source!r}")
+                normalized_catalog[normalized_source] = normalized_translation
         resolved_catalogs.append(resolved_catalog)
+        normalized_catalogs.append(normalized_catalog)
 
     def register(text: str) -> tuple[list[int], int]:
         """Register one English msgid and compile every available translation."""
@@ -2118,6 +2135,9 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                 catalog_text = catalog.get(text)
                 if catalog_text is None:
                     catalog_text = resolved_catalogs[language_index].get(english)
+                if catalog_text is None:
+                    catalog_text = normalized_catalogs[language_index].get(
+                        normalize_gettext_whitespace(english))
                 if catalog_text is None:
                     language["fallback"] = int(language["fallback"]) + 1
                 else:

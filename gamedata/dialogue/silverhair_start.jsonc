@@ -2,8 +2,11 @@
   "id": "silverhair_start",
   "start": [
     { "node": "gem_returned", "when": { "flag": "silverhair_gem_pending", "equals": 1 } },
-    { "node": "repeat_greeting", "when": { "flag": "silverhair_talked", "equals": 1 } },
-    { "node": "janesta_surprised" }
+    { "node": "janesta_surprised", "when": { "flag": "silverhair_talked", "equals": 0 } },
+    { "node": "confined_greeting", "when": { "flag": "silverhair_free", "equals": 0 } },
+    { "node": "released_greeting", "when": { "flag": "get_item", "equals": 0 } },
+    { "node": "articles_missing", "when": { "flag": "get_item", "equals": 1 } },
+    { "node": "repeat_greeting" }
   ],
   "speakers": [
     {
@@ -21,6 +24,67 @@
     { "id": "narrator", "name": "Narrator", "role": "narrator" }
   ],
   "nodes": [
+    {
+      "id": "confined_greeting", "speaker": "silverhair",
+      "text": "Banec, have you found anything yet? This confinement is intolerable, as you may well understand.",
+      "next": "repeat_greeting"
+    },
+    {
+      "id": "released_greeting", "speaker": "silverhair",
+      "text": "Banec! Thank the Powers!",
+      "next": "player_glad_silverhair_free"
+    },
+    {
+      "id": "player_glad_silverhair_free", "speaker": "player",
+      "text": "My Lady, I am glad to see you. You will be free soon, I know it.",
+      "next": "silverhair_free_boon"
+    },
+    {
+      "id": "silverhair_free_boon", "speaker": "silverhair",
+      "text": "I would ask a boon from you, now that it is safe. I have personal articles that I need, but are kept with our packs. I'm sure you know which articles I mean.",
+      "choices": [
+        {
+          "text": "Of course, Lady. That would be the least I could do after what you have endured. Rest assured, I will be back shortly.",
+          "actions": [{ "op": "set", "flag": "get_item", "value": 1 }],
+          "next": "articles_accepted"
+        },
+        {
+          "text": "And where are the packs kept, Lady?",
+          "actions": [{ "op": "set", "flag": "get_item", "value": 1 }],
+          "next": "silverhair_pantry_location"
+        }
+      ]
+    },
+    {
+      "id": "articles_accepted", "speaker": "player",
+      "text": "Of course, Lady. That would be the least I could do after what you have endured. Rest assured, I will be back shortly.",
+      "end": true
+    },
+    {
+      "id": "silverhair_pantry_location", "speaker": "silverhair",
+      "text": "You will find them below, in the pantry.",
+      "end": true
+    },
+    {
+      "id": "articles_missing", "speaker": "silverhair",
+      "text": "Banec, you have come back so soon? But where are the articles I asked for?",
+      "next": "player_has_not_retrieved_articles"
+    },
+    {
+      "id": "player_has_not_retrieved_articles", "speaker": "player",
+      "text": "I have yet to retrieve them, Lady.",
+      "next": "silverhair_urges_articles"
+    },
+    {
+      "id": "silverhair_urges_articles", "speaker": "silverhair",
+      "text": "Then please do so at once. I have been without them for too long.",
+      "next": "player_accepts_article_reminder"
+    },
+    {
+      "id": "player_accepts_article_reminder", "speaker": "player",
+      "text": "Very well, Lady.",
+      "end": true
+    },
     {
       "id": "janesta_surprised", "speaker": "janesta",
       "text": "Oh!!",
@@ -112,33 +176,37 @@
           "text": "Lady, could you tell me more about the argument you had with the Dwarf? It may be helpful.",
           "when": { "flag": "know_argument", "equals": 1 },
           "next": "ask_about_argument"
-        },
-        {
-          "text": "Do you wish me to retrieve your personal articles, Lady?",
-          "when": { "flag": "get_item", "equals": 0 },
-          "actions": [{ "op": "set", "flag": "get_item", "value": 1 }],
-          "next": "articles_request"
         }
       ]
     },
     {
       "id": "no_news", "speaker": "player",
       "text": "News? I must disappoint you, Lady. I have none. I simply wished to know if there was anything you need.",
+      "next": "silverhair_mentions_possessions"
+    },
+    {
+      "id": "silverhair_mentions_possessions", "speaker": "silverhair",
+      "text": "It is kind of you to ask. Indeed my possessions, other than what you see, have been taken from me. They are kept in the pantry below.",
+      "next": "player_offers_early_retrieval"
+    },
+    {
+      "id": "player_offers_early_retrieval", "speaker": "player",
+      "text": "Do you wish me to retrieve them for you, Lady?",
+      "next": "silverhair_says_wait"
+    },
+    {
+      "id": "silverhair_says_wait", "speaker": "silverhair",
+      "text": "No, that would not be wise. I have an item I need, but to fetch it now would be to invite trouble. Better we wait.",
+      "next": "player_waits"
+    },
+    {
+      "id": "player_waits", "speaker": "player",
+      "text": "Very well, Lady. I am yours to command.",
       "next": "leave_before_heard"
     },
     {
       "id": "leave_before_heard", "speaker": "silverhair",
       "text": "You must go. The human at the door may not hear as well as you or I, but he hears well enough. Leave before he discovers you.",
-      "end": true
-    },
-    {
-      "id": "articles_request", "speaker": "player",
-      "text": "Do you wish me to retrieve your personal articles, Lady?",
-      "next": "silverhair_requests_articles"
-    },
-    {
-      "id": "silverhair_requests_articles", "speaker": "silverhair",
-      "text": "I would ask a boon from you, now that it is safe. I have personal articles that I need, but they are kept with our packs. You will find them below, in the pantry.",
       "end": true
     },
     {

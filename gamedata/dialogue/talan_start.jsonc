@@ -40,7 +40,7 @@
     {
       "id": "talan_forgives",
       "speaker": "talan",
-      "text": "No, you did what you had to do, and it was only right that I got in trouble for leaving my post. And I owe you a big favour for covering for me!",
+      "text": "No, I understand. It was because of me shirking my duty that I did not see what happened that night. You had no choice, and I do not hold a grudge against you for doing your duty.",
       "next": "player_thanks_talan"
     },
     {
@@ -248,13 +248,46 @@
     {
       "id": "talan_bjarn_recent", "speaker": "talan",
       "text": "But at this most recent visit, Bjarn got here the morning of Lady Silverhair's arrival, which was a little strange. What's more, he brought Erek again, although I thought he had finished his apprenticeship and moved on long ago.",
+      "next": "player_thanks_for_bjarn_clue"
+    },
+    {
+      "id": "player_thanks_for_bjarn_clue", "speaker": "player",
+      "text": "I see ... that is strange. Thanks for telling me, Talan!",
       "next": "talan_more_questions"
     },
     {
       "id": "talan_confronted", "speaker": "talan",
       "text": "Wh... what do you mean?",
       "choices": [
+        { "text": "Should I rather call you a bard then?", "next": "talan_asks_about_noise" },
         { "text": "You were not, as you told me, manning your post the whole night.", "next": "talan_denies" }
+      ]
+    },
+    {
+      "id": "talan_asks_about_noise", "speaker": "talan",
+      "text": "A ... noise? What noise?",
+      "choices": [
+        {
+          "text": "The noise of someone singing, Talan.",
+          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 2 }],
+          "next": "talan_apologises"
+        },
+        {
+          "text": "According to Oliver, somebody must have been in the stables that night.",
+          "when": { "flag": "know_olivers_noise", "equals": 1 },
+          "next": "talan_realizes_player_knows"
+        }
+      ]
+    },
+    {
+      "id": "talan_realizes_player_knows", "speaker": "talan",
+      "text": "Oh. So you do know ... ?",
+      "choices": [
+        {
+          "text": "Yes I do. And I believe you left your post that night, did you not, Talan?",
+          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 2 }],
+          "next": "talan_admits"
+        }
       ]
     },
     {
@@ -298,10 +331,39 @@
       "id": "talan_accusation_reason",
       "speaker": "talan",
       "text": "Well, the most obvious reason is of course that she was interested in the gems, and made a trip here just to buy them.",
-      "choices": [{
-        "text": "True, but practically anyone at the Inn could have thrown an eye on the stones.",
-        "next": "player_anyone"
-      }]
+      "choices": [
+        {
+          "text": "But she felt the quality of the gems was too low, and she is hardly pressed for money, so why would she turn around and steal the gems?",
+          "when": { "flag": "know_low_quality", "equals": 1 },
+          "next": "talan_low_quality_excuse"
+        },
+        {
+          "text": "True, but practically anyone at the Inn could have thrown an eye on the stones.",
+          "next": "player_anyone"
+        }
+      ]
+    },
+    {
+      "id": "talan_low_quality_excuse", "speaker": "talan",
+      "text": "Well, according to Jelom, what better way to throw suspicion off yourself then to claim that the stones are of low quality?",
+      "choices": [
+        {
+          "text": "Who is Jelom? Your superiour?",
+          "when": { "flag": "know_jelom", "equals": 0 },
+          "actions": [{ "op": "set", "flag": "know_jelom", "value": 1 }],
+          "next": "player_asks_jelom"
+        },
+        {
+          "text": "Ah, Jelom said that, did he? What else did he say?",
+          "when": { "flag": "know_jelom", "equals": 1 },
+          "next": "talan_suspicion"
+        },
+        {
+          "text": "Yes. I do know what he thinks. That, however, does not help me too much.",
+          "when": { "flag": "know_jelom", "equals": 2 },
+          "next": "talan_more_questions"
+        }
+      ]
     },
     {
       "id": "player_anyone",
@@ -324,6 +386,11 @@
           "text": "Ah, Jelom said that, did he? What else did he say?",
           "when": { "flag": "know_jelom", "equals": 1 },
           "next": "talan_suspicion"
+        },
+        {
+          "text": "Yes. I do know what he thinks. That, however, does not help me too much.",
+          "when": { "flag": "know_jelom", "equals": 2 },
+          "next": "talan_more_questions"
         }
       ]
     },
@@ -343,13 +410,18 @@
       "id": "talan_suspicion",
       "speaker": "talan",
       "text": "He found her behaviour suspicious. I mean, she is all high and mighty, acting above the rest of us, and she obviously doesn't like dwarves ...",
-      "next": "player_asks_dwarves"
-    },
-    {
-      "id": "player_asks_dwarves",
-      "speaker": "player",
-      "text": "Wait! Why does everybody believe that she has an aversion to dwarves?",
-      "next": "talan_argument"
+      "choices": [
+        {
+          "text": "Wait! Why does everybody believe that she has an aversion to dwarves?",
+          "when": { "flag": "know_bjarns_insult", "equals": 1 },
+          "next": "talan_reports_bjarn_insult"
+        },
+        {
+          "text": "Wait! Why does everybody believe that she has an aversion to dwarves?",
+          "when": { "flag": "know_bjarns_insult", "not_equals": 1 },
+          "next": "talan_argument"
+        }
+      ]
     },
     {
       "id": "talan_argument",
@@ -359,6 +431,26 @@
         "text": "You think this argument is enough to prove Lady Silverhair's guilt?",
         "next": "player_challenges_argument"
       }]
+    },
+    {
+      "id": "talan_reports_bjarn_insult", "speaker": "talan",
+      "text": "Well, the way I heard the story, Bjarn made a point of insulting the entire elven race, loudly and publicly, upon her arrival!",
+      "next": "talan_softens_on_bjarn"
+    },
+    {
+      "id": "talan_softens_on_bjarn", "speaker": "talan",
+      "text": "Well, Master Fingolson can be, um ... blunt, I guess, at times, but ...",
+      "choices": [
+        {
+          "text": "Wasn't the argument rather Fingolson's fault, then?",
+          "next": "talan_concedes_bjarn_fault"
+        }
+      ]
+    },
+    {
+      "id": "talan_concedes_bjarn_fault", "speaker": "talan",
+      "text": "Well, I... ah, perhaps...",
+      "next": "talan_suggests_jelom"
     },
     {
       "id": "player_challenges_argument",

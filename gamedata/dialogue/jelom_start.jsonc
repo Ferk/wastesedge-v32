@@ -160,11 +160,21 @@
       "text": "What!? Are you telling me the kid was right after all? I don't believe it! Can't I even trust my own men any more!? Tell me, what was he doing?",
       "choices": [
         {
+          "text": "He sneaked away to take a nap.",
+          "actions": [{ "op": "set", "flag": "told_on_talan", "value": 1 }],
+          "next": "jelom_nap"
+        },
+        {
           "text": "He wandered off to practise singing, of all things!",
           "actions": [{ "op": "set", "flag": "told_on_talan", "value": 1 }],
           "next": "jelom_singing"
         }
       ]
+    },
+    {
+      "id": "jelom_nap", "speaker": "jelom",
+      "text": "A nap? I knew it! I had suspected that he caught some shuteye on duty from time to time, but have never caught him at it! He is in big trouble, this time!",
+      "next": "jelom_still_suspects"
     },
     {
       "id": "jelom_singing", "speaker": "jelom",
