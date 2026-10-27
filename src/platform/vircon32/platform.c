@@ -18,7 +18,8 @@
 #define DIALOG_PORTRAIT_X 18
 #define DIALOG_PORTRAIT_Y 20
 #define DIALOG_PORTRAIT_TEXT_GAP 12
-#define DIALOG_PORTRAIT_CHOICE_TOP 110
+#define DIALOG_PORTRAIT_CHOICE_MIN_OFFSET 66
+#define DIALOG_CHOICE_MIN_OFFSET 94
 #define DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM 92
 #define SPEECH_MAX_TEXT_WIDTH 300
 #define SPEECH_PADDING_X 6
@@ -120,7 +121,7 @@ static int displayed_node;
 static int displayed_choice;
 static int dialogue_scroll_dialogue = -1;
 static int dialogue_scroll_node = -1;
-static int dialogue_choice_scroll;
+static int dialogue_content_scroll;
 static const struct generated_runtime_scene *displayed_scene;
 static int displayed_player_x;
 static int displayed_player_y;
@@ -423,7 +424,7 @@ static void record_dialogue_panel(const struct world_state *world)
     int text_width = DIALOG_X + DIALOG_WIDTH - 20 - text_x;
     int choice_text_x = DIALOG_X + 36;
     int choice_text_width = DIALOG_WIDTH - 70;
-    int choice_top = has_portrait ? DIALOG_PORTRAIT_CHOICE_TOP : 138;
+    int choice_offset;
     int speech_width;
     int speech_height;
     int selected_top = 0;
@@ -432,9 +433,10 @@ static void record_dialogue_panel(const struct world_state *world)
     int choice_content_height;
     int dialog_height;
     int dialog_y;
-    int choice_view_top;
-    int choice_view_bottom;
-    int choice_view_height;
+    int content_view_top;
+    int content_view_bottom;
+    int content_view_height;
+    int scroll_content_height;
     int index;
 
     measure_runtime_text(speech, text_width, &speech_width, &speech_height);
@@ -453,22 +455,34 @@ static void record_dialogue_panel(const struct world_state *world)
     }
     choice_content_height = choices_height;
 
+    /* Keep the responses below the wrapped prompt.  The old fixed choice
+     * origin let translations with one extra line paint over their first
+     * response.  The portrait still reserves its natural footprint when the
+     * prompt happens to be short. */
+    choice_offset = speech_height + 10;
     if (choice_count > 0) {
-        /* Keep answers below portraits while letting their native 64-pixel
-         * footprint leave more room for the speaker's text and the scene. */
-        dialog_height = choice_top + choice_content_height + 10;
+        int minimum_offset = has_portrait ? DIALOG_PORTRAIT_CHOICE_MIN_OFFSET
+                                          : DIALOG_CHOICE_MIN_OFFSET;
+        if (choice_offset < minimum_offset)
+            choice_offset = minimum_offset;
+    }
+
+    if (choice_count > 0) {
+        dialog_height = 44 + choice_offset + choice_content_height + 10;
     } else {
-        int content_bottom = 44 + speech_height;
-        if (has_portrait && content_bottom < DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM)
-            content_bottom = DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM;
-        dialog_height = content_bottom + 10;
+        int content_height = speech_height;
+        if (has_portrait && content_height < DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM - 44)
+            content_height = DIALOG_PORTRAIT_MIN_CONTENT_BOTTOM - 44;
+        dialog_height = 44 + content_height + 10;
     }
     if (dialog_height > DIALOG_MAX_HEIGHT)
         dialog_height = DIALOG_MAX_HEIGHT;
     dialog_y = DIALOG_BOTTOM - dialog_height;
-    choice_view_bottom = dialog_y + dialog_height - 10;
-    choice_view_top = choice_count > 0 ? dialog_y + choice_top : choice_view_bottom;
-    choice_view_height = choice_view_bottom - choice_view_top;
+    content_view_top = dialog_y + 44;
+    content_view_bottom = dialog_y + dialog_height - 10;
+    content_view_height = content_view_bottom - content_view_top;
+    scroll_content_height = choice_count > 0 ? choice_offset + choice_content_height
+                                              : speech_height;
 
     /* The original conversation UI leaves the scene visible beneath a dark,
      * warm-edged translucent window. Anchor variable-height panels above the
@@ -490,42 +504,45 @@ static void record_dialogue_panel(const struct world_state *world)
         record_runtime_text(text_x, dialog_y + 16, text_width, dialog_y + 42,
                             world_localized_text(&speaker->name_text),
                             COLOR_ACCENT_GOLD);
-    record_runtime_text(text_x, dialog_y + 44, text_width,
-                        choice_count > 0 ? choice_view_top - 6
-                                         : dialog_y + dialog_height - 10,
-                        speech, speech_color);
-
-    /* Adonthell's conversation widget is a vertical scrollview. Reset it for
-     * each new line, then move by whole answer rows just far enough to keep
-     * the focused (possibly wrapped) answer visible. */
+    /* Adonthell's conversation widget is a vertical scrollview. Its prompt
+     * and responses share one content area: moving between long responses
+     * scrolls the prompt as necessary, and a focused response is never
+     * clipped or confirmable while invisible. */
     if (displayed_dialogue < 0 ||
         dialogue_scroll_dialogue != world->dialogue ||
         dialogue_scroll_node != world->dialogue_node) {
         dialogue_scroll_dialogue = world->dialogue;
         dialogue_scroll_node = world->dialogue_node;
-        dialogue_choice_scroll = 0;
+        dialogue_content_scroll = 0;
     }
-    if (selected_top < dialogue_choice_scroll) {
-        dialogue_choice_scroll = selected_top;
-    } else if (selected_bottom > dialogue_choice_scroll + choice_view_height) {
-        int target_scroll = selected_bottom - choice_view_height;
-        int option_top = 0;
-        dialogue_choice_scroll = selected_top;
-        for (index = 0; index < choice_count; ++index) {
-            int option_width;
-            int option_height;
-            measure_runtime_text(world_dialogue_choice_display(world, index),
-                                 choice_text_width, &option_width, &option_height);
-            if (option_top >= target_scroll) {
-                dialogue_choice_scroll = option_top;
-                break;
+    if (choice_count > 0) {
+        selected_top += choice_offset;
+        selected_bottom += choice_offset;
+        if (selected_top < dialogue_content_scroll) {
+            dialogue_content_scroll = selected_top;
+        } else if (selected_bottom > dialogue_content_scroll + content_view_height) {
+            int target_scroll = selected_bottom - content_view_height;
+            int option_top = choice_offset;
+            dialogue_content_scroll = selected_top;
+            for (index = 0; index < choice_count; ++index) {
+                int option_width;
+                int option_height;
+                measure_runtime_text(world_dialogue_choice_display(world, index),
+                                     choice_text_width, &option_width, &option_height);
+                if (option_top > target_scroll)
+                    break;
+                dialogue_content_scroll = option_top;
+                option_top += option_height + DIALOG_CHOICE_GAP;
             }
-            option_top += option_height + DIALOG_CHOICE_GAP;
         }
     }
-    if (choice_content_height > choice_view_height &&
-        dialogue_choice_scroll > choice_content_height - choice_view_height)
-        dialogue_choice_scroll = choice_content_height - choice_view_height;
+    if (scroll_content_height > content_view_height &&
+        dialogue_content_scroll > scroll_content_height - content_view_height)
+        dialogue_content_scroll = scroll_content_height - content_view_height;
+
+    record_runtime_text_clipped(text_x, content_view_top - dialogue_content_scroll,
+                                text_width, content_view_top, content_view_bottom,
+                                speech, speech_color);
 
     choices_height = 0;
     for (index = 0; index < choice_count; ++index) {
@@ -536,13 +553,13 @@ static void record_dialogue_panel(const struct world_state *world)
         int visible_bottom;
         measure_runtime_text(world_dialogue_choice_display(world, index),
                              choice_text_width, &option_width, &option_height);
-        option_y = choice_view_top + choices_height - dialogue_choice_scroll;
-        visible_top = option_y > choice_view_top ? option_y : choice_view_top;
-        visible_bottom = option_y + option_height < choice_view_bottom
-                             ? option_y + option_height : choice_view_bottom;
+        option_y = content_view_top + choice_offset + choices_height - dialogue_content_scroll;
+        visible_top = option_y > content_view_top ? option_y : content_view_top;
+        visible_bottom = option_y + option_height < content_view_bottom
+                             ? option_y + option_height : content_view_bottom;
         if (visible_bottom > visible_top) {
             record_runtime_text_clipped(choice_text_x, option_y, choice_text_width,
-                                        choice_view_top, choice_view_bottom,
+                                        content_view_top, content_view_bottom,
                                         world_dialogue_choice_display(world, index),
                                         index == selected_choice ? COLOR_ACCENT_GOLD
                                                                  : COLOR_TEXT_PALE);
@@ -553,19 +570,19 @@ static void record_dialogue_panel(const struct world_state *world)
         choices_height += option_height + DIALOG_CHOICE_GAP;
     }
 
-    if (choice_content_height > choice_view_height) {
+    if (choice_count > 0 && scroll_content_height > content_view_height) {
         int track_x = DIALOG_X + DIALOG_WIDTH - 15;
-        int thumb_height = (choice_view_height * choice_view_height) /
-                           choice_content_height;
+        int thumb_height = (content_view_height * content_view_height) /
+                           scroll_content_height;
         int thumb_y;
-        int maximum_scroll = choice_content_height - choice_view_height;
+        int maximum_scroll = scroll_content_height - content_view_height;
         if (thumb_height < 12)
             thumb_height = 12;
-        thumb_y = choice_view_top;
+        thumb_y = content_view_top;
         if (maximum_scroll > 0)
-            thumb_y += (dialogue_choice_scroll * (choice_view_height - thumb_height)) /
+            thumb_y += (dialogue_content_scroll * (content_view_height - thumb_height)) /
                        maximum_scroll;
-        record_solid_rect(track_x, choice_view_top, 4, choice_view_height,
+        record_solid_rect(track_x, content_view_top, 4, content_view_height,
                           COLOR_SCROLL_TRACK);
         record_solid_rect(track_x, thumb_y, 4, thumb_height, COLOR_SCROLL_THUMB);
     }
