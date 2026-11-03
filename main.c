@@ -1,3 +1,4 @@
+/* Application states for startup, naming, gameplay, cutscenes and save menus. */
 #include "engine/world.h"
 #include "platform/vircon32/platform.h"
 
@@ -23,7 +24,8 @@ enum application_mode {
     APPLICATION_LOAD_FROM_PAUSE = 4,
     APPLICATION_SAVE_FROM_PAUSE = 5,
     APPLICATION_CUTSCENE = 6,
-    APPLICATION_LANGUAGE = 7
+    APPLICATION_LANGUAGE = 7,
+    APPLICATION_NAME_ENTRY = 8
 };
 
 static int moved_choice(int current, int movement, int count)
@@ -61,6 +63,7 @@ int main(void)
     int cutscene_to_title = 0;
 
     world_initialize(&world);
+    world_set_player_name(&world, world.player_name);
     platform_initialize();
     world_set_language(platform_load_language());
     platform_play_music_track(generated_runtime_title_music);
@@ -121,19 +124,8 @@ int main(void)
                     platform_stop_audio();
                     world_initialize(&world);
                     world_seed_random(&world, platform_random_seed());
-                    platform_invalidate_world();
-                    simulation_frame = platform_frame_counter();
-                    if (generated_runtime_new_game_cutscene >= 0) {
-                        int dialogue = generated_runtime_new_game_cutscene;
-                        int start_node =
-                            generated_runtime_dialogues[dialogue].starts[0].node;
-                        platform_begin_cutscene(dialogue, start_node);
-                        cutscene_from_world = 0;
-                        cutscene_to_title = 0;
-                        mode = APPLICATION_CUTSCENE;
-                    } else {
-                        mode = APPLICATION_PLAYING;
-                    }
+                    platform_begin_name_entry();
+                    mode = APPLICATION_NAME_ENTRY;
                 } else if (menu_choice == 1) {
                     storage_result = platform_query_save_slots(slot_states);
                     slot_choice = 0;
@@ -142,6 +134,23 @@ int main(void)
                     language_choice = world_language();
                     storage_result = PLATFORM_STORAGE_OK;
                     mode = APPLICATION_LANGUAGE;
+                }
+            }
+        } else if (mode == APPLICATION_NAME_ENTRY) {
+            if (platform_update_name_entry(&world, &actions)) {
+                world_set_player_name(&world, world.player_name);
+                platform_invalidate_world();
+                simulation_frame = platform_frame_counter();
+                if (generated_runtime_new_game_cutscene >= 0) {
+                    int dialogue = generated_runtime_new_game_cutscene;
+                    int start_node =
+                        generated_runtime_dialogues[dialogue].starts[0].node;
+                    platform_begin_cutscene(dialogue, start_node);
+                    cutscene_from_world = 0;
+                    cutscene_to_title = 0;
+                    mode = APPLICATION_CUTSCENE;
+                } else {
+                    mode = APPLICATION_PLAYING;
                 }
             }
         } else if (mode == APPLICATION_LANGUAGE) {
@@ -236,6 +245,7 @@ int main(void)
                 } else {
                     storage_result = platform_load_slot(&world, slot_choice);
                     if (storage_result == PLATFORM_STORAGE_OK) {
+                        world_set_player_name(&world, world.player_name);
                         platform_invalidate_world();
                         simulation_frame = platform_frame_counter();
                         if (world_dialogue_is_cutscene(&world)) {
@@ -259,6 +269,8 @@ int main(void)
             platform_render_title_menu(menu_choice, storage_result);
         } else if (mode == APPLICATION_LANGUAGE) {
             platform_render_language_menu(language_choice);
+        } else if (mode == APPLICATION_NAME_ENTRY) {
+            platform_render_name_entry(&world);
         } else if (mode == APPLICATION_PAUSED) {
             platform_render_pause_menu(menu_choice, storage_result);
         } else {

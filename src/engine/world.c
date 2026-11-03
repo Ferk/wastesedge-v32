@@ -1,3 +1,4 @@
+/* Adventure simulation, actor movement, dialogue state and localized text. */
 #include "engine/world.h"
 
 #define WALK_NORTH 2
@@ -28,6 +29,72 @@ static int path_heap_width;
 static int path_heap_target_x;
 static int path_heap_target_y;
 static int active_language;
+static char active_player_name[21];
+static const struct generated_runtime_text *name_text_sources[64];
+static struct generated_runtime_text name_texts[64];
+static int name_text_glyphs[64][2048];
+static int name_text_cursor;
+
+/* Store a bounded name; a blank value restores the game-authored default. */
+void world_set_player_name(struct world_state *world, const char *name)
+{
+    int index = 0;
+    if (name == 0 || name[0] == 0)
+        name = generated_runtime_default_player_name;
+    while (index < 20 && name[index] != 0) {
+        world->player_name[index] = name[index];
+        active_player_name[index] = name[index];
+        ++index;
+    }
+    while (index < 21) {
+        world->player_name[index] = 0;
+        active_player_name[index] = 0;
+        ++index;
+    }
+    for (index = 0; index < 64; ++index)
+        name_text_sources[index] = 0;
+    name_text_cursor = 0;
+}
+
+/* Expand compiled player-name tokens before text measurement and rendering. */
+static const struct generated_runtime_text *expand_player_name(
+    const struct generated_runtime_text *text)
+{
+    int index;
+    int slot;
+    int count = 0;
+    if (text == 0)
+        return text;
+    for (slot = 0; slot < 64; ++slot)
+        if (name_text_sources[slot] == text)
+            return &name_texts[slot];
+    for (index = 0; index < text->glyph_count; ++index)
+        if (text->glyphs[index] == -3)
+            break;
+    if (index == text->glyph_count)
+        return text;
+    slot = name_text_cursor;
+    name_text_cursor = (name_text_cursor + 1) % 64;
+    for (index = 0; index < text->glyph_count; ++index) {
+        int glyph = text->glyphs[index];
+        if (glyph == -3) {
+            int letter;
+            const char *name = active_player_name[0] != 0 ? active_player_name :
+                               generated_runtime_default_player_name;
+            for (letter = 0; name[letter] != 0 && letter < 20; ++letter) {
+                int byte = (unsigned char)name[letter];
+                name_text_glyphs[slot][count++] = byte == 32 ? -1 : byte;
+            }
+        } else {
+            name_text_glyphs[slot][count++] = glyph;
+        }
+    }
+    name_text_sources[slot] = text;
+    name_texts[slot].glyphs = name_text_glyphs[slot];
+    name_texts[slot].glyph_count = count;
+    name_texts[slot].message = -1;
+    return &name_texts[slot];
+}
 
 static int opposite_mask(int move_x, int move_y)
 {
@@ -1551,6 +1618,11 @@ void world_initialize(struct world_state *world)
     int index;
     int scene_index;
     int entity_index;
+    for (index = 0; index < 20 && generated_runtime_default_player_name[index] != 0; ++index)
+        world->player_name[index] = generated_runtime_default_player_name[index];
+    world->player_name[index] = 0;
+    while (++index < 21)
+        world->player_name[index] = 0;
     world->scene = &generated_runtime_scenes[generated_runtime_initial_scene];
     world->scene_index = generated_runtime_initial_scene;
     world->player_entity = -1;
@@ -2049,9 +2121,9 @@ const struct generated_runtime_text *world_localized_text(
 {
     if (text == 0 || text->message < 0 ||
         text->message >= generated_runtime_localized_message_count)
-        return text;
-    return &generated_runtime_localized_texts[
-        active_language * generated_runtime_localized_message_count + text->message];
+        return expand_player_name(text);
+    return expand_player_name(&generated_runtime_localized_texts[
+        active_language * generated_runtime_localized_message_count + text->message]);
 }
 
 /* Resolve one generated UI role through the active language table. */

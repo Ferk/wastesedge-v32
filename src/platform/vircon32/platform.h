@@ -45,6 +45,10 @@ void platform_begin_menu(void);
 void platform_invalidate_world(void);
 void platform_render_title_menu(int selected, int storage_result);
 void platform_render_language_menu(int selected);
+/* Edit a new game's name with a controller; START accepts the current value. */
+void platform_begin_name_entry(void);
+int platform_update_name_entry(struct world_state *world, const struct world_actions *actions);
+void platform_render_name_entry(const struct world_state *world);
 void platform_render_pause_menu(int selected, int storage_result);
 void platform_render_slot_menu(int from_title, int saving, int selected,
                                const int slot_states[PLATFORM_SAVE_SLOT_COUNT],

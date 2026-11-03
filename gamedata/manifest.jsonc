@@ -43,12 +43,33 @@
     "empty": "Empty",
     "incompatible": "Incompatible Save",
     "day": "Day",
-    "slot": "Slot"
+    "slot": "Slot",
+    "enter_name": "Enter your character's name",
+    "keyboard_space": "Space",
+    "keyboard_delete": "Delete",
+    "keyboard_begin": "Begin"
   },
   "title_music": "title_theme",
   "ui_sounds": {
     "move": "ui_switch",
     "confirm": "ui_select"
+  },
+  "ui_icons": {
+    "button_a": { "source": "assets/ui/buttons/buttonA.png" },
+    "button_b": { "source": "assets/ui/buttons/buttonB.png" },
+    "button_x": { "source": "assets/ui/buttons/buttonX.png" },
+    "button_y": { "source": "assets/ui/buttons/buttonY.png" },
+    "button_l": { "source": "assets/ui/buttons/buttonL.png" },
+    "button_r": { "source": "assets/ui/buttons/buttonR.png" },
+    "button_start": { "source": "assets/ui/buttons/buttonS.png" },
+    "dpad_up": { "source": "assets/ui/buttons/dpadUp.png" },
+    "dpad_down": { "source": "assets/ui/buttons/dpadDown.png" },
+    "dpad_left": { "source": "assets/ui/buttons/dpadLeft.png" },
+    "dpad_right": { "source": "assets/ui/buttons/dpadRight.png" },
+    "dpad_up_left": { "source": "assets/ui/buttons/dpadUpLeft.png" },
+    "dpad_up_right": { "source": "assets/ui/buttons/dpadUpRight.png" },
+    "dpad_down_left": { "source": "assets/ui/buttons/dpadDownLeft.png" },
+    "dpad_down_right": { "source": "assets/ui/buttons/dpadDownRight.png" }
   },
   "save_signature": "WASTESEDGE-V32-SAVE",
   "save_version": 1,

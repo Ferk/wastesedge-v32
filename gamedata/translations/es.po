@@ -7787,3 +7787,15 @@ msgstr "La puerta de la despensa está cerrada con llave."
 #: scripts/game_events/silverhair_to_fst.py:41
 msgid "I better leave the way I came."
 msgstr "Será mejor que salga por donde he venido."
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Begin"
+msgstr "Comenzar"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Space"
+msgstr "Espacio"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Delete"
+msgstr "Borrar"

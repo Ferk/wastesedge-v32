@@ -7859,3 +7859,15 @@ msgstr "De deur naar de voorraadkast is op slot."
 #: scripts/game_events/silverhair_to_fst.py:41
 msgid "I better leave the way I came."
 msgstr "Ik kan het beste teruggaan zoals ik gekomen ben."
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Begin"
+msgstr "Beginnen"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Space"
+msgstr "Spatie"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Delete"
+msgstr "Wissen"

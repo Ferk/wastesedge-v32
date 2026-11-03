@@ -1,7 +1,9 @@
+/* Vircon32 graphics, controller menus, sound, cutscenes and memory-card access. */
 #include "platform/vircon32/vircon.h"
 
 #include "platform/vircon32/platform.h"
 #include "engine/savegame.h"
+#include "ui/virtual_keyboard.h"
 
 #define GAME_WIDTH 427
 #define GAME_HEIGHT 240
@@ -71,6 +73,7 @@
 #define COLOR_PANEL_BORDER 0xFF2C6868u
 #define COLOR_PANEL_BACKGROUND 0xFF101820u
 #define COLOR_MENU_SELECTION 0x80404020u
+#define COLOR_KEYBOARD_BUTTON_BACKGROUND 0x40101010u
 #define COLOR_STATUS_SUCCESS 0xFF80FF80u
 #define COLOR_STATUS_INFO 0xFF8080FFu
 #define COLOR_SLOT_EMPTY_BORDER 0xFF304050u
@@ -156,6 +159,8 @@ static int cinematic_pending_node = -1;
 static int cinematic_node_started_at[GENERATED_RUNTIME_DIALOGUE_USED_STORAGE_COUNT];
 static int active_music_track = -1;
 static game_signature game_card_signature;
+static struct virtual_keyboard name_keyboard;
+static const struct generated_runtime_frame *name_entry_portrait;
 
 static void define_region_rectangle(int x, int y, int width, int height)
 {
@@ -2229,6 +2234,32 @@ static void draw_title_background(void)
     }
 }
 
+/* Draw a UI portrait or control icon at its authored pixel size. */
+static void draw_direct_frame_native(const struct generated_runtime_frame *frame, int x, int y)
+{
+    if (frame->texture < 0 || frame->width <= 0 || frame->height <= 0)
+        return;
+    select_texture(frame->texture);
+    select_region(0);
+    define_region_rectangle(frame->source_x, frame->source_y, frame->width, frame->height);
+    set_drawing_scale(1.0f, 1.0f);
+    set_multiply_color(COLOR_WHITE);
+    set_drawing_point(x, y);
+    draw_region();
+}
+
+/* Draw a game-authored button image, retaining a text hint if it is omitted. */
+static void draw_ui_button_icon(int role, int x, int y, const char *fallback)
+{
+    const struct generated_runtime_frame *frame = &generated_runtime_ui_icons[role];
+    if (frame->texture >= 0) {
+        draw_direct_frame_native(frame, x, y);
+    } else {
+        set_multiply_color(COLOR_WHITE);
+        print_at(x, y, fallback);
+    }
+}
+
 /* Draw the optional logo using its manifest-authored position and scale. */
 static void draw_title_logo(void)
 {
@@ -2369,6 +2400,118 @@ void platform_render_language_menu(int selected)
     for (language = 0; language < generated_runtime_language_count; ++language)
         draw_menu_option(68 + language * 33,
                          world_language_name(language), language == selected);
+    set_multiply_color(COLOR_WHITE);
+}
+
+/* Start with the default name highlighted, ready to be replaced in one press. */
+void platform_begin_name_entry(void)
+{
+    int dialogue;
+    virtual_keyboard_begin(&name_keyboard);
+    /* The A press that opened this screen must not also type its first key. */
+    name_keyboard.previous_type = gamepad_button_a() > 0;
+    name_keyboard.previous_space = gamepad_button_x() > 0;
+    name_entry_portrait = 0;
+    /* Reuse the player portrait already supplied by dialogue data. Other
+     * games can author a different player speaker without changing this UI. */
+    for (dialogue = 0; dialogue < generated_runtime_dialogue_count && name_entry_portrait == 0; ++dialogue) {
+        const struct generated_runtime_dialogue *entry = &generated_runtime_dialogues[dialogue];
+        int speaker;
+        for (speaker = 0; speaker < entry->speaker_count; ++speaker) {
+            if (entry->speakers[speaker].is_player && entry->speakers[speaker].portrait.texture >= 0) {
+                name_entry_portrait = &entry->speakers[speaker].portrait;
+                break;
+            }
+        }
+    }
+    platform_begin_menu();
+}
+
+/* Navigate the virtual keyboard and replace the selected default on typing. */
+int platform_update_name_entry(struct world_state *world, const struct world_actions *actions)
+{
+    struct virtual_keyboard_input input;
+    int result;
+    input.x = actions->move_x;
+    input.y = actions->move_y;
+    input.page_left = gamepad_button_l() > 0;
+    input.page_right = gamepad_button_r() > 0;
+    input.type = gamepad_button_a() > 0;
+    input.space = gamepad_button_x() > 0;
+    input.erase = gamepad_button_b() > 0;
+    input.frame = platform_frame_counter();
+    input.accept = actions->menu_pressed;
+    result = virtual_keyboard_update(&name_keyboard, world->player_name,
+                                     (int)sizeof(world->player_name), &input);
+    if (result & VIRTUAL_KEYBOARD_ACCEPTED)
+        platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
+    else if (result & VIRTUAL_KEYBOARD_EDITED)
+        platform_play_ui_sound(input.erase ? WORLD_UI_SOUND_CANCEL : WORLD_UI_SOUND_CONFIRM);
+    else if (result & VIRTUAL_KEYBOARD_MOVED)
+        platform_play_ui_sound(WORLD_UI_SOUND_MOVE);
+    return (result & VIRTUAL_KEYBOARD_ACCEPTED) != 0;
+}
+
+/* Draw the localized naming prompt, selection, character grid and edit keys. */
+void platform_render_name_entry(const struct world_state *world)
+{
+    int name_glyphs[20];
+    struct generated_runtime_text name;
+    int key;
+    name.glyphs = name_glyphs;
+    name.glyph_count = 0;
+    name.message = -1;
+    for (key = 0; key < 20 && world->player_name[key] != 0; ++key) {
+        int byte = (unsigned char)world->player_name[key];
+        name_glyphs[name.glyph_count++] = byte == ' ' ? -1 : byte;
+    }
+    draw_title_background();
+    set_blending_mode(0x20);
+    draw_direct_rectangle(32, 14, 576, 332, COLOR_PANEL_BORDER);
+    draw_direct_rectangle(36, 18, 568, 324, COLOR_PANEL_BACKGROUND);
+    draw_direct_runtime_text_centered(28, world_ui_text(GENERATED_UI_TEXT_ENTER_NAME), COLOR_ACCENT_GOLD);
+    if (name_entry_portrait != 0) {
+        draw_direct_frame_native(name_entry_portrait, 75, 35);
+    }
+    draw_direct_rectangle(158, 72, 410, 34, COLOR_SLOT_BACKGROUND);
+    if (name_keyboard.text_selected)
+        draw_direct_rectangle(168, 76, direct_runtime_text_width(&name), 26,
+                              COLOR_MENU_SELECTION);
+    draw_direct_runtime_text(168, 78, &name, COLOR_ACCENT_GOLD);
+    draw_ui_button_icon(GENERATED_UI_ICON_BUTTON_L, 70, 126, "L");
+    draw_ui_button_icon(GENERATED_UI_ICON_BUTTON_R, 92, 126, "R");
+    draw_direct_text_centered(126, name_keyboard.page == 0 ?
+                             "[ ABC abc 123 ]     \xC0\xC9\xD1 \xE0\xE9\xF1" :
+                             "  ABC abc 123     [ \xC0\xC9\xD1 \xE0\xE9\xF1 ]", COLOR_ACCENT_GOLD);
+    for (key = 0; key < VIRTUAL_KEYBOARD_CHARACTER_KEYS; ++key) {
+        int byte = virtual_keyboard_character(name_keyboard.page, key);
+        struct generated_runtime_text label;
+        int center_x = 84 + (key % VIRTUAL_KEYBOARD_COLUMNS) * 50;
+        int y = 148 + (key / VIRTUAL_KEYBOARD_COLUMNS) * 22;
+        if (byte == 0)
+            continue;
+        label.glyphs = &byte;
+        label.glyph_count = 1;
+        label.message = -1;
+        draw_direct_rectangle(center_x - 16, y - 1, 32, 21,
+                              key == name_keyboard.key ? COLOR_MENU_SELECTION : COLOR_KEYBOARD_BUTTON_BACKGROUND);
+        draw_direct_runtime_text(center_x - direct_runtime_text_width(&label) / 2, y,
+                                 &label, key == name_keyboard.key ? COLOR_ACCENT_GOLD : COLOR_WHITE);
+    }
+    for (key = 0; key < VIRTUAL_KEYBOARD_ACTION_COUNT; ++key) {
+        int x = 70 + key * 168;
+        int role = key == 0 ? GENERATED_UI_TEXT_KEYBOARD_SPACE :
+                   key == 1 ? GENERATED_UI_TEXT_KEYBOARD_DELETE : GENERATED_UI_TEXT_KEYBOARD_BEGIN;
+        int button = key == 1 ? GENERATED_UI_ICON_BUTTON_B :
+                     key == 2 ? GENERATED_UI_ICON_BUTTON_START : GENERATED_UI_ICON_BUTTON_X;
+        draw_direct_rectangle(x - 7, 302, 154, 26,
+                              name_keyboard.key == VIRTUAL_KEYBOARD_CHARACTER_KEYS + key ?
+                              COLOR_MENU_SELECTION : COLOR_KEYBOARD_BUTTON_BACKGROUND);
+        draw_ui_button_icon(button, x, 307, key == 1 ? "B" : key == 2 ? "S" : "X");
+        draw_direct_runtime_text(x + 20, 306, world_ui_text(role),
+                                 name_keyboard.key == VIRTUAL_KEYBOARD_CHARACTER_KEYS + key ?
+                                 COLOR_ACCENT_GOLD : COLOR_WHITE);
+    }
     set_multiply_color(COLOR_WHITE);
 }
 

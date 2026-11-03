@@ -2685,7 +2685,7 @@ int main(void)
          * resumes at the original noon start rather than becoming corrupt. */
         save_words[0] = 1;
         assert(savegame_decode(&loaded, save_words,
-                               word_count - 5 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
+                               word_count - 26 - GENERATED_RUNTIME_ENTITY_COUNT * 12));
         assert(loaded.game_time == generated_runtime_initial_game_time);
         save_words[0] = SAVEGAME_FORMAT_VERSION;
         assert(!savegame_decode(&loaded, save_words, word_count - 1));

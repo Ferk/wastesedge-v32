@@ -7837,3 +7837,15 @@ msgstr "A porta da despensa está trancada."
 #: scripts/game_events/silverhair_to_fst.py:41
 msgid "I better leave the way I came."
 msgstr "É melhor voltar pelo caminho que eu vim."
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Begin"
+msgstr "Começar"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Space"
+msgstr "Espaço"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Delete"
+msgstr "Apagar"

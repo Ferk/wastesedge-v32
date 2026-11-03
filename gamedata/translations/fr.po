@@ -7950,3 +7950,15 @@ msgstr "La porte du cellier est fermée."
 #: scripts/game_events/silverhair_to_fst.py:41
 msgid "I better leave the way I came."
 msgstr "Je ferai mieux de quitter par où je suis entré."
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Begin"
+msgstr "Commencer"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Space"
+msgstr "Espace"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Delete"
+msgstr "Effacer"

@@ -1,3 +1,4 @@
+/* Serialize and validate adventure state in a versioned memory-card payload. */
 #include "engine/savegame.h"
 
 #include "content_ids.h"
@@ -174,6 +175,8 @@ int savegame_encode(const struct world_state *world, int *words, int capacity)
     write_word(&writer, world->dialogue_auto_frame);
     write_word(&writer, world->player_hidden);
     write_word(&writer, world->transition_player_hidden);
+    for (index = 0; index < 21; ++index)
+        write_word(&writer, (unsigned char)world->player_name[index]);
 
     return writer.failed ? 0 : writer.count;
 }
@@ -404,6 +407,14 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
     if (version >= 5) {
         restored_world.player_hidden = read_word(&reader);
         restored_world.transition_player_hidden = read_word(&reader);
+    }
+    if (version >= 6) {
+        for (index = 0; index < 21; ++index) {
+            int byte = read_word(&reader);
+            if (byte < 0 || byte > 255 || (index == 20 && byte != 0))
+                reader.failed = 1;
+            restored_world.player_name[index] = (char)byte;
+        }
     }
 
     restored_world.scene = (restored_world.scene_index >= 0 &&

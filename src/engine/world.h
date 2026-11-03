@@ -92,6 +92,7 @@ struct world_actor_checkpoint {
 };
 
 struct world_state {
+    char player_name[21];
     const struct generated_runtime_scene *scene;
     int scene_index;
     int player_entity;
@@ -141,6 +142,8 @@ struct world_state {
 void world_initialize(struct world_state *world);
 void world_seed_random(struct world_state *world, int seed);
 void world_update(struct world_state *world, const struct world_actions *actions);
+/* Store a CP-1252 name (up to 20 characters) and activate it for text display. */
+void world_set_player_name(struct world_state *world, const char *name);
 int world_dialogue_is_cutscene(const struct world_state *world);
 void world_finish_cutscene(struct world_state *world, int final_node);
 int world_transition_alpha(const struct world_state *world);

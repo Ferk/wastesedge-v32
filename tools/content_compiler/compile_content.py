@@ -32,7 +32,13 @@ UI_TEXT_ROLES = (
     "CONTINUE", "SAVE_GAME", "BACK_TO_TITLE", "NO_MEMORY_CARD",
     "FOREIGN_CARD", "EMPTY_SLOT", "CORRUPT_SAVE", "INCOMPATIBLE_SAVE",
     "SAVE_FAILED", "GAME_SAVED", "ERROR", "EMPTY", "INCOMPATIBLE", "DAY",
-    "SLOT",
+    "SLOT", "ENTER_NAME", "KEYBOARD_SPACE", "KEYBOARD_DELETE", "KEYBOARD_BEGIN",
+)
+
+UI_ICON_ROLES = (
+    "BUTTON_A", "BUTTON_B", "BUTTON_X", "BUTTON_Y", "BUTTON_L", "BUTTON_R", "BUTTON_START",
+    "DPAD_UP", "DPAD_DOWN", "DPAD_LEFT", "DPAD_RIGHT", "DPAD_UP_LEFT", "DPAD_UP_RIGHT",
+    "DPAD_DOWN_LEFT", "DPAD_DOWN_RIGHT",
 )
 
 
@@ -2058,8 +2064,16 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
 
     def encode(text: str) -> list[int]:
         """Encode UTF-8 authoring text as byte-indexed CP-1252 glyph IDs."""
+        # Legacy authored lines contain the fallback name literally. Preserve
+        # those occurrences as the same runtime token used by gettext $name.
+        default_name = translation_variables.get("$name", "")
+        if default_name:
+            text = re.sub(r"(?<!\w)" + re.escape(default_name) + r"(?!\w)", "\x01", text)
         encoded: list[int] = []
         for character in text:
+            if character == "\x01":
+                encoded.append(-3)
+                continue
             if character in "\r\n":
                 encoded.append(-2)
                 continue
@@ -2077,6 +2091,8 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                     f"dialogue font has no glyph in CP-1252 byte 0x{byte:02X} "
                     f"for {character!r}")
             encoded.append(byte)
+        if -3 in encoded and len(encoded) + encoded.count(-3) * 19 > 2048:
+            raise ContentError("player-name expansion exceeds 2048 glyphs")
         return encoded
 
     def resolve_variables(text: str) -> str:
@@ -2225,6 +2241,7 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
         "messages": messages,
         "glyphs": localized_glyphs,
         "ui_messages": ui_messages,
+        "default_player_name": translation_variables.get("$name", "Player"),
     }
     return entries, advances[0x20], line_height, localization
 
@@ -3899,6 +3916,7 @@ extern const int generated_runtime_initial_game_time;
 extern const int generated_runtime_new_game_cutscene;
 extern const int generated_runtime_title_cutscene;
 extern const char generated_runtime_game_title[];
+extern const char generated_runtime_default_player_name[];
 extern const int generated_runtime_title_music;
 extern const int generated_runtime_save_signature[20];
 extern const int generated_runtime_save_magic;
@@ -3915,6 +3933,7 @@ extern const int generated_runtime_localized_message_count;
 extern const int generated_runtime_ui_text_messages[];
 extern const struct generated_runtime_frame generated_runtime_title_background;
 extern const struct generated_runtime_frame generated_runtime_title_logo;
+extern const struct generated_runtime_frame generated_runtime_ui_icons[];
 extern const struct generated_runtime_frame generated_runtime_cutscene_images[];
 extern const int generated_runtime_cutscene_image_count;
 #define GENERATED_RUNTIME_FLAG_COUNT %d
@@ -3965,7 +3984,10 @@ extern const int generated_runtime_cutscene_image_count;
        "\n".join(
            f"#define GENERATED_UI_TEXT_{name} {index}"
            for index, name in enumerate(UI_TEXT_ROLES)) +
-       f"\n#define GENERATED_UI_TEXT_COUNT {len(UI_TEXT_ROLES)}")
+       f"\n#define GENERATED_UI_TEXT_COUNT {len(UI_TEXT_ROLES)}\n" +
+       "\n".join(f"#define GENERATED_UI_ICON_{name} {index}"
+                 for index, name in enumerate(UI_ICON_ROLES)) +
+       f"\n#define GENERATED_UI_ICON_COUNT {len(UI_ICON_ROLES)}")
 
 
 def frame_initializer(frame: object, resource_index: dict[str, int]) -> str:
@@ -3996,6 +4018,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                    ui_sounds: list[int], schedules: list[dict[str, object]],
                    title_background: dict[str, object],
                    title_logo: dict[str, object] | None,
+                   ui_icons: list[dict[str, object] | None],
                    cutscene_images: list[dict[str, object]],
                    new_game_cutscene: int, title_cutscene: int, game_title: str,
                    title_music: int, save_signature: list[int],
@@ -4006,6 +4029,10 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                  frame_initializer(title_background, resource_index) + ";\n")
     lines.append("const struct generated_runtime_frame generated_runtime_title_logo = " +
                  frame_initializer(title_logo, resource_index) + ";\n")
+    lines.append("const struct generated_runtime_frame generated_runtime_ui_icons[] = {")
+    for icon in ui_icons:
+        lines.append("    " + frame_initializer(icon, resource_index) + ",")
+    lines.append("};\n")
     lines.append("const struct generated_runtime_frame generated_runtime_cutscene_images[] = {")
     if cutscene_images:
         for frame in cutscene_images:
@@ -4444,6 +4471,8 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
     lines.append(f"const int generated_runtime_new_game_cutscene = {new_game_cutscene};")
     lines.append(f"const int generated_runtime_title_cutscene = {title_cutscene};")
     lines.append(f"const char generated_runtime_game_title[] = {json.dumps(game_title)};")
+    lines.append("const char generated_runtime_default_player_name[] = " +
+                 json.dumps(localization["default_player_name"]) + ";")
     lines.append(f"const int generated_runtime_title_music = {title_music};")
     lines.append("const int generated_runtime_save_signature[20] = { " +
                  ", ".join(str(value) for value in save_signature) + " };")
@@ -4504,6 +4533,13 @@ def compile_content(project_root: Path) -> None:
         game_root, manifest.get("title_background"), "title_background")
     title_logo = manifest_frame(
         game_root, manifest.get("title_logo"), "title_logo", optional=True)
+    raw_icons = expect(manifest.get("ui_icons", {}), dict, "manifest ui_icons")
+    unknown_icons = set(raw_icons) - {role.lower() for role in UI_ICON_ROLES}
+    if unknown_icons:
+        raise ContentError("manifest ui_icons has unsupported roles: " + ", ".join(sorted(unknown_icons)))
+    ui_icons = [manifest_frame(game_root, raw_icons.get(role.lower()),
+                               f"ui_icons.{role.lower()}", optional=True)
+                for role in UI_ICON_ROLES]
     cutscene_images: list[dict[str, object]] = []
     cutscene_image_ids: set[str] = set()
     try:
@@ -4690,7 +4726,8 @@ def compile_content(project_root: Path) -> None:
         actor_atlas_references(runtime_visuals, runtime_dialogue),
         game_root, output_root, "runtime-atlases", "actors", prefer_fewer_pages=True)
     world_logical, world_unique, world_atlases = materialize_runtime_atlases(
-        world_atlas_references(runtime_scenes, runtime_object_visuals, runtime_glyphs),
+        world_atlas_references(runtime_scenes, runtime_object_visuals, runtime_glyphs) +
+        [(icon, "image", "source_x", "source_y") for icon in ui_icons if icon is not None],
         game_root, output_root, "runtime-atlases", "world")
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
@@ -4698,7 +4735,8 @@ def compile_content(project_root: Path) -> None:
                                                   [str(title_background["image"])] +
                                                   ([] if title_logo is None else
                                                    [str(title_logo["image"])]) +
-                                                  [str(image["image"]) for image in cutscene_images])
+                                                  [str(image["image"]) for image in cutscene_images] +
+                                                  [str(icon["image"]) for icon in ui_icons if icon is not None])
     maximum_cartridge_textures = 256
     if len(runtime_resources) > maximum_cartridge_textures:
         raise ContentError(
@@ -4739,7 +4777,7 @@ def compile_content(project_root: Path) -> None:
         runtime_glyphs, runtime_space_advance, runtime_line_height, localization,
         music, effects, ui_sounds,
         runtime_schedule_data,
-        title_background, title_logo, cutscene_images,
+        title_background, title_logo, ui_icons, cutscene_images,
         new_game_cutscene, title_cutscene, game_title,
         title_music, save_signature, save_magic))
     source_textures = [path for path in runtime_resources if not path.startswith(GENERATED_RESOURCE_PREFIX)]

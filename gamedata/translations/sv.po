@@ -7747,3 +7747,15 @@ msgstr "Dörren till skafferiet är låst."
 #: scripts/game_events/silverhair_to_fst.py:41
 msgid "I better leave the way I came."
 msgstr "Bäst att jag går ut samma väg som jag kom."
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Begin"
+msgstr "Börja"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Space"
+msgstr "Mellanslag"
+
+#: gamedata/manifest.jsonc keyboard controls
+msgid "Delete"
+msgstr "Radera"
