@@ -17,16 +17,19 @@
   "nodes": [
     {
       "id": "gem_attention", "speaker": "gem",
+      "presentation": "notice",
       "text": "Upon opening the chest, a small green something catches your attention ...",
       "next": "gem_found"
     },
     {
       "id": "gem_found", "speaker": "gem",
+      "presentation": "notice",
       "text": "There, inmidst your mistress' luggage, lies one of Master Fingolson's gems.",
       "on_end": "record_fingolson_gem", "end": true
     },
     {
       "id": "familiar_chest", "speaker": "player",
+      "presentation": "ambient", "auto_advance_frames": 180,
       "text": "I know this chest. The Lady uses it on her journeys.",
       "end": true
     }

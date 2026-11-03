@@ -83,6 +83,8 @@ set(runtime_sources
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/savegame.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/virtual_keyboard.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/notice.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/text_layout.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/platform.c"
   "${generated_dir}/content_data.c"
   "${generated_dir}/content_scene_data.c")
@@ -91,6 +93,8 @@ set(runtime_headers
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/savegame.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/virtual_keyboard.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/notice.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/text_layout.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/platform.h"
   "${generated_dir}/content_ids.h"
   "${generated_dir}/content_scene_data.h")

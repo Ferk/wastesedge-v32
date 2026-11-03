@@ -4,6 +4,8 @@
 #include "platform/vircon32/platform.h"
 #include "engine/savegame.h"
 #include "ui/virtual_keyboard.h"
+#include "ui/notice.h"
+#include "ui/text_layout.h"
 
 #define GAME_WIDTH 427
 #define GAME_HEIGHT 240
@@ -368,53 +370,6 @@ static void record_runtime_text_centered_lines(
     }
 }
 
-static void measure_runtime_text(const struct generated_runtime_text *text,
-                                 int maximum_width, int *width, int *height)
-{
-    int cursor_x = 0;
-    int used_width = 0;
-    int lines = 1;
-    int index;
-    if (text == 0 || text->glyph_count <= 0) {
-        *width = 0;
-        *height = generated_runtime_line_height;
-        return;
-    }
-    for (index = 0; index < text->glyph_count; ++index) {
-        int glyph_index = text->glyphs[index];
-        if (glyph_index == -2) {
-            if (cursor_x > used_width)
-                used_width = cursor_x;
-            cursor_x = 0;
-            ++lines;
-            continue;
-        }
-        if (glyph_index < 0) {
-            cursor_x += generated_runtime_space_advance;
-            continue;
-        }
-        if (index == 0 || text->glyphs[index - 1] < 0) {
-            int scan = index;
-            int word_width = 0;
-            while (scan < text->glyph_count && text->glyphs[scan] >= 0) {
-                word_width += generated_runtime_glyphs[text->glyphs[scan]].advance;
-                ++scan;
-            }
-            if (cursor_x > 0 && cursor_x + word_width > maximum_width) {
-                if (cursor_x > used_width)
-                    used_width = cursor_x;
-                cursor_x = 0;
-                ++lines;
-            }
-        }
-        cursor_x += generated_runtime_glyphs[glyph_index].advance;
-        if (cursor_x > used_width)
-            used_width = cursor_x;
-    }
-    *width = used_width;
-    *height = lines * generated_runtime_line_height;
-}
-
 static void record_dialogue_panel(const struct world_state *world)
 {
     const struct generated_runtime_dialogue_speaker *speaker = world_dialogue_speaker(world);
@@ -444,11 +399,11 @@ static void record_dialogue_panel(const struct world_state *world)
     int scroll_content_height;
     int index;
 
-    measure_runtime_text(speech, text_width, &speech_width, &speech_height);
+    ui_measure_text(speech, text_width, &speech_width, &speech_height);
     for (index = 0; index < choice_count; ++index) {
         int option_width;
         int option_height;
-        measure_runtime_text(world_dialogue_choice_display(world, index),
+        ui_measure_text(world_dialogue_choice_display(world, index),
                              choice_text_width, &option_width, &option_height);
         if (index == selected_choice) {
             selected_top = choices_height;
@@ -532,7 +487,7 @@ static void record_dialogue_panel(const struct world_state *world)
             for (index = 0; index < choice_count; ++index) {
                 int option_width;
                 int option_height;
-                measure_runtime_text(world_dialogue_choice_display(world, index),
+                ui_measure_text(world_dialogue_choice_display(world, index),
                                      choice_text_width, &option_width, &option_height);
                 if (option_top > target_scroll)
                     break;
@@ -556,7 +511,7 @@ static void record_dialogue_panel(const struct world_state *world)
         int option_y;
         int visible_top;
         int visible_bottom;
-        measure_runtime_text(world_dialogue_choice_display(world, index),
+        ui_measure_text(world_dialogue_choice_display(world, index),
                              choice_text_width, &option_width, &option_height);
         option_y = content_view_top + choice_offset + choices_height - dialogue_content_scroll;
         visible_top = option_y > content_view_top ? option_y : content_view_top;
@@ -591,6 +546,32 @@ static void record_dialogue_panel(const struct world_state *world)
                           COLOR_SCROLL_TRACK);
         record_solid_rect(track_x, thumb_y, 4, thumb_height, COLOR_SCROLL_THUMB);
     }
+}
+
+/* Present an illustrated, nameless notice over the unchanged game scene. */
+static void record_dialogue_notice(const struct world_state *world)
+{
+    const struct generated_runtime_dialogue_speaker *speaker = world_dialogue_speaker(world);
+    const struct generated_runtime_text *text = world_dialogue_display(world);
+    const struct generated_runtime_frame *image = speaker != 0 ? &speaker->portrait : 0;
+    struct ui_notice_layout layout;
+    int image_width = image != 0 && image->texture >= 0 ? image->width : 0;
+    int image_height = image_width > 0 ? image->height : 0;
+    int text_width;
+    int text_height;
+    ui_notice_layout(&layout, DISPLAY_WIDTH, DISPLAY_HEIGHT, image_width, image_height, 0);
+    ui_measure_text(text, layout.text_width, &text_width, &text_height);
+    ui_notice_layout(&layout, DISPLAY_WIDTH, DISPLAY_HEIGHT, image_width, image_height, text_height);
+    record_solid_rect(layout.x, layout.y, layout.width, layout.height, COLOR_BALLOON_BACKGROUND);
+    record_solid_rect(layout.x - 1, layout.y - 1, layout.width + 2, 1, COLOR_ACCENT_GOLD);
+    record_solid_rect(layout.x - 1, layout.y + layout.height, layout.width + 2, 1, COLOR_ACCENT_GOLD);
+    record_solid_rect(layout.x - 1, layout.y, 1, layout.height, COLOR_ACCENT_GOLD);
+    record_solid_rect(layout.x + layout.width, layout.y, 1, layout.height, COLOR_ACCENT_GOLD);
+    if (image_width > 0)
+        record_ui_frame(image, layout.image_x, layout.image_y, 1.0f);
+    record_runtime_text_clipped(layout.text_x, layout.text_y, layout.text_width,
+                                layout.y + 8, layout.y + layout.height - 8,
+                                text, COLOR_WHITE);
 }
 
 static void camera_for_player(const struct world_state *world, int *camera_x, int *camera_y)
@@ -796,7 +777,7 @@ static void record_entity_speech(const struct world_state *world,
                         visual->base_y * world->scene->tile_size + frame->offset_y -
                         camera_y);
     sprite_bottom = sprite_top + (frame->height * 3) / 2;
-    measure_runtime_text(speech, SPEECH_MAX_TEXT_WIDTH, &text_width, &text_height);
+    ui_measure_text(speech, SPEECH_MAX_TEXT_WIDTH, &text_width, &text_height);
     bubble_width = text_width + SPEECH_PADDING_X * 2;
     bubble_height = text_height + SPEECH_PADDING_Y * 2;
     bubble_x = anchor_x - bubble_width / 2;
@@ -1224,8 +1205,12 @@ static void prepare_world_frame(const struct world_state *world)
     camera_for_player(world, &camera_x, &camera_y);
     draw_background(world, camera_x, camera_y);
     draw_depth_sorted_objects(world, camera_x, camera_y);
-    if (world_dialogue_is_open(world))
-        record_dialogue_panel(world);
+    if (world_dialogue_is_open(world)) {
+        if (world_dialogue_presentation(world) == GENERATED_DIALOGUE_PRESENTATION_NOTICE)
+            record_dialogue_notice(world);
+        else
+            record_dialogue_panel(world);
+    }
     else
         record_ambient_speech(world, camera_x, camera_y);
     transition_alpha = world_transition_alpha(world);
@@ -1498,7 +1483,7 @@ static void record_cutscene_text(const struct generated_runtime_dialogue *dialog
         int text_width;
         int text_height;
         int x = node->cutscene_text_x;
-        measure_runtime_text(text, node->cutscene_text_width,
+        ui_measure_text(text, node->cutscene_text_width,
                              &text_width, &text_height);
         if (x < 0)
             x = (DISPLAY_WIDTH - text_width - SPEECH_PADDING_X * 2) / 2;
@@ -1637,13 +1622,10 @@ static void finish_prepared_frame(void)
 
 void platform_render_world(const struct world_state *world)
 {
-    const struct generated_runtime_dialogue *dialogue =
-        world_dialogue_is_open(world)
-            ? &generated_runtime_dialogues[world->dialogue] : 0;
     int preparation_frame;
 
-    if (dialogue != 0 && dialogue->presentation_mode ==
-                             GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON) {
+    if (world_dialogue_is_open(world) && world_dialogue_presentation(world) ==
+                                            GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON) {
         prepared_frame_valid = 0;
         displayed_world_valid = 0;
         prepare_balloon_dialogue_frame(world);

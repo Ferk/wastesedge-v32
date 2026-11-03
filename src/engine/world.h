@@ -169,6 +169,8 @@ const struct generated_runtime_frame *world_scenery_frame(
     const struct world_state *world,
     const struct generated_runtime_scenery *scenery);
 int world_dialogue_is_open(const struct world_state *world);
+/* Return the node's presentation override, falling back to its dialogue. */
+int world_dialogue_presentation(const struct world_state *world);
 void world_set_language(int language);
 int world_language(void);
 const struct generated_runtime_text *world_localized_text(

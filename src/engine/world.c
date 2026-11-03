@@ -257,6 +257,8 @@ static int hotspot_script(const struct world_state *world)
     return selected;
 }
 
+static void close_dialogue(struct world_state *world);
+
 /* Enter one dialogue node and apply any audiovisual cue authored on it. */
 static void enter_dialogue_node(struct world_state *world, int node_index)
 {
@@ -273,6 +275,18 @@ static void enter_dialogue_node(struct world_state *world, int node_index)
     if (node->music_track >= 0 && world->music_track != node->music_track) {
         world->music_track = node->music_track;
         ++world->music_revision;
+    }
+    /* Ambient terminal lines use actor speech, leaving movement and schedules live. */
+    if (node->presentation_mode == GENERATED_DIALOGUE_PRESENTATION_AMBIENT) {
+        int actor_index = dialogue->speakers[node->speaker].entity;
+        if (actor_index >= 0 && actor_index < GENERATED_RUNTIME_ENTITY_COUNT) {
+            struct world_actor_state *actor = &world->actors[actor_index];
+            actor->speech_override = &node->display;
+            actor->speech_line = -1;
+            actor->speech_frames = node->auto_advance_frames;
+            ++world->visual_revision;
+        }
+        close_dialogue(world);
     }
 }
 
@@ -1585,6 +1599,8 @@ static void advance_past_player_lines(struct world_state *world)
             return;
         }
         enter_dialogue_node(world, node->next_node);
+        if (world->dialogue < 0)
+            return;
     }
     close_dialogue(world);
 }
@@ -1849,7 +1865,9 @@ void world_update(struct world_state *world, const struct world_actions *actions
             if (choice_count > 1)
                 emit_ui_sound(world, WORLD_UI_SOUND_MOVE);
         }
-        if (actions->interact_pressed) {
+        if (actions->interact_pressed ||
+            (actions->cancel_pressed && world_dialogue_presentation(world) ==
+                                        GENERATED_DIALOGUE_PRESENTATION_NOTICE)) {
             if (choice_count > 0) {
                 const struct generated_runtime_dialogue_choice *choice =
                     dialogue_visible_choice(world, node, world->dialogue_choice);
@@ -2099,6 +2117,18 @@ const struct generated_runtime_frame *world_scenery_frame(
 int world_dialogue_is_open(const struct world_state *world)
 {
     return world->dialogue >= 0;
+}
+
+/* Choose a node-specific view, or inherit the dialogue's default view. */
+int world_dialogue_presentation(const struct world_state *world)
+{
+    const struct generated_runtime_dialogue *dialogue;
+    int mode;
+    if (!world_dialogue_is_open(world))
+        return GENERATED_DIALOGUE_PRESENTATION_PANEL;
+    dialogue = &generated_runtime_dialogues[world->dialogue];
+    mode = dialogue->nodes[world->dialogue_node].presentation_mode;
+    return mode >= 0 ? mode : dialogue->presentation_mode;
 }
 
 /* Select the language used by all compiled text lookups. */

@@ -2422,12 +2422,26 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
             else:
                 next_node = index + 1 if index + 1 < len(raw_nodes) else -1
             speaker_id = identifier(node.get("speaker"), f"{path} node speaker")
+            node_presentation = node.get("presentation")
+            node_presentations = {None: -1, "panel": 0, "map_balloon": 1, "notice": 3, "ambient": 4}
+            if not isinstance(node_presentation, (str, type(None))) or node_presentation not in node_presentations:
+                raise ContentError(f"{path}: unsupported node presentation {node_presentation!r}")
+            if node_presentation in ("notice", "map_balloon", "ambient") and choices:
+                raise ContentError(f"{path}: {node_presentation} nodes cannot have choices")
             auto_advance_frames = integer(
                 node.get("auto_advance_frames", 0),
                 f"{path} node auto_advance_frames")
             if auto_advance_frames < 0:
                 raise ContentError(
                     f"{path}: auto_advance_frames cannot be negative")
+            if node_presentation == "ambient" and (
+                    next_node >= 0 or auto_advance_frames <= 0 or
+                    node.get("on_end") is not None or document.get("on_end") is not None or
+                    node.get("hold_at_end", False) is not False or
+                    raw_speakers[speaker_index[speaker_id]]["entity_index"] < 0):
+                raise ContentError(
+                    f"{path}: ambient nodes must be terminal, have a positive duration, "
+                    "an actor speaker, no held ending, and no completion script")
             hold_at_end = expect(node.get("hold_at_end", False), bool,
                                  f"{path} node hold_at_end")
             if hold_at_end and auto_advance_frames <= 0:
@@ -2445,6 +2459,7 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 "text": expect(node.get("text"), str, f"{path} node text"),
                 "translation_parts": node.get("translation_parts"),
                 "speaker": speaker_index[speaker_id],
+                "presentation_mode": node_presentations[node_presentation],
                 "choices": choices,
                 "choices_owner": owner if choices else -1,
                 "next": next_node,
@@ -2465,6 +2480,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                                                    f"{path} node on_end")]),
             })
         presentation = document.get("presentation", "panel")
+        if isinstance(presentation, dict) and any(node["presentation_mode"] != -1 for node in nodes):
+            raise ContentError(f"{path}: cutscene nodes cannot override presentation")
         presentation_mode = 0
         cutscene_layers: list[dict[str, object]] = []
         text_mode = 0
@@ -3844,7 +3861,7 @@ struct generated_runtime_dialogue_node {
     int music_track, hold_at_end, music_delay_frames, music_fade_out_frames;
     int cutscene_text_mode, cutscene_text_x, cutscene_text_y;
     int cutscene_text_width, cutscene_text_bottom, cutscene_text_rate;
-    int cutscene_text_hold, cutscene_text_shadow, cutscene_finish_ranges;
+    int cutscene_text_hold, cutscene_text_shadow, cutscene_finish_ranges, presentation_mode;
 };
 struct generated_runtime_cutscene_keyframe { int frame, value; };
 struct generated_runtime_cutscene_layer {
@@ -3873,6 +3890,8 @@ struct generated_runtime_dialogue {
 #define GENERATED_DIALOGUE_PRESENTATION_PANEL 0
 #define GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON 1
 #define GENERATED_DIALOGUE_PRESENTATION_CUTSCENE 2
+#define GENERATED_DIALOGUE_PRESENTATION_NOTICE 3
+#define GENERATED_DIALOGUE_PRESENTATION_AMBIENT 4
 #define GENERATED_CUTSCENE_TEXT_NONE 0
 #define GENERATED_CUTSCENE_TEXT_BUBBLE 1
 #define GENERATED_CUTSCENE_TEXT_TYPEOVER 2
@@ -4424,7 +4443,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node['choices_owner']}"
                             if node["choices"] else "0")
             lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d, %d }, %s, "
-                         "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
+                         "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
                 json.dumps(node["text"]), dialogue_index, node_index,
                 len(node["text_glyphs"]), node["text_message"],
                 choices_name, len(node["choices"]), node["next"], node["speaker"],
@@ -4434,7 +4453,7 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                 node["cutscene_text_x"], node["cutscene_text_y"],
                 node["cutscene_text_width"], node["cutscene_text_bottom"],
                 node["cutscene_text_rate"], node["cutscene_text_hold"],
-                node["cutscene_text_shadow"], node["cutscene_finish_ranges"]))
+                node["cutscene_text_shadow"], node["cutscene_finish_ranges"], node["presentation_mode"]))
         lines.append("};")
     lines.append("const struct generated_runtime_dialogue generated_runtime_dialogues[] = {")
     for index, dialogue in enumerate(dialogues):
