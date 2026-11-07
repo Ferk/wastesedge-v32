@@ -13,7 +13,8 @@
   ],
   "nodes": [
     {
-      "id": "first_narration", "speaker": "narrator",
+      "id": "first_narration",
+      "achievement_events": [{"achievement": "2", "bit": 3}], "speaker": "narrator",
       "text": "The muscular fellow in front of you has the air of a troublemaker about him. Scars all over his body are evidence of his readiness to use the sword he is carrying. He eyes you with undisguised distaste as you approach.",
       "next": "first_insult"
     },
@@ -25,6 +26,7 @@
           "actions": [{ "op": "set", "flag": "alek_talked", "value": 1 }],
           "next": "dismiss_employer" },
         { "text": "I don't like you either, friend. But unfortunately, I need to talk to you.",
+            "achievement_events": [{"achievement": "9", "bit": 8}],
           "actions": [{ "op": "set", "flag": "alek_talked", "value": 1 }],
           "next": "what_want" }
       ]

@@ -23,3 +23,8 @@ cmake_install.cmake
 *.wasm
 *.asm
 *.v32
+/*.map
+/*-User.txt
+/*-User.ram.json
+/*.achievements.txt
+/local/achievement-*.png

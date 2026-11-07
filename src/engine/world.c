@@ -1,5 +1,6 @@
 /* Adventure simulation, actor movement, dialogue state and localized text. */
 #include "engine/world.h"
+#include "engine/achievements.h"
 
 #define WALK_NORTH 2
 #define WALK_SOUTH 1
@@ -272,6 +273,7 @@ static void enter_dialogue_node(struct world_state *world, int node_index)
     if (node_index < 0 || node_index >= dialogue->node_count)
         return;
     node = &dialogue->nodes[node_index];
+    achievements_event(world->achievement_progress, 0, world->dialogue, node_index, -1);
     if (node->music_track >= 0 && world->music_track != node->music_track) {
         world->music_track = node->music_track;
         ++world->music_revision;
@@ -301,6 +303,10 @@ static void apply_dialogue_choice(struct world_state *world,
                                   const struct generated_runtime_dialogue_choice *choice)
 {
     int index;
+    const struct generated_runtime_dialogue_node *node =
+        &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node];
+    achievements_event(world->achievement_progress, 1, world->dialogue,
+                       world->dialogue_node, (int)(choice - node->choices));
     for (index = 0; index < choice->action_count; ++index) {
         const struct generated_runtime_dialogue_action *action = &choice->actions[index];
         if (action->flag >= 0 && action->flag < GENERATED_RUNTIME_FLAG_COUNT)
@@ -374,6 +380,7 @@ static void start_script(struct world_state *world, int script)
     if (script < 0 || script >= generated_runtime_script_count)
         return;
     world->active_script = script;
+    achievements_event(world->achievement_progress, 2, script, -1, -1);
     world->script_action = 0;
     world->script_wait = 0;
 }
@@ -1634,6 +1641,7 @@ void world_initialize(struct world_state *world)
     int index;
     int scene_index;
     int entity_index;
+    achievements_begin_run(world->achievement_progress);
     for (index = 0; index < 20 && generated_runtime_default_player_name[index] != 0; ++index)
         world->player_name[index] = generated_runtime_default_player_name[index];
     world->player_name[index] = 0;

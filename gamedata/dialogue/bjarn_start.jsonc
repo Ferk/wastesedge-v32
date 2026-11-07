@@ -30,6 +30,7 @@
       "text": "Yes, sir, that is correct. I am here on the behalf of Lady Silverhair, trying to get to the bottom of the disappearance of your stones.",
       "next": "bjarn_calls_theft" },
     { "id": "bjarn_calls_theft", "speaker": "bjarn",
+      "achievement_events": [{ "achievement": "2", "bit": 5 }],
       "text": "I think that 'theft' is a better word for it than disappearance.",
       "next": "player_requests_questions" },
     { "id": "player_requests_questions", "speaker": "player",
@@ -135,7 +136,8 @@
     { "id": "found_gem", "speaker": "bjarn",
       "text": "Really? I ... I am impressed. Let me see! And tell me where you found it.",
       "choices": [
-        { "text": "In the pantry.", "next": "pantry_precision" },
+        { "text": "In the pantry.",
+            "achievement_events": [{"achievement": "9", "bit": 10}], "next": "pantry_precision" },
         { "text": "In Lady Silverhair's luggage.", "next": "bjarn_claims_proof" }
       ]
     },

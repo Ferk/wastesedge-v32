@@ -3,7 +3,7 @@
 
 #include "engine/world.h"
 
-#define SAVEGAME_FORMAT_VERSION 6
+#define SAVEGAME_FORMAT_VERSION 7
 #define SAVEGAME_MINIMUM_VERSION 1
 #define SAVEGAME_MAX_WORDS 1000
 

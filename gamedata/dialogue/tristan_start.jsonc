@@ -30,6 +30,7 @@
   "nodes": [
     {
       "id": "first_narration",
+      "achievement_events": [{"achievement": "2", "bit": 31}],
       "speaker": "narrator",
       "text": "The small man before you wears a cold expression. Judging by his garments he is sort of a merchant, and a rather successful one by the looks of it.",
       "next": "tristan_yes"

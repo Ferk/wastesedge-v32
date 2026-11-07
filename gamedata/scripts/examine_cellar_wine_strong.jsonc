@@ -1,5 +1,6 @@
 {
   "id": "examine_cellar_wine_strong",
+  "achievement_events": [{ "achievement": "1", "bit": 21 }],
   "actions": [
     { "op": "speak", "entity": "player", "text": "Hic! Whoa, that's quite strong!" }
   ]

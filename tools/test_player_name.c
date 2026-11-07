@@ -170,7 +170,7 @@ int main(void)
     assert(strcmp(world.player_name, "Banec") == 0);
     /* Format 5 has no name; keep the authored default when loading it. */
     words[0] = 5;
-    assert(savegame_decode(&preview, words, count - 21));
+    assert(savegame_decode(&preview, words, count - 21 - 1 - GENERATED_RUNTIME_ACHIEVEMENT_COUNT));
     assert(strcmp(preview.player_name, "Banec") == 0);
     puts("player name checks passed");
     return 0;

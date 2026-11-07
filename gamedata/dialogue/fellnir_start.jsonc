@@ -12,7 +12,8 @@
     { "id": "narrator", "name": "Narrator", "role": "narrator" }
   ],
   "nodes": [
-    { "id": "first_greeting", "speaker": "fellnir",
+    { "id": "first_greeting",
+      "achievement_events": [{"achievement": "2", "bit": 7}], "speaker": "fellnir",
       "text": "What do you want from me? I don't know anything.",
       "choices": [
         { "text": "I am with Lady Silverhair, and I am trying to prove her innocence. Do you know what happened here?",

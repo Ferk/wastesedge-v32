@@ -40,7 +40,8 @@
     { "id": "n7", "speaker": "player", "text": "Theft? But that cannot be, the Lady Silverhair is a wealthy noble in her own right. She need not stoop to theft.", "next": "n17" },
     { "id": "n8", "speaker": "player", "text": "You speak madness, man! There can have been no theft. Allow me in, and I shall prove to you the Lady is innocent.", "next": "n19" },
     { "id": "n9", "speaker": "player", "text": "But I must! If my Lady is in need of me I cannot simply walk away! Please, I beg you to open the gate so I may aid her.", "next": "n26" },
-    { "id": "n10", "speaker": "player", "text": "That is none of your concern. All you need know is that she is within your walls and will need me close if there is trouble at hand.", "next": "n11" },
+    { "id": "n10",
+      "achievement_events": [{"achievement": "9", "bit": 2}], "speaker": "player", "text": "That is none of your concern. All you need know is that she is within your walls and will need me close if there is trouble at hand.", "next": "n11" },
     { "id": "n11", "speaker": "talan", "text": "She, eh? Your employer wouldn't be an elven lady named Silverhair, would she?", "choices": [
       { "text": "Of course she is, you fool! Who else would it be? Are you going to open this gate or not?", "next": "n12" },
       { "text": "Er, no. No, it is not. In fact, my employer is no lady at all.", "next": "n13" }
@@ -72,7 +73,8 @@
     { "id": "n22", "speaker": "player", "text": "I am sick of arguing with you. Are you about to let me in, or will I be forced to take action? And believe me, you would not enjoy it.", "next": "n23" },
     { "id": "n23", "speaker": "narrator", "text": "The guard hesitates for a moment, and even from where you stand you can see he is uncertain.", "next": "n25" },
     { "id": "n24", "speaker": "player", "text": "You'll be in more trouble for not opening that gate than you will be for letting me in, I assure you of that. Now do as I say!", "next": "n23" },
-    { "id": "n25", "speaker": "narrator", "text": "But finally he seems to reach a conclusion, and after carefully scanning the surroundings, he beckons you in.", "end": true },
+    { "id": "n25",
+      "achievement_events": [{"achievement": "2", "bit": 27}], "speaker": "narrator", "text": "But finally he seems to reach a conclusion, and after carefully scanning the surroundings, he beckons you in.", "end": true },
     { "id": "n26", "speaker": "talan", "text": "Aid her? That is why you can't be allowed in. If you aid her too much, she might escape.", "choices": [
       { "text": "I promise, please. I am becoming sick with worry. Can you not help me?", "next": "n27" },
       { "text": "How could she escape from a guarded camp, even if I did help? Now let me in!", "next": "n28" },

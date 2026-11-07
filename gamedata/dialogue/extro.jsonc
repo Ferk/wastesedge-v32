@@ -25,7 +25,8 @@
         { "text": "It's obvious that the thief tried to frame Lady Silverhair.", "next": "n36" },
         { "text": "I'm sorry, I have no idea as to who the thief might be.", "next": "n10" }
       ] },
-    { "id": "n10", "speaker": "bjarn", "text": "There you have it! I daresay it'll be extremely difficult to find a thief other than the Elf over there. Who if not she would have wanted to steal my Catseyes!?",
+    { "id": "n10",
+      "achievement_events": [{"achievement": "7", "bit": 24}], "speaker": "bjarn", "text": "There you have it! I daresay it'll be extremely difficult to find a thief other than the Elf over there. Who if not she would have wanted to steal my Catseyes!?",
       "choices": [
         { "text": "I wonder whether you really want your gems back, or just the Lady Silverhair convicted!", "next": "n24" },
         { "text": "Catseyes? You call those worthless shards of yours Catseyes!?", "next": "n13" }
@@ -45,6 +46,7 @@
         { "text": "Then you confess that the theft was just pretended?",
           "when": { "flag": "extro_guess_deceit", "equals": 1 }, "next": "n47" },
         { "text": "If your gems are no Catseyes, you have to see that it is unlikely for my mistress to steal them.",
+            "achievement_events": [{"achievement": "7", "bit": 26}],
           "actions": [{ "op": "set", "flag": "extro_guess_deceit", "value": 1 }], "next": "n23" }
       ] },
     { "id": "n23", "speaker": "bjarn", "text": "Foolish Half-Elf! Don't you think I'd know best how unlikely it is for anyone, including your fine mistress, to steal these gems? Were it not for Erek, that betrayer, you'd never know!",
@@ -78,12 +80,14 @@
         { "text": "Then you confess that the theft was just pretended?",
           "when": { "flag": "extro_guess_deceit", "equals": 1 }, "next": "n47" }
       ] },
-    { "id": "n36", "speaker": "jelom", "text": "You mean the thief expected to escape unnoticed while your mistress would have been held responsible?",
+    { "id": "n36",
+      "achievement_events": [{"achievement": "7", "bit": 3}], "speaker": "jelom", "text": "You mean the thief expected to escape unnoticed while your mistress would have been held responsible?",
       "choices": [
         { "text": "No. I mean the theft's sole purpose was to discredit my mistress.", "next": "n39" },
         { "text": "That I would imagine.", "next": "n54" }
       ] },
-    { "id": "n39", "speaker": "jelom", "text": "That's a grave accusation, Banec! Who would do such a thing, and why, I wonder?", "next": "n40" },
+    { "id": "n39",
+      "achievement_events": [{"achievement": "7", "bit": 6}], "speaker": "jelom", "text": "That's a grave accusation, Banec! Who would do such a thing, and why, I wonder?", "next": "n40" },
     { "id": "n40", "speaker": "bjarn", "text": "This is ridiculous! My business with the Elf was only known to the both of us. Besides, who amongst the attendees holds any grudge against her?",
       "choices": [
         { "text": "You do! And you knew of her business.",
@@ -97,7 +101,8 @@
         { "text": "But your stones are of poor quality indeed!", "next": "n46" }
       ] },
     { "id": "n46", "speaker": "bjarn", "text": "You doubt my word and expertise, Half-Elf? Perhaps you have more faith in my apprentice then. Erek, please tell those ignorants how valuable these Catseyes are.", "next": "n14" },
-    { "id": "n47", "speaker": "player", "text": "Then you confess that the theft was just pretended?",
+    { "id": "n47",
+      "achievement_events": [{"achievement": "7", "bit": 12}, {"achievement": "5", "bit": 7}, {"achievement": "9", "bit": 5}], "speaker": "player", "text": "Then you confess that the theft was just pretended?",
       "on_end": "begin_extro_aftermath", "end": true },
     { "id": "n48", "speaker": "bjarn", "text": "What do you mean?",
       "choices": [{ "text": "You feigned the theft, as an act of revenge.", "next": "n42" }] },
@@ -107,14 +112,16 @@
         { "text": "You are obsessed by your aversion to Lady Silverhair!", "next": "n27" },
         { "text": "Catseyes? You call those worthless shards of yours Catseyes!?", "next": "n13" }
       ] },
-    { "id": "n52", "speaker": "bjarn", "text": "You think I did that deliberately?",
+    { "id": "n52",
+      "achievement_events": [{"achievement": "7", "bit": 9}], "speaker": "bjarn", "text": "You think I did that deliberately?",
       "choices": [{ "text": "Yes. And afterwards you offered her worthless gems to enrage her even more!", "next": "n46" }] },
     { "id": "n54", "speaker": "bjarn", "text": "Rubbish I say! There can be no doubt that the Elf is responsible!",
       "choices": [
         { "text": "Why do you keep insisting on my mistress' guilt?", "next": "n50" },
         { "text": "I wonder whether you really want your gems back, or just the Lady Silverhair convicted!", "next": "n24" }
       ] },
-    { "id": "n56", "speaker": "bjarn", "text": "Really? Now that is news to me. If you don't mind I would like to know your reasoning, Half-Elf!",
+    { "id": "n56",
+      "achievement_events": [{"achievement": "7", "bit": 22}], "speaker": "bjarn", "text": "Really? Now that is news to me. If you don't mind I would like to know your reasoning, Half-Elf!",
       "choices": [
         { "text": "The gems the Lady is accused of stealing are worthless to her.", "next": "n61" },
         { "text": "Whoever planted that gem in the mistress' chest, it was not her.", "next": "n58" }

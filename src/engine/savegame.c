@@ -178,6 +178,9 @@ int savegame_encode(const struct world_state *world, int *words, int capacity)
     for (index = 0; index < 21; ++index)
         write_word(&writer, (unsigned char)world->player_name[index]);
 
+    write_word(&writer, GENERATED_RUNTIME_ACHIEVEMENT_COUNT);
+    for (index = 0; index < GENERATED_RUNTIME_ACHIEVEMENT_COUNT; ++index)
+        write_word(&writer, (int)world->achievement_progress[index]);
     return writer.failed ? 0 : writer.count;
 }
 
@@ -417,6 +420,12 @@ int savegame_decode(struct world_state *world, const int *words, int word_count)
         }
     }
 
+    if (version >= 7) {
+        if (read_word(&reader) != GENERATED_RUNTIME_ACHIEVEMENT_COUNT)
+            return 0;
+        for (index = 0; index < GENERATED_RUNTIME_ACHIEVEMENT_COUNT; ++index)
+            restored_world.achievement_progress[index] = (unsigned int)read_word(&reader);
+    }
     restored_world.scene = (restored_world.scene_index >= 0 &&
                             restored_world.scene_index < generated_runtime_scene_count) ?
                            &generated_runtime_scenes[restored_world.scene_index] : 0;

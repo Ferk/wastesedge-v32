@@ -7,6 +7,7 @@
   "new_game_cutscene": "intro_cutscene",
   "game_title": "Waste's Edge",
   "font": "ui/font.jsonc",
+  "achievements": "achievements.jsonc",
   "languages": [
     { "id": "en", "name": "English" },
     { "id": "da", "name": "Dansk", "catalog": "translations/da.po" },
@@ -47,7 +48,8 @@
     "enter_name": "Enter your character's name",
     "keyboard_space": "Space",
     "keyboard_delete": "Delete",
-    "keyboard_begin": "Begin"
+    "keyboard_begin": "Begin",
+    "achievements": "Achievements"
   },
   "title_music": "title_theme",
   "ui_sounds": {

@@ -96,7 +96,8 @@
       "next": "silverhair_relief"
     },
     {
-      "id": "silverhair_relief", "speaker": "silverhair",
+      "id": "silverhair_relief",
+      "achievement_events": [{"achievement": "2", "bit": 25}], "speaker": "silverhair",
       "text": "Yes, yes dear, I see him. Please calm yourself. Banec, I am relieved to see you. This situation has clearly gone beyond any civil control.",
       "next": "player_reports_charge"
     },

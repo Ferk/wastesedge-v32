@@ -92,6 +92,7 @@ struct world_actor_checkpoint {
 };
 
 struct world_state {
+    unsigned int achievement_progress[GENERATED_RUNTIME_ACHIEVEMENT_STORAGE_COUNT];
     char player_name[21];
     const struct generated_runtime_scene *scene;
     int scene_index;

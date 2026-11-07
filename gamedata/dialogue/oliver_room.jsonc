@@ -12,6 +12,7 @@
   "nodes": [
     {
       "id": "arrival", "speaker": "narrator",
+      "achievement_events": [{ "achievement": "2", "bit": 17 }],
       "text": "Oliver leads you to a room on the first floor.",
       "next": "hope_you_like_it"
     },

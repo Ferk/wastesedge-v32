@@ -59,7 +59,8 @@
       "choices": "question_menu"
     },
     {
-      "id": "first_meeting", "speaker": "narrator",
+      "id": "first_meeting",
+      "achievement_events": [{"achievement": "2", "bit": 15}], "speaker": "narrator",
       "text": "There is little doubt that this busy-looking woman is the unchallenged mistress of the Redwyne household. As she spots you, a look of resignation flashes across her face.",
       "next": "young_people"
     },
@@ -97,7 +98,8 @@
       "id": "too_busy", "speaker": "lucia",
       "text": "What questions? Don't you see I'm busy? Who's going to put the food on the table, if I'm going to chat with you? Now out of my sight with you!",
       "choices": [
-        { "text": "Calm down, please. This is important. I'm investigating the theft.", "next": "investigation" },
+        { "text": "Calm down, please. This is important. I'm investigating the theft.",
+          "achievement_events": [{ "achievement": "9", "bit": 18 }], "next": "investigation" },
         { "text": "Lunch can wait, but if you don't help with my investigation, the thief might get away!", "next": "investigation" },
         { "text": "My apologies. Must have been the wrong door ...", "next": "goodbye" }
       ]
@@ -384,6 +386,7 @@
       "choices": [
         {
           "text": "You have my word, Lucia. Now what is it?",
+            "achievement_events": [{"achievement": "9", "bit": 20}],
           "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
           "next": "singing_reveal"
         },

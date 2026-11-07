@@ -46,6 +46,7 @@ file(GLOB_RECURSE gamedata_inputs CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/translations/*"
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/ui/*"
      "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/manifest.jsonc")
+list(APPEND gamedata_inputs "${CMAKE_CURRENT_SOURCE_DIR}/gamedata/achievements.jsonc")
 execute_process(
   COMMAND "${Python3_EXECUTABLE}" "${content_compiler}"
           --project-root "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -57,6 +58,7 @@ endif()
 include("${generated_asset_manifest}")
 
 set(generated_content_outputs
+  "${generated_dir}/achievement_manifest.json"
   "${generated_dir}/content_manifest.json"
   "${generated_dir}/content_ids.h"
   "${generated_dir}/content_data.c"
@@ -79,6 +81,8 @@ add_custom_command(
   VERBATIM)
 
 set(runtime_sources
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/achievements.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/achievements.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/main.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/savegame.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.c"
@@ -89,6 +93,8 @@ set(runtime_sources
   "${generated_dir}/content_data.c"
   "${generated_dir}/content_scene_data.c")
 set(runtime_headers
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/achievements.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/achievements.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/vircon32/vircon.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/savegame.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/world.h"
@@ -101,6 +107,7 @@ set(runtime_headers
 
 set(project_entry "__original_main")
 set(project_wasm "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.wasm")
+set(project_link_map "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.map")
 set(project_asm "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.asm")
 set(project_vbin "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.vbin")
 set(project_xml "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.xml")
@@ -127,8 +134,9 @@ foreach(source IN LISTS runtime_sources)
 endforeach()
 
 add_custom_command(
-  OUTPUT "${project_wasm}"
+  OUTPUT "${project_wasm}" "${project_link_map}"
   COMMAND "${WASM_LD_EXECUTABLE}" --no-entry --export=${project_entry}
+          --Map=${project_link_map}
           --allow-undefined ${project_objects} -o "${project_wasm}"
   DEPENDS ${project_objects}
   COMMENT "Linking ${project_name}.wasm"
@@ -216,7 +224,25 @@ add_custom_command(
   COMMENT "Packaging ${project_name}.v32"
   VERBATIM)
 
-add_custom_target(v32 ALL DEPENDS "${project_rom}")
+# wasm2vircon currently maps Wasm byte offsets onto console RAM word 1,000,000.
+# The libretro core exposes native RAM as bytes from address zero.
+set(WASM_LINEAR_RAM_BYTE_BASE 4000000 CACHE STRING
+    "Byte offset of wasm2vircon linear memory in libretro system RAM")
+set(achievement_user_file "${CMAKE_CURRENT_BINARY_DIR}/${project_name}-User.txt")
+add_custom_command(
+  OUTPUT "${achievement_user_file}" "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.achievements.txt"
+         "${CMAKE_CURRENT_BINARY_DIR}/${project_name}-User.ram.json"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/export_retroachievements.py"
+          --map "${project_link_map}"
+          --manifest "${generated_dir}/achievement_manifest.json"
+          --rom "${project_rom}" --gamedata "${CMAKE_CURRENT_SOURCE_DIR}/gamedata"
+          --output "${achievement_user_file}" --ram-byte-base "${WASM_LINEAR_RAM_BYTE_BASE}"
+  DEPENDS "${project_rom}" "${project_wasm}" "${project_link_map}" "${generated_dir}/achievement_manifest.json"
+          "${CMAKE_CURRENT_SOURCE_DIR}/tools/export_retroachievements.py"
+  COMMENT "Generating build-specific RetroAchievements definitions from the link map"
+  VERBATIM)
+add_custom_target(v32 ALL DEPENDS "${project_rom}" "${achievement_user_file}"
+                                "${CMAKE_CURRENT_BINARY_DIR}/${project_name}.achievements.txt")
 add_custom_target(run
   COMMAND "${VIRCON32_EMULATOR}" "${project_rom}"
   DEPENDS v32

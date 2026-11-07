@@ -34,6 +34,7 @@
   "nodes": [
     {
       "id": "first_narration",
+      "achievement_events": [{"achievement": "2", "bit": 19}],
       "speaker": "narrator",
       "text": "This appears to be the Innkeeper and owner of the place. He seems lost in thought and it looks as if he hasn't slept much lately. His worried face brightens up as you approach though, and his voice is warm and friendly:",
       "next": "welcome"
@@ -78,6 +79,7 @@
         },
         {
           "text": "Do not worry, Master Redwyne. I believe things would turn out quite different if only someone would commence a proper investigation.",
+            "achievement_events": [{"achievement": "9", "bit": 22}],
           "next": "needs_investigator"
         }
       ]

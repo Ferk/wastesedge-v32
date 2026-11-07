@@ -1,0 +1,16 @@
+// Original achievement masks: bits outside the exact target spoil that run.
+// Unlocks are permanent across new games; current masks are saved per slot.
+{
+  "locked_icon": "assets/ui/achievements/0.png",
+  "entries": [
+    { "id": "1", "title": "Sommelier", "description": "You know a good drop when you taste it", "expected": "0x80200800", "initial": "0x0", "icon": "assets/ui/achievements/1.png", "points": 5 },
+    { "id": "2", "title": "Conversationalist", "description": "None will escape your silver tongue", "expected": "0x8a2aaaaa", "initial": "0x08000000", "icon": "assets/ui/achievements/2.png", "points": 10 },
+    { "id": "3", "title": "Keeper of secrets", "description": "Embarrassing confessions are safe with you", "expected": "0x800", "initial": "0x0", "icon": "assets/ui/achievements/3.png", "points": 5 },
+    { "id": "4", "title": "Revealer of truth", "description": "Under your vigilant eye, no wrongdoing stays hidden", "expected": "0x400000", "initial": "0x0", "icon": "assets/ui/achievements/4.png", "points": 5 },
+    { "id": "5", "title": "Trusty servant", "description": "As always, you keep your mistress out of harm's way", "expected": "0x80", "initial": "0x0", "icon": "assets/ui/achievements/5.png", "points": 10 },
+    { "id": "6", "title": "Yetin acolyte", "description": "You walk the path of the yetin spirit", "expected": "0x02008020", "initial": "0x0", "icon": "assets/ui/achievements/6.png", "points": 10 },
+    { "id": "7", "title": "Master detective", "description": "Your inquisitive powers lead you to the right conclusions", "expected": "0x1248", "initial": "0x0", "icon": "assets/ui/achievements/7.png", "points": 25 },
+    { "id": "8", "title": "Gem-bearer", "description": "What is thought to be lost, you already discovered", "expected": "0x20000", "initial": "0x0", "icon": "assets/ui/achievements/8.png", "points": 10 },
+    { "id": "9", "title": "Paragon of virtue", "description": "Neither lie nor deceit parts your lips", "expected": "0x20", "initial": "0x0", "icon": "assets/ui/achievements/9.png", "points": 25 }
+  ]
+}

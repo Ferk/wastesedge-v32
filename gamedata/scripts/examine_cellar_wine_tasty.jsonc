@@ -1,5 +1,6 @@
 {
   "id": "examine_cellar_wine_tasty",
+  "achievement_events": [{ "achievement": "1", "bit": 11 }],
   "actions": [
     { "op": "speak", "entity": "player", "text": "Mmmh ... this wine is really tasty!" }
   ]

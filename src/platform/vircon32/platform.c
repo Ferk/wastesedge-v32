@@ -3,6 +3,8 @@
 
 #include "platform/vircon32/platform.h"
 #include "engine/savegame.h"
+#include "engine/achievements.h"
+#include "ui/achievements.h"
 #include "ui/virtual_keyboard.h"
 #include "ui/notice.h"
 #include "ui/text_layout.h"
@@ -44,6 +46,7 @@
     (game_signature_words + PLATFORM_SAVE_SLOT_COUNT * SAVE_SLOT_STRIDE)
 #define LANGUAGE_SETTING_MAGIC 0x57454C47u
 #define LANGUAGE_SETTING_VERSION 1
+#define ACHIEVEMENT_SETTING_OFFSET (LANGUAGE_SETTING_OFFSET + 4)
 #define BOOT_LOCALE_MAGIC 0x4C323356u
 #define BOOT_LOCALE_VERSION 1
 #define BOOT_LOCALE_MAGIC_WORD 0
@@ -55,6 +58,10 @@
 #define SAVE_PREVIEW_SIZE 60
 #define WALK_ANIMATION_SLOWDOWN 2
 #define CUTSCENE_RANGE_CATCH_UP_STEP 8
+#define ACHIEVEMENT_NOTICE_TEXT_WIDTH 220
+#define ACHIEVEMENT_NOTICE_PADDING 4
+#define ACHIEVEMENT_NOTICE_ICON_GAP 6
+#define ACHIEVEMENT_NOTICE_MARGIN 6
 
 /* Vircon32 colors use AABBGGRR ordering. Keep every authored renderer color
  * named here so alpha values and palette choices remain easy to audit. */
@@ -74,6 +81,8 @@
 #define COLOR_SAVE_PREVIEW_BACKGROUND 0xFF080B10u
 #define COLOR_PANEL_BORDER 0xFF2C6868u
 #define COLOR_PANEL_BACKGROUND 0xFF101820u
+#define COLOR_ACHIEVEMENT_NOTICE_BACKGROUND 0xB0101820u
+#define COLOR_ACHIEVEMENT_NOTICE_BORDER 0xC02C6868u
 #define COLOR_MENU_SELECTION 0x80404020u
 #define COLOR_KEYBOARD_BUTTON_BACKGROUND 0x40101010u
 #define COLOR_STATUS_SUCCESS 0xFF80FF80u
@@ -145,6 +154,9 @@ static int save_words[SAVEGAME_MAX_WORDS];
 static struct world_state save_slot_previews[PLATFORM_SAVE_SLOT_COUNT];
 static int save_slot_preview_valid[PLATFORM_SAVE_SLOT_COUNT];
 static int displayed_slot_menu_valid;
+static int displayed_achievement_selection = -1;
+static int displayed_achievement_language;
+static unsigned int displayed_achievement_mask;
 static int displayed_slot_menu_from_title;
 static int displayed_slot_menu_saving;
 static int displayed_slot_menu_selected;
@@ -1196,6 +1208,43 @@ int platform_update_cutscene(const struct world_actions *actions)
     return 0;
 }
 
+/* Fit a compact translucent unlock notice around its half-size badge and localized title. */
+static void record_achievement_notice(void)
+{
+    int index = achievement_notice_current();
+    const struct generated_runtime_achievement *achievement;
+    const struct generated_runtime_text *title;
+    int text_width;
+    int text_height;
+    int icon_width;
+    int icon_height;
+    int width;
+    int height;
+    int x;
+    int y = ACHIEVEMENT_NOTICE_MARGIN;
+    if (index < 0)
+        return;
+    achievement = &generated_runtime_achievements[index];
+    title = world_localized_text(&achievement->title);
+    ui_measure_text(title, ACHIEVEMENT_NOTICE_TEXT_WIDTH, &text_width, &text_height);
+    icon_width = achievement->icon.width / 2;
+    icon_height = achievement->icon.height / 2;
+    width = icon_width + ACHIEVEMENT_NOTICE_ICON_GAP + text_width + 2 * ACHIEVEMENT_NOTICE_PADDING;
+    height = (icon_height > text_height ? icon_height : text_height) + 2 * ACHIEVEMENT_NOTICE_PADDING;
+    x = DISPLAY_WIDTH - ACHIEVEMENT_NOTICE_MARGIN - width;
+    record_solid_rect(x, y, width, height, COLOR_ACHIEVEMENT_NOTICE_BACKGROUND);
+    /* Only the edges receive the border color, preserving the fill's authored alpha. */
+    record_solid_rect(x, y, width, 1, COLOR_ACHIEVEMENT_NOTICE_BORDER);
+    record_solid_rect(x, y + height - 1, width, 1, COLOR_ACHIEVEMENT_NOTICE_BORDER);
+    record_solid_rect(x, y + 1, 1, height - 2, COLOR_ACHIEVEMENT_NOTICE_BORDER);
+    record_solid_rect(x + width - 1, y + 1, 1, height - 2, COLOR_ACHIEVEMENT_NOTICE_BORDER);
+    record_ui_frame(&achievement->icon, x + ACHIEVEMENT_NOTICE_PADDING,
+                    y + (height - icon_height) / 2, 0.5f);
+    record_runtime_text(x + ACHIEVEMENT_NOTICE_PADDING + icon_width + ACHIEVEMENT_NOTICE_ICON_GAP,
+                        y + (height - text_height) / 2, ACHIEVEMENT_NOTICE_TEXT_WIDTH,
+                        y + height - ACHIEVEMENT_NOTICE_PADDING, title, COLOR_ACCENT_GOLD);
+}
+
 static void prepare_world_frame(const struct world_state *world)
 {
     int camera_x;
@@ -1213,6 +1262,7 @@ static void prepare_world_frame(const struct world_state *world)
     }
     else
         record_ambient_speech(world, camera_x, camera_y);
+    record_achievement_notice();
     transition_alpha = world_transition_alpha(world);
     if (transition_alpha > 0)
         record_solid_rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT,
@@ -1236,6 +1286,7 @@ static void prepare_balloon_dialogue_frame(const struct world_state *world)
         record_entity_speech(world, speaker->entity,
                              world_dialogue_display(world),
                              camera_x, camera_y);
+    record_achievement_notice();
     transition_alpha = world_transition_alpha(world);
     if (transition_alpha > 0)
         record_solid_rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT,
@@ -1538,6 +1589,7 @@ void platform_render_cutscene(void)
                               cinematic_node_started_at);
     record_cutscene_text(dialogue, cinematic_node, cinematic_node_frame,
                          cinematic_visible_glyphs);
+    record_achievement_notice();
     fade_alpha = dialogue->fade_in_frames - cinematic_sequence_frame;
     if (fade_alpha > 0) {
         fade_alpha = fade_alpha * 255 / dialogue->fade_in_frames;
@@ -1858,6 +1910,57 @@ int platform_store_language(int language)
             LANGUAGE_SETTING_MAGIC ||
         (unsigned int)card_read_word(LANGUAGE_SETTING_OFFSET + 3) != checksum)
         return PLATFORM_STORAGE_WRITE_FAILED;
+    return PLATFORM_STORAGE_OK;
+}
+
+/* Read the independently persistent achievement profile, validating its rule layout. */
+unsigned int platform_load_achievements(void)
+{
+    unsigned int unlocked;
+    unsigned int checksum;
+    int offset = ACHIEVEMENT_SETTING_OFFSET;
+    if (!card_is_connected() || card_is_empty() || !storage_card_game_matches() ||
+        (unsigned int)card_read_word(offset) != ACHIEVEMENT_RAM_MAGIC ||
+        (unsigned int)card_read_word(offset + 1) != ACHIEVEMENT_RAM_VERSION ||
+        (unsigned int)card_read_word(offset + 2) != generated_runtime_achievement_signature)
+        return 0;
+    unlocked = (unsigned int)card_read_word(offset + 3);
+    checksum = ACHIEVEMENT_RAM_MAGIC ^ ACHIEVEMENT_RAM_VERSION ^
+               generated_runtime_achievement_signature ^ unlocked;
+    return (unsigned int)card_read_word(offset + 4) == checksum ? unlocked : 0;
+}
+
+/* Store unlocks without touching saves or language; publish the marker last. */
+int platform_store_achievements(unsigned int unlocked)
+{
+    unsigned int checksum;
+    int index;
+    int offset = ACHIEVEMENT_SETTING_OFFSET;
+    int words[5];
+    if (!card_is_connected())
+        return PLATFORM_STORAGE_NO_CARD;
+    if (card_is_empty()) {
+        card_write_signature(&game_card_signature);
+        if (!card_signature_matches(&game_card_signature))
+            return PLATFORM_STORAGE_WRITE_FAILED;
+    } else if (!storage_card_game_matches())
+        return PLATFORM_STORAGE_FOREIGN_CARD;
+    unlocked |= platform_load_achievements();
+    checksum = ACHIEVEMENT_RAM_MAGIC ^ ACHIEVEMENT_RAM_VERSION ^
+               generated_runtime_achievement_signature ^ unlocked;
+    words[0] = (int)ACHIEVEMENT_RAM_MAGIC;
+    words[1] = (int)ACHIEVEMENT_RAM_VERSION;
+    words[2] = (int)generated_runtime_achievement_signature;
+    words[3] = (int)unlocked;
+    words[4] = (int)checksum;
+    card_write_word(offset, 0);
+    for (index = 1; index < 5; ++index)
+        card_write_word(offset + index, words[index]);
+    card_write_word(offset, words[0]);
+    for (index = 0; index < 5; ++index)
+        if (card_read_word(offset + index) != words[index])
+            return PLATFORM_STORAGE_WRITE_FAILED;
+    achievements_merge(unlocked);
     return PLATFORM_STORAGE_OK;
 }
 
@@ -2356,15 +2459,17 @@ void platform_invalidate_world(void)
 
 void platform_render_title_menu(int selected, int storage_result)
 {
+    displayed_achievement_selection = -1;
     draw_title_background();
     draw_title_logo();
     draw_direct_text_centered(96, generated_runtime_game_title, COLOR_ACCENT_GOLD);
-    draw_menu_option(154, world_ui_text(GENERATED_UI_TEXT_NEW_GAME),
+    draw_menu_option(130, world_ui_text(GENERATED_UI_TEXT_NEW_GAME),
                      selected == 0);
-    draw_menu_option(194, world_ui_text(GENERATED_UI_TEXT_LOAD_GAME),
+    draw_menu_option(170, world_ui_text(GENERATED_UI_TEXT_LOAD_GAME),
                      selected == 1);
-    draw_menu_option(234, world_ui_text(GENERATED_UI_TEXT_LANGUAGE),
+    draw_menu_option(210, world_ui_text(GENERATED_UI_TEXT_LANGUAGE),
                      selected == 2);
+    draw_menu_option(250, world_ui_text(GENERATED_UI_TEXT_ACHIEVEMENTS), selected == 3);
     draw_menu_status(storage_result);
     set_multiply_color(COLOR_WHITE);
 }
@@ -2499,19 +2604,73 @@ void platform_render_name_entry(const struct world_state *world)
 
 void platform_render_pause_menu(int selected, int storage_result)
 {
+    displayed_achievement_selection = -1;
     draw_menu_panel();
     draw_direct_runtime_text_centered(
         58, world_ui_text(GENERATED_UI_TEXT_GAME_PAUSED), COLOR_ACCENT_GOLD);
-    draw_menu_option(112, world_ui_text(GENERATED_UI_TEXT_CONTINUE),
+    draw_menu_option(92, world_ui_text(GENERATED_UI_TEXT_CONTINUE),
                      selected == 0);
-    draw_menu_option(152, world_ui_text(GENERATED_UI_TEXT_SAVE_GAME),
+    draw_menu_option(132, world_ui_text(GENERATED_UI_TEXT_SAVE_GAME),
                      selected == 1);
-    draw_menu_option(192, world_ui_text(GENERATED_UI_TEXT_LOAD_GAME),
+    draw_menu_option(172, world_ui_text(GENERATED_UI_TEXT_LOAD_GAME),
                      selected == 2);
-    draw_menu_option(232, world_ui_text(GENERATED_UI_TEXT_BACK_TO_TITLE),
-                     selected == 3);
+    draw_menu_option(212, world_ui_text(GENERATED_UI_TEXT_ACHIEVEMENTS), selected == 3);
+    draw_menu_option(252, world_ui_text(GENERATED_UI_TEXT_BACK_TO_TITLE), selected == 4);
     draw_menu_status(storage_result);
     set_multiply_color(COLOR_WHITE);
+}
+
+/* Scroll three badge rows at a time, keeping descriptions visible for locked entries too. */
+void platform_render_achievements(int selected)
+{
+    int first = selected > 1 ? selected - 1 : 0;
+    int index;
+    int count = 0;
+    int summary_glyphs[5];
+    struct generated_runtime_text summary = { summary_glyphs, 0, -1 };
+    unsigned int unlocked = achievements_unlocked();
+    const struct generated_runtime_text *heading = world_ui_text(GENERATED_UI_TEXT_ACHIEVEMENTS);
+    if (displayed_achievement_selection == selected &&
+        displayed_achievement_language == world_language() && displayed_achievement_mask == unlocked)
+        return;
+    if (first > GENERATED_RUNTIME_ACHIEVEMENT_COUNT - 3)
+        first = GENERATED_RUNTIME_ACHIEVEMENT_COUNT - 3;
+    if (first < 0)
+        first = 0;
+    draw_command_count = 0;
+    record_solid_rect(30, 12, 580, 336, COLOR_PANEL_BORDER);
+    record_solid_rect(34, 16, 572, 328, COLOR_PANEL_BACKGROUND);
+    record_runtime_text((DISPLAY_WIDTH - direct_runtime_text_width(heading)) / 2, 24,
+                        560, 52, heading, COLOR_ACCENT_GOLD);
+    for (index = 0; index < GENERATED_RUNTIME_ACHIEVEMENT_COUNT; ++index) {
+        const struct generated_runtime_achievement *entry = &generated_runtime_achievements[index];
+        int earned = (unlocked & (1u << index)) != 0;
+        int y = 68 + (index - first) * 84;
+        if (earned)
+            ++count;
+        if (index < first || index >= first + 3)
+            continue;
+        if (index == selected)
+            record_solid_rect(36, y - 4, 568, 80, COLOR_MENU_SELECTION);
+        record_ui_frame(earned ? &entry->icon : &generated_runtime_achievement_locked, 46, y + 6, 1.0f);
+        record_runtime_text(108, y, 486, y + 28, world_localized_text(&entry->title),
+                            earned ? COLOR_ACCENT_GOLD : COLOR_TEXT_PALE);
+        record_runtime_text(108, y + 28, 486, y + 76, world_localized_text(&entry->description), COLOR_TEXT_PALE);
+    }
+    /* Counts share the native game font rather than mixing in BIOS glyphs. */
+    if (count >= 10)
+        summary_glyphs[summary.glyph_count++] = '0' + count / 10;
+    summary_glyphs[summary.glyph_count++] = '0' + count % 10;
+    summary_glyphs[summary.glyph_count++] = '/';
+    if (GENERATED_RUNTIME_ACHIEVEMENT_COUNT >= 10)
+        summary_glyphs[summary.glyph_count++] = '0' + GENERATED_RUNTIME_ACHIEVEMENT_COUNT / 10;
+    summary_glyphs[summary.glyph_count++] = '0' + GENERATED_RUNTIME_ACHIEVEMENT_COUNT % 10;
+    record_runtime_text((DISPLAY_WIDTH - direct_runtime_text_width(&summary)) / 2,
+                        322, 100, 344, &summary, COLOR_ACCENT_GOLD);
+    flush_prepared_frame();
+    displayed_achievement_selection = selected;
+    displayed_achievement_language = world_language();
+    displayed_achievement_mask = unlocked;
 }
 
 void platform_render_slot_menu(int from_title, int saving, int selected,

@@ -17,7 +17,8 @@
   ],
   "nodes": [
     {
-      "id": "hallway_warning", "speaker": "jelom",
+      "id": "hallway_warning",
+      "achievement_events": [{"achievement": "2", "bit": 13}], "speaker": "jelom",
       "text": "No-one is allowed into the prisoner's room, so please leave this hallway!",
       "choices": [
         {
@@ -161,11 +162,13 @@
       "choices": [
         {
           "text": "He sneaked away to take a nap.",
+            "achievement_events": [{"achievement": "3", "bit": 11}, {"achievement": "9", "bit": 14}],
           "actions": [{ "op": "set", "flag": "told_on_talan", "value": 1 }],
           "next": "jelom_nap"
         },
         {
           "text": "He wandered off to practise singing, of all things!",
+            "achievement_events": [{"achievement": "4", "bit": 22}],
           "actions": [{ "op": "set", "flag": "told_on_talan", "value": 1 }],
           "next": "jelom_singing"
         }

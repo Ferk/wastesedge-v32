@@ -1,5 +1,7 @@
 /* Application states for startup, naming, gameplay, cutscenes and save menus. */
 #include "engine/world.h"
+#include "engine/achievements.h"
+#include "ui/achievements.h"
 #include "platform/vircon32/platform.h"
 
 #if defined(__clang__)
@@ -25,7 +27,8 @@ enum application_mode {
     APPLICATION_SAVE_FROM_PAUSE = 5,
     APPLICATION_CUTSCENE = 6,
     APPLICATION_LANGUAGE = 7,
-    APPLICATION_NAME_ENTRY = 8
+    APPLICATION_NAME_ENTRY = 8,
+    APPLICATION_ACHIEVEMENTS = 9
 };
 
 static int moved_choice(int current, int movement, int count)
@@ -61,11 +64,18 @@ int main(void)
     int simulation_frame;
     int cutscene_from_world = 0;
     int cutscene_to_title = 0;
+    int achievement_choice = 0;
+    int achievement_return_mode = APPLICATION_TITLE;
+    unsigned int stored_achievements;
+    int achievement_store_retry = 0;
 
+    achievements_initialize();
     world_initialize(&world);
     world_set_player_name(&world, world.player_name);
     platform_initialize();
     world_set_language(platform_load_language());
+    achievements_merge(platform_load_achievements());
+    stored_achievements = achievements_unlocked();
     platform_play_music_track(generated_runtime_title_music);
     if (generated_runtime_title_cutscene >= 0) {
         int dialogue = generated_runtime_title_cutscene;
@@ -117,7 +127,7 @@ int main(void)
                 }
             }
         } else if (mode == APPLICATION_TITLE) {
-            menu_choice = moved_choice(menu_choice, actions.choice_move, 3);
+            menu_choice = moved_choice(menu_choice, actions.choice_move, 4);
             if (actions.interact_pressed) {
                 platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
                 if (menu_choice == 0) {
@@ -130,10 +140,14 @@ int main(void)
                     storage_result = platform_query_save_slots(slot_states);
                     slot_choice = 0;
                     mode = APPLICATION_LOAD_FROM_TITLE;
-                } else {
+                } else if (menu_choice == 2) {
                     language_choice = world_language();
                     storage_result = PLATFORM_STORAGE_OK;
                     mode = APPLICATION_LANGUAGE;
+                } else {
+                    achievement_choice = 0;
+                    achievement_return_mode = APPLICATION_TITLE;
+                    mode = APPLICATION_ACHIEVEMENTS;
                 }
             }
         } else if (mode == APPLICATION_NAME_ENTRY) {
@@ -170,7 +184,21 @@ int main(void)
                 menu_choice = 2;
                 mode = APPLICATION_TITLE;
             }
+        } else if (mode == APPLICATION_ACHIEVEMENTS) {
+            if (GENERATED_RUNTIME_ACHIEVEMENT_COUNT > 0)
+                achievement_choice = moved_choice(achievement_choice, actions.choice_move,
+                                                  GENERATED_RUNTIME_ACHIEVEMENT_COUNT);
+            if (actions.cancel_pressed || actions.menu_pressed) {
+                platform_play_ui_sound(WORLD_UI_SOUND_CANCEL);
+                platform_begin_menu();
+                menu_choice = 3;
+                mode = achievement_return_mode;
+            }
         } else if (mode == APPLICATION_CUTSCENE) {
+            if (!cutscene_to_title)
+                achievements_event(world.achievement_progress, 0,
+                                   cutscene_from_world ? world.dialogue : generated_runtime_new_game_cutscene,
+                                   platform_cutscene_node(), -1);
             if (platform_update_cutscene(&actions)) {
                 if (cutscene_from_world) {
                     world_finish_cutscene(&world, platform_cutscene_node());
@@ -193,7 +221,7 @@ int main(void)
                 }
             }
         } else if (mode == APPLICATION_PAUSED) {
-            menu_choice = moved_choice(menu_choice, actions.choice_move, 4);
+            menu_choice = moved_choice(menu_choice, actions.choice_move, 5);
             if (actions.interact_pressed)
                 platform_play_ui_sound(WORLD_UI_SOUND_CONFIRM);
             else if (actions.menu_pressed || actions.cancel_pressed)
@@ -212,6 +240,10 @@ int main(void)
                 slot_choice = 0;
                 mode = APPLICATION_LOAD_FROM_PAUSE;
             } else if (actions.interact_pressed && menu_choice == 3) {
+                achievement_choice = 0;
+                achievement_return_mode = APPLICATION_PAUSED;
+                mode = APPLICATION_ACHIEVEMENTS;
+            } else if (actions.interact_pressed && menu_choice == 4) {
                 platform_stop_audio();
                 storage_result = platform_query_save_slots(slot_states);
                 menu_choice = 0;
@@ -260,6 +292,21 @@ int main(void)
             }
         }
 
+        achievements_set_active(mode == APPLICATION_PLAYING ||
+                                (mode == APPLICATION_CUTSCENE && !cutscene_to_title));
+        if (achievement_notice_update(platform_frame_counter(), achievement_ram[3])) {
+            ++world.visual_revision;
+            platform_invalidate_world();
+        }
+        if (achievement_store_retry > 0)
+            --achievement_store_retry;
+        if (stored_achievements != achievements_unlocked() && achievement_store_retry == 0) {
+            if (platform_store_achievements(achievements_unlocked()) == PLATFORM_STORAGE_OK)
+                stored_achievements = achievements_unlocked();
+            else
+                achievement_store_retry = 60;
+        }
+
         if (mode == APPLICATION_PLAYING) {
             platform_update_audio(&world);
             platform_render_world(&world);
@@ -273,6 +320,8 @@ int main(void)
             platform_render_name_entry(&world);
         } else if (mode == APPLICATION_PAUSED) {
             platform_render_pause_menu(menu_choice, storage_result);
+        } else if (mode == APPLICATION_ACHIEVEMENTS) {
+            platform_render_achievements(achievement_choice);
         } else {
             platform_render_slot_menu(mode == APPLICATION_LOAD_FROM_TITLE,
                                       mode == APPLICATION_SAVE_FROM_PAUSE,

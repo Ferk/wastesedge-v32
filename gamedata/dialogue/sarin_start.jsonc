@@ -9,7 +9,8 @@
   ],
   "nodes": [
     {
-      "id": "opening", "speaker": "sarin",
+      "id": "opening",
+      "achievement_events": [{"achievement": "2", "bit": 21}], "speaker": "sarin",
       "text": "What insolence! Banec, do you believe the depths of what they have done to our Lady? To accuse her of common theft, as if she was a human! And to lock her away in this tiny, dirty room! I tell you, I cannot bear it.",
       "next": "must_bear_it"
     },

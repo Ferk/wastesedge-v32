@@ -50,6 +50,10 @@ void platform_begin_name_entry(void);
 int platform_update_name_entry(struct world_state *world, const struct world_actions *actions);
 void platform_render_name_entry(const struct world_state *world);
 void platform_render_pause_menu(int selected, int storage_result);
+/* Browse earned and locked badges independently of save-slot selection. */
+void platform_render_achievements(int selected);
+unsigned int platform_load_achievements(void);
+int platform_store_achievements(unsigned int unlocked);
 void platform_render_slot_menu(int from_title, int saving, int selected,
                                const int slot_states[PLATFORM_SAVE_SLOT_COUNT],
                                int storage_result);

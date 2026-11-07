@@ -9,7 +9,8 @@
   ],
   "nodes": [
     {
-      "id": "opening", "speaker": "janesta",
+      "id": "opening",
+      "achievement_events": [{"achievement": "2", "bit": 11}], "speaker": "janesta",
       "text": "Oh, Banec, we've been so worried for the Mistress. Can't you do something to set her free?",
       "choices": [
         {

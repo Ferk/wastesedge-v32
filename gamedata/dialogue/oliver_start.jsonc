@@ -13,7 +13,8 @@
   ],
   "nodes": [
     {
-      "id": "first_narration", "speaker": "narrator",
+      "id": "first_narration",
+      "achievement_events": [{"achievement": "2", "bit": 17}], "speaker": "narrator",
       "text": "As he notices you, the boy stops whatever he's been doing. With a cheerful grin on his face, he turns towards you.",
       "next": "welcome"
     },

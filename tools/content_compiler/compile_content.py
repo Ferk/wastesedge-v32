@@ -32,7 +32,7 @@ UI_TEXT_ROLES = (
     "CONTINUE", "SAVE_GAME", "BACK_TO_TITLE", "NO_MEMORY_CARD",
     "FOREIGN_CARD", "EMPTY_SLOT", "CORRUPT_SAVE", "INCOMPATIBLE_SAVE",
     "SAVE_FAILED", "GAME_SAVED", "ERROR", "EMPTY", "INCOMPATIBLE", "DAY",
-    "SLOT", "ENTER_NAME", "KEYBOARD_SPACE", "KEYBOARD_DELETE", "KEYBOARD_BEGIN",
+    "SLOT", "ENTER_NAME", "KEYBOARD_SPACE", "KEYBOARD_DELETE", "KEYBOARD_BEGIN", "ACHIEVEMENTS",
 )
 
 UI_ICON_ROLES = (
@@ -1960,7 +1960,7 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
                                      languages: list[dict[str, object]],
                                      translation_variables: dict[str, str],
                                      translation_variants: dict[str, int],
-                                     ui_texts: dict[str, str]
+                                     ui_texts: dict[str, str], achievements: list[dict[str, object]]
                                      ) -> tuple[list[dict[str, object]], int, int,
                                                 dict[str, object]]:
     """Load a byte-indexed PNG font and encode authored Unicode as CP-1252."""
@@ -2233,6 +2233,9 @@ def materialize_dialogue_glyph_atlas(dialogues: list[dict[str, object]],
             registered = [register(str(line)) for line in speech["lines"]]
             speech["line_glyphs"] = [item[0] for item in registered]
             speech["line_messages"] = [item[1] for item in registered]
+    for achievement in achievements:
+        for field in ("title", "description"):
+            achievement[field + "_glyphs"], achievement[field + "_message"] = register(achievement[field])
     ui_messages = [register(ui_texts[role])[1] for role in UI_TEXT_ROLES]
     for language in languages:
         language["name_glyphs"] = encode(str(language["name"]))
@@ -2405,6 +2408,7 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                             "value": integer(action.get("value"), f"{path} choice action value"),
                         })
                     owner_choices.append({
+                        "achievement_events": choice.get("achievement_events", []),
                         "text": expect(choice.get("text"), str, f"{path} choice text"),
                         "translation_parts": choice.get("translation_parts"),
                         "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
@@ -2456,6 +2460,7 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                     raise ContentError(f"{path}: unknown music track {music_id!r}")
                 music_track = music_index[music_id]
             nodes.append({
+                "achievement_events": node.get("achievement_events", []),
                 "text": expect(node.get("text"), str, f"{path} node text"),
                 "translation_parts": node.get("translation_parts"),
                 "speaker": speaker_index[speaker_id],
@@ -3017,6 +3022,7 @@ def runtime_scripts(script_paths: list[Path], entity_definitions: dict[str, dict
                 a = entity_index[identifier(action.get("entity"), f"{path} entity")]
             actions.append((opcodes[operation], a, b, c, d))
         scripts.append({
+            "achievement_events": document.get("achievement_events", []),
             "id": script_id,
             "actions": actions,
             "positions": positions,
@@ -3767,8 +3773,103 @@ def runtime_scene_data(map_paths: list[Path], entity_definitions: dict[str, dict
     return raw_scenes, visuals, object_visuals, actors, actor_visuals, sorted(resources)
 
 
+def collect_achievements(manifest: dict, game_root: Path) -> tuple[list[dict], dict | None]:
+    """Validate optional achievement definitions; preserve their authored order as RAM bit indices."""
+    if "achievements" not in manifest:
+        return [], None
+    source = expect(manifest["achievements"], str, "manifest achievements")
+    path = path_inside(game_root, (game_root / source).resolve(), "achievements")
+    document = expect(load_jsonc(path), dict, str(path))
+    entries = expect(document.get("entries"), list, "achievement entries")
+    if len(entries) > 32:
+        raise ContentError("at most 32 achievements are supported")
+    seen = set()
+    result = []
+    for raw in entries:
+        entry = dict(expect(raw, dict, "achievement"))
+        key = expect(entry.get("id"), str, "achievement id")
+        if not key or key in seen:
+            raise ContentError(f"empty or duplicate achievement id {key!r}")
+        seen.add(key)
+        if "expected" not in entry:
+            raise ContentError(f"achievement {key}: expected mask is required")
+        for field in ("expected", "initial"):
+            value = entry.get(field, 0)
+            try:
+                value = int(value, 0) if isinstance(value, str) else integer(value, field)
+            except ValueError as error:
+                raise ContentError(f"achievement {key}: invalid {field}") from error
+            if not 0 <= value <= 0xffffffff:
+                raise ContentError(f"achievement {key}: {field} must be an unsigned 32-bit mask")
+            entry[field] = value
+        for field in ("title", "description"):
+            expect(entry.get(field), str, f"achievement {key} {field}")
+        if not entry["title"]:
+            raise ContentError(f"achievement {key}: title must not be empty")
+        entry["points"] = integer(entry.get("points", 5), "achievement points")
+        if entry["points"] < 0:
+            raise ContentError("achievement points must not be negative")
+        entry["frame"] = manifest_frame(game_root, entry.get("icon"), f"achievement {key} icon")
+        result.append(entry)
+    return result, manifest_frame(game_root, document.get("locked_icon"), "locked achievement icon", optional=True)
+
+
+def achievement_event_table(achievements: list[dict], dialogues: list[dict], scripts: list[dict]) -> list[tuple]:
+    """Resolve dialogue/choice/script hooks into a compact table, including shared-choice owners."""
+    indices = {entry["id"]: index for index, entry in enumerate(achievements)}
+    events = []
+
+    def add(owner: dict, kind: int, source: int, node: int, choice: int) -> None:
+        """Validate and append each bit event owned by this authored location."""
+        for raw in expect(owner.get("achievement_events", []), list, "achievement_events"):
+            event = expect(raw, dict, "achievement event")
+            key = expect(event.get("achievement"), str, "achievement event id")
+            bit = integer(event.get("bit"), "achievement event bit")
+            if key not in indices or not 0 <= bit < 32:
+                raise ContentError(f"invalid achievement event {event!r}: unknown id or bit outside 0..31")
+            events.append((kind, source, node, choice, indices[key], bit))
+
+    for source, dialogue in enumerate(dialogues):
+        for node_index, node in enumerate(dialogue["nodes"]):
+            add(node, 0, source, node_index, -1)
+            for choice_index, choice in enumerate(node["choices"]):
+                add(choice, 1, source, node_index, choice_index)
+    for source, script in enumerate(scripts):
+        add(script, 2, source, -1, -1)
+    return events
+
+
+def achievement_source(achievements: list[dict], locked: dict | None, events: list[tuple], resources: dict) -> str:
+    """Emit achievement text, icons and exact-mask rules without game-specific runtime code."""
+    lines = []
+    for index, entry in enumerate(achievements):
+        for field in ("title", "description"):
+            lines.append(f"static const int achievement_{index}_{field}[] = {{ " +
+                         ", ".join(str(glyph) for glyph in entry[field + "_glyphs"]) + " };")
+    lines.append("const struct generated_runtime_achievement generated_runtime_achievements[] = {")
+    for index, entry in enumerate(achievements):
+        texts = [f"{{ achievement_{index}_{field}, {len(entry[field + '_glyphs'])}, {entry[field + '_message']} }}"
+                 for field in ("title", "description")]
+        lines.append(f"    {{ {entry['expected']}u, {entry['initial']}u, " + ", ".join(texts) +
+                     ", " + frame_initializer(entry["frame"], resources) + " },")
+    if not achievements:
+        lines.append("    { 0 },")
+    lines.append("};")
+    layout = [(entry["id"], entry["expected"], entry["initial"]) for entry in achievements]
+    signature = int(hashlib.sha256(json.dumps(layout).encode()).hexdigest()[:8], 16)
+    lines.append(f"const unsigned int generated_runtime_achievement_signature = {signature}u;")
+    lines.append("const struct generated_runtime_frame generated_runtime_achievement_locked = " +
+                 frame_initializer(locked, resources) + ";")
+    lines.append("const struct generated_runtime_achievement_event generated_runtime_achievement_events[] = {")
+    lines.extend("    { %d, %d, %d, %d, %d, %d }," % event for event in events)
+    if not events:
+        lines.append("    { 0 },")
+    lines.extend(["};", f"const int generated_runtime_achievement_event_count = {len(events)};", ""])
+    return "\n".join(lines)
+
+
 def runtime_header(flag_count: int, stateful_scenery_count: int, entity_count: int,
-                   maximum_dialogue_nodes: int) -> str:
+                   maximum_dialogue_nodes: int, achievement_count: int = 0) -> str:
     return """/* Generated by tools/content_compiler/compile_content.py; do not edit. */
 #ifndef WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
 #define WASTESEDGE_GENERATED_CONTENT_SCENE_DATA_H
@@ -3846,6 +3947,17 @@ struct generated_runtime_dialogue_speaker {
     unsigned int speech_color;
     int is_player, is_narrator, entity;
 };
+struct generated_runtime_achievement {
+    unsigned int expected, initial;
+    struct generated_runtime_text title, description;
+    struct generated_runtime_frame icon;
+};
+struct generated_runtime_achievement_event { int kind, source, node, choice, achievement, bit; };
+extern const struct generated_runtime_achievement generated_runtime_achievements[];
+extern const unsigned int generated_runtime_achievement_signature;
+extern const struct generated_runtime_frame generated_runtime_achievement_locked;
+extern const struct generated_runtime_achievement_event generated_runtime_achievement_events[];
+extern const int generated_runtime_achievement_event_count;
 struct generated_runtime_dialogue_choice {
     const char *text;
     struct generated_runtime_text display;
@@ -4004,6 +4116,8 @@ extern const int generated_runtime_cutscene_image_count;
            f"#define GENERATED_UI_TEXT_{name} {index}"
            for index, name in enumerate(UI_TEXT_ROLES)) +
        f"\n#define GENERATED_UI_TEXT_COUNT {len(UI_TEXT_ROLES)}\n" +
+       f"#define GENERATED_RUNTIME_ACHIEVEMENT_COUNT {achievement_count}\n" +
+       "#define GENERATED_RUNTIME_ACHIEVEMENT_STORAGE_COUNT (GENERATED_RUNTIME_ACHIEVEMENT_COUNT > 0 ? GENERATED_RUNTIME_ACHIEVEMENT_COUNT : 1)\n" +
        "\n".join(f"#define GENERATED_UI_ICON_{name} {index}"
                  for index, name in enumerate(UI_ICON_ROLES)) +
        f"\n#define GENERATED_UI_ICON_COUNT {len(UI_ICON_ROLES)}")
@@ -4041,9 +4155,11 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                    cutscene_images: list[dict[str, object]],
                    new_game_cutscene: int, title_cutscene: int, game_title: str,
                    title_music: int, save_signature: list[int],
-                   save_magic: int) -> str:
+                   save_magic: int, achievements: list[dict], achievement_locked: dict | None,
+                   achievement_events: list[tuple]) -> str:
     resource_index = {path: index for index, path in enumerate(resources)}
     lines = ["/* Generated by tools/content_compiler/compile_content.py; do not edit. */", '#include "content_scene_data.h"', ""]
+    lines.append(achievement_source(achievements, achievement_locked, achievement_events, resource_index))
     lines.append("const struct generated_runtime_frame generated_runtime_title_background = " +
                  frame_initializer(title_background, resource_index) + ";\n")
     lines.append("const struct generated_runtime_frame generated_runtime_title_logo = " +
@@ -4559,6 +4675,10 @@ def compile_content(project_root: Path) -> None:
     ui_icons = [manifest_frame(game_root, raw_icons.get(role.lower()),
                                f"ui_icons.{role.lower()}", optional=True)
                 for role in UI_ICON_ROLES]
+    achievements, achievement_locked = collect_achievements(manifest, game_root)
+    achievement_frames = [entry["frame"] for entry in achievements]
+    if achievement_locked is not None:
+        achievement_frames.append(achievement_locked)
     cutscene_images: list[dict[str, object]] = []
     cutscene_image_ids: set[str] = set()
     try:
@@ -4712,11 +4832,13 @@ def compile_content(project_root: Path) -> None:
     runtime_script_data = runtime_scripts(
         inputs["scripts"], entities, dialogue_index, runtime_scenes, music_index, schedule_index,
         {flag: index for index, flag in enumerate(runtime_flags)}, actor_visuals)
+    achievement_events = achievement_event_table(achievements, runtime_dialogue, runtime_script_data)
     for definition in entities.values():
         tilesets.update(str(path) for path in definition["visuals"].values())
     ordered = {"scenes": sorted(scenes), "tilesets": sorted(tilesets),
                "entities": sorted(entities), "music": sorted(music_ids),
                "effects": sorted(effect_ids),
+               "achievements": [(entry["id"], entry["expected"], entry["initial"]) for entry in achievements],
                "dialogue": sorted(dialogue), "scripts": sorted(scripts),
                "schedules": sorted(schedules),
                "cutscene_images": sorted(cutscene_image_ids),
@@ -4733,7 +4855,7 @@ def compile_content(project_root: Path) -> None:
         materialize_dialogue_glyph_atlas(
             runtime_dialogue, runtime_schedule_data, runtime_script_data,
             game_root, output_root, font_definition, languages,
-            translation_variables, translation_variants, ui_texts)
+            translation_variables, translation_variants, ui_texts, achievements)
     background_logical, background_unique, background_atlases = materialize_runtime_atlases(
         background_atlas_references(runtime_scenes), game_root, output_root,
         "background-atlases", "backgrounds")
@@ -4746,7 +4868,8 @@ def compile_content(project_root: Path) -> None:
         game_root, output_root, "runtime-atlases", "actors", prefer_fewer_pages=True)
     world_logical, world_unique, world_atlases = materialize_runtime_atlases(
         world_atlas_references(runtime_scenes, runtime_object_visuals, runtime_glyphs) +
-        [(icon, "image", "source_x", "source_y") for icon in ui_icons if icon is not None],
+        [(icon, "image", "source_x", "source_y") for icon in ui_icons if icon is not None] +
+        [(frame, "image", "source_x", "source_y") for frame in achievement_frames],
         game_root, output_root, "runtime-atlases", "world")
     runtime_resources = collect_runtime_resources(runtime_scenes, runtime_visuals,
                                                   runtime_object_visuals,
@@ -4755,7 +4878,8 @@ def compile_content(project_root: Path) -> None:
                                                   ([] if title_logo is None else
                                                    [str(title_logo["image"])]) +
                                                   [str(image["image"]) for image in cutscene_images] +
-                                                  [str(icon["image"]) for icon in ui_icons if icon is not None])
+                                                  [str(icon["image"]) for icon in ui_icons if icon is not None] +
+                                                  [str(frame["image"]) for frame in achievement_frames])
     maximum_cartridge_textures = 256
     if len(runtime_resources) > maximum_cartridge_textures:
         raise ContentError(
@@ -4782,6 +4906,9 @@ def compile_content(project_root: Path) -> None:
         c_lines.append(f"const unsigned int generated_{category}_count = {len(ordered[category])};")
     c_lines.append("")
     write_output(output_root / "content_manifest.json", manifest_output)
+    write_output(output_root / "achievement_manifest.json", json.dumps([
+        {key: entry[key] for key in ("id", "title", "description", "points", "icon")}
+        for entry in achievements], indent=2) + "\n")
     write_output(output_root / "content_ids.h", "\n".join(header_lines))
     write_output(output_root / "content_data.c", "\n".join(c_lines))
     stateful_scenery_count = sum(int(scene["stateful_scenery_count"])
@@ -4789,7 +4916,7 @@ def compile_content(project_root: Path) -> None:
     maximum_dialogue_nodes = max((len(dialogue["nodes"]) for dialogue in runtime_dialogue),
                                  default=0)
     write_output(output_root / "content_scene_data.h", runtime_header(
-        len(runtime_flags), stateful_scenery_count, len(entities), maximum_dialogue_nodes))
+        len(runtime_flags), stateful_scenery_count, len(entities), maximum_dialogue_nodes, len(achievements)))
     write_output(output_root / "content_scene_data.c", runtime_source(
         runtime_scenes, runtime_visuals, runtime_actors, runtime_object_visuals, runtime_resources,
         initial_scene, initial_game_time, runtime_dialogue, runtime_script_data,
@@ -4798,7 +4925,7 @@ def compile_content(project_root: Path) -> None:
         runtime_schedule_data,
         title_background, title_logo, ui_icons, cutscene_images,
         new_game_cutscene, title_cutscene, game_title,
-        title_music, save_signature, save_magic))
+        title_music, save_signature, save_magic, achievements, achievement_locked, achievement_events))
     source_textures = [path for path in runtime_resources if not path.startswith(GENERATED_RESOURCE_PREFIX)]
     generated_textures = [path.removeprefix(GENERATED_RESOURCE_PREFIX) for path in runtime_resources if path.startswith(GENERATED_RESOURCE_PREFIX)]
     cmake_lists = {
