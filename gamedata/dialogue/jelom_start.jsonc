@@ -1,402 +1,680 @@
 {
   "id": "jelom_start",
   "start": [
-    { "node": "released_greeting", "when": { "flag": "silverhair_free", "equals": 1 } },
-    { "node": "repeat_greeting", "when": { "flag": "know_jelom", "equals": 2 } },
-    { "node": "hallway_warning" }
+    {
+      "node": "released_greeting",
+      "when": {
+        "flag": "silverhair_free",
+        "equals": 1
+      }
+    },
+    {
+      "node": "jelom_door_repeat",
+      "when": {
+        "all": [
+          {
+            "flag": "at_silverhairs_door",
+            "equals": 1
+          },
+          {
+            "flag": "know_jelom",
+            "equals": 2
+          }
+        ]
+      }
+    },
+    {
+      "node": "jelom_door_first",
+      "when": {
+        "flag": "at_silverhairs_door",
+        "equals": 1
+      }
+    },
+    {
+      "node": "repeat_greeting",
+      "when": {
+        "flag": "know_jelom",
+        "equals": 2
+      }
+    },
+    {
+      "node": "hallway_warning"
+    }
   ],
   "speakers": [
     {
-      "id": "player", "name": "Banec", "role": "player",
+      "id": "player",
+      "name": "Banec",
+      "role": "player",
       "portrait": "assets/ui/portraits/player.png"
     },
     {
-      "id": "jelom", "name": "Jelom Rasgar", "role": "npc", "entity": "jelom",
+      "id": "jelom",
+      "name": "Jelom Rasgar",
+      "role": "npc",
+      "entity": "jelom",
       "portrait": "assets/ui/portraits/jelom.png"
     }
   ],
   "nodes": [
     {
       "id": "hallway_warning",
-      "achievement_events": [{"achievement": "2", "bit": 13}], "speaker": "jelom",
+      "achievement_events": [
+        {
+          "achievement": "2",
+          "bit": 13
+        }
+      ],
+      "speaker": "jelom",
       "text": "No-one is allowed into the prisoner's room, so please leave this hallway!",
       "choices": [
         {
-          "text": "And just who are you to prevent me from entering, sir?",
-          "when": { "flag": "know_jelom", "equals": 0 },
-          "actions": [{ "op": "set", "flag": "know_jelom", "value": 2 }],
+          "when": {
+            "flag": "know_jelom",
+            "equals": 0
+          },
+          "actions": [
+            {
+              "op": "set",
+              "flag": "know_jelom",
+              "value": 2
+            }
+          ],
           "next": "challenge_identity"
         },
         {
-          "text": "Ah, you must be Jelom. Talan told me that I could find you here.",
-          "when": { "flag": "know_jelom", "equals": 1 },
-          "actions": [{ "op": "set", "flag": "know_jelom", "value": 2 }],
+          "when": {
+            "flag": "know_jelom",
+            "equals": 1
+          },
+          "actions": [
+            {
+              "op": "set",
+              "flag": "know_jelom",
+              "value": 2
+            }
+          ],
           "next": "known_identity"
+        }
+      ],
+      "actions": [
+        {
+          "op": "set",
+          "flag": "at_silverhairs_door",
+          "value": 0
         }
       ]
     },
     {
-      "id": "challenge_identity", "speaker": "player",
+      "id": "challenge_identity",
+      "speaker": "player",
       "text": "And just who are you to prevent me from entering, sir?",
       "next": "jelom_identifies"
     },
     {
-      "id": "jelom_identifies", "speaker": "jelom",
+      "id": "jelom_identifies",
+      "speaker": "jelom",
       "text": "My name is Jelom, and I am the chief of the guard at Waste's Edge! Who the hell are you?",
       "next": "player_introduces"
     },
     {
-      "id": "known_identity", "speaker": "player",
+      "id": "known_identity",
+      "speaker": "player",
       "text": "Ah, you must be Jelom. Talan told me that I could find you here.",
       "next": "jelom_asks_identity"
     },
     {
-      "id": "jelom_asks_identity", "speaker": "jelom",
+      "id": "jelom_asks_identity",
+      "speaker": "jelom",
       "text": "Who are you, and why were you looking for me?",
       "next": "player_introduces"
     },
     {
-      "id": "player_introduces", "speaker": "player",
+      "id": "player_introduces",
+      "speaker": "player",
       "text": "My name is Banec. I'm investigating the theft and I have a few questions for you.",
       "next": "jelom_objects"
     },
     {
-      "id": "jelom_objects", "speaker": "jelom",
+      "id": "jelom_objects",
+      "speaker": "jelom",
       "text": "You investigate the theft? You don't look at all like the officer I sent Bregon for. What makes you believe you could meddle in my affairs?",
       "choices": [
         {
-          "text": "My mistress has been wrongly accused, and I intend to clear her name.",
           "next": "player_defends_silverhair"
         }
       ]
     },
     {
-      "id": "player_defends_silverhair", "speaker": "player",
+      "id": "player_defends_silverhair",
+      "speaker": "player",
       "text": "My mistress has been wrongly accused, and I intend to clear her name.",
       "next": "jelom_relents"
     },
     {
-      "id": "jelom_relents", "speaker": "jelom",
+      "id": "jelom_relents",
+      "speaker": "jelom",
       "text": "Listen, Half-Elf! The theft and any investigations are business of the guard and none of yours! But by the looks of it, the only way to keep your nose out would be to lock you up.",
       "next": "jelom_allows_questions"
     },
     {
-      "id": "jelom_allows_questions", "speaker": "jelom",
+      "id": "jelom_allows_questions",
+      "speaker": "jelom",
       "text": "So I won't prevent you from pestering the folk at the Inn. But should you find out anything, you report to me, you understand! Now, what is it you want from me?",
       "choices": "question_menu"
     },
     {
-      "id": "repeat_greeting", "speaker": "jelom",
+      "id": "repeat_greeting",
+      "speaker": "jelom",
       "text": "You again, Half-Elf? What do you want this time?",
       "choices": [
+        {
+          "text": "Look, Jelom, I found out something that will cast some serious doubt on Lady Silverhair having committed the theft!",
+          "when": {
+            "all": [
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              }
+            ]
+          },
+          "next": "jelom_hears_evidence"
+        },
         {
           "text": "Did you know that Talan left his post during the night of the theft?",
           "when": {
             "all": [
-              { "flag": "know_talan_singing", "equals": 2 },
-              { "flag": "jelom_not_convinced", "equals": 1 }
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              },
+              {
+                "flag": "jelom_not_convinced",
+                "equals": 1
+              }
             ]
           },
-          "next": "talan_left_post"
+          "next": "jelom_asks_talan"
         },
         {
-          "text": "Nice to see you again, Jelom. Look, I have some more questions regarding the theft.",
           "repeatable": true,
           "next": "repeat_questions"
         }
       ]
     },
     {
-      "id": "repeat_questions", "speaker": "player",
+      "id": "repeat_questions",
+      "speaker": "player",
       "text": "Nice to see you again, Jelom. Look, I have some more questions regarding the theft.",
       "next": "question_menu"
     },
     {
-      "id": "question_menu", "speaker": "jelom",
+      "id": "question_menu",
+      "speaker": "jelom",
       "text": "And what might those questions be, Half-Elf?",
       "choices": [
+        {
+          "text": "I actually have found out something that should interest you.",
+          "when": {
+            "all": [
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              }
+            ]
+          },
+          "next": "jelom_hears_evidence"
+        },
         {
           "text": "Did you know that Talan left his post during the night of the theft?",
           "when": {
             "all": [
-              { "flag": "know_talan_singing", "equals": 2 },
-              { "flag": "jelom_not_convinced", "equals": 1 }
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              },
+              {
+                "flag": "jelom_not_convinced",
+                "equals": 1
+              }
             ]
           },
-          "next": "talan_left_post"
+          "next": "jelom_asks_talan"
         },
         {
-          "text": "The stableboy, Oliver, heard a noise in the stables, well after everyone had gone to sleep.",
-          "when": { "flag": "know_olivers_noise", "equals": 1 },
+          "when": {
+            "flag": "know_olivers_noise",
+            "equals": 1
+          },
           "next": "oliver_noise"
         },
         {
-          "text": "Alek Endhelm was eavesdropping outside the room during the negotiations, according to Erek. Do you think he could be mixed up in this?",
-          "when": { "flag": "know_alek_eavesdrop", "equals": 1 },
+          "when": {
+            "flag": "know_alek_eavesdrop",
+            "equals": 1
+          },
           "next": "alek_eavesdropping"
         },
         {
-          "text": "Erek actually packed the gems, according to Alek. Do you think he could be mixed up in this?",
-          "when": { "flag": "ask_packed_gems", "equals": 1 },
+          "when": {
+            "flag": "ask_packed_gems",
+            "equals": 1
+          },
           "next": "erek_packed_gems"
         },
         {
-          "text": "Can you tell me what happened on the night of the theft?",
-          "when": { "flag": "know_talan_singing", "not_equals": 2 },
+          "when": {
+            "flag": "know_talan_singing",
+            "not_equals": 2
+          },
           "next": "ask_night"
         },
         {
-          "text": "I am Lady Silverhair's clerk. I demand to see her immediately!",
           "next": "demand_entry"
         }
       ]
     },
     {
-      "id": "talan_left_post", "speaker": "player",
+      "id": "talan_left_post",
+      "speaker": "player",
       "text": "Talan did not hear anything that night, because he was not at his post.",
-      "next": "jelom_asks_talan"
+      "next": "jelom_asks_absence"
     },
     {
-      "id": "jelom_asks_talan", "speaker": "jelom",
+      "id": "jelom_asks_talan",
+      "speaker": "jelom",
       "text": "What!? Are you telling me the kid was right after all? I don't believe it! Can't I even trust my own men any more!? Tell me, what was he doing?",
       "choices": [
         {
           "text": "He sneaked away to take a nap.",
-            "achievement_events": [{"achievement": "3", "bit": 11}, {"achievement": "9", "bit": 14}],
-          "actions": [{ "op": "set", "flag": "told_on_talan", "value": 1 }],
+          "achievement_events": [
+            {
+              "achievement": "3",
+              "bit": 11
+            },
+            {
+              "achievement": "9",
+              "bit": 14
+            }
+          ],
           "next": "jelom_nap"
         },
         {
           "text": "He wandered off to practise singing, of all things!",
-            "achievement_events": [{"achievement": "4", "bit": 22}],
-          "actions": [{ "op": "set", "flag": "told_on_talan", "value": 1 }],
+          "achievement_events": [
+            {
+              "achievement": "4",
+              "bit": 22
+            }
+          ],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "told_on_talan",
+              "value": 1
+            }
+          ],
           "next": "jelom_singing"
         }
       ]
     },
     {
-      "id": "jelom_nap", "speaker": "jelom",
+      "id": "jelom_nap",
+      "speaker": "jelom",
       "text": "A nap? I knew it! I had suspected that he caught some shuteye on duty from time to time, but have never caught him at it! He is in big trouble, this time!",
       "next": "jelom_still_suspects"
     },
     {
-      "id": "jelom_singing", "speaker": "jelom",
+      "id": "jelom_singing",
+      "speaker": "jelom",
       "text": "Singing? What, does the fool want to be a bard now? He is in big trouble now!",
       "next": "jelom_still_suspects"
     },
     {
-      "id": "jelom_still_suspects", "speaker": "jelom",
+      "id": "jelom_still_suspects",
+      "speaker": "jelom",
       "text": "But regardless of that, how do you know that it was not Silverhair herself who went to the stables and caused the noise? After stealing Master Fingolson's gems!",
       "choices": [
         {
-          "text": "Her servants could certainly confirm that she did not leave the room that night.",
           "next": "servants_confirm"
         },
         {
-          "text": "Well, everybody knows that Elves can move with absolute silence.",
           "when": {
             "all": [
-              { "flag": "know_talan_singing", "equals": 2 },
-              { "flag": "know_olivers_noise", "equals": 1 }
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              },
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              }
             ]
           },
-          "actions": [{ "op": "set", "flag": "silverhair_free", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "silverhair_free",
+              "value": 1
+            }
+          ],
           "next": "silent_thief"
         }
       ]
     },
     {
-      "id": "servants_confirm", "speaker": "player",
+      "id": "servants_confirm",
+      "speaker": "player",
       "text": "Her servants could certainly confirm that she did not leave the room that night.",
       "next": "jelom_distrusts_servants"
     },
     {
-      "id": "jelom_distrusts_servants", "speaker": "jelom",
+      "id": "jelom_distrusts_servants",
+      "speaker": "jelom",
       "text": "Ha! They'd do everything to please their mistress. I wouldn't trust in any of their words.",
       "choices": [
         {
-          "text": "Well, everybody knows that Elves can move with absolute silence.",
           "when": {
             "all": [
-              { "flag": "know_talan_singing", "equals": 2 },
-              { "flag": "know_olivers_noise", "equals": 1 }
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              },
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              }
             ]
           },
-          "actions": [{ "op": "set", "flag": "silverhair_free", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "silverhair_free",
+              "value": 1
+            }
+          ],
           "next": "silent_thief"
         }
       ]
     },
     {
-      "id": "silent_thief", "speaker": "player",
+      "id": "silent_thief",
+      "speaker": "player",
       "text": "Well, everybody knows that Elves can move with absolute silence.",
       "next": "jelom_concedes"
     },
     {
-      "id": "jelom_concedes", "speaker": "jelom",
+      "id": "jelom_concedes",
+      "speaker": "jelom",
       "text": "Hm ... yes, that's a fact. You are right, Half-Elf. Something strange is going on.",
       "next": "jelom_releases_silverhair"
     },
     {
-      "id": "jelom_releases_silverhair", "speaker": "jelom",
+      "id": "jelom_releases_silverhair",
+      "speaker": "jelom",
       "text": "Maybe you should go in and see if your mistress can shed some light on the whole affair. However, until we find a new suspect, I'll be keeping an eye on her.",
       "on_end": "activate_jelom_second_dialogue",
       "end": true
     },
     {
-      "id": "released_greeting", "speaker": "jelom",
+      "id": "released_greeting",
+      "speaker": "jelom",
       "text": "Back again, Half-Elf? Have you learned anything of importance from your mistress?",
       "choices": [
         {
-          "text": "Nothing you'd be interested in, Jelom.",
           "next": "nothing_new"
         }
       ]
     },
     {
-      "id": "nothing_new", "speaker": "player",
+      "id": "nothing_new",
+      "speaker": "player",
       "text": "Nothing you'd be interested in, Jelom.",
       "end": true
     },
     {
-      "id": "oliver_noise", "speaker": "player",
+      "id": "oliver_noise",
+      "speaker": "player",
       "text": "The stableboy, Oliver, heard a noise in the stables, well after everyone had gone to sleep.",
       "next": "jelom_dismisses_oliver"
     },
     {
-      "id": "jelom_dismisses_oliver", "speaker": "jelom",
+      "id": "jelom_dismisses_oliver",
+      "speaker": "jelom",
       "text": "You trust in the overactive imagination of some little kid? I know from Talan that everything was quiet during the night. And I take the word of my own guard over Oliver's!",
       "choices": [
         {
-          "text": "But that noise might have been caused by the real thief!",
-          "actions": [{ "op": "set", "flag": "jelom_not_convinced", "value": 1 }],
+          "when": {
+            "flag": "know_talan_singing",
+            "equals": 2
+          },
+          "next": "talan_left_post"
+        },
+        {
+          "actions": [
+            {
+              "op": "set",
+              "flag": "jelom_not_convinced",
+              "value": 1
+            }
+          ],
           "next": "real_thief"
         }
       ]
     },
     {
-      "id": "real_thief", "speaker": "player",
+      "id": "real_thief",
+      "speaker": "player",
       "text": "But that noise might have been caused by the real thief!",
       "next": "child_fantasies"
     },
     {
-      "id": "child_fantasies", "speaker": "jelom",
+      "id": "child_fantasies",
+      "speaker": "jelom",
       "text": "I say this is crap. You'll need better arguments then mere fantasies of a child to convince me. Now don't hold me off my duty!",
       "end": true
     },
     {
-      "id": "alek_eavesdropping", "speaker": "player",
+      "id": "alek_eavesdropping",
+      "speaker": "player",
       "text": "Alek Endhelm was eavesdropping outside the room during the negotiations, according to Erek. Do you think he could be mixed up in this?",
       "next": "jelom_defends_alek"
     },
     {
-      "id": "jelom_defends_alek", "speaker": "jelom",
+      "id": "jelom_defends_alek",
+      "speaker": "jelom",
       "text": "Don't get excited, half-elf. Alek looks like scum, and probably is, being a mercenary, but there is no reason to suspect him of the theft. In fact, I hear that he offered his services to Bjarn as a guard.",
       "choices": [
-        { "text": "You don't think that is a little suspicious?", "next": "alek_suspicious" }
+        {
+          "next": "alek_suspicious"
+        }
       ]
     },
     {
-      "id": "alek_suspicious", "speaker": "player",
+      "id": "alek_suspicious",
+      "speaker": "player",
       "text": "You don't think that is a little suspicious?",
       "next": "dismissed"
     },
     {
-      "id": "erek_packed_gems", "speaker": "player",
+      "id": "erek_packed_gems",
+      "speaker": "player",
       "text": "Erek actually packed the gems, according to Alek. Do you think he could be mixed up in this?",
       "next": "jelom_defends_erek"
     },
     {
-      "id": "jelom_defends_erek", "speaker": "jelom",
+      "id": "jelom_defends_erek",
+      "speaker": "jelom",
       "text": "Erek? Come on, don't be stupid. You are a more likely thief than Erek, and you weren't even here! It is just like Alek to tell you things like that!",
       "choices": [
-        { "text": "Why do you say that?", "next": "why_defend_erek" }
+        {
+          "next": "why_defend_erek"
+        }
       ]
     },
     {
-      "id": "why_defend_erek", "speaker": "player",
+      "id": "why_defend_erek",
+      "speaker": "player",
       "text": "Why do you say that?",
       "next": "jelom_on_alek"
     },
     {
-      "id": "jelom_on_alek", "speaker": "jelom",
+      "id": "jelom_on_alek",
+      "speaker": "jelom",
       "text": "Don't get excited, half-elf. Alek looks like scum, and probably is, being a mercenary, but there is no reason to suspect him of the theft. In fact, I hear that he offered his services to Bjarn as a guard.",
-      "choices": [
-        { "text": "You don't think that is a little suspicious?", "next": "alek_suspicious" }
-      ]
+      "choices": "jelom_defends_alek"
     },
     {
-      "id": "ask_night", "speaker": "player",
+      "id": "ask_night",
+      "speaker": "player",
       "text": "Can you tell me what happened on the night of the theft?",
       "next": "ask_talan"
     },
     {
-      "id": "ask_talan", "speaker": "jelom",
+      "id": "ask_talan",
+      "speaker": "jelom",
       "text": "No, I can't. Talan was on guard duty. Go bother him.",
       "choices": [
-        { "text": "You won't tell me anything about your own investigation, then?", "next": "own_investigation" }
+        {
+          "next": "own_investigation"
+        }
       ]
     },
     {
-      "id": "own_investigation", "speaker": "player",
+      "id": "own_investigation",
+      "speaker": "player",
       "text": "You won't tell me anything about your own investigation, then?",
       "next": "dismissed"
     },
     {
-      "id": "dismissed", "speaker": "jelom",
+      "id": "dismissed",
+      "speaker": "jelom",
       "text": "Look, Half-Elf, I am getting pretty damn tired of you and your questions. This investigation has nothing to do with you, so why don't you keep your nose out of it? Now get the hell out of here!",
       "end": true
     },
     {
-      "id": "demand_entry", "speaker": "player",
+      "id": "demand_entry",
+      "speaker": "player",
       "text": "I am Lady Silverhair's clerk. I demand to see her immediately!",
       "next": "entry_refused"
     },
     {
-      "id": "entry_refused", "speaker": "jelom",
+      "id": "entry_refused",
+      "speaker": "jelom",
       "text": "It does not matter who you are. None may leave this room and none may enter. 'Tis as simple as that.",
       "choices": [
-        { "text": "Who's order is this?", "next": "whose_order" },
-        { "text": "What harm could it do if I spoke to my mistress?", "next": "what_harm" }
+        {
+          "next": "whose_order"
+        },
+        {
+          "next": "what_harm"
+        }
       ]
     },
     {
-      "id": "whose_order", "speaker": "player",
+      "id": "whose_order",
+      "speaker": "player",
       "text": "Who's order is this?",
       "next": "jelom_order"
     },
     {
-      "id": "jelom_order", "speaker": "jelom",
+      "id": "jelom_order",
+      "speaker": "jelom",
       "text": "Mine! As long as Silverhair does not give in and hands out Master Fingolson's gems she's staying where she is. On her own!",
       "choices": [
-        { "text": "I assure you, Lady Silverhair is innocent.", "next": "silverhair_innocent" },
-        { "text": "What harm could it do if I spoke to my mistress?", "next": "what_harm" }
+        {
+          "next": "silverhair_innocent"
+        },
+        {
+          "next": "what_harm"
+        }
       ]
     },
     {
-      "id": "silverhair_innocent", "speaker": "player",
+      "id": "silverhair_innocent",
+      "speaker": "player",
       "text": "I assure you, Lady Silverhair is innocent.",
       "next": "jelom_claims_facts"
     },
     {
-      "id": "jelom_claims_facts", "speaker": "jelom",
+      "id": "jelom_claims_facts",
+      "speaker": "jelom",
       "text": "Really? Too bad then, that all the facts I know prove the opposite.",
       "next": "get_lost"
     },
     {
-      "id": "get_lost", "speaker": "jelom",
+      "id": "get_lost",
+      "speaker": "jelom",
       "text": "Now get lost!",
       "end": true
     },
     {
-      "id": "what_harm", "speaker": "player",
+      "id": "what_harm",
+      "speaker": "player",
       "text": "What harm could it do if I spoke to my mistress?",
       "next": "jelom_no_risk"
     },
     {
-      "id": "jelom_no_risk", "speaker": "jelom",
+      "id": "jelom_no_risk",
+      "speaker": "jelom",
       "text": "How should I know!? But I'm not taking any risk.",
       "end": true
+    },
+    {
+      "id": "jelom_door_first",
+      "speaker": "jelom",
+      "text": "Halt there! No-one is allowed into the prisoner's room!",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "at_silverhairs_door",
+          "value": 0
+        }
+      ],
+      "achievement_events": [
+        {
+          "achievement": "2",
+          "bit": 13
+        }
+      ],
+      "choices": "hallway_warning"
+    },
+    {
+      "id": "jelom_door_repeat",
+      "speaker": "jelom",
+      "text": "Stop right there, Half-Elf! You know that you are not allowed in there!",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "at_silverhairs_door",
+          "value": 0
+        }
+      ],
+      "choices": "repeat_greeting"
+    },
+    {
+      "id": "jelom_hears_evidence",
+      "speaker": "jelom",
+      "text": "I doubt that, but since I won't get any peace from your pestering until you tell me, go ahead.",
+      "choices": [
+        {
+          "next": "oliver_noise"
+        }
+      ]
+    },
+    {
+      "id": "jelom_asks_absence",
+      "speaker": "jelom",
+      "text": "What do you mean? Why wasn't he at his post?",
+      "choices": "jelom_asks_talan"
     }
   ]
 }

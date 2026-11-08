@@ -43,7 +43,7 @@
         { "text": "Then you took advantage of the theft to discredit my mistress, because you despise the arcane arts?",
           "when": { "flag": "extro_guess_deceit", "equals": 0 },
           "actions": [{ "op": "set", "flag": "extro_guess_deceit", "value": 1 }], "next": "n34" },
-        { "text": "Then you confess that the theft was just pretended?",
+        {
           "when": { "flag": "extro_guess_deceit", "equals": 1 }, "next": "n47" },
         { "text": "If your gems are no Catseyes, you have to see that it is unlikely for my mistress to steal them.",
             "achievement_events": [{"achievement": "7", "bit": 26}],
@@ -51,7 +51,7 @@
       ] },
     { "id": "n23", "speaker": "bjarn", "text": "Foolish Half-Elf! Don't you think I'd know best how unlikely it is for anyone, including your fine mistress, to steal these gems? Were it not for Erek, that betrayer, you'd never know!",
       "choices": [
-        { "text": "Then you confess that the theft was just pretended?",
+        {
           "when": { "flag": "extro_guess_deceit", "equals": 1 }, "next": "n47" }
       ] },
     { "id": "n24", "speaker": "bjarn", "text": "So what? I'd gladly go without the stones if only the thief was put to her just punishment. Is this so wrong?",
@@ -76,10 +76,7 @@
     { "id": "n33", "speaker": "bjarn", "text": "What would a Half-Elf know of these matters? You couldn't tell one gem from the other! Erek, you have seen the stones; tell our friend whether they are Catseyes or not!", "next": "n14" },
     { "id": "n34", "speaker": "bjarn", "text": "You call tinkering with the supernatural an art!? It is an insult to any upright Dwarf. But what could I do against it? My people have no use for ornaments or luxuries, but we cannot live of rocks alone. We need to trade.", "next": "n35" },
     { "id": "n35", "speaker": "bjarn", "text": "So I couldn't simply refuse selling to those filthy Elves. But if one of their nobles turns out to be a thief, who knows what the elders would decide.",
-      "choices": [
-        { "text": "Then you confess that the theft was just pretended?",
-          "when": { "flag": "extro_guess_deceit", "equals": 1 }, "next": "n47" }
-      ] },
+      "choices": "n23" },
     { "id": "n36",
       "achievement_events": [{"achievement": "7", "bit": 3}], "speaker": "jelom", "text": "You mean the thief expected to escape unnoticed while your mistress would have been held responsible?",
       "choices": [

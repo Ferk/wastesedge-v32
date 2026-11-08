@@ -19,7 +19,7 @@
       "id": "initial_report", "speaker": "jelom",
       "text": "Back again, Half-Elf? Have you learned anything of importance from your mistress?",
       "choices": [
-        { "text": "Nothing you'd be interested in, Jelom.", "next": "nothing_new" },
+        { "next": "nothing_new" },
         { "text": "It seems that Fingolson's gems are worthless to her.",
           "when": { "flag": "gem_worthless", "equals": 1 }, "next": "asks_for_proof" },
         { "text": "It seems that Fingolson's gems are worthless to her.",
@@ -33,15 +33,15 @@
     { "id": "asks_for_proof", "speaker": "jelom",
       "text": "Really? I imagine you have some sort of proof for this, then?",
       "choices": [
-        { "text": "Lady Silverhair said so.",
+        {
           "when": { "flag": "gem_worthless", "equals": 1 }, "next": "silverhair_is_proof" },
-        { "text": "Lady Silverhair said so.",
+        {
           "when": { "flag": "gem_worthless", "equals": 3 }, "next": "silverhair_is_proof" },
-        { "text": "I'm just repeating Erek Stonebreaker's words.",
+        {
           "when": { "flag": "gem_worthless", "equals": 2 }, "next": "erek_is_proof" },
-        { "text": "I'm just repeating Erek Stonebreaker's words.",
+        {
           "when": { "flag": "gem_worthless", "equals": 3 }, "next": "erek_is_proof" },
-        { "text": "I have this Chrysoberyl. Apparently it is no Catseye, so why should Lady Silverhair have stolen it?",
+        {
           "when": { "flag": "have_gem", "equals": 1 }, "next": "show_gem" }
       ]
     },
@@ -55,8 +55,8 @@
     { "id": "questions_erek", "speaker": "jelom",
       "text": "Now I'm surprised. What makes him believe all of a sudden that his Master is selling crap? That doesn't sound at all like the Erek I know.",
       "choices": [
-        { "text": "If you don't believe me, go ask him yourself!", "next": "ask_erek_yourself" },
-        { "text": "I showed him one of Fingolson's gems I found.", "next": "showed_erek_gem" }
+        { "next": "ask_erek_yourself" },
+        { "next": "showed_erek_gem" }
       ]
     },
     { "id": "ask_erek_yourself", "speaker": "player",
@@ -69,8 +69,8 @@
     { "id": "where_found", "speaker": "jelom",
       "text": "What? One of the stolen gems? Tell me Half-Elf, where have you found that?",
       "choices": [
-        { "text": "It was hidden in Lady Silverhair's luggage.", "next": "gem_in_luggage" },
-        { "text": "That's not important. The important thing is that this gem is of poor quality. See?", "next": "quality_only" }
+        { "next": "gem_in_luggage" },
+        { "next": "quality_only" }
       ]
     },
     { "id": "show_gem", "speaker": "player",
@@ -79,8 +79,8 @@
     { "id": "stolen_gem", "speaker": "jelom",
       "text": "You mean this is one of the stolen gems? How in hell did you come across that? And where are the others?",
       "choices": [
-        { "text": "I don't know where the others are, but this one was hidden in Lady Silverhair's luggage.", "next": "gem_in_luggage_long" },
-        { "text": "That's not important. The important thing is that this gem is of poor quality. See?", "next": "quality_only" }
+        { "next": "gem_in_luggage_long" },
+        { "next": "quality_only" }
       ]
     },
     { "id": "gem_in_luggage", "speaker": "player",
@@ -107,13 +107,13 @@
     { "id": "still_unconvinced", "speaker": "jelom",
       "text": "Not you again, Half-Elf? Are you still trying to make me believe that your Mistress has no use for the gems?",
       "choices": [
-        { "text": "I'm just repeating Erek Stonebreaker's words.",
+        {
           "when": { "flag": "gem_worthless", "equals": 2 }, "next": "erek_is_proof" },
-        { "text": "I'm just repeating Erek Stonebreaker's words.",
+        {
           "when": { "flag": "gem_worthless", "equals": 3 }, "next": "erek_is_proof" },
-        { "text": "I have this Chrysoberyl. Apparently it is no Catseye, so why should Lady Silverhair have stolen it?",
+        {
           "when": { "flag": "have_gem", "equals": 1 }, "next": "show_gem" },
-        { "text": "I'd be just wasting my breath on you!", "next": "wasting_breath" }
+        { "next": "wasting_breath" }
       ]
     },
     { "id": "wasting_breath", "speaker": "player",
@@ -128,8 +128,8 @@
     { "id": "jelom_warns_erek", "speaker": "jelom",
       "text": "I should have known it! Believe me Erek, these Half-Elves are talking you into things you will regret later on. Is it not so, Half-Elf?",
       "choices": [
-        { "text": "Listen Jelom, I am getting sick of you. What is it you want?", "next": "sick_of_jelom" },
-        { "text": "You think that I deceived Erek?", "next": "deceived_erek" }
+        { "next": "sick_of_jelom" },
+        { "next": "deceived_erek" }
       ]
     },
     { "id": "sick_of_jelom", "speaker": "player",
@@ -140,20 +140,16 @@
     { "id": "ask_fingolson", "speaker": "jelom",
       "text": "If this gem really belongs to Master Fingolson, why don't I hear what he has to say about it?",
       "choices": [
-        { "text": "Well, Master Fingolson is pretending that this gem is a valuable Catseye, despite the fact that it isn't.",
+        {
           "when": { "flag": "bjarn_lies", "equals": 1 }, "next": "fingolson_lies" },
-        { "text": "Uh, I haven't asked him yet.", "next": "not_asked_fingolson" }
+        { "next": "not_asked_fingolson" }
       ]
     },
     { "id": "deceived_erek", "speaker": "player",
       "text": "You think that I deceived Erek?", "next": "jelom_suspicious" },
     { "id": "jelom_suspicious", "speaker": "jelom",
       "text": "I wouldn't be surprised. And I find it more than suspicious that I heard nothing from the gem's owner yet. If it really belongs to Master Fingolson, he should be able to give reliable information.",
-      "choices": [
-        { "text": "Well, Master Fingolson is pretending that this gem is a valuable Catseye, despite the fact that it isn't.",
-          "when": { "flag": "bjarn_lies", "equals": 1 }, "next": "fingolson_lies" },
-        { "text": "Uh, I haven't asked him yet.", "next": "not_asked_fingolson" }
-      ]
+      "choices": "ask_fingolson"
     },
     { "id": "not_asked_fingolson", "speaker": "player",
       "text": "Uh, I haven't asked him yet.", "next": "jelom_waits" },
@@ -175,13 +171,13 @@
     { "id": "returned_from_fingolson", "speaker": "jelom",
       "text": "It's about time you return, Half-Elf! Tell me, what does Master Fingolson say about this gem of yours?",
       "choices": [
-        { "text": "Nothing. He refused to talk with me!",
+        {
           "when": { "flag": "bjarn_door_open", "equals": 0 }, "next": "fingolson_refused" },
-        { "text": "Nothing. He refused to talk with me!",
+        {
           "when": { "flag": "bjarn_door_open", "equals": 1 }, "next": "fingolson_refused" },
-        { "text": "Nothing. He refused to talk with me!",
+        {
           "when": { "flag": "bjarn_door_open", "equals": 2 }, "next": "fingolson_refused" },
-        { "text": "Well, Master Fingolson is pretending that this gem is a valuable Catseye, despite the fact that it isn't.",
+        {
           "when": { "flag": "bjarn_lies", "equals": 1 }, "next": "fingolson_lies" }
       ]
     },

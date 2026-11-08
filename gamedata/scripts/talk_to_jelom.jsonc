@@ -1,6 +1,14 @@
 {
   "id": "talk_to_jelom",
   "actions": [
-    { "op": "show_dialogue", "dialogue": "jelom_start" }
+    {
+      "op": "set",
+      "flag": "at_silverhairs_door",
+      "value": 1
+    },
+    {
+      "op": "show_dialogue",
+      "dialogue": "jelom_start"
+    }
   ]
 }

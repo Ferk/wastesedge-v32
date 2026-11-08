@@ -1,252 +1,398 @@
 {
   "id": "silverhair_start",
   "start": [
-    { "node": "gem_returned", "when": { "flag": "silverhair_gem_pending", "equals": 1 } },
-    { "node": "janesta_surprised", "when": { "flag": "silverhair_talked", "equals": 0 } },
-    { "node": "confined_greeting", "when": { "flag": "silverhair_free", "equals": 0 } },
-    { "node": "released_greeting", "when": { "flag": "get_item", "equals": 0 } },
-    { "node": "articles_missing", "when": { "flag": "get_item", "equals": 1 } },
-    { "node": "repeat_greeting" }
+    {
+      "node": "gem_returned",
+      "when": {
+        "flag": "silverhair_gem_pending",
+        "equals": 1
+      }
+    },
+    {
+      "node": "janesta_surprised",
+      "when": {
+        "flag": "silverhair_talked",
+        "equals": 0
+      }
+    },
+    {
+      "node": "confined_greeting",
+      "when": {
+        "flag": "silverhair_free",
+        "equals": 0
+      }
+    },
+    {
+      "node": "released_greeting",
+      "when": {
+        "flag": "get_item",
+        "equals": 0
+      }
+    },
+    {
+      "node": "articles_missing",
+      "when": {
+        "flag": "get_item",
+        "equals": 1
+      }
+    },
+    {
+      "node": "repeat_greeting"
+    }
   ],
   "speakers": [
     {
-      "id": "player", "name": "Banec", "role": "player",
+      "id": "player",
+      "name": "Banec",
+      "role": "player",
       "portrait": "assets/ui/portraits/player.png"
     },
     {
-      "id": "silverhair", "name": "Imoen Silverhair", "role": "npc",
-      "entity": "silverhair", "portrait": "assets/ui/portraits/silverhair.png"
+      "id": "silverhair",
+      "name": "Imoen Silverhair",
+      "role": "npc",
+      "entity": "silverhair",
+      "portrait": "assets/ui/portraits/silverhair.png"
     },
     {
-      "id": "janesta", "name": "Janesta Skywind", "role": "npc",
+      "id": "janesta",
+      "name": "Janesta Skywind",
+      "role": "npc",
       "entity": "janesta"
     },
-    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+    {
+      "id": "narrator",
+      "name": "Narrator",
+      "role": "narrator"
+    }
   ],
   "nodes": [
     {
-      "id": "confined_greeting", "speaker": "silverhair",
+      "id": "confined_greeting",
+      "speaker": "silverhair",
       "text": "Banec, have you found anything yet? This confinement is intolerable, as you may well understand.",
-      "next": "repeat_greeting"
+      "next": "player_asks_patience"
     },
     {
-      "id": "released_greeting", "speaker": "silverhair",
+      "id": "released_greeting",
+      "speaker": "silverhair",
       "text": "Banec! Thank the Powers!",
       "next": "player_glad_silverhair_free"
     },
     {
-      "id": "player_glad_silverhair_free", "speaker": "player",
+      "id": "player_glad_silverhair_free",
+      "speaker": "player",
       "text": "My Lady, I am glad to see you. You will be free soon, I know it.",
       "next": "silverhair_free_boon"
     },
     {
-      "id": "silverhair_free_boon", "speaker": "silverhair",
+      "id": "silverhair_free_boon",
+      "speaker": "silverhair",
       "text": "I would ask a boon from you, now that it is safe. I have personal articles that I need, but are kept with our packs. I'm sure you know which articles I mean.",
       "choices": [
         {
-          "text": "Of course, Lady. That would be the least I could do after what you have endured. Rest assured, I will be back shortly.",
-          "actions": [{ "op": "set", "flag": "get_item", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "get_item",
+              "value": 1
+            }
+          ],
           "next": "articles_accepted"
         },
         {
           "text": "And where are the packs kept, Lady?",
-          "actions": [{ "op": "set", "flag": "get_item", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "get_item",
+              "value": 1
+            }
+          ],
           "next": "silverhair_pantry_location"
         }
       ]
     },
     {
-      "id": "articles_accepted", "speaker": "player",
+      "id": "articles_accepted",
+      "speaker": "player",
       "text": "Of course, Lady. That would be the least I could do after what you have endured. Rest assured, I will be back shortly.",
       "end": true
     },
     {
-      "id": "silverhair_pantry_location", "speaker": "silverhair",
+      "id": "silverhair_pantry_location",
+      "speaker": "silverhair",
       "text": "You will find them below, in the pantry.",
-      "end": true
+      "next": "player_understands_pantry"
     },
     {
-      "id": "articles_missing", "speaker": "silverhair",
+      "id": "articles_missing",
+      "speaker": "silverhair",
       "text": "Banec, you have come back so soon? But where are the articles I asked for?",
       "next": "player_has_not_retrieved_articles"
     },
     {
-      "id": "player_has_not_retrieved_articles", "speaker": "player",
+      "id": "player_has_not_retrieved_articles",
+      "speaker": "player",
       "text": "I have yet to retrieve them, Lady.",
       "next": "silverhair_urges_articles"
     },
     {
-      "id": "silverhair_urges_articles", "speaker": "silverhair",
+      "id": "silverhair_urges_articles",
+      "speaker": "silverhair",
       "text": "Then please do so at once. I have been without them for too long.",
       "next": "player_accepts_article_reminder"
     },
     {
-      "id": "player_accepts_article_reminder", "speaker": "player",
+      "id": "player_accepts_article_reminder",
+      "speaker": "player",
       "text": "Very well, Lady.",
       "end": true
     },
     {
-      "id": "janesta_surprised", "speaker": "janesta",
+      "id": "janesta_surprised",
+      "speaker": "janesta",
       "text": "Oh!!",
       "next": "janesta_calls_mistress"
     },
     {
-      "id": "janesta_calls_mistress", "speaker": "janesta",
+      "id": "janesta_calls_mistress",
+      "speaker": "janesta",
       "text": "Mistress! Mistress! Banec has come!",
       "next": "silverhair_relief"
     },
     {
       "id": "silverhair_relief",
-      "achievement_events": [{"achievement": "2", "bit": 25}], "speaker": "silverhair",
+      "achievement_events": [
+        {
+          "achievement": "2",
+          "bit": 25
+        }
+      ],
+      "speaker": "silverhair",
       "text": "Yes, yes dear, I see him. Please calm yourself. Banec, I am relieved to see you. This situation has clearly gone beyond any civil control.",
       "next": "player_reports_charge"
     },
     {
-      "id": "player_reports_charge", "speaker": "player",
+      "id": "player_reports_charge",
+      "speaker": "player",
       "text": "That is certain, my lady. I am told you are suspected of theft.",
       "next": "silverhair_denies_theft"
     },
     {
-      "id": "silverhair_denies_theft", "speaker": "silverhair",
+      "id": "silverhair_denies_theft",
+      "speaker": "silverhair",
       "text": "Theft indeed, and theft most grave. This Fingolson may be uncouth, but he bears considerable influence. A theft from him would have dire consequences indeed. But you know I could not have done this thing.",
       "choices": [
         {
-          "text": "What do you know of Fingolson, Lady? I have not met him before.",
-          "actions": [{ "op": "set", "flag": "silverhair_talked", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "silverhair_talked",
+              "value": 1
+            }
+          ],
           "next": "ask_fingolson"
         },
         {
-          "text": "Of course. Theft is not in you, my Lady, nor is deceit. But these folk have not my confidence in you.",
-          "actions": [{ "op": "set", "flag": "silverhair_talked", "value": 1 }],
-          "next": "pledge_help"
+          "text": "Of course.  Theft is not in you, my Lady, nor is deceit.  But these folk have not my confidence in you.  I fear that there is no one who will speak for your honour among them.",
+          "actions": [
+            {
+              "op": "set",
+              "flag": "silverhair_talked",
+              "value": 1
+            }
+          ],
+          "next": "silverhair_trusts_player"
         }
       ]
     },
     {
-      "id": "ask_fingolson", "speaker": "player",
+      "id": "ask_fingolson",
+      "speaker": "player",
       "text": "What do you know of Fingolson, Lady? I have not met him before.",
       "next": "silverhair_on_fingolson"
     },
     {
-      "id": "silverhair_on_fingolson", "speaker": "silverhair",
+      "id": "silverhair_on_fingolson",
+      "speaker": "silverhair",
       "text": "Be glad of that, he is an uncouth lout at best. I should have known better than to deal fairly with such a rough and uncultured beast.",
-      "next": "silverhair_sends_player"
+      "next": "silverhair_initial_defence"
     },
     {
-      "id": "pledge_help", "speaker": "player",
+      "id": "pledge_help",
+      "speaker": "player",
       "text": "Of course, my Lady. You may trust me to the end of the world. What little I may do is yours to command.",
       "next": "silverhair_trusts_player"
     },
     {
-      "id": "silverhair_trusts_player", "speaker": "silverhair",
-      "text": "Then it falls to you, Banec, as my sole friend in this outpost, to make certain my name is clear of any stain.",
-      "next": "silverhair_sends_player"
+      "id": "silverhair_trusts_player",
+      "speaker": "silverhair",
+      "text": "I see.  Then it falls to you, $name, as my sole friend in this outpost, to make certain my name is clear of any stain.  May I trust you to do this for me?",
+      "choices": [
+        {
+          "text": "Of course, my Lady.  You may trust me to the end of the world.  What little I may do is yours to command.",
+          "next": "silverhair_sends_player"
+        }
+      ]
     },
     {
-      "id": "silverhair_sends_player", "speaker": "silverhair",
+      "id": "silverhair_sends_player",
+      "speaker": "silverhair",
       "text": "I thank you for that. Now you must go, lest they find you here and imprison you as well. Free, you are my hope.",
-      "end": true
+      "choices": [
+        {
+          "next": "silverhair_farewell"
+        }
+      ]
     },
     {
-      "id": "repeat_greeting", "speaker": "silverhair",
+      "id": "repeat_greeting",
+      "speaker": "silverhair",
       "text": "I have little choice. Do you have news? Or questions?",
       "choices": [
         {
-          "text": "News? I must disappoint you, Lady. I have none. I simply wished to know if there was anything you need.",
           "next": "no_news"
         },
         {
-          "text": "I am curious, Lady. What of that figurine there? I do not recall it.",
-          "when": { "all": [
-            { "flag": "know_frostbloom", "equals": 1 },
-            { "flag": "talked_about_yeti", "equals": 0 }
-          ] },
-          "actions": [{ "op": "set", "flag": "talked_about_yeti", "value": 1 }],
+          "when": {
+            "all": [
+              {
+                "flag": "know_frostbloom",
+                "equals": 1
+              },
+              {
+                "flag": "talked_about_yeti",
+                "equals": 0
+              }
+            ]
+          },
+          "actions": [
+            {
+              "op": "set",
+              "flag": "talked_about_yeti",
+              "value": 1
+            }
+          ],
           "next": "ask_about_yeti"
         },
         {
-          "text": "I have spoken with the artist, Frostbloom. She mentioned that she had heard some strange sounds in the night, when the theft must have taken place. Did you hear anything?",
-          "when": { "all": [
-            { "flag": "know_noise", "equals": 2 },
-            { "flag": "silverhair_noise_heard", "equals": 0 }
-          ] },
-          "actions": [{ "op": "set", "flag": "silverhair_noise_heard", "value": 1 }],
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "has_bits": 2
+              },
+              {
+                "flag": "silverhair_noise_heard",
+                "equals": 0
+              }
+            ]
+          },
+          "actions": [
+            {
+              "op": "set",
+              "flag": "silverhair_noise_heard",
+              "value": 1
+            },
+            {
+              "op": "set_bits",
+              "flag": "know_noise",
+              "value": 1
+            }
+          ],
           "next": "ask_about_noise"
         },
         {
-          "text": "Lady, could you tell me more about the argument you had with the Dwarf? It may be helpful.",
-          "when": { "flag": "know_argument", "equals": 1 },
+          "when": {
+            "flag": "know_argument",
+            "equals": 1
+          },
           "next": "ask_about_argument"
         }
       ]
     },
     {
-      "id": "no_news", "speaker": "player",
+      "id": "no_news",
+      "speaker": "player",
       "text": "News? I must disappoint you, Lady. I have none. I simply wished to know if there was anything you need.",
       "next": "silverhair_mentions_possessions"
     },
     {
-      "id": "silverhair_mentions_possessions", "speaker": "silverhair",
+      "id": "silverhair_mentions_possessions",
+      "speaker": "silverhair",
       "text": "It is kind of you to ask. Indeed my possessions, other than what you see, have been taken from me. They are kept in the pantry below.",
       "next": "player_offers_early_retrieval"
     },
     {
-      "id": "player_offers_early_retrieval", "speaker": "player",
+      "id": "player_offers_early_retrieval",
+      "speaker": "player",
       "text": "Do you wish me to retrieve them for you, Lady?",
       "next": "silverhair_says_wait"
     },
     {
-      "id": "silverhair_says_wait", "speaker": "silverhair",
+      "id": "silverhair_says_wait",
+      "speaker": "silverhair",
       "text": "No, that would not be wise. I have an item I need, but to fetch it now would be to invite trouble. Better we wait.",
       "next": "player_waits"
     },
     {
-      "id": "player_waits", "speaker": "player",
+      "id": "player_waits",
+      "speaker": "player",
       "text": "Very well, Lady. I am yours to command.",
       "next": "leave_before_heard"
     },
     {
-      "id": "leave_before_heard", "speaker": "silverhair",
+      "id": "leave_before_heard",
+      "speaker": "silverhair",
       "text": "You must go. The human at the door may not hear as well as you or I, but he hears well enough. Leave before he discovers you.",
       "end": true
     },
     {
-      "id": "ask_about_yeti", "speaker": "player",
+      "id": "ask_about_yeti",
+      "speaker": "player",
       "text": "I am curious, Lady. What of that figurine there? I do not recall it.",
       "next": "yeti_origin"
     },
     {
-      "id": "yeti_origin", "speaker": "silverhair",
+      "id": "yeti_origin",
+      "speaker": "silverhair",
       "text": "The Yeti? I bought that upon arriving here. From a young lady of your breed, it was.",
       "next": "player_recognizes_artist"
     },
     {
-      "id": "player_recognizes_artist", "speaker": "player",
+      "id": "player_recognizes_artist",
+      "speaker": "player",
       "text": "The artist, then? I must speak more with her. I had not known you had been together.",
       "next": "silverhair_respects_artist"
     },
     {
-      "id": "silverhair_respects_artist", "speaker": "silverhair",
+      "id": "silverhair_respects_artist",
+      "speaker": "silverhair",
       "text": "She is a very intelligent woman, and regards the Yeti highly. Do not take her lightly.",
       "end": true
     },
     {
-      "id": "ask_about_noise", "speaker": "player",
+      "id": "ask_about_noise",
+      "speaker": "player",
       "text": "I have spoken with the artist, Frostbloom. She mentioned that she had heard some strange sounds in the night, when the theft must have taken place. Did you hear anything?",
       "next": "silverhair_remembers_noise"
     },
     {
-      "id": "silverhair_remembers_noise", "speaker": "silverhair",
+      "id": "silverhair_remembers_noise",
+      "speaker": "silverhair",
       "text": "In the night...? Yes. Yes, I do recall a sound in the night. How could I have forgotten such a thing?",
       "next": "player_asks_noise_detail"
     },
     {
-      "id": "player_asks_noise_detail", "speaker": "player",
+      "id": "player_asks_noise_detail",
+      "speaker": "player",
       "text": "This may be important to your freedom. What are you able to tell me of it?",
       "next": "silverhair_voice_uncertain"
     },
     {
-      "id": "silverhair_voice_uncertain", "speaker": "silverhair",
+      "id": "silverhair_voice_uncertain",
+      "speaker": "silverhair",
       "text": "Little, I'm afraid. I know it was a voice, of that I am certain. But whose voice I was not able to tell, nor what was said.",
       "choices": [
         {
@@ -260,105 +406,181 @@
       ]
     },
     {
-      "id": "noise_distance", "speaker": "silverhair",
+      "id": "noise_distance",
+      "speaker": "silverhair",
       "text": "Very little, I'm afraid. Only that it seemed to come from a distance. Past the wall, perhaps. In the direction of the stables.",
       "next": "noise_anxiety"
     },
     {
-      "id": "noise_anxiety", "speaker": "narrator",
+      "id": "noise_anxiety",
+      "speaker": "narrator",
       "text": "The lady looks anxiously at the door.",
       "end": true
     },
     {
-      "id": "noise_thinks", "speaker": "narrator",
+      "id": "noise_thinks",
+      "speaker": "narrator",
       "text": "She thinks for a moment, her eyes distant.",
       "next": "noise_unknown"
     },
     {
-      "id": "noise_unknown", "speaker": "silverhair",
+      "id": "noise_unknown",
+      "speaker": "silverhair",
       "text": "No, I am sorry. The nature of the voice is a mystery to me still.",
       "end": true
     },
     {
-      "id": "ask_about_argument", "speaker": "player",
+      "id": "ask_about_argument",
+      "speaker": "player",
       "text": "Lady, could you tell me more about the argument you had with the Dwarf? It may be helpful.",
       "next": "silverhair_argument_insult"
     },
     {
-      "id": "silverhair_argument_insult", "speaker": "silverhair",
+      "id": "silverhair_argument_insult",
+      "speaker": "silverhair",
       "text": "Argument? An insult, it was. That foul creature had the audacity to accuse me of ignorance!",
       "next": "player_defends_education"
     },
     {
-      "id": "player_defends_education", "speaker": "player",
+      "id": "player_defends_education",
+      "speaker": "player",
       "text": "Ignorance? But you are highly educated, Lady. Anyone could see that.",
       "next": "silverhair_inferior_gems"
     },
     {
-      "id": "silverhair_inferior_gems", "speaker": "silverhair",
+      "id": "silverhair_inferior_gems",
+      "speaker": "silverhair",
       "text": "Not this beast. He attempted to sell inferior gems to me, pretending that they were of a high grade. As if I was nothing more than a child who could not tell one stone from another.",
       "next": "silverhair_enchantment"
     },
     {
-      "id": "silverhair_enchantment", "speaker": "silverhair",
+      "id": "silverhair_enchantment",
+      "speaker": "silverhair",
       "text": "You know it is my intent to enchant these stones. Else why would I trek this far? Awful stones like his would shatter in an instant.",
       "next": "player_remembers_intent"
     },
     {
-      "id": "player_remembers_intent", "speaker": "player",
+      "id": "player_remembers_intent",
+      "speaker": "player",
       "text": "Yes, that's true. When we set out, you told me of your intent.",
       "next": "silverhair_remembers_rage"
     },
     {
-      "id": "silverhair_remembers_rage", "speaker": "silverhair",
+      "id": "silverhair_remembers_rage",
+      "speaker": "silverhair",
       "text": "That rough animal! He went so far as to claim that I not only did not know the value of the stone, but that I hardly knew one gem from another! If I could have destroyed the filth on the spot, I certainly would have!",
       "next": "argument_interrupted"
     },
     {
-      "id": "argument_interrupted", "speaker": "narrator",
+      "id": "argument_interrupted",
+      "speaker": "narrator",
       "text": "Silverhair's eyes flash with remembered anger, but a scuffing sound by the door distracts her and her anger drains as suddenly as it rose.",
       "end": true
     },
     {
-      "id": "gem_returned", "speaker": "silverhair",
+      "id": "gem_returned",
+      "speaker": "silverhair",
       "text": "Returned already? But what is this?",
       "next": "player_shows_gem"
     },
     {
-      "id": "player_shows_gem", "speaker": "player",
+      "id": "player_shows_gem",
+      "speaker": "player",
       "text": "A stone I found in the cellar, among your chests. I hate to think such a thing, but is this one of the jewels that the Dwarf has lost?",
       "next": "silverhair_inspects_gem"
     },
     {
-      "id": "silverhair_inspects_gem", "speaker": "narrator",
+      "id": "silverhair_inspects_gem",
+      "speaker": "narrator",
       "text": "You show the jewel to Lady Silverhair, who frowns upon seeing it. She inspects it more closely, but carefully avoids touching it. She straightens then, a puzzled look on her features.",
       "next": "silverhair_disowns_gem"
     },
     {
-      "id": "silverhair_disowns_gem", "speaker": "silverhair",
+      "id": "silverhair_disowns_gem",
+      "speaker": "silverhair",
       "text": "You say this was found among my goods? But this is not a stone of mine, and neither is it the stone I was shown before. I have never seen this before.",
       "next": "player_asks_catseye"
     },
     {
-      "id": "player_asks_catseye", "speaker": "player",
+      "id": "player_asks_catseye",
+      "speaker": "player",
       "text": "But is this not one of the Catseyes he claims to have lost?",
       "next": "silverhair_calls_gem_worthless"
     },
     {
-      "id": "silverhair_calls_gem_worthless", "speaker": "silverhair",
+      "id": "silverhair_calls_gem_worthless",
+      "speaker": "silverhair",
       "text": "It cannot be. For this is no Catseye at all, and in fact is hardly worth a fraction of the other stones.",
       "next": "player_confused_by_gem"
     },
     {
-      "id": "player_confused_by_gem", "speaker": "player",
+      "id": "player_confused_by_gem",
+      "speaker": "player",
       "text": "I do not understand this at all.",
       "next": "silverhair_asks_belief"
     },
     {
-      "id": "silverhair_asks_belief", "speaker": "silverhair",
+      "id": "silverhair_asks_belief",
+      "speaker": "silverhair",
       "text": "I admit he goaded me to rage earlier, to my shame. But I have done nothing more than voice my anger. You must believe that.",
-      "on_end": "record_silverhair_gem_assessment",
+      "choices": [
+        {
+          "text": "Of course, Lady. I have believed nothing but your innocence since I arrived. You may trust me to act on your behalf.",
+          "next": "silverhair_gem_sendoff"
+        }
+      ]
+    },
+    {
+      "id": "silverhair_farewell",
+      "speaker": "player",
+      "text": "I will try to be worthy of your trust, Lady.  I will return once I know more.",
       "end": true
+    },
+    {
+      "id": "player_reassures_silverhair",
+      "speaker": "player",
+      "text": "Of course, Lady. I have believed nothing but your innocence since I arrived. You may trust me to act on your behalf.",
+      "next": "silverhair_sends_player"
+    },
+    {
+      "id": "player_asks_patience",
+      "speaker": "player",
+      "text": "I understand, Lady.  Please be patient.",
+      "next": "repeat_greeting"
+    },
+    {
+      "id": "player_understands_pantry",
+      "speaker": "player",
+      "text": "So I gathered.  I will do my best, Lady.",
+      "end": true
+    },
+    {
+      "id": "silverhair_initial_defence",
+      "speaker": "silverhair",
+      "text": "I admit he goaded me to rage earlier, to my shame. But I have done nothing more than voice my anger. You must believe that.",
+      "choices": [
+        {
+          "text": "Of course, Lady. I have believed nothing but your innocence since I arrived. You may trust me to act on your behalf.",
+          "next": "silverhair_sends_player"
+        }
+      ]
+    },
+    {
+      "id": "silverhair_gem_sendoff",
+      "speaker": "silverhair",
+      "text": "I thank you for that.  Now you must go, lest they find you here and imprison you as well.  Free, you are my hope.",
+      "choices": [
+        {
+          "next": "silverhair_gem_farewell"
+        }
+      ]
+    },
+    {
+      "id": "silverhair_gem_farewell",
+      "speaker": "player",
+      "text": "I will try to be worthy of your trust, Lady.  I will return once I know more.",
+      "end": true,
+      "on_end": "record_silverhair_gem_assessment"
     }
   ]
 }

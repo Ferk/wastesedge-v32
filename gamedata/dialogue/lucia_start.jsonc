@@ -2,199 +2,1740 @@
   "id": "lucia_start",
   "start": [
     {
-      "node": "question_menu",
-      "when": { "flag": "pantry_locked", "equals": 1 }
+      "node": "lucia_pantry_entry",
+      "when": {
+        "flag": "pantry_locked",
+        "equals": 1
+      }
     },
-    { "node": "lucia_betrayed_narration", "when": { "flag": "told_on_talan", "equals": 1 } },
-    { "node": "lucia_betrayed_narration", "when": { "flag": "told_on_talan", "equals": 2 } },
-    { "node": "lucia_repeat_narration", "when": { "flag": "lucia_talked", "equals": 1 } },
-    { "node": "first_meeting" }
+    {
+      "node": "lucia_betrayed_narration",
+      "when": {
+        "flag": "told_on_talan",
+        "equals": 1
+      }
+    },
+    {
+      "node": "lucia_betrayed_narration",
+      "when": {
+        "flag": "told_on_talan",
+        "equals": 2
+      }
+    },
+    {
+      "node": "lucia_repeat_narration",
+      "when": {
+        "flag": "lucia_talked",
+        "equals": 1
+      }
+    },
+    {
+      "node": "first_meeting"
+    }
   ],
   "speakers": [
-    { "id": "player", "name": "Banec", "role": "player",
-      "portrait": "assets/ui/portraits/player.png" },
-    { "id": "lucia", "name": "Lucia Redwyne", "role": "npc", "entity": "lucia",
-      "portrait": "assets/ui/portraits/lucia.png" },
-    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+    {
+      "id": "player",
+      "name": "Banec",
+      "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    },
+    {
+      "id": "lucia",
+      "name": "Lucia Redwyne",
+      "role": "npc",
+      "entity": "lucia",
+      "portrait": "assets/ui/portraits/lucia.png"
+    },
+    {
+      "id": "narrator",
+      "name": "Narrator",
+      "role": "narrator"
+    }
   ],
   "nodes": [
     {
-      "id": "lucia_betrayed_narration", "speaker": "narrator",
-      "text": "Lucia does not even bother to look up from her work as you approach her.",
-      "next": "player_tries_lucia"
+      "id": "first_meeting",
+      "speaker": "narrator",
+      "text": "There is little doubt that this busy-looking woman is the unchallenged mistress of the Redwyne household. As she spots you, a look of resignation flashes across her face.",
+      "achievement_events": [
+        {
+          "achievement": "2",
+          "bit": 15
+        }
+      ],
+      "next": "young_people"
     },
     {
-      "id": "player_tries_lucia", "speaker": "player",
-      "text": "Excuse me Lucia, I have ...",
-      "next": "lucia_rebukes_betrayal"
-    },
-    {
-      "id": "lucia_rebukes_betrayal", "speaker": "lucia",
-      "text": "Don't even think of asking me for anything. The way you let Talan down, even though you gave your word not to, makes me sick.",
+      "id": "young_people",
+      "speaker": "lucia",
+      "text": "You young people never learn to keep out of my kitchen, do you?",
       "choices": [
         {
-          "text": "I'm sorry, but I had no other choice.",
-          "next": "lucia_rejects_excuse"
+          "next": "lucia_sorry_madam_i_did_not_mean_to_trespass_but_i_nee"
+        },
+        {
+          "next": "lucia_i_have_no_time_for_this_woman_i_have_some_questi"
+        },
+        {
+          "next": "player_leaves_kitchen"
         }
       ]
     },
     {
-      "id": "lucia_rejects_excuse", "speaker": "lucia",
-      "text": "I don't want to hear your lame excuses. You have broken your word and that is all that counts.",
-      "next": "lucia_turns_away"
+      "id": "lucia_sorry_madam_i_did_not_mean_to_trespass_but_i_nee",
+      "speaker": "player",
+      "text": "Sorry madam, I did not mean to trespass, but I need to talk to you.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_talked",
+          "value": 1
+        }
+      ],
+      "next": "polite_introduction"
     },
     {
-      "id": "lucia_turns_away", "speaker": "narrator",
-      "text": "With these words she turns her back on you and continues with her work.",
+      "id": "lucia_i_have_no_time_for_this_woman_i_have_some_questi",
+      "speaker": "player",
+      "text": "I have no time for this, woman! I have some questions for you.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_talked",
+          "value": 1
+        }
+      ],
+      "next": "too_busy"
+    },
+    {
+      "id": "too_busy",
+      "speaker": "lucia",
+      "text": "What questions? Don't you see I'm busy? Who's going to put the food on the table, if I'm going to chat with you? Now out of my sight with you!",
+      "choices": [
+        {
+          "next": "lucia_calm_down_please_this_is_important_i_m_investiga"
+        },
+        {
+          "next": "lucia_lunch_can_wait_but_if_you_don_t_help_with_my_inv"
+        }
+      ]
+    },
+    {
+      "id": "player_leaves_kitchen",
+      "speaker": "player",
+      "text": "My apologies. Must have been the wrong door ...",
       "end": true
     },
     {
-      "id": "lucia_repeat_narration", "speaker": "narrator",
+      "id": "lucia_calm_down_please_this_is_important_i_m_investiga",
+      "speaker": "player",
+      "text": "Calm down, please. This is important. I'm investigating the theft.",
+      "next": "lucia_city_investigation"
+    },
+    {
+      "id": "polite_introduction",
+      "speaker": "lucia",
+      "text": "It's always the same. I can never do my work without interruptions. But you won't hear me complaining. So what is it you want?",
+      "choices": [
+        {
+          "next": "lucia_i_am_name_lady_silverhair_s_clerk_i_m_investigat"
+        },
+        {
+          "next": "lucia_my_name_is_name_i_am_investigating_the_theft"
+        }
+      ]
+    },
+    {
+      "id": "lucia_i_am_name_lady_silverhair_s_clerk_i_m_investigat",
+      "speaker": "player",
+      "text": "I am $name, Lady Silverhair's clerk. I'm investigating the theft.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_knows_clerk",
+          "value": 1
+        }
+      ],
+      "responses": [
+        {
+          "node": "lucia_sympathy"
+        },
+        {
+          "node": "lucia_the_elven_lady_you_say_then_you_must_be_from_cir"
+        }
+      ]
+    },
+    {
+      "id": "lucia_the_elven_lady_you_say_then_you_must_be_from_cir",
+      "speaker": "lucia",
+      "text": "The Elven Lady you say? Then you must be from Cirdanth, ain't you?",
+      "choices": [
+        {
+          "next": "lucia_listen_madam"
+        },
+        {
+          "next": "lucia_yes_i_am_from_cirdanth"
+        }
+      ]
+    },
+    {
+      "id": "lucia_yes_i_am_from_cirdanth",
+      "speaker": "player",
+      "text": "Yes I am from Cirdanth.",
+      "next": "lucia_ah_the_city_what_would_i_give_to_live_there_but"
+    },
+    {
+      "id": "lucia_listen_madam",
+      "speaker": "player",
+      "text": "Listen madam ...",
+      "next": "lucia_ah_the_city_what_would_i_give_to_live_there_but"
+    },
+    {
+      "id": "lucia_ah_the_city_what_would_i_give_to_live_there_but",
+      "speaker": "lucia",
+      "text": "Ah, the city. What would I give to live there! But no, Orloth had to buy the Inn from his scoundrel brother. The deal of his life he said!",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "complain_about_wastesedge",
+          "value": 1
+        }
+      ],
+      "choices": [
+        {
+          "next": "lucia_true_waste_s_edge_is_quite_a_remote_place_but"
+        },
+        {
+          "next": "lucia_could_we_perhaps_return_to_more_pressing_matters"
+        }
+      ]
+    },
+    {
+      "id": "lucia_sympathy",
+      "speaker": "lucia",
+      "text": "Do you? Oh what an awful thing to happen! But I'm not surprised. Out here, in the middle of nowhere, something like this was bound to happen one day.",
+      "next": "lucia_warned_orloth"
+    },
+    {
+      "id": "lucia_warned_orloth",
+      "speaker": "lucia",
+      "text": "I told Orloth. \"If you're going to buy this inn, you'll end up with trouble\", I said. But would he listen to me?",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "complain_about_wastesedge",
+          "value": 1
+        }
+      ],
+      "choices": [
+        {
+          "next": "lucia_sorry_to_interrupt_but_did_you_notice_anything_o"
+        }
+      ]
+    },
+    {
+      "id": "lucia_sorry_to_interrupt_but_did_you_notice_anything_o",
+      "speaker": "player",
+      "text": "Sorry to interrupt, but did you notice anything odd during the night of the theft?",
+      "next": "rooms_apart"
+    },
+    {
+      "id": "rooms_apart",
+      "speaker": "lucia",
+      "text": "Something unusual? How should I? We're sleeping under the roof, whereas poor Master Fingolson has his room downstairs, in the cellar. Just as his kind likes it the most.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_talked_fingolson",
+          "value": 1
+        },
+        {
+          "op": "set",
+          "flag": "lucia_asked_noise",
+          "value": 1
+        },
+        {
+          "op": "set",
+          "flag": "lucia_asked_about_theft",
+          "value": 1
+        }
+      ],
+      "responses": [
+        {
+          "node": "ask_talan"
+        },
+        {
+          "node": "lucia_theft_shame",
+          "when": {
+            "flag": "lucia_talked_fingolson",
+            "equals": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "lucia_theft_shame",
+      "speaker": "lucia",
+      "text": "He is such a regular and welcome guest, and of all people he gets robbed in our house. What a shame!",
+      "choices": [
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_1",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_2",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 2
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_3",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 3
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_what_about_your_son_oliver_said_he_heard_somethi",
+          "when": {
+            "all": [
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_so_you_know_fingolson"
+        }
+      ]
+    },
+    {
+      "id": "lucia_so_you_know_fingolson",
+      "speaker": "player",
+      "text": "So you know Fingolson?",
+      "responses": [
+        {
+          "node": "lucia_he_stays_here_quite_often_and_has_done_that_for"
+        },
+        {
+          "node": "lucia_in_cirdanth_that_wouldn_t_have_happened_and_even"
+        }
+      ]
+    },
+    {
+      "id": "lucia_the_dwarf_madam_do_you_know_him",
+      "speaker": "player",
+      "text": "The Dwarf, madam! Do you know him?",
+      "next": "lucia_he_stays_here_quite_often_and_has_done_that_for"
+    },
+    {
+      "id": "lucia_in_cirdanth_that_wouldn_t_have_happened_and_even",
+      "speaker": "lucia",
+      "text": "In Cirdanth that wouldn't have happened. And even if it had, there would be proper guards to track the thief down. But whom do I tell? Surely, you are from Cirdanth, ain't you?",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_asked_followup",
+          "value": 1
+        }
+      ],
+      "choices": [
+        {
+          "next": "lucia_the_dwarf_madam_do_you_know_him"
+        },
+        {
+          "next": "lucia_what_about_the_guards_here"
+        },
+        {
+          "next": "lucia_yes_i_am_from_cirdanth"
+        }
+      ]
+    },
+    {
+      "id": "lucia_what_about_the_guards_here",
+      "speaker": "player",
+      "text": "What about the guards here?",
+      "next": "lucia_on_guards"
+    },
+    {
+      "id": "lucia_he_stays_here_quite_often_and_has_done_that_for",
+      "speaker": "lucia",
+      "text": "He stays here quite often, and has done that for many years. I wouldn't say that I know him well, though. He behaves quite reserved and formal, but he is a pleasant character. Not like the other types we get here usually.",
+      "next": "lucia_just_take_a_look_at_that_mercenary_what_a_dreadf"
+    },
+    {
+      "id": "lucia_on_guards",
+      "speaker": "lucia",
+      "text": "Oh, you mean Jelom and Talan. They are good men, no doubt. Their task is to keep the peace, and usually they are well up to it.",
+      "next": "lucia_guards_limit"
+    },
+    {
+      "id": "lucia_my_name_is_name_i_am_investigating_the_theft",
+      "speaker": "player",
+      "text": "My name is $name. I am investigating the theft.",
+      "achievement_events": [
+        {
+          "achievement": "9",
+          "bit": 18
+        }
+      ],
+      "next": "lucia_city_investigation"
+    },
+    {
+      "id": "lucia_city_investigation",
+      "speaker": "lucia",
+      "text": "You should have said so! It is about time that something is going to happen. I tell you, in Cirdanth, everything would have been solved by now.",
+      "next": "lucia_lady_suspected"
+    },
+    {
+      "id": "lucia_lady_suspected",
+      "speaker": "lucia",
+      "text": "But here, in the middle of nowhere, they hold an Elven Lady responsible and nobody seems interested in finding poor Master Fingolson's gems.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_talked_fingolson",
+          "value": 1
+        }
+      ],
+      "choices": [
+        {
+          "next": "lucia_i_am_lady_silverhair_s_clerk_madam_and_i_m_going"
+        },
+        {
+          "next": "lucia_what_about_the_guards_you_have_here"
+        }
+      ]
+    },
+    {
+      "id": "lucia_i_am_lady_silverhair_s_clerk_madam_and_i_m_going",
+      "speaker": "player",
+      "text": "I am Lady Silverhair's clerk, madam, and I'm going to find the real thief, if you'd only let me ask you some questions!",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_knows_clerk",
+          "value": 1
+        }
+      ],
+      "responses": [
+        {
+          "node": "lucia_theft_shame",
+          "when": {
+            "flag": "lucia_talked_fingolson",
+            "equals": 1
+          }
+        },
+        {
+          "node": "lucia_city_orig"
+        },
+        {
+          "node": "lucia_oh_forgive_me_orloth_always_says_i_m_talking_too"
+        }
+      ]
+    },
+    {
+      "id": "lucia_city_orig",
+      "speaker": "lucia",
+      "text": "Then you are from Cirdanth? What would I give to live there! But no! Orloth had to buy the Inn from his scoundrel brother. As if it'd bring him anything but trouble.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "complain_about_wastesedge",
+          "value": 1
+        }
+      ],
+      "choices": "lucia_ah_the_city_what_would_i_give_to_live_there_but"
+    },
+    {
+      "id": "lucia_true_waste_s_edge_is_quite_a_remote_place_but",
+      "speaker": "player",
+      "text": "True, Waste's Edge is quite a remote place, but ...",
+      "next": "lucia_remote_the_edge_of_the_world_couldn_t_be_more_re"
+    },
+    {
+      "id": "lucia_could_we_perhaps_return_to_more_pressing_matters",
+      "speaker": "player",
+      "text": "Could we perhaps return to more pressing matters?",
+      "next": "lucia_oh_forgive_me_i_am_sure_you_have_more_important"
+    },
+    {
+      "id": "lucia_just_take_a_look_at_that_mercenary_what_a_dreadf",
+      "speaker": "lucia",
+      "text": "Just take a look at that mercenary. What a dreadful man! You wouldn't find people like him in the city!",
+      "choices": [
+        {
+          "next": "lucia_what_mercenary",
+          "when": {
+            "flag": "alek_talked",
+            "equals": 0
+          }
+        },
+        {
+          "next": "lucia_what_about_him_do_you_think_he_is_involved_into"
+        }
+      ]
+    },
+    {
+      "id": "lucia_what_about_the_guards_you_have_here",
+      "speaker": "player",
+      "text": "What about the guards you have here?",
+      "next": "lucia_on_guards"
+    },
+    {
+      "id": "lucia_oh_forgive_me_orloth_always_says_i_m_talking_too",
+      "speaker": "lucia",
+      "text": "Oh forgive me. Orloth always says I'm talking too much, but actually, he never keeps his mouth shut. He always denies when I tell him, but I'm sure you have noticed yourself.",
+      "next": "lucia_direct_questions"
+    },
+    {
+      "id": "lucia_direct_questions",
+      "speaker": "lucia",
+      "text": "Now don't keep me off my work. Ask what you want to know and then out with you!",
+      "choices": [
+        {
+          "next": "lucia_yes_madam_did_you_notice_anything_unusual_during"
+        }
+      ]
+    },
+    {
+      "id": "lucia_yes_madam_did_you_notice_anything_unusual_during",
+      "speaker": "player",
+      "text": "Yes, madam. Did you notice anything unusual during the night of the theft?",
+      "next": "rooms_apart"
+    },
+    {
+      "id": "lucia_remote_the_edge_of_the_world_couldn_t_be_more_re",
+      "speaker": "lucia",
+      "text": "Remote!? The edge of the world couldn't be more remote! Mind you, I'm not complaining. It's just...",
+      "responses": [
+        {
+          "node": "lucia_all_these_filthy_types_we_get_here_like_that_end"
+        },
+        {
+          "node": "lucia_we_re_days_from_the_next_settlement_out_here_wer"
+        }
+      ]
+    },
+    {
+      "id": "lucia_all_these_filthy_types_we_get_here_like_that_end",
+      "speaker": "lucia",
+      "text": "All these filthy types we get here. Like that Endhelm fellow. I don't think you'd meet people like him in Cirdanth.",
+      "choices": [
+        {
+          "next": "lucia_what_about_him_do_you_think_he_is_involved_into"
+        }
+      ]
+    },
+    {
+      "id": "lucia_what_about_him_do_you_think_he_is_involved_into",
+      "speaker": "player",
+      "text": "What about him? Do you think he is involved into the theft?",
+      "next": "lucia_suspects_alek"
+    },
+    {
+      "id": "lucia_oh_forgive_me_i_am_sure_you_have_more_important",
+      "speaker": "lucia",
+      "text": "Oh, forgive me. I am sure you have more important things on your mind than listening to the sorrows of a woman.",
+      "choices": [
+        {
+          "next": "lucia_you_said_master_fingolson_is_a_regular_guest_wha",
+          "when": {
+            "flag": "lucia_asked_followup",
+            "equals": 1
+          }
+        },
+        {
+          "next": "lucia_i_was_wondering_whether_you_noticed_anything_unu",
+          "when": {
+            "flag": "lucia_asked_followup",
+            "equals": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "ask_talan",
+      "speaker": "lucia",
+      "text": "But perhaps you should ask Talan, as he was on duty that night. If somebody noticed something, then it was him.",
+      "next": "lucia_just_don_t_blame_him_if_he_hasn_t_sir_he_is_a_go"
+    },
+    {
+      "id": "lucia_you_said_master_fingolson_is_a_regular_guest_wha",
+      "speaker": "player",
+      "text": "You said Master Fingolson is a regular guest. What can you tell me about him?",
+      "next": "lucia_i_am_afraid_there_is_only_little_i_know_about_hi"
+    },
+    {
+      "id": "lucia_i_was_wondering_whether_you_noticed_anything_unu",
+      "speaker": "player",
+      "text": "I was wondering whether you noticed anything unusual during the night of the theft.",
+      "next": "lucia_i_fear_i_haven_t_see_our_rooms_are_under_the_roo"
+    },
+    {
+      "id": "lucia_suspects_alek",
+      "speaker": "lucia",
+      "text": "How should I know? But he does look suspicious to me. More than any others of our guests.",
+      "choices": [
+        {
+          "next": "lucia_can_you_tell_me_a_little_more_about_them"
+        },
+        {
+          "next": "lucia_well_you_were_very_helpful_madam_but_if_you_ll_e"
+        }
+      ]
+    },
+    {
+      "id": "lucia_can_you_tell_me_a_little_more_about_them",
+      "speaker": "player",
+      "text": "Can you tell me a little more about them?",
+      "next": "lucia_i_hardly_get_out_of_the_kitchen_during_the_day_b"
+    },
+    {
+      "id": "lucia_well_you_were_very_helpful_madam_but_if_you_ll_e",
+      "speaker": "player",
+      "text": "Well, you were very ... helpful, madam. But if you'll excuse me now, I've got a thief to catch.",
+      "end": true
+    },
+    {
+      "id": "lucia_i_am_afraid_there_is_only_little_i_know_about_hi",
+      "speaker": "lucia",
+      "text": "I am afraid there is only little I know about him. He is so reserved and formal, a calm and pleasant character. But he stays here regularly.",
+      "next": "fingolson_trade"
+    },
+    {
+      "id": "fingolson_trade",
+      "speaker": "lucia",
+      "text": "Which is no surprise; much of the trade with the mines of Uzdun'kal is done here, and Master Fingolson is one of the few tradesmen the Dwarfs have.",
+      "choices": [
+        {
+          "next": "lucia_well_you_were_very_helpful_madam_but_if_you_ll_e"
+        },
+        {
+          "next": "lucia_i_didn_t_know_that_much_trade_with_the_dwarfs_ru"
+        }
+      ]
+    },
+    {
+      "id": "lucia_i_didn_t_know_that_much_trade_with_the_dwarfs_ru",
+      "speaker": "player",
+      "text": "I didn't know that much trade with the Dwarfs runs through Waste's Edge.",
+      "next": "lucia_trade_route"
+    },
+    {
+      "id": "lucia_lunch_can_wait_but_if_you_don_t_help_with_my_inv",
+      "speaker": "player",
+      "text": "Lunch can wait, but if you don't help with my investigation, the thief might get away!",
+      "next": "investigation"
+    },
+    {
+      "id": "investigation",
+      "speaker": "lucia",
+      "text": "You are looking for the thief!? My apologies then, sir. It is about time that somebody takes an interest into this unlucky incident.",
+      "responses": [
+        {
+          "node": "lucia_suspects_silverhair"
+        },
+        {
+          "node": "lucia_city_complaint"
+        }
+      ]
+    },
+    {
+      "id": "lucia_suspects_silverhair",
+      "speaker": "lucia",
+      "text": "Can you imagine they suspect the fair Lady Silverhair!? And bad types like that dreadful Endhelm are walking around unnoticed.",
+      "choices": [
+        {
+          "next": "lucia_what_about_him_do_you_think_he_is_involved_into"
+        },
+        {
+          "next": "lucia_i_am_lady_silverhair_s_clerk_madam_and_i_m_going"
+        }
+      ]
+    },
+    {
+      "id": "lucia_city_complaint",
+      "speaker": "lucia",
+      "text": "I say, in a city like Cirdanth the true thief would have been tracked down by now. But out here, in the middle of nowhere, law and order are just hollow phrases.",
+      "choices": [
+        {
+          "next": "lucia_what_about_the_guards_you_have_here"
+        },
+        {
+          "next": "lucia_rest_assured_that_i_will_find_out_the_truth_mada"
+        }
+      ]
+    },
+    {
+      "id": "lucia_rest_assured_that_i_will_find_out_the_truth_mada",
+      "speaker": "player",
+      "text": "Rest assured that I will find out the truth, madam. But to do so I need to know whether you noticed anything unusual during the night of the theft.",
+      "next": "lucia_i_fear_i_haven_t_see_our_rooms_are_under_the_roo"
+    },
+    {
+      "id": "lucia_i_fear_i_haven_t_see_our_rooms_are_under_the_roo",
+      "speaker": "lucia",
+      "text": "I fear I haven't. See, our rooms are under the roof, while Master Fingolson sleeps below ground, like his kind is used to. Any noise hearable in our chamber would have woken up the whole house.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_asked_noise",
+          "value": 1
+        },
+        {
+          "op": "set",
+          "flag": "lucia_asked_about_theft",
+          "value": 1
+        }
+      ],
+      "next": "lucia_but_as_far_as_i_know_none_of_our_guests_noticed"
+    },
+    {
+      "id": "lucia_but_as_far_as_i_know_none_of_our_guests_noticed",
+      "speaker": "lucia",
+      "text": "But as far as I know, none of our guests noticed anything suspicious. It is really a shame, theft beneath our roof. And of all people, the good Master Fingolson is the victim.",
+      "choices": [
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_1",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_2",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 2
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_3",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 3
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_what_about_your_son_oliver_said_he_heard_somethi",
+          "when": {
+            "all": [
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_so_you_know_the_dwarf_well"
+        }
+      ]
+    },
+    {
+      "id": "lucia_so_you_know_the_dwarf_well",
+      "speaker": "player",
+      "text": "So you know the Dwarf well?",
+      "next": "lucia_he_stays_here_quite_often_and_has_done_that_for"
+    },
+    {
+      "id": "lucia_i_hardly_get_out_of_the_kitchen_during_the_day_b",
+      "speaker": "lucia",
+      "text": "I hardly get out of the kitchen during the day. Best you talk to my husband. He usually knows more about people than they know themselves.",
+      "next": "goodbye"
+    },
+    {
+      "id": "lucia_guards_limit",
+      "speaker": "lucia",
+      "text": "But a situation like this exceeds their abilities. Not that I'd blame them. Convicting this thief is no job for simple people. I hope you understand, sir.",
+      "choices": [
+        {
+          "next": "lucia_don_t_worry_madam_i_won_t_trouble_the_guards_mor"
+        }
+      ]
+    },
+    {
+      "id": "lucia_we_re_days_from_the_next_settlement_out_here_wer",
+      "speaker": "lucia",
+      "text": "We're days from the next settlement out here. Were it not for all the trade passing through we couldn't even buy the most basic things we need for our living.",
+      "next": "lucia_although_without_the_trade_waste_s_edge_wouldn_t"
+    },
+    {
+      "id": "lucia_although_without_the_trade_waste_s_edge_wouldn_t",
+      "speaker": "lucia",
+      "text": "Although without the trade, Waste's Edge wouldn't even exist and we might run an Inn in Cirdanth instead. But as long as the mines of Uzdun'kal are there, there is little chance to get Orloth away from here.",
+      "choices": "fingolson_trade"
+    },
+    {
+      "id": "lucia_trade_route",
+      "speaker": "lucia",
+      "text": "Well, upwards from here the river gets treacherous, therefore most boats go no further. The way remaining is covered by caravans. So everything that comes along the river runs past our gates.",
+      "next": "lucia_dwarf_trade"
+    },
+    {
+      "id": "lucia_northern_road",
+      "speaker": "lucia",
+      "text": "There is also an ancient road that leads north towards Elgilad and the human cities. A lot of spice comes along that way, from Elminscourt and beyond.",
+      "next": "goodbye"
+    },
+    {
+      "id": "goodbye",
+      "speaker": "lucia",
+      "text": "But enough chatting. This food won't prepare itself, and you still have a thief to catch.",
+      "end": true
+    },
+    {
+      "id": "lucia_just_don_t_blame_him_if_he_hasn_t_sir_he_is_a_go",
+      "speaker": "lucia",
+      "text": "Just don't blame him, if he hasn't, sir. He is a good lad and I don't want any harm coming to him.",
+      "choices": [
+        {
+          "next": "lucia_don_t_worry_madam_i_won_t_trouble_the_guards_mor"
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_1",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_2",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 2
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_3",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              },
+              {
+                "flag": "know_noise",
+                "equals": 3
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_what_about_your_son_oliver_said_he_heard_somethi",
+          "when": {
+            "all": [
+              {
+                "flag": "know_olivers_noise",
+                "equals": 1
+              },
+              {
+                "flag": "lucia_asked_noise",
+                "equals": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "lucia_don_t_worry_madam_i_won_t_trouble_the_guards_mor",
+      "speaker": "player",
+      "text": "Don't worry, madam. I won't trouble the guards more than they deserve.",
+      "next": "lucia_i_ll_take_you_at_your_word_name_sir_but_if_you_l"
+    },
+    {
+      "id": "lucia_i_ll_take_you_at_your_word_name_sir_but_if_you_l",
+      "speaker": "lucia",
+      "text": "I'll take you at your word, $name sir. But if you'll excuse me now. I have to prepare the food, and you still have your thief to catch.",
+      "end": true
+    },
+    {
+      "id": "lucia_what_about_your_son_oliver_said_he_heard_somethi",
+      "speaker": "player",
+      "text": "What about your son? Oliver said he heard something that night.",
+      "next": "lucia_on_oliver"
+    },
+    {
+      "id": "lucia_on_oliver",
+      "speaker": "lucia",
+      "text": "That boy! If I ever catch him outside when he should be sleeping in his bedroom ... . And if that's not enough, he starts spreading rumours.",
+      "choices": [
+        {
+          "next": "lucia_but_who_heard_noise_heard_something_outside_the_1",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "know_noise",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_but_who_heard_noise_heard_something_outside_the_2",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "know_noise",
+                "equals": 2
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_but_who_heard_noise_heard_something_outside_the_3",
+          "when": {
+            "all": [
+              {
+                "flag": "know_noise",
+                "not_equals": 0
+              },
+              {
+                "flag": "know_noise",
+                "equals": 3
+              }
+            ]
+          }
+        },
+        {
+          "next": "player_questions_oliver"
+        }
+      ]
+    },
+    {
+      "id": "player_questions_oliver",
+      "speaker": "player",
+      "text": "You don't believe him?",
+      "next": "lucia_explains_oliver"
+    },
+    {
+      "id": "lucia_explains_oliver",
+      "speaker": "lucia",
+      "text": "Don't get me wrong. Oliver tells no lies. He'd better not! But he has an overactive imagination, so I would be careful with his \"observations\". Trust me, sir.",
+      "end": true
+    },
+    {
+      "id": "player_asks_practising_reluctant",
+      "speaker": "player",
+      "text": "Talan practising what?",
+      "responses": [
+        {
+          "node": "lucia_confidence",
+          "when": {
+            "flag": "lucia_knows_clerk",
+            "equals": 1
+          }
+        },
+        {
+          "node": "lucia_cannot_tell",
+          "when": {
+            "flag": "lucia_knows_clerk",
+            "equals": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "lucia_confidence",
+      "speaker": "lucia",
+      "text": "I shouldn't have mentioned this at all! Telling on other people is not right. But if it helps to clear your mistress' guilt, I cannot keep it secret. But you mustn't tell anybody, do you understand!?",
+      "choices": [
+        {
+          "next": "lucia_you_have_my_word_lucia_now_what_is_it"
+        },
+        {
+          "next": "lucia_i_can_t_promise_anything_before_i_know_what_you"
+        }
+      ]
+    },
+    {
+      "id": "lucia_you_have_my_word_lucia_now_what_is_it",
+      "speaker": "player",
+      "text": "You have my word, Lucia. Now what is it?",
+      "achievement_events": [
+        {
+          "achievement": "9",
+          "bit": 20
+        }
+      ],
+      "next": "singing_reveal"
+    },
+    {
+      "id": "singing_reveal",
+      "speaker": "lucia",
+      "text": "He is singing. Talan sometimes leaves his post to practice his voice where nobody hears him. That's nothing bad, but he'd be more than embarrassed if you tell it around. And I fear Jelom won't take it very well.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "know_talan_singing",
+          "value": 1
+        }
+      ],
+      "choices": [
+        {
+          "next": "player_reacts_talan_absence"
+        }
+      ]
+    },
+    {
+      "id": "player_reacts_talan_absence",
+      "speaker": "player",
+      "text": "And he'd be right! Singing might not be bad, but leaving ones post during duty is! I think I'll have to have a serious word with Talan. If you'll excuse me, madam.",
+      "end": true
+    },
+    {
+      "id": "lucia_cannot_tell",
+      "speaker": "lucia",
+      "text": "I ... I cannot tell. I have said more than I should have already.",
+      "choices": [
+        {
+          "next": "lucia_please_lucia_if_it_has_anything_to_do_with_the_t"
+        }
+      ]
+    },
+    {
+      "id": "lucia_i_can_t_promise_anything_before_i_know_what_you",
+      "speaker": "player",
+      "text": "I can't promise anything before I know what you are talking about.",
+      "next": "lucia_refuses"
+    },
+    {
+      "id": "lucia_refuses",
+      "speaker": "lucia",
+      "text": "I want no harm done to Talan, see. He is a good lad, and he deserves better than ending like Jelom. Don't destroy the chance to make something out of his life.",
+      "choices": [
+        {
+          "next": "lucia_you_have_my_word_lucia_now_what_is_it"
+        },
+        {
+          "next": "lucia_i_don_t_want_anybody_harm_but_i_will_do_what_i_m"
+        }
+      ]
+    },
+    {
+      "id": "lucia_i_don_t_want_anybody_harm_but_i_will_do_what_i_m",
+      "speaker": "player",
+      "text": "I don't want anybody harm, but I will do what I must to find the thief.",
+      "next": "only_reason"
+    },
+    {
+      "id": "lucia_please_lucia_if_it_has_anything_to_do_with_the_t",
+      "speaker": "player",
+      "text": "Please Lucia. If it has anything to do with the theft, I need to know! Don't you want the real thief caught?",
+      "next": "lucia_refuses"
+    },
+    {
+      "id": "only_reason",
+      "speaker": "lucia",
+      "text": "And that is the only reason why I'll tell you about Talan. But you'd better not disappoint me!",
+      "next": "singing_reveal"
+    },
+    {
+      "id": "player_objects_to_talan",
+      "speaker": "player",
+      "text": "What if it wasn't!? If that guard would do his duty instead of wandering off for a singsong at nights, we'd know for sure.",
+      "next": "lucia_asks_mercy_for_talan"
+    },
+    {
+      "id": "lucia_asks_mercy_for_talan",
+      "speaker": "lucia",
+      "text": "Please sir, don't be too harsh with Talan. He is a good lad at heart, and I wouldn't like any harm coming to him.",
+      "choices": "lucia_guards_limit"
+    },
+    {
+      "id": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_1",
+      "speaker": "player",
+      "text": "I know that Lady Silverhair has heard a noise outside the inn during that night.",
+      "next": "talan_practising"
+    },
+    {
+      "id": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_2",
+      "speaker": "player",
+      "text": "I know that Lady Frostbloom has heard a noise outside the inn during that night.",
+      "next": "talan_practising"
+    },
+    {
+      "id": "lucia_i_know_that_who_heard_noise_heard_a_noise_outsid_3",
+      "speaker": "player",
+      "text": "I know that both Lady Silverhair and Lady Frostbloom have heard a noise outside the inn during that night.",
+      "next": "talan_practising"
+    },
+    {
+      "id": "talan_practising",
+      "speaker": "lucia",
+      "text": "Outside the inn you say? I don't know anything about this, but I suspect that was rather Talan practising than the thief.",
+      "choices": [
+        {
+          "next": "player_asks_practising_reluctant",
+          "when": {
+            "flag": "know_talan_singing",
+            "equals": 0
+          }
+        },
+        {
+          "next": "player_objects_to_talan",
+          "when": {
+            "flag": "know_talan_singing",
+            "not_equals": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "lucia_repeat_narration",
+      "speaker": "narrator",
       "text": "Lucia seems busy as usual, but this time she actually smiles as she turns to you.",
       "next": "lucia_repeat_greeting"
     },
     {
-      "id": "lucia_repeat_greeting", "speaker": "lucia",
+      "id": "lucia_repeat_greeting",
+      "speaker": "lucia",
       "text": "Come back to hold me off my work again, did you?",
       "choices": "question_menu"
     },
     {
-      "id": "first_meeting",
-      "achievement_events": [{"achievement": "2", "bit": 15}], "speaker": "narrator",
-      "text": "There is little doubt that this busy-looking woman is the unchallenged mistress of the Redwyne household. As she spots you, a look of resignation flashes across her face.",
-      "next": "young_people"
+      "id": "lucia_i_m_afraid_so_i_d_like_you_to_repeat_what_you_ve",
+      "speaker": "player",
+      "text": "I'm afraid so. I'd like you to repeat what you've heard the night of the theft.",
+      "next": "lucia_repeats_night"
     },
     {
-      "id": "young_people", "speaker": "lucia",
-      "text": "You young people never learn to keep out of my kitchen, do you?",
-      "choices": [
+      "id": "lucia_repeats_night",
+      "speaker": "lucia",
+      "text": "I already told you everything I know, but if you insist.",
+      "next": "lucia_repeats_rooms"
+    },
+    {
+      "id": "lucia_repeats_rooms",
+      "speaker": "lucia",
+      "text": "As I said, we're sleeping under the roof, whereas poor Master Fingolson has his room down below ground. So if he hasn't heard anything, how should I?",
+      "actions": [
         {
-          "text": "Sorry madam, I did not mean to trespass, but I need to talk to you.",
-          "actions": [
-            { "op": "set", "flag": "lucia_talked", "value": 1 },
-            { "op": "set", "flag": "complain_about_wastesedge", "value": 1 }
-          ],
-          "next": "too_busy"
+          "op": "set",
+          "flag": "lucia_talked_fingolson",
+          "value": 1
         },
         {
-          "text": "I have no time for this, woman! I have some questions for you.",
-          "actions": [
-            { "op": "set", "flag": "lucia_talked", "value": 1 },
-            { "op": "set", "flag": "complain_about_wastesedge", "value": 1 }
-          ],
-          "next": "too_busy"
+          "op": "set",
+          "flag": "lucia_asked_noise",
+          "value": 1
+        }
+      ],
+      "responses": [
+        {
+          "node": "ask_talan"
         },
         {
-          "text": "My apologies. Must have been the wrong door ...",
-          "actions": [
-            { "op": "set", "flag": "lucia_talked", "value": 1 },
-            { "op": "set", "flag": "complain_about_wastesedge", "value": 1 }
-          ],
-          "next": "goodbye"
+          "node": "lucia_theft_shame",
+          "when": {
+            "flag": "lucia_talked_fingolson",
+            "equals": 1
+          }
         }
       ]
     },
     {
-      "id": "too_busy", "speaker": "lucia",
-      "text": "What questions? Don't you see I'm busy? Who's going to put the food on the table, if I'm going to chat with you? Now out of my sight with you!",
+      "id": "lucia_betrayed_narration",
+      "speaker": "narrator",
+      "text": "Lucia does not even bother to look up from her work as you approach her.",
       "choices": [
-        { "text": "Calm down, please. This is important. I'm investigating the theft.",
-          "achievement_events": [{ "achievement": "9", "bit": 18 }], "next": "investigation" },
-        { "text": "Lunch can wait, but if you don't help with my investigation, the thief might get away!", "next": "investigation" },
-        { "text": "My apologies. Must have been the wrong door ...", "next": "goodbye" }
+        {
+          "next": "lucia_look_lucia_i_spoke_with_talan_and_he_understands",
+          "when": {
+            "all": [
+              {
+                "flag": "soothe_lucia",
+                "equals": 1
+              },
+              {
+                "flag": "told_on_talan",
+                "equals": 2
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_excuse_me_lucia_i_have_to_fetch_something_for_la",
+          "when": {
+            "all": [
+              {
+                "flag": "get_item",
+                "equals": 1
+              },
+              {
+                "flag": "pantry_locked",
+                "equals": 1
+              }
+            ]
+          }
+        },
+        {
+          "next": "player_tries_lucia",
+          "when": {
+            "flag": "told_on_talan",
+            "not_equals": 2
+          }
+        }
       ]
     },
     {
-      "id": "investigation", "speaker": "lucia",
-      "text": "You are looking for the thief!? My apologies then, sir. It is about time that somebody takes an interest into this unlucky incident.",
-      "next": "lucia_suspects_silverhair"
+      "id": "player_tries_lucia",
+      "speaker": "player",
+      "text": "Excuse me Lucia, I have ...",
+      "next": "lucia_rebukes_betrayal"
     },
     {
-      "id": "lucia_suspects_silverhair", "speaker": "lucia",
-      "text": "Can you imagine they suspect the fair Lady Silverhair!? And bad types like that dreadful Endhelm are walking around unnoticed.",
-      "next": "lucia_city_complaint"
+      "id": "lucia_rebukes_betrayal",
+      "speaker": "lucia",
+      "text": "Don't even think of asking me for anything. The way you let Talan down, even though you gave your word not to, makes me sick.",
+      "choices": [
+        {
+          "next": "lucia_i_m_sorry_but_i_had_no_other_choice"
+        }
+      ]
     },
     {
-      "id": "lucia_city_complaint", "speaker": "lucia",
-      "text": "I say, in a city like Cirdanth the true thief would have been tracked down by now. But out here, in the middle of nowhere, law and order are just hollow phrases.",
-      "next": "question_menu"
+      "id": "lucia_i_m_sorry_but_i_had_no_other_choice",
+      "speaker": "player",
+      "text": "I'm sorry, but I had no other choice.",
+      "next": "lucia_rejects_excuse"
     },
     {
-      "id": "question_menu", "speaker": "lucia",
+      "id": "lucia_rejects_excuse",
+      "speaker": "lucia",
+      "text": "I don't want to hear your lame excuses. You have broken your word and that is all that counts.",
+      "next": "lucia_turns_away"
+    },
+    {
+      "id": "lucia_turns_away",
+      "speaker": "narrator",
+      "text": "With these words she turns her back on you and continues with her work.",
+      "end": true
+    },
+    {
+      "id": "lucia_i_am_afraid_so_i_was_wondering_whether_you_notic",
+      "speaker": "player",
+      "text": "I am afraid so. I was wondering whether you noticed something unusual during the night of the theft?",
+      "next": "rooms_apart"
+    },
+    {
+      "id": "lucia_but_who_heard_noise_heard_something_outside_the_1",
+      "speaker": "player",
+      "text": "But Lady Silverhair has heard something outside the inn as well.",
+      "next": "talan_practising"
+    },
+    {
+      "id": "lucia_but_who_heard_noise_heard_something_outside_the_2",
+      "speaker": "player",
+      "text": "But Lady Frostbloom has heard something outside the inn as well.",
+      "next": "talan_practising"
+    },
+    {
+      "id": "lucia_but_who_heard_noise_heard_something_outside_the_3",
+      "speaker": "player",
+      "text": "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well.",
+      "next": "talan_practising"
+    },
+    {
+      "id": "lucia_what_mercenary",
+      "speaker": "player",
+      "text": "What mercenary?",
+      "next": "lucia_on_alek"
+    },
+    {
+      "id": "lucia_on_alek",
+      "speaker": "lucia",
+      "text": "His name is Endhelm, I believe. You must have noticed him in the common room: he carries a sword and swears a lot. I'm sick of his likes, but out here we are getting to see plenty of them.",
+      "choices": [
+        {
+          "next": "lucia_could_he_be_involved_into_the_theft"
+        }
+      ]
+    },
+    {
+      "id": "lucia_could_he_be_involved_into_the_theft",
+      "speaker": "player",
+      "text": "Could he be involved into the theft?",
+      "next": "lucia_suspects_alek"
+    },
+    {
+      "id": "lucia_dwarf_trade",
+      "speaker": "lucia",
+      "text": "Besides, few Dwarves go further than Waste's Edge, so if you want to buy from them directly, this is the best place to meet.",
+      "next": "lucia_northern_road"
+    },
+    {
+      "id": "lucia_i_need_to_fetch_something_for_my_mistress_but_th",
+      "speaker": "player",
+      "text": "I need to fetch something for my mistress, but the pantry is locked.",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "pantry_locked",
+          "value": 2
+        }
+      ],
+      "next": "lucia_heard_silverhair"
+    },
+    {
+      "id": "lucia_heard_silverhair",
+      "speaker": "lucia",
+      "text": "Then you have spoken to your Lady? I was afraid that Jelom wouldn't allow you to see her. Even I was refused entry when I brought her some breakfast this morning! Can you imagine that?",
+      "choices": [
+        {
+          "next": "player_reminds_key"
+        }
+      ]
+    },
+    {
+      "id": "player_reminds_key",
+      "speaker": "player",
+      "text": "The key, Mrs. Redwyne ...",
+      "next": "lucia_remembers_key"
+    },
+    {
+      "id": "lucia_remembers_key",
+      "speaker": "lucia",
+      "text": "What? Ah ... the key. Sorry, $name. I only hope it is not too uncomfortable for your mistress, being locked into that small chamber and all that.",
+      "next": "lucia_hands_key"
+    },
+    {
+      "id": "lucia_hands_key",
+      "speaker": "narrator",
+      "text": "Lucia rambles on some more, but finally she reaches into her apron and hands you the key to the storeroom.",
+      "end": true
+    },
+    {
+      "id": "lucia_excuse_me_lucia_i_have_to_fetch_something_for_la",
+      "speaker": "player",
+      "text": "Excuse me Lucia, I have to fetch something for Lady Silverhair from the pantry, and ...",
+      "next": "lucia_angry_key"
+    },
+    {
+      "id": "lucia_angry_key",
+      "speaker": "lucia",
+      "text": "... and now you want my key!? You have nerves! Do you think I'd forget how you let Talan down, despite the word you've given me?",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "lucia_refuses_key",
+          "value": 1
+        },
+        {
+          "op": "set",
+          "flag": "soothe_lucia",
+          "value": 1
+        }
+      ],
+      "choices": [
+        {
+          "next": "lucia_look_lucia_i_spoke_with_talan_and_he_understands",
+          "when": {
+            "all": [
+              {
+                "flag": "soothe_lucia",
+                "equals": 1
+              },
+              {
+                "flag": "told_on_talan",
+                "equals": 2
+              }
+            ]
+          }
+        },
+        {
+          "next": "lucia_i_m_sorry_but_i_had_no_other_choice"
+        },
+        {
+          "next": "lucia_please_lucia_i_need_the_key"
+        }
+      ]
+    },
+    {
+      "id": "lucia_please_lucia_i_need_the_key",
+      "speaker": "player",
+      "text": "Please Lucia, I need the key.",
+      "next": "lucia_false_friendliness"
+    },
+    {
+      "id": "lucia_false_friendliness",
+      "speaker": "lucia",
+      "text": "Spare me your false friendliness. You tricked me once with your charm, but a second time I won't fall for it!",
+      "choices": [
+        {
+          "next": "lucia_and_what_about_my_mistress"
+        },
+        {
+          "next": "lucia_just_give_me_that_key_and_i_won_t_bother_you_aga"
+        }
+      ]
+    },
+    {
+      "id": "lucia_and_what_about_my_mistress",
+      "speaker": "player",
+      "text": "And what about my mistress?",
+      "next": "lucia_pities_silverhair"
+    },
+    {
+      "id": "lucia_pities_silverhair",
+      "speaker": "lucia",
+      "text": "I pity the poor woman; held for theft and stuck with a sycophant like you.",
+      "next": "lucia_turns_away"
+    },
+    {
+      "id": "lucia_just_give_me_that_key_and_i_won_t_bother_you_aga",
+      "speaker": "player",
+      "text": "Just give me that key and I won't bother you again!",
+      "next": "lucia_rejects_tone"
+    },
+    {
+      "id": "lucia_rejects_tone",
+      "speaker": "lucia",
+      "text": "And I'm not taking that tone either! You have used my confidence and must suffer the consequences.",
+      "next": "lucia_turns_away"
+    },
+    {
+      "id": "lucia_look_lucia_i_spoke_with_talan_and_he_understands",
+      "speaker": "player",
+      "text": "Look, Lucia, I spoke with Talan and he understands what I had to do.",
+      "next": "lucia_talan_reconciled"
+    },
+    {
+      "id": "lucia_talan_reconciled",
+      "speaker": "lucia",
+      "text": "He's not in terrible trouble then? Seems you are in luck, $name. I wouldn't have forgiven you if you brought any harm upon the lad.",
+      "choices": [
+        {
+          "next": "lucia_reconciled_key"
+        }
+      ]
+    },
+    {
+      "id": "lucia_reconciled_key",
+      "speaker": "player",
+      "text": "May I have the key then?",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "soothe_lucia",
+          "value": 0
+        },
+        {
+          "op": "set",
+          "flag": "told_on_talan",
+          "value": 3
+        },
+        {
+          "op": "set",
+          "flag": "pantry_locked",
+          "value": 2
+        }
+      ],
+      "next": "lucia_reconciled_hands_key"
+    },
+    {
+      "id": "lucia_reconciled_hands_key",
+      "speaker": "narrator",
+      "text": "Without any further words, Lucia reaches into her apron and hands you the key to the storeroom.",
+      "end": true
+    },
+    {
+      "id": "question_menu",
+      "speaker": "lucia",
       "text": "Now don't keep me off my work. Ask what you want to know and then out with you!",
       "choices": [
         {
           "text": "I need to fetch something for my mistress, but the pantry is locked.",
           "when": {
             "all": [
-              { "flag": "get_item", "equals": 1 },
-              { "flag": "pantry_locked", "equals": 1 },
-              { "flag": "told_on_talan", "equals": 1 }
+              {
+                "flag": "get_item",
+                "equals": 1
+              },
+              {
+                "flag": "pantry_locked",
+                "equals": 1
+              },
+              {
+                "flag": "told_on_talan",
+                "equals": 1
+              }
             ]
           },
           "actions": [
-            { "op": "set", "flag": "lucia_refuses_key", "value": 1 },
-            { "op": "set", "flag": "soothe_lucia", "value": 1 }
+            {
+              "op": "set",
+              "flag": "lucia_refuses_key",
+              "value": 1
+            },
+            {
+              "op": "set",
+              "flag": "soothe_lucia",
+              "value": 1
+            }
           ],
-          "next": "lucia_angry_key"
+          "next": "lucia_excuse_me_lucia_i_have_to_fetch_something_for_la"
         },
         {
           "text": "I need to fetch something for my mistress, but the pantry is locked.",
           "when": {
             "all": [
-              { "flag": "get_item", "equals": 1 },
-              { "flag": "pantry_locked", "equals": 1 },
-              { "flag": "told_on_talan", "equals": 0 }
+              {
+                "flag": "get_item",
+                "equals": 1
+              },
+              {
+                "flag": "pantry_locked",
+                "equals": 1
+              },
+              {
+                "flag": "told_on_talan",
+                "equals": 0
+              }
             ]
           },
-          "actions": [{ "op": "set", "flag": "pantry_locked", "value": 2 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "pantry_locked",
+              "value": 2
+            }
+          ],
           "next": "lucia_heard_silverhair"
         },
         {
           "text": "Look, Lucia, I spoke with Talan and he understands what I had to do.",
           "when": {
             "all": [
-              { "flag": "get_item", "equals": 1 },
-              { "flag": "pantry_locked", "equals": 1 },
-              { "flag": "lucia_refuses_key", "equals": 1 },
-              { "flag": "soothe_lucia", "equals": 1 },
-              { "flag": "told_on_talan", "equals": 2 }
+              {
+                "flag": "get_item",
+                "equals": 1
+              },
+              {
+                "flag": "pantry_locked",
+                "equals": 1
+              },
+              {
+                "flag": "lucia_refuses_key",
+                "equals": 1
+              },
+              {
+                "flag": "soothe_lucia",
+                "equals": 1
+              },
+              {
+                "flag": "told_on_talan",
+                "equals": 2
+              }
             ]
           },
           "actions": [
-            { "op": "set", "flag": "soothe_lucia", "value": 0 },
-            { "op": "set", "flag": "told_on_talan", "value": 3 },
-            { "op": "set", "flag": "pantry_locked", "value": 2 }
+            {
+              "op": "set",
+              "flag": "soothe_lucia",
+              "value": 0
+            },
+            {
+              "op": "set",
+              "flag": "told_on_talan",
+              "value": 3
+            },
+            {
+              "op": "set",
+              "flag": "pantry_locked",
+              "value": 2
+            }
           ],
           "next": "lucia_talan_reconciled"
         },
         {
-          "text": "I know that Rhayne Frostbloom heard a noise outside the inn during that night.",
-          "when": { "flag": "know_noise", "equals": 2 },
+          "text": "I know that both Lady Silverhair and Lady Frostbloom have heard a noise outside the inn during that night.",
+          "when": {
+            "flag": "know_noise",
+            "equals": 3
+          },
           "next": "talan_practising"
         },
         {
-          "text": "I was wondering whether you noticed anything unusual during the night of the theft.",
-          "when": { "flag": "lucia_asked_about_theft", "equals": 0 },
+          "text": "I know that Lady Frostbloom has heard a noise outside the inn during that night.",
+          "when": {
+            "flag": "know_noise",
+            "equals": 2
+          },
+          "next": "talan_practising"
+        },
+        {
+          "text": "I know that Lady Silverhair has heard a noise outside the inn during that night.",
+          "when": {
+            "flag": "know_noise",
+            "equals": 1
+          },
+          "next": "talan_practising"
+        },
+        {
+          "when": {
+            "flag": "lucia_asked_about_theft",
+            "equals": 0
+          },
           "repeatable": true,
-          "actions": [{ "op": "set", "flag": "lucia_asked_about_theft", "value": 1 }],
-          "next": "rooms_apart"
+          "actions": [
+            {
+              "op": "set",
+              "flag": "lucia_asked_about_theft",
+              "value": 1
+            }
+          ],
+          "next": "lucia_i_am_afraid_so_i_was_wondering_whether_you_notic"
         },
         {
           "text": "I'm afraid so. I'd like you to repeat what you've heard the night of the theft.",
-          "when": { "flag": "lucia_asked_about_theft", "equals": 1 },
+          "when": {
+            "flag": "lucia_asked_about_theft",
+            "equals": 1
+          },
           "repeatable": true,
           "next": "lucia_repeats_night"
         },
         {
           "text": "You said Master Fingolson is a regular guest. What can you tell me about him?",
-          "when": { "flag": "lucia_asked_about_theft", "equals": 1 },
+          "when": {
+            "flag": "lucia_asked_about_theft",
+            "equals": 1
+          },
           "repeatable": true,
-          "next": "fingolson_regular"
+          "next": "lucia_i_am_afraid_there_is_only_little_i_know_about_hi"
         },
         {
           "text": "What about your son? Oliver said he heard something that night.",
-          "when": { "flag": "know_olivers_noise", "equals": 1 },
+          "when": {
+            "flag": "know_olivers_noise",
+            "equals": 1
+          },
           "repeatable": true,
           "next": "lucia_on_oliver"
         },
@@ -210,7 +1751,10 @@
         },
         {
           "text": "What mercenary?",
-          "when": { "flag": "alek_talked", "equals": 0 },
+          "when": {
+            "flag": "alek_talked",
+            "equals": 0
+          },
           "repeatable": true,
           "next": "lucia_on_alek"
         },
@@ -218,220 +1762,55 @@
           "text": "Well, you were very ... helpful, madam. But if you'll excuse me now, I've got a thief to catch.",
           "repeatable": true,
           "next": "goodbye"
+        },
+        {
+          "text": "I need to fetch something for my mistress, but the pantry is locked.",
+          "when": {
+            "all": [
+              {
+                "flag": "get_item",
+                "equals": 1
+              },
+              {
+                "flag": "pantry_locked",
+                "equals": 1
+              },
+              {
+                "flag": "told_on_talan",
+                "equals": 2
+              },
+              {
+                "flag": "lucia_refuses_key",
+                "equals": 0
+              }
+            ]
+          },
+          "next": "lucia_excuse_me_lucia_i_have_to_fetch_something_for_la"
         }
       ]
     },
     {
-      "id": "lucia_angry_key", "speaker": "lucia",
-      "text": "... and now you want my key!? You have nerves! Do you think I'd forget how you let Talan down, despite the word you've given me?",
-      "choices": [
-        { "text": "Please Lucia, I need the key.", "next": "lucia_false_friendliness" },
-        { "text": "And what about my mistress?", "next": "lucia_pities_silverhair" },
-        { "text": "Just give me that key and I won't bother you again!", "next": "lucia_rejects_tone" }
-      ]
+      "id": "lucia_pantry_entry",
+      "speaker": "lucia",
+      "text": "Now don't keep me off my work. Ask what you want to know and then out with you!",
+      "choices": "question_menu"
+    }
+  ],
+  "start_actions": [
+    {
+      "op": "set",
+      "flag": "lucia_asked_followup",
+      "value": 0
     },
     {
-      "id": "lucia_false_friendliness", "speaker": "lucia",
-      "text": "Spare me your false friendliness. You tricked me once with your charm, but a second time I won't fall for it!",
-      "end": true
+      "op": "set",
+      "flag": "lucia_asked_noise",
+      "value": 0
     },
     {
-      "id": "lucia_pities_silverhair", "speaker": "lucia",
-      "text": "I pity the poor woman; held for theft and stuck with a sycophant like you.",
-      "end": true
-    },
-    {
-      "id": "lucia_rejects_tone", "speaker": "lucia",
-      "text": "And I'm not taking that tone either! You have used my confidence and must suffer the consequences.",
-      "end": true
-    },
-    {
-      "id": "lucia_talan_reconciled", "speaker": "lucia",
-      "text": "He's not in terrible trouble then? Seems you are in luck, Banec. I wouldn't have forgiven you if you brought any harm upon the lad.",
-      "next": "lucia_reconciled_key"
-    },
-    {
-      "id": "lucia_reconciled_key", "speaker": "player",
-      "text": "May I have the key then?",
-      "next": "lucia_reconciled_hands_key"
-    },
-    {
-      "id": "lucia_reconciled_hands_key", "speaker": "narrator",
-      "text": "Without any further words, Lucia reaches into her apron and hands you the key to the storeroom.",
-      "end": true
-    },
-    {
-      "id": "lucia_heard_silverhair", "speaker": "lucia",
-      "text": "Then you have spoken to your Lady? I was afraid that Jelom wouldn't allow you to see her. Even I was refused entry when I brought her some breakfast this morning! Can you imagine that?",
-      "next": "player_reminds_key"
-    },
-    {
-      "id": "player_reminds_key", "speaker": "player",
-      "text": "The key, Mrs. Redwyne ...",
-      "next": "lucia_remembers_key"
-    },
-    {
-      "id": "lucia_remembers_key", "speaker": "lucia",
-      "text": "What? Ah ... the key. Sorry, Banec. I only hope it is not too uncomfortable for your mistress, being locked into that small chamber and all that.",
-      "next": "lucia_hands_key"
-    },
-    {
-      "id": "lucia_hands_key", "speaker": "narrator",
-      "text": "Lucia rambles on some more, but finally she reaches into her apron and hands you the key to the storeroom.",
-      "end": true
-    },
-    {
-      "id": "rooms_apart", "speaker": "lucia",
-      "text": "Something unusual? How should I? We're sleeping under the roof, whereas poor Master Fingolson has his room downstairs, in the cellar. Just as his kind likes it the most.",
-      "next": "lucia_theft_shame"
-    },
-    {
-      "id": "lucia_theft_shame", "speaker": "lucia",
-      "text": "He is such a regular and welcome guest, and of all people he gets robbed in our house. What a shame!",
-      "next": "ask_talan"
-    },
-    {
-      "id": "lucia_repeats_night", "speaker": "lucia",
-      "text": "I already told you everything I know, but if you insist.",
-      "next": "lucia_repeats_rooms"
-    },
-    {
-      "id": "lucia_repeats_rooms", "speaker": "lucia",
-      "text": "As I said, we're sleeping under the roof, whereas poor Master Fingolson has his room down below ground. So if he hasn't heard anything, how should I?",
-      "end": true
-    },
-    {
-      "id": "ask_talan", "speaker": "lucia",
-      "text": "But perhaps you should ask Talan, as he was on duty that night. If somebody noticed something, then it was him.",
-      "end": true
-    },
-    {
-      "id": "fingolson_regular", "speaker": "lucia",
-      "text": "He stays here quite often, and has done that for many years. I wouldn't say that I know him well, though. He behaves quite reserved and formal, but he is a pleasant character.",
-      "next": "fingolson_trade"
-    },
-    {
-      "id": "fingolson_trade", "speaker": "lucia",
-      "text": "Which is no surprise; much of the trade with the mines of Uzdun'kal is done here, and Master Fingolson is one of the few tradesmen the Dwarfs have.",
-      "end": true
-    },
-    {
-      "id": "lucia_on_oliver", "speaker": "lucia",
-      "text": "That boy! If I ever catch him outside when he should be sleeping in his bedroom ... . And if that's not enough, he starts spreading rumours.",
-      "next": "player_questions_oliver"
-    },
-    {
-      "id": "player_questions_oliver", "speaker": "player",
-      "text": "You don't believe him?",
-      "next": "lucia_explains_oliver"
-    },
-    {
-      "id": "lucia_explains_oliver", "speaker": "lucia",
-      "text": "Don't get me wrong. Oliver tells no lies. He'd better not! But he has an overactive imagination, so I would be careful with his \"observations\". Trust me, sir.",
-      "end": true
-    },
-    {
-      "id": "lucia_on_guards", "speaker": "lucia",
-      "text": "Oh, you mean Jelom and Talan. They are good men, no doubt. Their task is to keep the peace, and usually they are well up to it.",
-      "next": "lucia_guards_limit"
-    },
-    {
-      "id": "lucia_guards_limit", "speaker": "lucia",
-      "text": "But a situation like this exceeds their abilities. Not that I'd blame them. Convicting this thief is no job for simple people. I hope you understand, sir.",
-      "end": true
-    },
-    {
-      "id": "lucia_trade_route", "speaker": "lucia",
-      "text": "Well, upwards from here the river gets treacherous, therefore most boats go no further. The way remaining is covered by caravans. So everything that comes along the river runs past our gates.",
-      "next": "lucia_northern_road"
-    },
-    {
-      "id": "lucia_northern_road", "speaker": "lucia",
-      "text": "There is also an ancient road that leads north towards Elgilad and the human cities. A lot of spice comes along that way, from Elminscourt and beyond.",
-      "next": "lucia_dwarf_trade"
-    },
-    {
-      "id": "lucia_dwarf_trade", "speaker": "lucia",
-      "text": "Besides, few Dwarves go further than Waste's Edge, so if you want to buy from them directly, this is the best place to meet.",
-      "end": true
-    },
-    {
-      "id": "lucia_on_alek", "speaker": "lucia",
-      "text": "His name is Endhelm, I believe. You must have noticed him in the common room: he carries a sword and swears a lot. I'm sick of his likes, but out here we are getting to see plenty of them.",
-      "choices": [
-        {
-          "text": "Could he be involved into the theft?",
-          "next": "lucia_suspects_alek"
-        }
-      ]
-    },
-    {
-      "id": "lucia_suspects_alek", "speaker": "lucia",
-      "text": "How should I know? But he does look suspicious to me. More than any others of our guests.",
-      "end": true
-    },
-    {
-      "id": "talan_practising", "speaker": "lucia",
-      "text": "Outside the inn you say? I don't know anything about this, but I suspect that was rather Talan practising than the thief.",
-      "next": "what_practising"
-    },
-    {
-      "id": "what_practising", "speaker": "player",
-      "text": "Talan practising what?",
-      "next": "lucia_confidence"
-    },
-    {
-      "id": "lucia_confidence", "speaker": "lucia",
-      "text": "I shouldn't have mentioned this at all! Telling on other people is not right. But if it helps to clear your mistress' guilt, I cannot keep it secret. But you mustn't tell anybody, do you understand!?",
-      "choices": [
-        {
-          "text": "You have my word, Lucia. Now what is it?",
-            "achievement_events": [{"achievement": "9", "bit": 20}],
-          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
-          "next": "singing_reveal"
-        },
-        {
-          "text": "I can't promise anything before I know what you are talking about.",
-          "next": "lucia_refuses"
-        },
-        {
-          "text": "Please Lucia. If it has anything to do with the theft, I need to know! Don't you want the real thief caught?",
-          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
-          "next": "only_reason"
-        }
-      ]
-    },
-    {
-      "id": "lucia_refuses", "speaker": "lucia",
-      "text": "I want no harm done to Talan, see. He is a good lad, and he deserves better than ending like Jelom. Don't destroy the chance to make something out of his life.",
-      "choices": [
-        {
-          "text": "Please Lucia. If it has anything to do with the theft, I need to know! Don't you want the real thief caught?",
-          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 1 }],
-          "next": "only_reason"
-        },
-        { "text": "I don't want anybody harm, but I will do what I must to find the thief.", "next": "goodbye" }
-      ]
-    },
-    {
-      "id": "only_reason", "speaker": "lucia",
-      "text": "And that is the only reason why I'll tell you about Talan. But you'd better not disappoint me!",
-      "next": "singing_reveal"
-    },
-    {
-      "id": "singing_reveal", "speaker": "lucia",
-      "text": "He is singing. Talan sometimes leaves his post to practice his voice where nobody hears him. That's nothing bad, but he'd be more than embarrassed if you tell it around. And I fear Jelom won't take it very well.",
-      "next": "lucia_asks_mercy_for_talan"
-    },
-    {
-      "id": "lucia_asks_mercy_for_talan", "speaker": "lucia",
-      "text": "Please sir, don't be too harsh with Talan. He is a good lad at heart, and I wouldn't like any harm coming to him.",
-      "end": true
-    },
-    {
-      "id": "goodbye", "speaker": "lucia",
-      "text": "But enough chatting. This food won't prepare itself, and you still have a thief to catch.",
-      "end": true
+      "op": "set",
+      "flag": "lucia_talked_fingolson",
+      "value": 0
     }
   ]
 }

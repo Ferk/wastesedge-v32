@@ -2195,7 +2195,8 @@ int main(void)
                                "Seemingly reluctant, Erek beckons you to follow him down into the cellar.");
         const struct generated_runtime_dialogue_choice *insist;
         assert(erek_obeys != 0 && erek_beckons != 0);
-        insist = find_dialogue_choice(erek_obeys, "I am trying to help here, Erek!");
+        insist = find_dialogue_choice(erek_obeys,
+            "Stubborn Dwarf! But if he is in no hurry to get his gems back, what can I do about it?");
         assert(insist != 0);
         assert(choice_has_action(insist, bjarn_door_flag, 2));
         assert(erek_beckons->end_script == GENERATED_SCRIPT_ESCORT_TO_FINGOLSON_ROOM);

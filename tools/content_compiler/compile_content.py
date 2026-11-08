@@ -722,31 +722,24 @@ def dialogue_start_cases(document: dict[str, object], path: Path,
     raw_start = document.get("start")
     if isinstance(raw_start, str):
         cases = [{"node": identifier(raw_start, f"{path} start"),
-                  "flag": None, "value": 0}]
+                  "flag": None, "value": 0, "conditions": []}]
     else:
         cases = []
         for index, raw_case in enumerate(expect(raw_start, list, f"{path} start")):
             case = expect(raw_case, dict, f"{path} start case {index}")
             node = identifier(case.get("node"), f"{path} start case {index} node")
-            when = case.get("when")
-            if when is None:
-                flag = None
-                value = 0
-            else:
-                condition = expect(when, dict, f"{path} start case {index} when")
-                flag = identifier(condition.get("flag"),
-                                  f"{path} start case {index} condition flag")
-                value = integer(condition.get("equals"),
-                                f"{path} start case {index} condition equals")
-            cases.append({"node": node, "flag": flag, "value": value})
+            conditions = dialogue_conditions(case.get("when"), f"{path} start case {index} when")
+            first = conditions.pop(0) if conditions and conditions[0]["comparison"] == "equals" else None
+            cases.append({"node": node, "flag": first["flag"] if first else None,
+                          "value": first["value"] if first else 0, "conditions": conditions})
     if not cases:
         raise ContentError(f"{path}: dialogue start must not be empty")
     for index, case in enumerate(cases):
         if case["node"] not in node_ids:
             raise ContentError(f"{path}: start node {case['node']!r} does not exist")
-        if case["flag"] is None and index != len(cases) - 1:
+        if case["flag"] is None and not case["conditions"] and index != len(cases) - 1:
             raise ContentError(f"{path}: only the final dialogue start case may be unconditional")
-    if cases[-1]["flag"] is not None:
+    if cases[-1]["flag"] is not None or cases[-1]["conditions"]:
         raise ContentError(f"{path}: final dialogue start case must be an unconditional fallback")
     return cases
 
@@ -755,7 +748,7 @@ def dialogue_conditions(raw_when: object, description: str) -> list[dict[str, ob
     """Return the simple comparisons in a dialogue `when` clause.
 
     A condition compares a flag through exactly one of `equals`, `not_equals`,
-    or `less_than`. Content needing several facts at once uses
+    `less_than`, `has_bits`, or `lacks_bits`. Several facts at once use
     `{ "all": [condition, ...] }`. Keeping this deliberately conjunctive
     matches Waste's Edge's concrete needs without introducing an expression
     evaluator.
@@ -778,17 +771,52 @@ def dialogue_conditions(raw_when: object, description: str) -> list[dict[str, ob
         item = expect(raw_condition, dict, item_description)
         comparison_keys = set(item) - {"flag"}
         if len(comparison_keys) != 1 or not comparison_keys <= {
-                "equals", "not_equals", "less_than"} or "flag" not in item:
+                "equals", "not_equals", "less_than", "has_bits", "lacks_bits"} or "flag" not in item:
             raise ContentError(
                 f"{item_description}: condition must contain 'flag' and exactly one of "
-                "'equals', 'not_equals', or 'less_than'")
+                "'equals', 'not_equals', 'less_than', 'has_bits', or 'lacks_bits'")
         comparison = comparison_keys.pop()
+        value = integer(item.get(comparison), f"{item_description} {comparison}")
+        if comparison in {"has_bits", "lacks_bits"} and value <= 0:
+            raise ContentError(f"{item_description}: bit mask must be positive")
         result.append({
             "flag": identifier(item.get("flag"), f"{item_description} flag"),
-            "value": integer(item.get(comparison), f"{item_description} {comparison}"),
+            "value": value,
             "comparison": comparison,
         })
     return result
+
+
+def dialogue_actions(raw_actions: object, description: str) -> list[dict[str, object]]:
+    """Validate flag writes shared by node-entry and player-choice actions."""
+    result = []
+    for raw in expect(raw_actions, list, description):
+        action = expect(raw, dict, description)
+        op = identifier(action.get("op"), f"{description} op")
+        if op not in {"set", "set_bits"}:
+            raise ContentError(f"{description}: expected 'set' or 'set_bits'")
+        value = integer(action.get("value"), f"{description} value")
+        if op == "set_bits" and value <= 0:
+            raise ContentError(f"{description}: set_bits mask must be positive")
+        result.append({"flag": identifier(action.get("flag"), f"{description} flag"),
+                       "value": value, "op": int(op == "set_bits")})
+    return result
+
+
+def dialogue_choice_text(choice: dict[str, object], nodes: dict[str, dict[str, object]],
+                         roles: dict[str, str], description: str) -> tuple[str, object]:
+    """Resolve choice wording from an explicit label or its player-node target."""
+    target_id = identifier(choice.get("next"), f"{description} next")
+    if target_id not in nodes:
+        raise ContentError(f"{description}: unknown next node {target_id!r}")
+    target = nodes[target_id]
+    if "text" in choice:
+        return expect(choice["text"], str, f"{description} text"), choice.get("translation_parts")
+    if roles.get(str(target.get("speaker"))) != "player":
+        raise ContentError(
+            f"{description}: omitting text requires a player-node target; {target_id!r} is not one")
+    return (expect(target.get("text"), str, f"{description} target text"),
+            choice.get("translation_parts", target.get("translation_parts")))
 
 
 def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> set[str]:
@@ -813,6 +841,9 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
             if speaker not in speaker_ids:
                 raise ContentError(f"{path}: node {node_id} refers to unknown speaker {speaker!r}")
         dialogue_start_cases(document, path, node_ids)
+        start_actions = dialogue_actions(document.get("start_actions", []), f"{path} start_actions")
+        if isinstance(document.get("presentation"), dict) and start_actions:
+            raise ContentError(f"{path}: cinematic dialogue cannot use start_actions; use a surrounding script")
         nodes_by_id = {
             identifier(node.get("id"), f"{path} node id"): node
             for node in nodes
@@ -832,6 +863,19 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                         f"{path}: node {node_id!r} translation_parts cannot be empty")
                 for part in parts:
                     expect(part, str, f"{path} node {node_id} translation part")
+            dialogue_actions(node.get("actions", []), f"{path} node {node_id} actions")
+            responses = expect(node.get("responses", []), list, f"{path} node responses")
+            if isinstance(document.get("presentation"), dict) and (node.get("actions") or responses):
+                raise ContentError(f"{path}: cinematic nodes cannot use flag actions or responses; use a surrounding script")
+            if responses and any(key in node for key in ("next", "choices", "end")):
+                raise ContentError(f"{path}: responses cannot be combined with next, choices, or end")
+            for response in responses:
+                response = expect(response, dict, f"{path} response")
+                if identifier(response.get("node"), f"{path} response node") not in node_ids:
+                    raise ContentError(f"{path}: response refers to unknown node")
+                dialogue_conditions(response.get("when"), f"{path} response when")
+                if not isinstance(response.get("repeatable", False), bool):
+                    raise ContentError(f"{path}: response repeatable must be a bool")
             raw_choices = node.get("choices", [])
             if isinstance(raw_choices, str):
                 choice_source = identifier(
@@ -860,9 +904,8 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                 raise ContentError(f"{path}: player response node {node_id!r} cannot contain choices")
             for choice in raw_choices:
                 choice = expect(choice, dict, f"{path} choice")
-                if "next" in choice and identifier(choice["next"], f"{path} choice next") not in node_ids:
-                    raise ContentError(f"{path}: choice refers to an unknown next node")
-                expect(choice.get("text"), str, f"{path} choice text")
+                dialogue_choice_text(choice, nodes_by_id, speaker_roles,
+                                     f"{path} node {node_id} choice")
                 if "translation_parts" in choice:
                     parts = expect(choice["translation_parts"], list,
                                    f"{path} choice translation_parts")
@@ -875,12 +918,7 @@ def collect_dialogue(paths: list[Path], entities: set[str], game_root: Path) -> 
                     raise ContentError(f"{path}: choice repeatable must be a bool")
                 when = choice.get("when")
                 dialogue_conditions(when, f"{path} choice condition")
-                for action in expect(choice.get("actions", []), list, f"{path} choice actions"):
-                    action = expect(action, dict, f"{path} choice action")
-                    if identifier(action.get("op"), f"{path} choice action op") != "set":
-                        raise ContentError(f"{path}: dialogue choices currently support only 'set' actions")
-                    identifier(action.get("flag"), f"{path} choice action flag")
-                    integer(action.get("value"), f"{path} choice action value")
+                dialogue_actions(choice.get("actions", []), f"{path} choice actions")
         result.add(dialogue_id)
     return result
 
@@ -2366,11 +2404,16 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
             speaker["entity_index"] = (-1 if speaker["entity"] is None else
                                        entity_index[str(speaker["entity"])])
         speaker_index = {str(speaker["id"]): index for index, speaker in enumerate(raw_speakers)}
+        speaker_roles = {str(speaker["id"]): str(speaker["role"]) for speaker in raw_speakers}
         raw_nodes = expect(document.get("nodes"), list, f"{path}.nodes")
         if not raw_nodes:
             raise ContentError(f"{path}: dialogue must contain at least one node")
         node_index = {identifier(expect(node, dict, f"{path}.node").get("id"), f"{path} node id"): index
                       for index, node in enumerate(raw_nodes)}
+        nodes_by_id = {str(node["id"]): node for node in raw_nodes}
+        start_actions = dialogue_actions(document.get("start_actions", []), f"{path} start_actions")
+        for action in start_actions:
+            flags.add(str(action["flag"]))
         choices_owner: list[int] = []
         for index, raw_node in enumerate(raw_nodes):
             node = expect(raw_node, dict, f"{path}.node")
@@ -2384,6 +2427,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
         for start in starts:
             if start["flag"] is not None:
                 flags.add(str(start["flag"]))
+            for condition in start["conditions"]:
+                flags.add(str(condition["flag"]))
         nodes: list[dict[str, object]] = []
         compiled_choices: dict[int, list[dict[str, object]]] = {}
         for index, raw_node in enumerate(raw_nodes):
@@ -2398,19 +2443,15 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                         choice.get("when"), f"{path} choice condition")
                     for condition in conditions:
                         flags.add(str(condition["flag"]))
-                    actions: list[dict[str, int]] = []
-                    for raw_action in expect(choice.get("actions", []), list, f"{path} choice actions"):
-                        action = expect(raw_action, dict, f"{path} choice action")
-                        flag = identifier(action.get("flag"), f"{path} choice action flag")
-                        flags.add(flag)
-                        actions.append({
-                            "flag": flag,
-                            "value": integer(action.get("value"), f"{path} choice action value"),
-                        })
+                    actions = dialogue_actions(choice.get("actions", []), f"{path} choice actions")
+                    for action in actions:
+                        flags.add(str(action["flag"]))
+                    text, translation_parts = dialogue_choice_text(
+                        choice, nodes_by_id, speaker_roles, f"{path} node {owner_node['id']} choice")
                     owner_choices.append({
                         "achievement_events": choice.get("achievement_events", []),
-                        "text": expect(choice.get("text"), str, f"{path} choice text"),
-                        "translation_parts": choice.get("translation_parts"),
+                        "text": text,
+                        "translation_parts": translation_parts,
                         "next": node_index[identifier(choice.get("next"), f"{path} choice next")],
                         "actions": actions,
                         "conditions": conditions,
@@ -2418,10 +2459,20 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                     })
                 compiled_choices[owner] = owner_choices
             choices = compiled_choices[owner]
+            actions = dialogue_actions(node.get("actions", []), f"{path} node actions")
+            for action in actions:
+                flags.add(str(action["flag"]))
+            responses = []
+            for response in node.get("responses", []):
+                conditions = dialogue_conditions(response.get("when"), f"{path} response when")
+                for condition in conditions:
+                    flags.add(str(condition["flag"]))
+                responses.append({"node": node_index[response["node"]], "conditions": conditions,
+                                  "repeatable": int(response.get("repeatable", False))})
             explicit_next = node.get("next")
             if explicit_next is not None:
                 next_node = node_index[identifier(explicit_next, f"{path} node next")]
-            elif choices or node.get("end", False):
+            elif choices or responses or node.get("end", False):
                 next_node = -1
             else:
                 next_node = index + 1 if index + 1 < len(raw_nodes) else -1
@@ -2466,6 +2517,8 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 "speaker": speaker_index[speaker_id],
                 "presentation_mode": node_presentations[node_presentation],
                 "choices": choices,
+                "actions": actions,
+                "responses": responses,
                 "choices_owner": owner if choices else -1,
                 "next": next_node,
                 "auto_advance_frames": auto_advance_frames,
@@ -2672,10 +2725,12 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
                 raise ContentError(f"{path}: node music timing cannot be negative")
         dialogues.append({
             "id": dialogue_id,
+            "start_actions": start_actions,
             "starts": [{
                 "node": node_index[str(start["node"])],
                 "flag": start["flag"],
                 "value": start["value"],
+                "conditions": start["conditions"],
             } for start in starts],
             "on_end": (-1 if document.get("on_end") is None else
                        script_index[identifier(document.get("on_end"), f"{path} on_end")]),
@@ -2711,10 +2766,19 @@ def runtime_dialogues(dialogue_paths: list[Path], script_paths: list[Path], enti
     flag_index = {flag: index for index, flag in enumerate(sorted(flags))}
     converted_choice_lists: set[int] = set()
     for dialogue in dialogues:
+        for action in dialogue["start_actions"]:
+            action["flag"] = flag_index[str(action["flag"])]
         for start in dialogue["starts"]:
             if start["flag"] is not None:
                 start["flag"] = flag_index[str(start["flag"])]
+            for condition in start["conditions"]:
+                condition["flag"] = flag_index[str(condition["flag"])]
         for node in dialogue["nodes"]:
+            for action in node["actions"]:
+                action["flag"] = flag_index[str(action["flag"])]
+            for response in node["responses"]:
+                for condition in response["conditions"]:
+                    condition["flag"] = flag_index[str(condition["flag"])]
             choice_list_identity = id(node["choices"])
             if choice_list_identity in converted_choice_lists:
                 continue
@@ -3930,11 +3994,13 @@ struct generated_runtime_schedule {
     int speech_count, ambient_speech_count;
     int speech_delay_min, speech_delay_max, speech_duration;
 };
-struct generated_runtime_dialogue_action { int flag, value; };
+struct generated_runtime_dialogue_action { int flag, value, set_bits; };
 enum generated_runtime_dialogue_comparison {
     GENERATED_RUNTIME_DIALOGUE_EQUALS,
     GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS,
-    GENERATED_RUNTIME_DIALOGUE_LESS_THAN
+    GENERATED_RUNTIME_DIALOGUE_LESS_THAN,
+    GENERATED_RUNTIME_DIALOGUE_HAS_BITS,
+    GENERATED_RUNTIME_DIALOGUE_LACKS_BITS
 };
 struct generated_runtime_dialogue_condition { int flag, value, comparison; };
 struct generated_runtime_glyph {
@@ -3965,6 +4031,11 @@ struct generated_runtime_dialogue_choice {
     const struct generated_runtime_dialogue_condition *conditions;
     int action_count, condition_count, next_node, repeatable;
 };
+struct generated_runtime_dialogue_response {
+    int node;
+    const struct generated_runtime_dialogue_condition *conditions;
+    int condition_count, repeatable;
+};
 struct generated_runtime_dialogue_node {
     const char *text;
     struct generated_runtime_text display;
@@ -3974,6 +4045,10 @@ struct generated_runtime_dialogue_node {
     int cutscene_text_mode, cutscene_text_x, cutscene_text_y;
     int cutscene_text_width, cutscene_text_bottom, cutscene_text_rate;
     int cutscene_text_hold, cutscene_text_shadow, cutscene_finish_ranges, presentation_mode;
+    const struct generated_runtime_dialogue_action *actions;
+    int action_count;
+    const struct generated_runtime_dialogue_response *responses;
+    int response_count;
 };
 struct generated_runtime_cutscene_keyframe { int frame, value; };
 struct generated_runtime_cutscene_layer {
@@ -3985,7 +4060,11 @@ struct generated_runtime_cutscene_layer {
     int first_node, last_node, x, y, clock_mode;
     int frame_delay, wrap_x_delay, wrap_x_step, alpha_frames;
 };
-struct generated_runtime_dialogue_start { int node, flag, value; };
+struct generated_runtime_dialogue_start {
+    int node, flag, value;
+    const struct generated_runtime_dialogue_condition *conditions;
+    int condition_count;
+};
 struct generated_runtime_dialogue {
     const struct generated_runtime_dialogue_speaker *speakers;
     int speaker_count;
@@ -3998,6 +4077,8 @@ struct generated_runtime_dialogue {
     int text_mode, text_x, text_y, text_width, text_bottom, text_rate;
     unsigned int background_color;
     int fade_in_frames;
+    const struct generated_runtime_dialogue_action *start_actions;
+    int start_action_count;
 };
 #define GENERATED_DIALOGUE_PRESENTATION_PANEL 0
 #define GENERATED_DIALOGUE_PRESENTATION_MAP_BALLOON 1
@@ -4486,10 +4567,30 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                         layer["frame_delay"], layer["wrap_delay"],
                         layer["wrap_step"], layer["alpha_frames"]))
             lines.append("};")
+        if dialogue["start_actions"]:
+            lines.append(f"static const struct generated_runtime_dialogue_action generated_runtime_dialogue_start_actions_{dialogue_index}[] = {{")
+            lines.extend("    { %d, %d, %d }," % (a["flag"], a["value"], a["op"])
+                         for a in dialogue["start_actions"])
+            lines.append("};")
+        for start_index, start in enumerate(dialogue["starts"]):
+            if start["conditions"]:
+                lines.append(f"static const struct generated_runtime_dialogue_condition generated_runtime_start_conditions_{dialogue_index}_{start_index}[] = {{")
+                lines.extend("    { %d, %d, %s }," % (
+                    condition["flag"], condition["value"], {
+                        "equals": "GENERATED_RUNTIME_DIALOGUE_EQUALS",
+                        "not_equals": "GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS",
+                        "less_than": "GENERATED_RUNTIME_DIALOGUE_LESS_THAN",
+                        "has_bits": "GENERATED_RUNTIME_DIALOGUE_HAS_BITS",
+                        "lacks_bits": "GENERATED_RUNTIME_DIALOGUE_LACKS_BITS",
+                    }[str(condition["comparison"])]) for condition in start["conditions"])
+                lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_start generated_runtime_dialogue_starts_{dialogue_index}[] = {{")
-        for start in dialogue["starts"]:
+        for start_index, start in enumerate(dialogue["starts"]):
             flag = -1 if start["flag"] is None else start["flag"]
-            lines.append("    { %d, %d, %d }," % (start["node"], flag, start["value"]))
+            conditions = (f"generated_runtime_start_conditions_{dialogue_index}_{start_index}"
+                          if start["conditions"] else "0")
+            lines.append("    { %d, %d, %d, %s, %d }," % (
+                start["node"], flag, start["value"], conditions, len(start["conditions"])))
         lines.append("};")
         for speaker_index, speaker in enumerate(dialogue["speakers"]):
             lines.append(f"static const int generated_runtime_dialogue_speaker_glyphs_{dialogue_index}_{speaker_index}[] = {{ " +
@@ -4531,13 +4632,15 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                             "equals": "GENERATED_RUNTIME_DIALOGUE_EQUALS",
                             "not_equals": "GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS",
                             "less_than": "GENERATED_RUNTIME_DIALOGUE_LESS_THAN",
+                        "has_bits": "GENERATED_RUNTIME_DIALOGUE_HAS_BITS",
+                        "lacks_bits": "GENERATED_RUNTIME_DIALOGUE_LACKS_BITS",
                         }[str(condition["comparison"])])
                                  for condition in conditions)
                     lines.append("};")
                 actions = choice["actions"]
                 if actions:
                     lines.append(f"static const struct generated_runtime_dialogue_action generated_runtime_dialogue_actions_{dialogue_index}_{node_index}_{choice_index}[] = {{")
-                    lines.extend("    { %d, %d }," % (action["flag"], action["value"]) for action in actions)
+                    lines.extend("    { %d, %d, %d }," % (action["flag"], action["value"], action["op"]) for action in actions)
                     lines.append("};")
             if node["choices"]:
                 lines.append(f"static const struct generated_runtime_dialogue_choice generated_runtime_dialogue_choices_{dialogue_index}_{node_index}[] = {{")
@@ -4554,12 +4657,36 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                         action_name, condition_name, len(actions),
                         len(conditions), choice["next"], int(choice["repeatable"])))
                 lines.append("};")
+        for node_index, node in enumerate(dialogue["nodes"]):
+            prefix = f"generated_runtime_dialogue_node_{dialogue_index}_{node_index}"
+            if node["actions"]:
+                lines.append(f"static const struct generated_runtime_dialogue_action {prefix}_actions[] = {{")
+                lines.extend("    { %d, %d, %d }," % (a["flag"], a["value"], a["op"]) for a in node["actions"])
+                lines.append("};")
+            for response_index, response in enumerate(node["responses"]):
+                if response["conditions"]:
+                    lines.append(f"static const struct generated_runtime_dialogue_condition {prefix}_conditions_{response_index}[] = {{")
+                    lines.extend("    { %d, %d, %s }," % (c["flag"], c["value"], {
+                        "equals": "GENERATED_RUNTIME_DIALOGUE_EQUALS",
+                        "not_equals": "GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS",
+                        "less_than": "GENERATED_RUNTIME_DIALOGUE_LESS_THAN",
+                        "has_bits": "GENERATED_RUNTIME_DIALOGUE_HAS_BITS",
+                        "lacks_bits": "GENERATED_RUNTIME_DIALOGUE_LACKS_BITS",
+                    }[c["comparison"]]) for c in response["conditions"])
+                    lines.append("};")
+            if node["responses"]:
+                lines.append(f"static const struct generated_runtime_dialogue_response {prefix}_responses[] = {{")
+                for response_index, response in enumerate(node["responses"]):
+                    conditions = f"{prefix}_conditions_{response_index}" if response["conditions"] else "0"
+                    lines.append("    { %d, %s, %d, %d }," % (
+                        response["node"], conditions, len(response["conditions"]), response["repeatable"]))
+                lines.append("};")
         lines.append(f"static const struct generated_runtime_dialogue_node generated_runtime_dialogue_nodes_{dialogue_index}[] = {{")
         for node_index, node in enumerate(dialogue["nodes"]):
             choices_name = (f"generated_runtime_dialogue_choices_{dialogue_index}_{node['choices_owner']}"
                             if node["choices"] else "0")
             lines.append("    { %s, { generated_runtime_dialogue_node_glyphs_%d_%d, %d, %d }, %s, "
-                         "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d }," % (
+                         "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %s, %d, %s, %d }," % (
                 json.dumps(node["text"]), dialogue_index, node_index,
                 len(node["text_glyphs"]), node["text_message"],
                 choices_name, len(node["choices"]), node["next"], node["speaker"],
@@ -4569,7 +4696,11 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
                 node["cutscene_text_x"], node["cutscene_text_y"],
                 node["cutscene_text_width"], node["cutscene_text_bottom"],
                 node["cutscene_text_rate"], node["cutscene_text_hold"],
-                node["cutscene_text_shadow"], node["cutscene_finish_ranges"], node["presentation_mode"]))
+                node["cutscene_text_shadow"], node["cutscene_finish_ranges"], node["presentation_mode"],
+                f"generated_runtime_dialogue_node_{dialogue_index}_{node_index}_actions" if node["actions"] else "0",
+                len(node["actions"]),
+                f"generated_runtime_dialogue_node_{dialogue_index}_{node_index}_responses" if node["responses"] else "0",
+                len(node["responses"])))
         lines.append("};")
     lines.append("const struct generated_runtime_dialogue generated_runtime_dialogues[] = {")
     for index, dialogue in enumerate(dialogues):
@@ -4579,14 +4710,16 @@ def runtime_source(scenes: list[dict[str, object]], visuals: list[dict[str, obje
             "    { generated_runtime_dialogue_speakers_%d, %d, "
             "generated_runtime_dialogue_nodes_%d, %d, "
             "generated_runtime_dialogue_starts_%d, %d, %d, %d, %s, %d, "
-            "%d, %d, %d, %d, %d, %d, %u, %d }," % (
+            "%d, %d, %d, %d, %d, %d, %u, %d, %s, %d }," % (
                 index, len(dialogue["speakers"]), index, len(dialogue["nodes"]),
                 index, len(dialogue["starts"]), dialogue["on_end"],
                 dialogue["presentation_mode"], layers_name,
                 len(dialogue["cutscene_layers"]), dialogue["text_mode"],
                 dialogue["text_x"], dialogue["text_y"], dialogue["text_width"],
                 dialogue["text_bottom"], dialogue["text_rate"],
-                dialogue["background_color"], dialogue["fade_in_frames"]))
+                dialogue["background_color"], dialogue["fade_in_frames"],
+                f"generated_runtime_dialogue_start_actions_{index}" if dialogue["start_actions"] else "0",
+                len(dialogue["start_actions"])))
     lines.append("};")
     lines.append(f"const int generated_runtime_dialogue_count = {len(dialogues)};\n")
     lines.append("const struct generated_runtime_scene generated_runtime_scenes[] = {")
@@ -4794,7 +4927,7 @@ def compile_content(project_root: Path) -> None:
         if runtime_dialogue[title_cutscene]["presentation_mode"] != 2:
             raise ContentError("manifest title_cutscene must use cutscene presentation")
         title_starts = runtime_dialogue[title_cutscene]["starts"]
-        if len(title_starts) != 1 or title_starts[0]["flag"] is not None:
+        if len(title_starts) != 1 or (title_starts[0]["flag"] is not None or title_starts[0]["conditions"]):
             raise ContentError(
                 "manifest title_cutscene must have one unconditional start")
         if runtime_dialogue[title_cutscene]["on_end"] >= 0 or any(
@@ -4816,7 +4949,7 @@ def compile_content(project_root: Path) -> None:
         if runtime_dialogue[new_game_cutscene]["presentation_mode"] != 2:
             raise ContentError("manifest new_game_cutscene must use cutscene presentation")
         opening_starts = runtime_dialogue[new_game_cutscene]["starts"]
-        if len(opening_starts) != 1 or opening_starts[0]["flag"] is not None:
+        if len(opening_starts) != 1 or (opening_starts[0]["flag"] is not None or opening_starts[0]["conditions"]):
             raise ContentError(
                 "manifest new_game_cutscene must have one unconditional start")
         if runtime_dialogue[new_game_cutscene]["on_end"] >= 0 or any(

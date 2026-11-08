@@ -1,6 +1,9 @@
 {
   "id": "talk_to_alek",
   "actions": [
-    { "op": "show_dialogue", "dialogue": "alek_start" }
+    {
+      "op": "show_dialogue",
+      "dialogue": "alek_start"
+    }
   ]
 }

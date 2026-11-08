@@ -3,9 +3,14 @@
   "start": [
     {
       "node": "repeat_narration",
-      "when": { "flag": "tristan_talked", "equals": 1 }
+      "when": {
+        "flag": "tristan_talked",
+        "equals": 1
+      }
     },
-    { "node": "first_narration" }
+    {
+      "node": "first_narration"
+    }
   ],
   "speakers": [
     {
@@ -30,7 +35,12 @@
   "nodes": [
     {
       "id": "first_narration",
-      "achievement_events": [{"achievement": "2", "bit": 31}],
+      "achievement_events": [
+        {
+          "achievement": "2",
+          "bit": 31
+        }
+      ],
       "speaker": "narrator",
       "text": "The small man before you wears a cold expression. Judging by his garments he is sort of a merchant, and a rather successful one by the looks of it.",
       "next": "tristan_yes"
@@ -41,11 +51,33 @@
       "text": "Yes?",
       "choices": [
         {
-          "text": "Greetings sir, I am Banec. I wonder whether you know anything about that theft.",
+          "text": "Hello, sir. My name is $name, and I am investigating the theft of Master Fingolson's gems.",
+          "when": {
+            "flag": "know_argument",
+            "equals": 1
+          },
           "actions": [
-            { "op": "set", "flag": "tristan_talked", "value": 1 }
+            {
+              "op": "set",
+              "flag": "tristan_talked",
+              "value": 1
+            }
           ],
-          "next": "player_greeting"
+          "next": "tristan_formal_greeting"
+        },
+        {
+          "actions": [
+            {
+              "op": "set",
+              "flag": "tristan_talked",
+              "value": 1
+            }
+          ],
+          "next": "player_greeting",
+          "when": {
+            "flag": "know_argument",
+            "equals": 0
+          }
         }
       ]
     },
@@ -65,25 +97,34 @@
           "next": "tristan_polite_refusal"
         },
         {
-          "text": "Right then, sorry to bother you, Master Illig.",
           "next": "player_leave"
         },
         {
-          "text": "Who is \"they\"?",
           "next": "player_who"
         }
       ]
     },
     {
-      "id": "tristan_polite_refusal", "speaker": "tristan",
+      "id": "tristan_polite_refusal",
+      "speaker": "tristan",
       "text": "Well, Banec, I would like to be of help, but I am afraid that I know nothing that will aid you. Your time would be better spent talking to those who are involved, I would imagine.",
       "choices": [
-        { "text": "And who says you are not amongst those?", "next": "tristan_denies_involvement" },
-        { "text": "Right then, sorry to bother you, Master Illig.", "next": "player_leave" }
+        {
+          "text": "All the same I would like to ask you a thing or two ...",
+          "next": "tristan_repeat_warning"
+        },
+        {
+          "text": "And who says you are not amongst those?",
+          "next": "tristan_denies_involvement"
+        },
+        {
+          "next": "player_leave"
+        }
       ]
     },
     {
-      "id": "tristan_denies_involvement", "speaker": "tristan",
+      "id": "tristan_denies_involvement",
+      "speaker": "tristan",
       "text": "What? You cannot seriously consider that! Use your eyes, man! Do I look like a thief to you?",
       "next": "tristan_warning"
     },
@@ -111,7 +152,6 @@
       "text": "And it's not as if they would still be looking for the thief. As it turned out, it's been that Elf, Lady Silverhair. But so far they failed in retrieving the gems from her.",
       "choices": [
         {
-          "text": "As my mistress did certainly not steal them, they'll have a hard time in doing so I guess.",
           "next": "player_denial"
         }
       ]
@@ -134,11 +174,9 @@
       "text": "I warn you, Half-Elf, I am losing my patience with you and this whole affair. I am losing money by the hour, while you bumble around, bothering everyone with questions!",
       "choices": [
         {
-          "text": "All right, all right! I'll leave you alone. But I shall be watching you!",
           "next": "player_watch"
         },
         {
-          "text": "Could it be that you have something to hide, what with all this blustering?",
           "next": "player_challenge"
         }
       ]
@@ -161,7 +199,6 @@
       "text": "You have the nerve to accuse me, Half-Elf?! I don't have to take this. Go! Go before I lose my temper!",
       "choices": [
         {
-          "text": "All right, all right! I'll leave you alone. But I shall be watching you!",
           "next": "player_watch"
         }
       ]
@@ -196,15 +233,12 @@
       "text": "Now leave me alone, please. I assure you that I know nothing about the theft, let alone have any part in it. Or do you think I would endanger my whole business for a few worthless pebbles?",
       "choices": [
         {
-          "text": "Do you perhaps think my mistress is in need of stealing? Yet she is accused!",
           "next": "player_silverhair"
         },
         {
-          "text": "Right then, sorry to bother you, Master Illig.",
           "next": "player_leave"
         },
         {
-          "text": "Who says you aren't broke already?",
           "next": "player_broke"
         }
       ]
@@ -220,6 +254,20 @@
       "speaker": "player",
       "text": "Who says you aren't broke already?",
       "next": "tristan_anger"
+    },
+    {
+      "id": "tristan_formal_greeting",
+      "speaker": "tristan",
+      "text": "Well met then, $name! I am Tristan Illig, a merchant by trade, and currently stuck here at the Redwyne Inn until this business is cleared up. So may I ask you to continue your investigation?",
+      "choices": [
+        {
+          "text": "That is what I am doing, Master Illig. I have a few questions for you.",
+          "next": "tristan_polite_refusal"
+        },
+        {
+          "next": "player_leave"
+        }
+      ]
     }
   ]
 }

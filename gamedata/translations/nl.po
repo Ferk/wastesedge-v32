@@ -7871,3 +7871,99 @@ msgstr "Spatie"
 #: gamedata/manifest.jsonc keyboard controls
 msgid "Delete"
 msgstr "Wissen"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I think that 'theft' is a better word for it than disappearance."
+msgstr "Ik denk dat \"diefstal\" een beter woord is dan verdwijning."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Actually, I would mind. I am sure that you already know what happened, so nothing can be gained from bothering me. I would rather you 'recover' the gems from your mistress and return them to me!"
+msgstr "Om eerlijk te zijn, ik zou het wel erg vinden. Ik ben er zeker van dat u al weet wat er is gebeurd, dus er kan niets worden gewonnen door mij lastig te vallen. Ik zou liever hebben dat u de stenen \"terugwint\" van bij uw meesteres en ze teruggeeft aan mij!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Not even if I've found one of your 'Catseyes'!"
+msgstr "Zelfs niet als ik één van uw \"Kattenogen\" zou hebben gevonden!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "The roads have been getting more and more dangerous recently, that's for sure. But they would be even more dangerous with the likes of him 'guarding' me! So I told him, in no uncertain terms, that I didn't like his looks!"
+msgstr "De wegen zijn de laatste tijd steeds gevaarlijker geworden, dat is zeker. Maar ze zouden gevaarlijker zijn met het zicht van hem terwijl hij me \"bewaakt\"! Dus heb ik hem duidelijk gezegd, dat zijn uiterlijk mij niet bevalt!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Wait a moment! What exactly is a Catseye?"
+msgstr "Wacht eens even! Wat is een \"Kattenoog\" exact?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Thank you Erek. That is all I needed to know."
+msgstr "Bedankt, Erek. Dat is alles dat ik moet weten."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, in that case I will leave him alone."
+msgstr "Wel, in dat geval zal ik hem met rust laten."
+
+#. Port wording corrects the original English double negation.
+msgid "You don't trust me, $name? In that case I'm sorry. Unless I know the truth about the gem, I cannot help you."
+msgstr "U vertrouwt mij niet, $name? In dat geval spijt het mij. Tenzij ik de waarheid over de steen ken, kan ik u niet helpen."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I ... I'm sorry, but that is news to me. It must have happened while I was unpacking our luggage. Although to tell the truth, it does not sound like Master Fingolson at all."
+msgstr "Ik..., het spijt me, maar dat is nieuws voor mij. Het moet zijn gebeurd toen ik onze bagage was aan het uitpakken. Alhoewel, om de waarheid te zeggen, klinkt dat helemaal niet als meester Fingolson."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Oh! The Lady Silverhair said so. I assure you Half-Elf, the Lady Silverhair said quite a lot when we put her under arrest, and it wasn't very lady-like. Come back once you have something more substantial!"
+msgstr "O! *Juffrouw Silverhair zei het ook.* Ik verzeker u ervan, half-elf, dat juffrouw Silverhair nogal veel heeft gezegd toen ze werd opgepakt, en het niet echt iets voor een dame was. Kom terug als u meer betrouwbaarheid heeft!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, it's certain that it isn't Lady Silverhair. But I need to learn more."
+msgstr "Wel, het is al zeker dat het niet juffrouw Silverhair is. Maar ik moet meer leren."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, I don't know what you did to anger my dear Lucia, and I don't wanna know, but unless you set things right, she'll be giving you a hard time."
+msgstr "Wel, ik weet niet wat u heeft gedaan dat mijn arme Lucia boos heeft gemaakt, en ik wil het niet weten, maar tenzij u het goedmaakt met haar, zal ze het u moeilijk maken."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I hear that Alek Endhelm was very interested in Fingolson's business. Have you noticed him doing anything suspicious?"
+msgstr "Ik heb gehoord dat Alek Endhelm heel geïnteresseerd was in Fingolsons zaken. Heeft u hem iets verdachts zien doen?"
+
+
+
+
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling Master Orloth of your connection with that Silverhair woman."
+msgstr "Vergeef me, maar ik kon niet helpen te horen dat u Meester Orloth aan het vertellen was over uw band met die Silverhair vrouw."
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling the mercenary of your connection with that Silverhair woman."
+msgstr "Vergeef me, maar ik kon niet helpen te horen dat u de huurling aan het vertellen was over uw band met die Silverhair vrouw."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to Master Orloth! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Maar enkel door geluk: ik hoorde u praten tegen Meester Orloth! Het is gewoon niet juist, $name! U bent vertrouwd met de hoofdverdachte, maar u laat me geloven dat uw navraag het beste is voor ons allemaal."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to the mercenary! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Maar enkel door geluk: ik hoorde u praten tegen de huurling! Het is gewoon niet juist, $name! U bent vertrouwd met de hoofdverdachte, maar u laat me geloven dat uw navraag het beste is voor ons allemaal."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Silverhair has heard a noise outside the inn during that night."
+msgstr "Ik weet dat Juffrouw Silverhair heeft tijdens die nacht buiten de herberg een geluid heeft gehoord."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Frostbloom has heard a noise outside the inn during that night."
+msgstr "Ik weet dat Juffrouw Frostbloom heeft tijdens die nacht buiten de herberg een geluid heeft gehoord."
+
+#. Original Lucia witness variant.
+msgid "I know that both Lady Silverhair and Lady Frostbloom have heard a noise outside the inn during that night."
+msgstr "Ik weet dat juffrouw Silverhair en juffrouw Frostbloom hebben allebei tijdens die nacht buiten de herberg een geluid heeft gehoord."
+
+#. Original Lucia witness variant.
+msgid "But Lady Silverhair has heard something outside the inn as well."
+msgstr "Maar Juffrouw Silverhair heeft heeft ook iets gehoord buiten de herberg."
+
+#. Original Lucia witness variant.
+msgid "But Lady Frostbloom has heard something outside the inn as well."
+msgstr "Maar Juffrouw Frostbloom heeft heeft ook iets gehoord buiten de herberg."
+
+#. Original Lucia witness variant.
+msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
+msgstr "Maar juffrouw Silverhair en juffrouw Frostbloom hebben allebei heeft ook iets gehoord buiten de herberg."

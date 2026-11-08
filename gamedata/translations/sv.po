@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: wastesedge 0.3.6-pre1\n"
+"Project-Id-Version: wastesedge 0.3.7\n"
 "Report-Msgid-Bugs-To: kai.sterker@gmail.com\n"
 "POT-Creation-Date: 2018-12-30 12:02+0100\n"
-"PO-Revision-Date: 2017-07-02 21:57+0200\n"
+"PO-Revision-Date: 2020-07-12 23:12+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Poedit 2.0.2\n"
+"X-Generator: Poedit 2.3.1\n"
 
 #: scripts/dialogues/alek_start.py:9
 msgid "And who do we have here? A damn freak Half-Elf I say!"
@@ -151,8 +151,8 @@ msgid ""
 "Next moment, the door's burstin' open and your lovely mistress rushes "
 "past ... - I don't think you could call that eavesdropping."
 msgstr ""
-"Nästa ögonblick slås dörren upp och din förtjusande dam rusar förbi ... - "
-"Jag tror inte du kan kalla det tjuvlyssnande."
+"Nästa ögonblick slås dörren upp och din förtjusande dam rusar förbi… "
+"- Jag tror inte du kan kalla det tjuvlyssnande."
 
 #: scripts/dialogues/alek_start.py:31
 msgid "Leave the thinking to me and simply answer my questions, will you?"
@@ -267,9 +267,10 @@ msgid ""
 "I had an ... appointment, which is absolutely none of your concern. I'm just "
 "an innocent traveller caught in this bloody mess."
 msgstr ""
-"Om det kan få dig att bli nöjd; jag slog läger här på min väg tillbaka från "
-"Limebruck där jag hade ett ... möte, vilket absolut inte angår dig. Jag är "
-"bara en oskyldig åskådare som dragits in i denna jävla röra."
+"Om det kan få dig att bli nöjd; jag slog läger här på min väg "
+"tillbaka från Limebruck där jag hade ett… möte, vilket absolut inte "
+"angår dig. Jag är bara en oskyldig åskådare som dragits in i denna "
+"jävla röra."
 
 #: scripts/dialogues/alek_start.py:49
 msgid ""
@@ -364,8 +365,8 @@ msgid ""
 "Perhaps it's just me, but I'd ask myself why the ... thief hasn't left "
 "Waste's Edge."
 msgstr ""
-"Kanske är det bara jag, men jag skulle fråga mig varför ... tjuven inte har "
-"lämnat Waste's Edge."
+"Kanske är det bara jag, men jag skulle fråga mig varför… tjuven inte "
+"har lämnat Waste's Edge."
 
 #: scripts/dialogues/alek_start.py:65
 msgid ""
@@ -394,8 +395,8 @@ msgid ""
 "Perhaps you are right. Any further conversation would be useless anyway. So "
 "I'll leave you ... for now!"
 msgstr ""
-"Kanske du har rätt. Att prata vidare skulle vara lönlöst i vilket fall. Så "
-"jag lämnar dig ... för tillfället!"
+"Kanske du har rätt. Att prata vidare skulle vara lönlöst i vilket "
+"fall. Så jag lämnar dig… för tillfället!"
 
 #: scripts/dialogues/alek_start.py:69
 msgid "Very funny! Should I ever need a fool, I'll send for you."
@@ -746,7 +747,7 @@ msgstr "Inte ens om jag hittat ett av dina ”Kattögon”!"
 msgid ""
 "Really? I ... I am impressed. Let me see! And tell me where you found it."
 msgstr ""
-"Verkligen? Jag ... jag är imponerad. Låt se! Och säg var du hittade den."
+"Verkligen? Jag… jag är imponerad. Låt se! Och säg var du hittade den."
 
 #: scripts/dialogues/bjarn_start.py:48
 msgid "In the pantry."
@@ -841,9 +842,9 @@ msgid ""
 "the source of all this mess, and I'll be switched if I let her accomplice in "
 "to free her. Be on your way!"
 msgstr ""
-"Nä, om du är Silverhårs man kommer jag inte låta dig passera. Den där är "
-"roten till all den här oredan, och jag kommer bytas ut om jag släpper in "
-"hennes medhjälpare för att befria henne. Stick härifrån!"
+"Nä, om du är Silverhårs man kommer jag inte låta dig passera. Den där "
+"är roten till allt den här oredan, och jag kommer bytas ut om jag "
+"släpper in hennes medhjälpare för att befria henne. Stick härifrån!"
 
 #: scripts/dialogues/demo_intro_1.py:12
 msgid "What sort of mess, man? If my Lady is in trouble, I must know!"
@@ -964,7 +965,8 @@ msgstr "Jag säger det igen, du kommer inte in."
 
 #: scripts/dialogues/demo_intro_1.py:29
 msgid "I tell you, I cannot. My orders..."
-msgstr "Som jag säger, jag kan inte. Mina order ..."
+msgstr ""
+"Som jag säger, jag kan inte. Mina order…"
 
 #: scripts/dialogues/demo_intro_1.py:30
 msgid ""
@@ -1096,7 +1098,7 @@ msgstr ""
 msgid ""
 "Oh ... well, she's the reason why I want to talk to you, if you don't mind."
 msgstr ""
-"Åh ... hon är anledningen till att jag vill tala med dig, om du inte "
+"Åh… hon är anledningen till att jag vill tala med dig, om du inte "
 "misstycker."
 
 #: scripts/dialogues/erek_start.py:18
@@ -1104,7 +1106,7 @@ msgid ""
 "I understand. You have learned of the ... incident, but as I can see, you "
 "fail to believe it."
 msgstr ""
-"Jag förstår. Du har hört om ... incidenten, men som jag kan se så kan du "
+"Jag förstår. Du har hört om… incidenten, men som jag kan se så kan du "
 "inte tro det."
 
 #: scripts/dialogues/erek_start.py:19
@@ -1112,9 +1114,9 @@ msgid ""
 "Lady Silverhair, hm? There seems to be hardly any other topic since that ... "
 "incident. I'm sorry, but I don't think I can satisfy your curiosity."
 msgstr ""
-"Fru Silverhår, hm? Det verkar knappt finnas något annat samtalsämne sedan "
-"den ... incidenten. Jag är ledsen, men jag tror inte att jag kan mätta din "
-"nyfikenhet."
+"Fru Silverhår, hm? Det verkar knappt finnas något annat samtalsämne "
+"sedan den… incidenten. Jag är ledsen, men jag tror inte att jag kan "
+"mätta din nyfikenhet."
 
 #: scripts/dialogues/erek_start.py:20
 msgid ""
@@ -1161,8 +1163,8 @@ msgid ""
 "Master Fingolson says her guilt is proven beyond doubt, and there are indeed "
 "facts that support his opinion. But I ... am not sure."
 msgstr ""
-"Mäster Fingolson säger att hennes skuld är bortom tvivel, och det finns "
-"sannerligen fakta som stöder hans åsikt. Men jag ... är inte säker."
+"Mäster Fingolson säger att hennes skuld är bortom tvivel, och det "
+"finns sannerligen fakta som stöder hans åsikt. Men jag… är inte säker."
 
 #: scripts/dialogues/erek_start.py:27
 msgid ""
@@ -1292,7 +1294,7 @@ msgid ""
 "Well ... yes ... when looked at in a certain way, under the right light. No "
 "wonder your mistress mistook them for Cymophanes."
 msgstr ""
-"Tja ... jo ... när du tittar på dem i en visst sätt under rätt ljus. Inte "
+"Tja… jo… när du tittar på dem i en visst sätt under rätt ljus. Inte "
 "att undra på att din dam misstog dem för cymofaner."
 
 #: scripts/dialogues/erek_start.py:45
@@ -1346,7 +1348,8 @@ msgstr "Jag har fått höra att Fingolson och min dam hade ett gräl."
 
 #: scripts/dialogues/erek_start.py:52
 msgid "Can I have a word with you, uh... what was the name?"
-msgstr "Kan jag få byta några ord med dig, ehm ... hur var namnet?"
+msgstr ""
+"Kan jag få byta några ord med dig, ehm… hur var namnet?"
 
 #: scripts/dialogues/erek_start.py:53
 msgid ""
@@ -1413,9 +1416,9 @@ msgid ""
 "me! You are familiar with the prime suspect, but you deem it unnecessary to "
 "tell me!"
 msgstr ""
-"Du ..., du ... visste inte? Det är sanningen! Självklart är den viktig för "
-"mig! Du är bekant med den huvudmisstänkta, men tycker inte det är värt att "
-"berätta för mig!"
+"Du…, du… visste inte? Det är sanningen! Självklart är den viktig för "
+"mig! Du är bekant med den huvudmisstänkta, men tycker inte det är "
+"värt att berätta för mig!"
 
 #: scripts/dialogues/erek_start.py:64
 msgid ""
@@ -1562,9 +1565,9 @@ msgid ""
 "unpacking our luggage. Although to tell the truth, it does not sound like "
 "Master Fingolson at all."
 msgstr ""
-"J ... jag är ledsen, men det är nyheter för mig. Det måste ha hänt då jag "
-"packade upp vårt bagage. Men om jag ska vara ärlig så låter det inte alls "
-"som mäster Fingolson."
+"J… jag är ledsen, men det är nyheter för mig. Det måste ha hänt då "
+"jag packade upp vårt bagage. Men om jag ska vara ärlig så låter det "
+"inte alls som mäster Fingolson."
 
 #: scripts/dialogues/erek_start.py:82
 msgid ""
@@ -1670,8 +1673,9 @@ msgid ""
 "I ... I'll see what I can do. But should you talk with him, you will have to "
 "watch your words. I surely won't be able to change his mind a second time."
 msgstr ""
-"Jag ... jag ska se vad jag kan göra. Men om du pratar med honom får du vakta "
-"din tunga. Jag kan sannerligen inte få honom att ändra sig en andra gång."
+"Jag… jag ska se vad jag kan göra. Men om du pratar med honom får du "
+"vakta din tunga. Jag kan sannerligen inte få honom att ändra sig en "
+"andra gång."
 
 #: scripts/dialogues/erek_start.py:98
 msgid ""
@@ -1705,7 +1709,8 @@ msgstr "Och ädelstenarna var inte i ditt bagage då du packade, eller hur?"
 
 #: scripts/dialogues/erek_start.py:103
 msgid "What do you mean? No ... they weren't. Of course not!"
-msgstr "Vad menar du? Nej ... det var de inte. Självklart inte!"
+msgstr ""
+"Vad menar du? Nej… det var de inte. Självklart inte!"
 
 #: scripts/dialogues/erek_start.py:104
 msgid "Thank you Erek."
@@ -1731,7 +1736,7 @@ msgid ""
 "That ... - it's one of the Master's. It must be. Where did you get that, "
 "$name?"
 msgstr ""
-"Det ... - det är en av mästers. Det måste det vara. Var hittade du den, "
+"Det… - det är en av mästers. Det måste det vara. Var hittade du den, "
 "$name?"
 
 #: scripts/dialogues/erek_start.py:108
@@ -1903,10 +1908,10 @@ msgid ""
 "that foul Elf finally return my Catseyes? I hear one was found amongst her "
 "belongings. And where there is one, the others shouldn't be far."
 msgstr ""
-"Lösa fallet? Bra ... bra! Det var minsann på tiden! Så ... kommer den där "
-"otäcka alven slutligen ge tillbaka mina kattögon? Jag hör att en hittades "
-"bland hennes tillhörigheter. Finns det en så bör de andra inte vara långt "
-"borta."
+"Lösa fallet? Bra… bra! Det var minsann på tiden! Så… kommer den där "
+"otäcka alven slutligen ge tillbaka mina kattögon? Jag hör att en "
+"hittades bland hennes tillhörigheter. Finns det en så bör de andra "
+"inte vara långt borta."
 
 #: scripts/dialogues/extro.py:12
 msgid ""
@@ -1919,7 +1924,8 @@ msgstr ""
 
 #: scripts/dialogues/extro.py:13
 msgid "As if an ignorant like you could tell the difference! I ..."
-msgstr "Som om en okunnig som du kunde se skillnaden! Jag ..."
+msgstr ""
+"Som om en okunnig som du kunde se skillnaden! Jag…"
 
 #: scripts/dialogues/extro.py:14
 msgid ""
@@ -1988,8 +1994,9 @@ msgid ""
 "Very well. I ... - I am not sure about the other gems, but the stone $name "
 "has discovered is undoubtedly a Chrysoberyl. However, a Catseye it is not."
 msgstr ""
-"Okej! Jag ... - Jag är inte säker om de andra ädelstenarna, men stenen som "
-"$name har upptäckt är tveklöst en krysoberyll. Ett kattöga är den dock inte."
+"Okej! Jag… - Jag är inte säker om de andra ädelstenarna, men stenen "
+"som $name har upptäckt är tveklöst en krysoberyll. Ett kattöga är den "
+"dock inte."
 
 #: scripts/dialogues/extro.py:25
 msgid ""
@@ -2003,8 +2010,8 @@ msgid ""
 "Erek, this is not the right time for any of your childish pranks! Master "
 "Rasgar, you mustn't believe that ..., that impertinent youth!"
 msgstr ""
-"Erek, det här är inte rätt tid för barnsliga spratt! Mäster Rasgar, du får "
-"inte tro den där ..., den där näsvise ynglingen!"
+"Erek, det här är inte rätt tid för barnsliga spratt! Mäster Rasgar, "
+"du får inte tro den där…, den där näsvise ynglingen!"
 
 #: scripts/dialogues/extro.py:27
 msgid ""
@@ -2183,9 +2190,9 @@ msgid ""
 "this infamy, are you? Since my arrival at this depraved place I am being "
 "continuously insulted!"
 msgstr ""
-"Det ... jag ... - Mäster Rasgar, du kommer inte tro denna ... denna "
-"skamlöshet, eller hur? Allt sedan jag anlänt till detta fördärvade ställe "
-"har jag förolämpats hela tiden!"
+"Det… jag… - Mäster Rasgar, du kommer inte tro denna… denna "
+"skamlöshet, eller hur? Allt sedan jag anlänt till detta fördärvade "
+"ställe har jag förolämpats hela tiden!"
 
 #: scripts/dialogues/extro.py:51
 msgid ""
@@ -2418,9 +2425,9 @@ msgid ""
 "\"Take equal parts of vitriol, nitre and sal ammoniac ...\"  Then he speaks "
 "more clearly to you."
 msgstr ""
-"Fellnir tittar inte ens upp på dig då du pratar. Han muttrar lite grann, ”Ta "
-"lika delar svavel, salpeter och salmiak ...” och pratar sedan mer tydligt "
-"med dig."
+"Fellnir tittar inte ens upp på dig då du pratar. Han muttrar lite "
+"grann, ”Ta lika delar svavel, salpeter och salmiak…” och pratar sedan "
+"mer tydligt med dig."
 
 #: scripts/dialogues/fellnir_start.py:21
 msgid ""
@@ -2490,7 +2497,8 @@ msgstr "Hm? Vad vill du?"
 #: scripts/dialogues/frostbloom_start.py:10
 msgid "I am a servant of Lady Imoen Silverhair, and I'd like to ask ..."
 msgstr ""
-"Jag är en tjänare till fru Imoen Silverhår, och jag skulle vilja fråga ..."
+"Jag är en tjänare till fru Imoen Silverhår, och jag skulle vilja "
+"fråga…"
 
 #: scripts/dialogues/frostbloom_start.py:11
 msgid ""
@@ -2506,7 +2514,8 @@ msgstr "Du igen? Jag tyckte jag bad dig att lämna mig i fred."
 
 #: scripts/dialogues/frostbloom_start.py:13
 msgid "But lady, I must ask you about the theft..."
-msgstr "Men frun, jag måste fråga dig om stölden ..."
+msgstr ""
+"Men frun, jag måste fråga dig om stölden…"
 
 #: scripts/dialogues/frostbloom_start.py:14
 msgid ""
@@ -2520,7 +2529,8 @@ msgstr ""
 
 #: scripts/dialogues/frostbloom_start.py:15
 msgid "But, lady..."
-msgstr "Men, frun ..."
+msgstr ""
+"Men, frun…"
 
 #: scripts/dialogues/frostbloom_start.py:16
 msgid "Off, I say!  I have no patience for this chatter!"
@@ -2894,9 +2904,9 @@ msgid ""
 "mistress. Ha! Nice idea, Half-elf. But why should I believe that your gem "
 "really belongs to Fingolson?"
 msgstr ""
-"Om inte ... den ”riktiga” tjuven ville avleda all misstänksamhet till din "
-"dam. Ha! Bra idé, halvalv. Men varför skulle jag tro att din ädelsten "
-"verkligen tillhör Fingolson?"
+"Om inte… den ”riktiga” tjuven ville avleda all misstänksamhet till "
+"din dam. Ha! Bra idé, halvalv. Men varför skulle jag tro att din "
+"ädelsten verkligen tillhör Fingolson?"
 
 #: scripts/dialogues/jelom_2nd.py:18
 msgid ""
@@ -3067,8 +3077,8 @@ msgid ""
 "$name's gem is definitely no Catseye, master Rasgar. I hate to admit, but "
 "Master Fingolson appears to be ... lying!"
 msgstr ""
-"Den ädelsten som $name har är inget kattöga, mäster Rasgar. Jag hatar att "
-"medge det, men mäster Fingolson verkar ... ljuga!"
+"Den ädelsten som $name har är inget kattöga, mäster Rasgar. Jag hatar "
+"att medge det, men mäster Fingolson verkar… ljuga!"
 
 #: scripts/dialogues/jelom_2nd.py:45
 msgid ""
@@ -3380,7 +3390,8 @@ msgstr "Tja, alla vet att alver kan röra sig under absolut tystnad."
 msgid ""
 "Hm ... yes, that's a fact. You are right, Half-Elf. Something strange is "
 "going on."
-msgstr "Hm ... ja, det är fakta. Du har rätt, halvalv. Något märkligt pågår."
+msgstr ""
+"Hm… ja, det är fakta. Du har rätt, halvalv. Något märkligt pågår."
 
 #: scripts/dialogues/jelom_start.py:57
 msgid ""
@@ -3466,7 +3477,8 @@ msgstr ""
 
 #: scripts/dialogues/lucia_start.py:14
 msgid "My apologies. Must have been the wrong door ..."
-msgstr "Ursäkta, måste ha tagit fel dörr ..."
+msgstr ""
+"Ursäkta, måste ha tagit fel dörr…"
 
 #: scripts/dialogues/lucia_start.py:15
 msgid "Calm down, please. This is important. I'm investigating the theft."
@@ -3494,7 +3506,8 @@ msgstr "Ja, jag är från Cirdanth."
 
 #: scripts/dialogues/lucia_start.py:20
 msgid "Listen madam ..."
-msgstr "Lyssna madam ..."
+msgstr ""
+"Lyssna madam…"
 
 #: scripts/dialogues/lucia_start.py:21
 msgid ""
@@ -3627,7 +3640,8 @@ msgstr ""
 
 #: scripts/dialogues/lucia_start.py:38
 msgid "True, Waste's Edge is quite a remote place, but ..."
-msgstr "Det stämmer att Waste's Edge är rätt avlägset, men ..."
+msgstr ""
+"Det stämmer att Waste's Edge är rätt avlägset, men…"
 
 #: scripts/dialogues/lucia_start.py:39
 msgid "Could we perhaps return to more pressing matters?"
@@ -3672,8 +3686,8 @@ msgid ""
 "Remote!? The edge of the world couldn't be more remote! Mind you, I'm not "
 "complaining. It's just..."
 msgstr ""
-"Avlägset!? Världens ände kunde inte vara mer avlägsen! Märk väl att jag inte "
-"klagar. Det är bara att ..."
+"Avlägset!? Världens ände kunde inte vara mer avlägsen! Märk väl att "
+"jag inte klagar. Det är bara att…"
 
 #: scripts/dialogues/lucia_start.py:46
 msgid ""
@@ -3733,8 +3747,8 @@ msgid ""
 "Well, you were very ... helpful, madam. But if you'll excuse me now, I've "
 "got a thief to catch."
 msgstr ""
-"Nå, du har varit väldigt ... hjälpsam, frun. Om du ursäktar mig nu så har "
-"jag en tjuv att fånga."
+"Nå, du har varit väldigt… hjälpsam, frun. Om du ursäktar mig nu så "
+"har jag en tjuv att fånga."
 
 #: scripts/dialogues/lucia_start.py:55
 msgid ""
@@ -3922,8 +3936,9 @@ msgid ""
 "That boy! If I ever catch him outside when he should be sleeping in his "
 "bedroom ... . And if that's not enough, he starts spreading rumours."
 msgstr ""
-"Den där pojken! Om jag någonsin får tag på honom utomhus då han borde sova i "
-"sitt sovrum ... Och som om det inte är nog börjar han sprida rykten."
+"Den där pojken! Om jag någonsin får tag på honom utomhus då han borde "
+"sova i sitt sovrum… Och som om det inte är nog börjar han sprida "
+"rykten."
 
 #: scripts/dialogues/lucia_start.py:78
 msgid "You don't believe him?"
@@ -3979,7 +3994,8 @@ msgstr ""
 
 #: scripts/dialogues/lucia_start.py:85
 msgid "I ... I cannot tell. I have said more than I should have already."
-msgstr "Jag ... jag kan inte berätta. Jag har redan sagt mer än jag borde."
+msgstr ""
+"Jag… jag kan inte berätta. Jag har redan sagt mer än jag borde."
 
 #: scripts/dialogues/lucia_start.py:86
 msgid "I can't promise anything before I know what you are talking about."
@@ -4091,7 +4107,8 @@ msgstr ""
 
 #: scripts/dialogues/lucia_start.py:101
 msgid "Excuse me Lucia, I have ..."
-msgstr "Ursäkta mig lucia, jag har..."
+msgstr ""
+"Ursäkta mig lucia, jag har…"
 
 #: scripts/dialogues/lucia_start.py:102
 msgid ""
@@ -4173,15 +4190,16 @@ msgstr ""
 
 #: scripts/dialogues/lucia_start.py:114
 msgid "The key, Mrs. Redwyne ..."
-msgstr "Nyckeln, fru Rödviin ..."
+msgstr ""
+"Nyckeln, fru Rödviin…"
 
 #: scripts/dialogues/lucia_start.py:115
 msgid ""
 "What? Ah ... the key. Sorry, $name. I only hope it is not too uncomfortable "
 "for your mistress, being locked into that small chamber and all that."
 msgstr ""
-"Vad? Åh ... nyckeln. Ursäkta, $name. Jag hoppas det inte är för obekvämt för "
-"din dam, med att vara inlåst i den där lilla kammaren och så."
+"Vad? Åh… nyckeln. Ursäkta, $name. Jag hoppas det inte är för obekvämt "
+"för din dam, med att vara inlåst i den där lilla kammaren och så."
 
 #: scripts/dialogues/lucia_start.py:116
 msgid ""
@@ -4196,16 +4214,16 @@ msgid ""
 "Excuse me Lucia, I have to fetch something for Lady Silverhair from the "
 "pantry, and ..."
 msgstr ""
-"Ursäkta mig Lucia, jag måste hämta något åt fru Silverhår från skafferiet, "
-"och ..."
+"Ursäkta mig Lucia, jag måste hämta något åt fru Silverhår från "
+"skafferiet, och…"
 
 #: scripts/dialogues/lucia_start.py:118
 msgid ""
 "... and now you want my key!? You have nerves! Do you think I'd forget how "
 "you let Talan down, despite the word you've given me?"
 msgstr ""
-"... och nu vill du ha min nyckel!? Maken till fräckhet! Trodde du att jag "
-"glömt hur du lämnade Talan i sticket, trots vad du lovat mig?"
+"…och nu vill du ha min nyckel!? Maken till fräckhet! Trodde du att "
+"jag glömt hur du lämnade Talan i sticket, trots vad du lovat mig?"
 
 #: scripts/dialogues/lucia_start.py:119
 msgid "Please Lucia, I need the key."
@@ -4749,8 +4767,8 @@ msgid ""
 "I wish you luck with your inquiries then, uh ... I didn't catch your name, "
 "sir?"
 msgstr ""
-"Då önskar jag dig lycka till med dina efterfrågningar, eh ... jag uppfattade "
-"inte ditt namn, herrn?"
+"Då önskar jag dig lycka till med dina efterfrågningar, eh… jag "
+"uppfattade inte ditt namn, herrn?"
 
 #: scripts/dialogues/orloth_start.py:44
 msgid ""
@@ -4883,8 +4901,8 @@ msgid ""
 "But it's too late to think about this. The theft already happened and "
 "talking won't convict the thief. So ... where was I?"
 msgstr ""
-"Men det är för sent att tänka på det här. Stölden har redan inträffat och "
-"att prata kommer inte att döma tjuven. Så ... var var jag?"
+"Men det är för sent att tänka på det här. Stölden har redan inträffat "
+"och att prata kommer inte att döma tjuven. Så… var var jag?"
 
 #: scripts/dialogues/orloth_start.py:64
 msgid "The argument between the two."
@@ -5293,9 +5311,9 @@ msgid ""
 "been sent to fetch a senior officer from the garrison at Erinsford to take "
 "over the investigations."
 msgstr ""
-"Fru Silverhår har stängts in på sitt rum, och Bregon från vakten har "
-"skickats för att hämta en officer från garnisonen i Erinsford för att ta "
-"över utredningarna."
+"Fru Silverhår har stängts in på sitt rum , och Bregon från vakten har "
+"skickats för att hämta en officer från garnisonen i Erinsford för att "
+"ta över utredningarna."
 
 #: scripts/dialogues/orloth_start.py:119
 msgid ""
@@ -5790,8 +5808,8 @@ msgid ""
 "In the night...? Yes.  Yes, I do recall a sound in the night.  How could I "
 "have forgotten such a thing?"
 msgstr ""
-"På natten ...? Ja. Ja, jag kommer ihåg ett ljud under natten. Hur kan jag ha "
-"glömt något sådant?"
+"På natten…? Ja. Ja, jag kommer ihåg ett ljud under natten. Hur kan "
+"jag ha glömt något sådant?"
 
 #: scripts/dialogues/silverhair_start.py:40
 msgid ""
@@ -6020,7 +6038,8 @@ msgstr "Glöm det. Jag försäkrar att jag inte hyser agg mot dig."
 
 #: scripts/dialogues/talan_start.py:12
 msgid "Oh... that. Yes, how may I help you?"
-msgstr "Åh ... det där. Ja, hur kan jag hjälpa dig?"
+msgstr ""
+"Åh… det där. Ja, hur kan jag hjälpa dig?"
 
 #: scripts/dialogues/talan_start.py:13
 msgid "Hello, Talan. Look, I have a couple more questions about the theft."
@@ -6040,11 +6059,13 @@ msgstr "Så du såg eller hörde inget ovanligt den natten?"
 
 #: scripts/dialogues/talan_start.py:16
 msgid "No... no, not at all."
-msgstr "Nej ... nej, inte alls."
+msgstr ""
+"Nej… nej, inte alls."
 
 #: scripts/dialogues/talan_start.py:17
 msgid "If you do not have any more questions ..."
-msgstr "Om du inte har några fler frågor ..."
+msgstr ""
+"Om du inte har några fler frågor…"
 
 #: scripts/dialogues/talan_start.py:18
 msgid "No, thank you, I have a lot of work to do. You have been most helpful."
@@ -6071,7 +6092,8 @@ msgstr ""
 
 #: scripts/dialogues/talan_start.py:21
 msgid "Now, if you don't have any more questions..."
-msgstr "Nu, om du inte har några fler frågor ..."
+msgstr ""
+"Nu, om du inte har några fler frågor…"
 
 #: scripts/dialogues/talan_start.py:22
 msgid "I wish you had not lied to me about the night of the theft."
@@ -6079,7 +6101,8 @@ msgstr "Jag önskar att du inte ljugit för mig om stöldnatten."
 
 #: scripts/dialogues/talan_start.py:23
 msgid "Wh... what do you mean?"
-msgstr "V ... vad menar du?"
+msgstr ""
+"V… vad menar du?"
 
 #: scripts/dialogues/talan_start.py:24
 msgid "You were not, as you told me, manning your post the whole night."
@@ -6093,7 +6116,8 @@ msgstr ""
 
 #: scripts/dialogues/talan_start.py:26
 msgid "Oh. So you do know ... ?"
-msgstr "Åh. Så du vet ...?"
+msgstr ""
+"Åh. Så du vet…?"
 
 #: scripts/dialogues/talan_start.py:27
 msgid ""
@@ -6182,8 +6206,8 @@ msgid ""
 "He found her behaviour suspicious. I mean, she is all high and mighty, "
 "acting above the rest of us, and she obviously doesn't like dwarves ..."
 msgstr ""
-"Han fann hennes beteende misstänkt. Jag menar, hon agerar som att hon är "
-"bättre än oss andra, och hon tycker uppenbarligen inte om dvärgar ..."
+"Han fann hennes beteende misstänkt. Jag menar, hon agerar som att hon "
+"är bättre än oss andra, och hon tycker uppenbarligen inte om dvärgar…"
 
 #: scripts/dialogues/talan_start.py:40
 msgid "Wait! Why does everybody believe that she has an aversion to dwarves?"
@@ -6209,7 +6233,7 @@ msgstr ""
 #: scripts/dialogues/talan_start.py:43
 msgid "Well, Master Fingolson can be, um ... blunt, I guess, at times, but ..."
 msgstr ""
-"Tja, mäster Fingolson kan vara, eh ... burdus, antar jag, ibland, men ..."
+"Tja, mäster Fingolson kan vara, eh… burdus, antar jag, ibland, men…"
 
 #: scripts/dialogues/talan_start.py:44
 msgid "Wasn't the argument rather Fingolson's fault, then?"
@@ -6217,19 +6241,21 @@ msgstr "Var inte grälet snarare Fingolsons fel i så fall?"
 
 #: scripts/dialogues/talan_start.py:45
 msgid "Well, I... ah, perhaps..."
-msgstr "Tja, jag ... ah, kanske ..."
+msgstr ""
+"Tja, jag… ah, kanske…"
 
 #: scripts/dialogues/talan_start.py:46
 msgid ""
 "Maybe you should speak to Jelom. He knows more about the theft and his "
 "reasons for suspecting her than I do..."
 msgstr ""
-"Kanske du borde prata med Jelom. Han vet mer om stölden och hans anledningar "
-"för att misstänka henne än jag gör ..."
+"Kanske du borde prata med Jelom. Han vet mer om stölden och hans "
+"anledningar för att misstänka henne än jag gör…"
 
 #: scripts/dialogues/talan_start.py:47
 msgid "Well, you've talked to Jelom. You know what he thinks..."
-msgstr "Tja, du har talat med Jelom. Du vet vad han tror ..."
+msgstr ""
+"Tja, du har talat med Jelom. Du vet vad han tror…"
 
 #: scripts/dialogues/talan_start.py:48
 msgid "And so I shall. Where is he?"
@@ -6254,7 +6280,8 @@ msgstr "Ah, $name, hej."
 
 #: scripts/dialogues/talan_start.py:53
 msgid "Hi there, Talan. Look, I am sorry that ..."
-msgstr "Hallå där, Talan. Jag är ledsen att ..."
+msgstr ""
+"Hallå där, Talan. Jag är ledsen att…"
 
 #: scripts/dialogues/talan_start.py:54
 msgid ""
@@ -6332,7 +6359,8 @@ msgstr ""
 
 #: scripts/dialogues/talan_start.py:62
 msgid "I see ... that is strange. Thanks for telling me, Talan!"
-msgstr "Jag förstår ... det är märkligt. Tack för att du berättar, Talan!"
+msgstr ""
+"Jag förstår… det är märkligt. Tack för att du berättar, Talan!"
 
 #: scripts/dialogues/talan_start.py:63
 msgid "Couldn't it be that you missed what there was to see or hear?"
@@ -6345,7 +6373,8 @@ msgstr ""
 
 #: scripts/dialogues/talan_start.py:65
 msgid "I ... I don't know."
-msgstr "Jag ... jag vet inte."
+msgstr ""
+"Jag… jag vet inte."
 
 #: scripts/dialogues/talan_start.py:66
 msgid ""
@@ -6396,7 +6425,8 @@ msgstr "Ska jag hellre kalla dig en bard då?"
 
 #: scripts/dialogues/talan_start.py:74
 msgid "A ... noise? What noise?"
-msgstr "Ett ... ljud? Vad för ljud?"
+msgstr ""
+"Ett… ljud? Vad för ljud?"
 
 #: scripts/dialogues/talan_start.py:75
 msgid "The noise of someone singing, Talan."
@@ -6412,7 +6442,8 @@ msgstr "Tja, jag upptäckte ingenting, $name. Det är sanningen!"
 
 #: scripts/dialogues/talan_start.py:78
 msgid "It had better be, my friend."
-msgstr "Det är bäst det, min vän..."
+msgstr ""
+"Det är bäst det, min vän."
 
 #: scripts/dialogues/talan_start.py:79
 msgid ""
@@ -6424,7 +6455,8 @@ msgstr ""
 
 #: scripts/dialogues/talan_start.py:80
 msgid "I, I understand. I am very sorry, $name ..."
-msgstr "Jag, jag förstår. Jag är hemskt ledsen, $name..."
+msgstr ""
+"Jag, jag förstår. Jag är hemskt ledsen, $name…"
 
 #: scripts/dialogues/talan_start.py:81
 msgid ""
@@ -6496,7 +6528,8 @@ msgstr ""
 
 #: scripts/dialogues/tristan_start.py:13
 msgid "All the same I would like to ask you a thing or two ..."
-msgstr "Jag skulle ändå vilja fråga dig en sak eller två..."
+msgstr ""
+"Jag skulle ändå vilja fråga dig en sak eller två…"
 
 #: scripts/dialogues/tristan_start.py:14
 msgid ""
@@ -6572,9 +6605,9 @@ msgid ""
 "that Dwarf claims to have lost. And if I cannot reach it in time ... I'll be "
 "ruined! Ruined!"
 msgstr ""
-"En karavan med saffran väntar på mig, värd tio gånger så mycket som det "
-"dvärgen påstår sig ha förlorat. Och om jag inte kan nå den i tid ... kommer "
-"jag vara ruinerad!"
+"En karavan med saffran väntar på mig, värd tio gånger så mycket som "
+"det dvärgen påstår sig ha förlorat. Och om jag inte kan nå den i tid… "
+"kommer jag vara ruinerad!"
 
 #: scripts/dialogues/tristan_start.py:25
 msgid ""
@@ -6727,8 +6760,8 @@ msgid ""
 "Their ... meddling with reality contradicts all principles I learnt to hold "
 "true.     "
 msgstr ""
-"Deras ... stökande med verkligheten motsäger alla principer som jag lärt mig "
-"hålla för sanna.     "
+"Deras… stökande med verkligheten motsäger alla principer som jag lärt "
+"mig hålla för sanna.     "
 
 #: scripts/schedules/mapcharacters/extro.py:46
 msgid ""
@@ -6740,7 +6773,8 @@ msgstr ""
 
 #: scripts/schedules/mapcharacters/extro.py:47
 msgid "I felt so ... ashamed! "
-msgstr "Jag kände sådan ... skam! "
+msgstr ""
+"Jag kände sådan… skam! "
 
 #: scripts/schedules/mapcharacters/extro.py:48
 msgid "And you believe this justifies the discomfort you caused my mistress? "
@@ -6755,8 +6789,8 @@ msgid ""
 "Theft by a high born like Lady Silverhair would have been considered a grave "
 "insult by the clan elders.     "
 msgstr ""
-"Stöld av en högboren som fru Silverhår skulle ha setts som en allvarlig "
-"förolämpning av klanens äldste.     "
+"Stöld av en högboren som fru Silverhår skulle ha sett som en "
+"allvarlig förolämpning av klanens äldste.     "
 
 #: scripts/schedules/mapcharacters/extro.py:51
 msgid ""
@@ -6821,11 +6855,13 @@ msgstr "Mäster Fingolson! "
 
 #: scripts/schedules/mapcharacters/extro.py:61
 msgid "They were here all the time, safe from thieving hands, ..."
-msgstr "De var här hela tiden, säkra från tjuvande händer, ..."
+msgstr ""
+"De var här hela tiden, säkra från tjuvande händer,…"
 
 #: scripts/schedules/mapcharacters/extro.py:62
 msgid "... well hidden in a niche I carved during my previous visits."
-msgstr "... väl dolda i ett lönnfack jag karvat ut under mina tidigare besök."
+msgstr ""
+"… väl dolda i ett lönnfack jag karvat ut under mina tidigare besök."
 
 #: scripts/schedules/mapcharacters/extro.py:63
 msgid "Right here."
@@ -6833,11 +6869,13 @@ msgstr "Precis här."
 
 #: scripts/schedules/mapcharacters/extro.py:64
 msgid "But ..."
-msgstr "Men ..."
+msgstr ""
+"Men…"
 
 #: scripts/schedules/mapcharacters/extro.py:65
 msgid "... they are gone!"
-msgstr "... de är borta!"
+msgstr ""
+"… de är borta!"
 
 #: scripts/schedules/mapcharacters/extro.py:66
 msgid "Sir, sir! To the gate! Quick! The thief is loose!"
@@ -6885,8 +6923,8 @@ msgid ""
 "Where you are going you won't need them any more. Besides, Alek is probably "
 "long gone by now ..."
 msgstr ""
-"Du kommer inte behöva dem där du hamnar nu. För övrigt är Alek troligen "
-"långt borta nu ..."
+"Du kommer inte behöva dem där du hamnar nu. För övrigt är Alek "
+"troligen långt borta nu…"
 
 #: scripts/schedules/mapcharacters/extro.py:79
 msgid ""
@@ -7161,7 +7199,8 @@ msgstr "Mäster Orloth borde slänga ut den råe sällen!"
 
 #: scripts/schedules/mapcharacters/fellnir.py:30
 msgid "Take equal parts of vitriol, nitre and sal ammoniac ..."
-msgstr "Ta lika delar svavel, salpeter och salmiak ..."
+msgstr ""
+"Ta lika delar svavel, salpeter och salmiak…"
 
 #: scripts/schedules/mapcharacters/frostbloom.py:35
 msgid "This tree is so inspiring."
@@ -7313,11 +7352,13 @@ msgstr "Åh, en dvärgyeti, så söt!"
 
 #: scripts/modules/player_text.py:3
 msgid "I'd better not touch this ... What if it explodes??"
-msgstr "Bäst att jag inte rör denna ... Tänk om den exploderar??"
+msgstr ""
+"Bäst att jag inte rör denna… Tänk om den exploderar??"
 
 #: scripts/modules/player_text.py:4
 msgid "Closed. We are all imprisoned here ..."
-msgstr "Stängd. Vi är alla inlåsta här ..."
+msgstr ""
+"Stängd. Vi är alla inlåsta här…"
 
 #: scripts/modules/player_text.py:5
 msgid "No. I certainly won't climb up there!"
@@ -7355,8 +7396,8 @@ msgstr "Plaketten på den kistan säger ”Alek Endhelm”."
 msgid ""
 "I doubt Master Fingolson would be happy if I went through his things ..."
 msgstr ""
-"Jag tror inte mäster Fingolson skulle bli glad om jag rotade bland hans "
-"saker ..."
+"Jag tror inte mäster Fingolson skulle bli glad om jag rotade bland "
+"hans saker…"
 
 #: scripts/modules/player_text.py:14
 msgid "Hm, nothing hidden in there!"
@@ -7372,7 +7413,8 @@ msgstr "Nej, jag kommer inte att röra min dams tillhörigheter!"
 
 #: scripts/modules/player_text.py:17
 msgid "Mmmh ... this wine is really tasty!"
-msgstr "Mmm ... det här vinet är riktigt gott!"
+msgstr ""
+"Mmm… det här vinet är riktigt gott!"
 
 #: scripts/modules/player_text.py:18
 msgid "I'm sure Master Redwyne won't mind if I take a sip."
@@ -7504,7 +7546,8 @@ msgstr "Leet haxor"
 
 #: scripts/modules/achievement_screen.py:42
 msgid "Your hex editing skillz are unparalleled ... or your disk broken"
-msgstr "Ingen slår dig i hexredigering ... eller så är din disk trasig"
+msgstr ""
+"Ingen slår dig i hexredigering… eller så är din disk trasig"
 
 #: scripts/modules/achievement_screen.py:95 scripts/modules/main_menu.py:98
 #: scripts/modules/main_menu.py:322
@@ -7631,10 +7674,8 @@ msgid ""
 "approach the gate, you suddenly hear\n"
 "a voice from within."
 msgstr ""
-"De tunga trädörrarna är stängda,\n"
-"och ingen finns där för att släppa in\n"
-"dig. Då du går mot porten hör du\n"
-"plötsligt en röst inifrån."
+"De tunga trädörrarna är stängda,\noch ingen finns där för att släppa "
+"in dig.\nDå du går mot porten hör du plötsligt\nen röst inifrån."
 
 #: scripts/modules/intro.py:109
 msgid ""
@@ -7642,9 +7683,8 @@ msgid ""
 "Suddenly, it looked like the day would\n"
 "be harder than I thought ..."
 msgstr ""
-"                      \n"
-"Plötsligt verkade det som att det skulle\n"
-"bli en tuffare dag än jag hade anat ..."
+"                      \nPlötsligt verkade det som att det skulle\nbli "
+"en tuffare dag än jag hade anat…"
 
 #: scripts/modules/intro.py:125
 msgid "Halt! Stand and declare yourself, stranger!"
@@ -7733,7 +7773,8 @@ msgstr "Jag känner igen den här kistan. Frun använder den på sina resor."
 #: scripts/game_events/search_chest.py:67
 msgid ""
 "Upon opening the chest, a small green something catches your attention ..."
-msgstr "Då du öppnar kistan fångar något grönt och litet din uppmärksamhet ..."
+msgstr ""
+"Då du öppnar kistan fångar något grönt och litet din uppmärksamhet…"
 
 #: scripts/game_events/search_chest.py:96
 msgid ""
@@ -7759,3 +7800,99 @@ msgstr "Mellanslag"
 #: gamedata/manifest.jsonc keyboard controls
 msgid "Delete"
 msgstr "Radera"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I think that 'theft' is a better word for it than disappearance."
+msgstr "Jag tycker att ”stöld” är ett bättre ord för det än försvinnande."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Actually, I would mind. I am sure that you already know what happened, so nothing can be gained from bothering me. I would rather you 'recover' the gems from your mistress and return them to me!"
+msgstr "Jag skulle faktiskt ha något mot det. Jag är säker på att du redan vet vad som hände, så det ger inget att du stör mig. Jag skulle föredra att du ”återfann” ädelstenarna från din dam och gav dem tillbaka till mig!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Not even if I've found one of your 'Catseyes'!"
+msgstr "Inte ens om jag hittat ett av dina ”Kattögon”!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "The roads have been getting more and more dangerous recently, that's for sure. But they would be even more dangerous with the likes of him 'guarding' me! So I told him, in no uncertain terms, that I didn't like his looks!"
+msgstr "Vägarna har blivit allt farligare på senaste tiden, det är sant. Men de skulle vara ännu farligare med folk som honom som ”vaktar” mig! Så jag sa till honom klart och tydligt att jag inte tyckte om hur han såg ut!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Wait a moment! What exactly is a Catseye?"
+msgstr "Vänta ett ögonblick! Vad är ett ”kattöga”?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Thank you Erek. That is all I needed to know."
+msgstr "Tack Erek. Det är allt jag behöver veta."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, in that case I will leave him alone."
+msgstr "Jaha, i så fall lämnar jag honom i fred."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "You don't trust me, $name? In that case I'm sorry. Unless I know the truth about the gem, I cannot help you."
+msgstr "Du litar inte på mig, $name? I så fall är jag ledsen. Jag kan inte hjälpa dig om jag inte vet sanningen om ädelstenen."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I ... I'm sorry, but that is news to me. It must have happened while I was unpacking our luggage. Although to tell the truth, it does not sound like Master Fingolson at all."
+msgstr "J… jag är ledsen, men det är nyheter för mig. Det måste ha hänt då jag packade upp vårt bagage. Men om jag ska vara ärlig så låter det inte alls som mäster Fingolson."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Oh! The Lady Silverhair said so. I assure you Half-Elf, the Lady Silverhair said quite a lot when we put her under arrest, and it wasn't very lady-like. Come back once you have something more substantial!"
+msgstr "Åh! *Fru Silverhår sa det.* Jag kan lova dig halvalv, att fru Silverhår sa ett och annat då vi arresterade henne, och det var inte värdigt en dam. Kom tillbaka då du har något med lite mera substans!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, it's certain that it isn't Lady Silverhair. But I need to learn more."
+msgstr "Det är i alla fall uppenbart att det inte är fru Silverhår. Men jag måste få reda på mer."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, I don't know what you did to anger my dear Lucia, and I don't wanna know, but unless you set things right, she'll be giving you a hard time."
+msgstr "Jag vet inte vad du gjorde för att reta upp min kära Lucia, och vill inte veta heller, men om du inte ställer saker till rätta så kommer hon att vara svår med dig."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I hear that Alek Endhelm was very interested in Fingolson's business. Have you noticed him doing anything suspicious?"
+msgstr "Jag hör att Alek Endhelm var väldigt intresserade av Fingolsons affärer. Har du sett honom göra något misstänkt?"
+
+
+
+
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling Master Orloth of your connection with that Silverhair woman."
+msgstr "Ursäkta mig. Jag kunde inte undgå att höra dig säga till mäster Orloth om din koppling till den där kvinnan Silverhår."
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling the mercenary of your connection with that Silverhair woman."
+msgstr "Ursäkta mig. Jag kunde inte undgå att höra dig säga till legosoldaten om din koppling till den där kvinnan Silverhår."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to Master Orloth! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Men endast av en slum: jag hörde dig prata medmäster Orloth! Det är helt enkelt inte rätt, $name! Du är bekant med den huvudmisstänkta, men du vill få mig att tro att din utredning är för allas vårt bästa."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to the mercenary! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Men endast av en slum: jag hörde dig prata medlegosoldaten! Det är helt enkelt inte rätt, $name! Du är bekant med den huvudmisstänkta, men du vill få mig att tro att din utredning är för allas vårt bästa."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Silverhair has heard a noise outside the inn during that night."
+msgstr "Jag vet att fru Silverhår har hörde ett ljud utanför värdshuset under den natten."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Frostbloom has heard a noise outside the inn during that night."
+msgstr "Jag vet att fru Frostblomma har hörde ett ljud utanför värdshuset under den natten."
+
+#. Original Lucia witness variant.
+msgid "I know that both Lady Silverhair and Lady Frostbloom have heard a noise outside the inn during that night."
+msgstr "Jag vet att både fru Silverhår och fru Frostblomma har hörde ett ljud utanför värdshuset under den natten."
+
+#. Original Lucia witness variant.
+msgid "But Lady Silverhair has heard something outside the inn as well."
+msgstr "Men fru Silverhår har hörde också något utanför värdshuset."
+
+#. Original Lucia witness variant.
+msgid "But Lady Frostbloom has heard something outside the inn as well."
+msgstr "Men fru Frostblomma har hörde också något utanför värdshuset."
+
+#. Original Lucia witness variant.
+msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
+msgstr "Men både fru Silverhår och fru Frostblomma har hörde också något utanför värdshuset."

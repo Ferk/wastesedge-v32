@@ -2,14 +2,45 @@
   "id": "talan_start",
   "start": [
     {
-      "node": "reconciliation_greeting",
-      "when": { "flag": "told_on_talan", "equals": 1 }
+      "node": "gate_apology",
+      "when": {
+        "flag": "talan_apologised",
+        "equals": 0
+      }
     },
     {
-      "node": "repeat_greeting",
-      "when": { "flag": "talan_apologised", "equals": 1 }
+      "node": "reconciliation_greeting",
+      "when": {
+        "all": [
+          {
+            "flag": "silverhair_free",
+            "equals": 1
+          },
+          {
+            "flag": "told_on_talan",
+            "equals": 1
+          }
+        ]
+      }
     },
-    { "node": "gate_apology" }
+    {
+      "node": "covered_greeting",
+      "when": {
+        "all": [
+          {
+            "flag": "silverhair_free",
+            "equals": 1
+          },
+          {
+            "flag": "told_on_talan",
+            "equals": 0
+          }
+        ]
+      }
+    },
+    {
+      "node": "repeat_greeting"
+    }
   ],
   "speakers": [
     {
@@ -28,14 +59,59 @@
   ],
   "nodes": [
     {
+      "id": "covered_greeting",
+      "speaker": "talan",
+      "text": "Ah, Banec, hello.",
+      "choices": [
+        {
+          "text": "Hi there, Talan. Look, I am sorry that ...",
+          "next": "talan_thanks_cover"
+        }
+      ]
+    },
+    {
+      "id": "talan_thanks_cover",
+      "speaker": "talan",
+      "text": "No, you did what you had to do, and it was only right that I got in trouble for leaving my post. And I owe you a big favour for covering for me!",
+      "choices": [
+        {
+          "next": "cover_goodbye"
+        },
+        {
+          "text": "I should think so Talan, considering the discomfort you caused my mistress.",
+          "next": "talan_offers_new_detail"
+        }
+      ]
+    },
+    {
+      "id": "cover_goodbye",
+      "speaker": "player",
+      "text": "No, it was the least I could do. Do not worry about the favour.",
+      "end": true
+    },
+    {
+      "id": "talan_offers_new_detail",
+      "speaker": "talan",
+      "text": "What has happened cannot be undone, I fear. But perhaps there is a little detail that might help to clear the Lady's reputation.",
+      "next": "talan_bjarn_visit"
+    },
+    {
       "id": "reconciliation_greeting",
       "speaker": "talan",
       "text": "Ah, Banec, hello.",
-      "choices": [{
-        "text": "Hi there, Talan. Look, I am sorry that I got you into trouble with Jelom.",
-        "actions": [{ "op": "set", "flag": "told_on_talan", "value": 2 }],
-        "next": "talan_forgives"
-      }]
+      "choices": [
+        {
+          "text": "Hi there, Talan. Look, I am sorry that I got you into trouble with Jelom.",
+          "actions": [
+            {
+              "op": "set",
+              "flag": "told_on_talan",
+              "value": 2
+            }
+          ],
+          "next": "talan_forgives"
+        }
+      ]
     },
     {
       "id": "talan_forgives",
@@ -53,11 +129,18 @@
       "id": "gate_apology",
       "speaker": "talan",
       "text": "Listen, I really am sorry about that fuss at the gate. I hope you will not hold it against me.",
-      "choices": [{
-        "text": "Please do not mention it again. I assure you that I hold no grudge against you.",
-        "actions": [{ "op": "set", "flag": "talan_apologised", "value": 1 }],
-        "next": "player_forgives"
-      }]
+      "choices": [
+        {
+          "actions": [
+            {
+              "op": "set",
+              "flag": "talan_apologised",
+              "value": 1
+            }
+          ],
+          "next": "player_forgives"
+        }
+      ]
     },
     {
       "id": "player_forgives",
@@ -89,11 +172,9 @@
       "text": "In the morning, of course, I heard that Master Fingolson's gems had been stolen and that Lady Silverhair was suspected of the theft.",
       "choices": [
         {
-          "text": "And why was Lady Silverhair accused?",
           "next": "player_asks_accusation"
         },
         {
-          "text": "So you did not see or hear anything out of place that night?",
           "next": "player_asks_night"
         }
       ]
@@ -102,10 +183,11 @@
       "id": "repeat_greeting",
       "speaker": "talan",
       "text": "Oh, hullo again, Banec.",
-      "choices": [{
-        "text": "Hello, Talan. Look, I have a couple more questions about the theft.",
-        "next": "player_more_questions"
-      }]
+      "choices": [
+        {
+          "next": "player_more_questions"
+        }
+      ]
     },
     {
       "id": "player_more_questions",
@@ -120,17 +202,26 @@
       "choices": [
         {
           "text": "What do you make of Master Fingolson's unusual visit?",
-          "when": { "flag": "know_argument", "equals": 1 },
+          "when": {
+            "flag": "know_argument",
+            "equals": 1
+          },
           "next": "talan_bjarn_visit"
         },
         {
           "text": "I hear that Alek Endhelm was very interested in Fingolson's business. Have you noticed him doing anything suspicious?",
-          "when": { "flag": "know_alek_eavesdrop", "equals": 1 },
+          "when": {
+            "flag": "know_alek_eavesdrop",
+            "equals": 1
+          },
           "next": "talan_alek_busybody"
         },
         {
           "text": "I wish you had not lied to me about the night of the theft.",
-          "when": { "flag": "know_talan_singing", "equals": 1 },
+          "when": {
+            "flag": "know_talan_singing",
+            "equals": 1
+          },
           "next": "talan_confronted"
         },
         {
@@ -138,8 +229,10 @@
           "next": "player_asks_accusation"
         },
         {
-          "text": "Are you sure you haven't noticed anything out of place that night?",
-          "when": { "flag": "know_talan_singing", "not_equals": 2 },
+          "when": {
+            "flag": "know_talan_singing",
+            "not_equals": 2
+          },
           "next": "player_asks_night_again"
         }
       ]
@@ -169,32 +262,65 @@
       "choices": [
         {
           "text": "Couldn't it be that you missed what there was to see or hear?",
-          "when": { "all": [
-            { "flag": "know_talan_singing", "equals": 1 },
-            { "flag": "know_olivers_noise", "equals": 0 }
-          ] },
+          "when": {
+            "all": [
+              {
+                "flag": "know_talan_singing",
+                "equals": 1
+              },
+              {
+                "flag": "know_olivers_noise",
+                "equals": 0
+              }
+            ]
+          },
           "next": "talan_may_have_missed"
         },
-        { "text": "But Lady Frostbloom told me about a noise she heard.",
-          "when": { "flag": "know_noise", "equals": 2 }, "next": "talan_frostbloom_noise" },
-        { "text": "I see. I have another question.", "next": "talan_more_questions" }
+        {
+          "text": "But Lady Frostbloom told me about a noise she heard.",
+          "when": {
+            "flag": "know_noise",
+            "has_bits": 2
+          },
+          "next": "talan_frostbloom_noise"
+        },
+        {
+          "text": "I see. I have another question.",
+          "next": "talan_more_questions"
+        }
       ]
     },
     {
-      "id": "talan_may_have_missed", "speaker": "talan",
+      "id": "talan_may_have_missed",
+      "speaker": "talan",
       "text": "Well, I did not notice anything, Banec. That's the truth!",
       "choices": [
-        { "text": "It had better be, my friend.", "next": "talan_more_questions" },
-        { "text": "If I want to prove Lady Silverhair's innocence, I have little other choice, I fear.", "next": "talan_more_questions" }
+        {
+          "text": "No, you missed it. Because you were off singing, weren't you?",
+          "when": {
+            "flag": "know_talan_singing",
+            "equals": 1
+          },
+          "next": "talan_apologises"
+        },
+        {
+          "when": {
+            "flag": "know_talan_singing",
+            "not_equals": 1
+          },
+          "next": "player_truth_warning"
+        }
       ]
     },
     {
-      "id": "talan_frostbloom_noise", "speaker": "talan",
+      "id": "talan_frostbloom_noise",
+      "speaker": "talan",
       "text": "Frostbloom? Then it must have been a Yeti, I suppose.",
       "next": "talan_frostbloom_serious"
     },
     {
-      "id": "talan_frostbloom_serious", "speaker": "talan",
+      "id": "talan_frostbloom_serious",
+      "speaker": "talan",
       "text": "But seriously, I did not notice anything. I'm sorry, Banec.",
       "next": "talan_more_questions"
     },
@@ -205,119 +331,180 @@
       "choices": [
         {
           "text": "What do you make of Master Fingolson's unusual visit?",
-          "when": { "flag": "know_argument", "equals": 1 },
+          "when": {
+            "flag": "know_argument",
+            "equals": 1
+          },
           "next": "talan_bjarn_visit"
         },
         {
           "text": "But Lady Frostbloom told me about a noise she heard.",
-          "when": { "flag": "know_noise", "equals": 2 },
+          "when": {
+            "flag": "know_noise",
+            "has_bits": 2
+          },
           "next": "talan_frostbloom_noise"
         },
         {
           "text": "I wish you had not lied to me about the night of the theft.",
-          "when": { "flag": "know_talan_singing", "equals": 1 },
+          "when": {
+            "flag": "know_talan_singing",
+            "equals": 1
+          },
           "next": "talan_confronted"
         },
         {
-          "text": "And why was Lady Silverhair accused?",
-          "actions": [{ "op": "set", "flag": "talan_heard_nothing", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "talan_heard_nothing",
+              "value": 1
+            }
+          ],
           "next": "player_asks_accusation"
         },
         {
-          "text": "No, thank you, I have a lot of work to do. You have been most helpful.",
-          "actions": [{ "op": "set", "flag": "talan_heard_nothing", "value": 1 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "talan_heard_nothing",
+              "value": 1
+            }
+          ],
           "next": "player_goodbye"
         }
       ]
     },
     {
-      "id": "talan_bjarn_visit", "speaker": "talan",
+      "id": "talan_bjarn_visit",
+      "speaker": "talan",
       "text": "I don't know if there is any coincidence, but this visit of Master Fingolson is very unusual. You see, he is quite a regular here. He comes every other month or so, and usually stays for a week before going back.",
       "next": "talan_bjarn_visits_before"
     },
     {
-      "id": "talan_bjarn_visits_before", "speaker": "talan",
+      "id": "talan_bjarn_visits_before",
+      "speaker": "talan",
       "text": "Usually he shows up a few days before the client, just to relax, I guess. Until about a year ago, he would spend this time in the common room, drinking ale and talking with Erek, his apprentice.",
       "next": "talan_bjarn_changes"
     },
     {
-      "id": "talan_bjarn_changes", "speaker": "talan",
+      "id": "talan_bjarn_changes",
+      "speaker": "talan",
       "text": "About a year ago, things changed. When he came, he came alone. He still showed up a couple of days ahead of the client, but he no longer visited the common room much. He just stayed down in his room.",
       "next": "talan_bjarn_recent"
     },
     {
-      "id": "talan_bjarn_recent", "speaker": "talan",
+      "id": "talan_bjarn_recent",
+      "speaker": "talan",
       "text": "But at this most recent visit, Bjarn got here the morning of Lady Silverhair's arrival, which was a little strange. What's more, he brought Erek again, although I thought he had finished his apprenticeship and moved on long ago.",
       "next": "player_thanks_for_bjarn_clue"
     },
     {
-      "id": "player_thanks_for_bjarn_clue", "speaker": "player",
+      "id": "player_thanks_for_bjarn_clue",
+      "speaker": "player",
       "text": "I see ... that is strange. Thanks for telling me, Talan!",
       "next": "talan_more_questions"
     },
     {
-      "id": "talan_confronted", "speaker": "talan",
+      "id": "talan_confronted",
+      "speaker": "talan",
       "text": "Wh... what do you mean?",
       "choices": [
-        { "text": "Should I rather call you a bard then?", "next": "talan_asks_about_noise" },
-        { "text": "You were not, as you told me, manning your post the whole night.", "next": "talan_denies" }
+        {
+          "text": "I've been told about a noise that night, but you say you heard nothing.",
+          "next": "talan_asks_noise"
+        },
+        {
+          "text": "You were not, as you told me, manning your post the whole night.",
+          "next": "talan_denies"
+        }
       ]
     },
     {
-      "id": "talan_asks_about_noise", "speaker": "talan",
+      "id": "talan_asks_about_noise",
+      "speaker": "talan",
       "text": "A ... noise? What noise?",
       "choices": [
         {
           "text": "The noise of someone singing, Talan.",
-          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 2 }],
+          "actions": [
+            {
+              "op": "set",
+              "flag": "know_talan_singing",
+              "value": 2
+            }
+          ],
           "next": "talan_apologises"
         },
         {
           "text": "According to Oliver, somebody must have been in the stables that night.",
-          "when": { "flag": "know_olivers_noise", "equals": 1 },
+          "when": {
+            "flag": "know_olivers_noise",
+            "equals": 1
+          },
           "next": "talan_realizes_player_knows"
         }
       ]
     },
     {
-      "id": "talan_realizes_player_knows", "speaker": "talan",
+      "id": "talan_realizes_player_knows",
+      "speaker": "talan",
       "text": "Oh. So you do know ... ?",
       "choices": [
         {
           "text": "Yes I do. And I believe you left your post that night, did you not, Talan?",
-          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 2 }],
           "next": "talan_admits"
         }
       ]
     },
     {
-      "id": "talan_denies", "speaker": "talan",
+      "id": "talan_denies",
+      "speaker": "talan",
       "text": "Now you look here! I was, and I do not appreciate you calling me a liar.",
       "choices": [
         {
-          "text": "Yes I do. And I believe you left your post that night, did you not, Talan?",
-          "actions": [{ "op": "set", "flag": "know_talan_singing", "value": 2 }],
-          "next": "talan_admits"
+          "text": "I've been told about a noise that night, but you say you heard nothing.",
+          "next": "talan_asks_noise"
+        },
+        {
+          "text": "Should I rather call you a bard then?",
+          "next": "talan_realizes_player_knows"
         }
       ]
     },
     {
-      "id": "talan_admits", "speaker": "talan",
+      "id": "talan_admits",
+      "speaker": "talan",
       "text": "Yes, I did. But please do not tell Jelom, sir! He will have my hide for sure if he finds out! Please, I beg you!",
-      "next": "player_names_singing"
+      "choices": [
+        {
+          "text": "If I want to prove Lady Silverhair's innocence, I have little other choice, I fear.",
+          "next": "talan_sorry_noise"
+        }
+      ]
     },
     {
-      "id": "player_names_singing", "speaker": "player",
+      "id": "player_names_singing",
+      "speaker": "player",
       "text": "No, you missed it. Because you were off singing, weren't you?",
       "next": "talan_apologises"
     },
     {
-      "id": "talan_apologises", "speaker": "talan",
+      "id": "talan_apologises",
+      "speaker": "talan",
       "text": "I'm afraid I was. Oh what terrible mistake! I am so sorry, Banec. I did not know about the noise! It is my fault that Lady Silverhair is being held in her room!",
-      "next": "player_calms_talan"
+      "next": "player_calms_talan",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "know_talan_singing",
+          "value": 2
+        }
+      ]
     },
     {
-      "id": "player_calms_talan", "speaker": "player",
+      "id": "player_calms_talan",
+      "speaker": "player",
       "text": "Calm down, Talan. Now I can prove that something strange happened that night at least.",
       "end": true
     },
@@ -334,33 +521,50 @@
       "choices": [
         {
           "text": "But she felt the quality of the gems was too low, and she is hardly pressed for money, so why would she turn around and steal the gems?",
-          "when": { "flag": "know_low_quality", "equals": 1 },
+          "when": {
+            "flag": "know_low_quality",
+            "equals": 1
+          },
           "next": "talan_low_quality_excuse"
         },
         {
-          "text": "True, but practically anyone at the Inn could have thrown an eye on the stones.",
           "next": "player_anyone"
         }
       ]
     },
     {
-      "id": "talan_low_quality_excuse", "speaker": "talan",
+      "id": "talan_low_quality_excuse",
+      "speaker": "talan",
       "text": "Well, according to Jelom, what better way to throw suspicion off yourself then to claim that the stones are of low quality?",
       "choices": [
         {
-          "text": "Who is Jelom? Your superiour?",
-          "when": { "flag": "know_jelom", "equals": 0 },
-          "actions": [{ "op": "set", "flag": "know_jelom", "value": 1 }],
+          "when": {
+            "flag": "know_jelom",
+            "equals": 0
+          },
+          "actions": [
+            {
+              "op": "set",
+              "flag": "know_jelom",
+              "value": 1
+            }
+          ],
           "next": "player_asks_jelom"
         },
         {
           "text": "Ah, Jelom said that, did he? What else did he say?",
-          "when": { "flag": "know_jelom", "equals": 1 },
+          "when": {
+            "flag": "know_jelom",
+            "equals": 1
+          },
           "next": "talan_suspicion"
         },
         {
           "text": "Yes. I do know what he thinks. That, however, does not help me too much.",
-          "when": { "flag": "know_jelom", "equals": 2 },
+          "when": {
+            "flag": "know_jelom",
+            "equals": 2
+          },
           "next": "talan_more_questions"
         }
       ]
@@ -377,20 +581,34 @@
       "text": "According to Jelom there is no doubt that Lady Silverhair is the thief.",
       "choices": [
         {
-          "text": "Who is Jelom? Your superiour?",
-          "when": { "flag": "know_jelom", "equals": 0 },
-          "actions": [{ "op": "set", "flag": "know_jelom", "value": 1 }],
+          "when": {
+            "flag": "know_jelom",
+            "equals": 0
+          },
+          "actions": [
+            {
+              "op": "set",
+              "flag": "know_jelom",
+              "value": 1
+            }
+          ],
           "next": "player_asks_jelom"
         },
         {
           "text": "Ah, Jelom said that, did he? What else did he say?",
-          "when": { "flag": "know_jelom", "equals": 1 },
+          "when": {
+            "flag": "know_jelom",
+            "equals": 1
+          },
           "next": "talan_suspicion"
         },
         {
-          "text": "Yes. I do know what he thinks. That, however, does not help me too much.",
-          "when": { "flag": "know_jelom", "equals": 2 },
-          "next": "talan_more_questions"
+          "text": "I'm anxious to hear his reasoning, then.",
+          "when": {
+            "flag": "know_jelom",
+            "equals": 2
+          },
+          "next": "talan_suspicion"
         }
       ]
     },
@@ -413,12 +631,6 @@
       "choices": [
         {
           "text": "Wait! Why does everybody believe that she has an aversion to dwarves?",
-          "when": { "flag": "know_bjarns_insult", "equals": 1 },
-          "next": "talan_reports_bjarn_insult"
-        },
-        {
-          "text": "Wait! Why does everybody believe that she has an aversion to dwarves?",
-          "when": { "flag": "know_bjarns_insult", "not_equals": 1 },
           "next": "talan_argument"
         }
       ]
@@ -427,30 +639,61 @@
       "id": "talan_argument",
       "speaker": "talan",
       "text": "Well, as I heard it told, she had quite an argument with Master Fingolson in which she insulted the quality of his gems and then the dwarven race!",
-      "choices": [{
-        "text": "You think this argument is enough to prove Lady Silverhair's guilt?",
-        "next": "player_challenges_argument"
-      }]
+      "choices": [
+        {
+          "text": "Well, the way I heard the story, Bjarn made a point of insulting the entire elven race, loudly and publicly, upon her arrival!",
+          "when": {
+            "flag": "know_bjarns_insult",
+            "equals": 1
+          },
+          "next": "talan_softens_on_bjarn"
+        },
+        {
+          "next": "player_challenges_argument"
+        }
+      ]
     },
     {
-      "id": "talan_reports_bjarn_insult", "speaker": "talan",
+      "id": "talan_reports_bjarn_insult",
+      "speaker": "talan",
       "text": "Well, the way I heard the story, Bjarn made a point of insulting the entire elven race, loudly and publicly, upon her arrival!",
       "next": "talan_softens_on_bjarn"
     },
     {
-      "id": "talan_softens_on_bjarn", "speaker": "talan",
+      "id": "talan_softens_on_bjarn",
+      "speaker": "talan",
       "text": "Well, Master Fingolson can be, um ... blunt, I guess, at times, but ...",
       "choices": [
         {
           "text": "Wasn't the argument rather Fingolson's fault, then?",
           "next": "talan_concedes_bjarn_fault"
+        },
+        {
+          "text": "And you say Lady Silverhair was accused because she \"obviously doesn't like dwarves\"!?",
+          "next": "talan_concedes_bjarn_fault"
         }
       ]
     },
     {
-      "id": "talan_concedes_bjarn_fault", "speaker": "talan",
+      "id": "talan_concedes_bjarn_fault",
+      "speaker": "talan",
       "text": "Well, I... ah, perhaps...",
-      "next": "talan_suggests_jelom"
+      "responses": [
+        {
+          "node": "talan_suggests_jelom",
+          "when": {
+            "flag": "know_jelom",
+            "not_equals": 2
+          }
+        },
+        {
+          "node": "talan_jelom_already_met",
+          "when": {
+            "flag": "know_jelom",
+            "equals": 2
+          }
+        }
+      ]
     },
     {
       "id": "player_challenges_argument",
@@ -462,7 +705,22 @@
       "id": "talan_unsure",
       "speaker": "talan",
       "text": "I ... I don't know.",
-      "next": "talan_suggests_jelom"
+      "responses": [
+        {
+          "node": "talan_suggests_jelom",
+          "when": {
+            "flag": "know_jelom",
+            "not_equals": 2
+          }
+        },
+        {
+          "node": "talan_jelom_already_met",
+          "when": {
+            "flag": "know_jelom",
+            "equals": 2
+          }
+        }
+      ]
     },
     {
       "id": "talan_suggests_jelom",
@@ -470,11 +728,9 @@
       "text": "Maybe you should speak to Jelom. He knows more about the theft and his reasons for suspecting her than I do...",
       "choices": [
         {
-          "text": "And so I shall. Where is he?",
           "next": "player_asks_location"
         },
         {
-          "text": "Well, I shall go and talk to him, then. Thank you and good day.",
           "next": "player_goodbye_jelom"
         }
       ]
@@ -501,6 +757,60 @@
       "id": "player_goodbye",
       "speaker": "player",
       "text": "No, thank you, I have a lot of work to do. You have been most helpful.",
+      "end": true
+    },
+    {
+      "id": "talan_jelom_already_met",
+      "speaker": "talan",
+      "text": "Well, you've talked to Jelom. You know what he thinks...",
+      "choices": [
+        {
+          "next": "player_knows_jelom_thoughts"
+        }
+      ]
+    },
+    {
+      "id": "player_knows_jelom_thoughts",
+      "speaker": "player",
+      "text": "Yes. I do know what he thinks. That, however, does not help me too much.",
+      "end": true
+    },
+    {
+      "id": "talan_asks_noise",
+      "speaker": "talan",
+      "text": "A ... noise? What noise?",
+      "choices": [
+        {
+          "text": "According to Oliver, somebody must have been in the stables that night.",
+          "when": {
+            "flag": "know_olivers_noise",
+            "equals": 1
+          },
+          "next": "talan_may_have_missed"
+        },
+        {
+          "text": "The noise of someone singing, Talan.",
+          "next": "talan_realizes_player_knows"
+        }
+      ]
+    },
+    {
+      "id": "talan_sorry_noise",
+      "speaker": "talan",
+      "text": "I, I understand. I am very sorry, $name ...",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "know_talan_singing",
+          "value": 2
+        }
+      ],
+      "end": true
+    },
+    {
+      "id": "player_truth_warning",
+      "speaker": "player",
+      "text": "It had better be, my friend.",
       "end": true
     }
   ]

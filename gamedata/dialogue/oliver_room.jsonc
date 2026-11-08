@@ -22,7 +22,7 @@
       "choices": [
         { "text": "You have a lot of guests here at the moment, then?",
           "next": "nobody_can_leave" },
-        { "text": "Don't worry Oliver. This one is fine.", "next": "goodbye" }
+        { "next": "goodbye" }
       ]
     },
     {

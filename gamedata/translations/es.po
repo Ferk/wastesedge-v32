@@ -7799,3 +7799,587 @@ msgstr "Espacio"
 #: gamedata/manifest.jsonc keyboard controls
 msgid "Delete"
 msgstr "Borrar"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I think that 'theft' is a better word for it than disappearance."
+msgstr "Creo que \"robo\" es una palabra más apropiada que desaparición."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Actually, I would mind. I am sure that you already know what happened, so nothing can be gained from bothering me. I would rather you 'recover' the gems from your mistress and return them to me!"
+msgstr "De hecho, sí me importaría. Estoy seguro de que ya sabes lo que sucedió, así que no se gana nada con molestarme. ¡Preferiría que \"recuperaras\" las gemas de manos de tu señora y me las devolvieras!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Not even if I've found one of your 'Catseyes'!"
+msgstr "¡¿Ni siquiera si he encontrado uno de sus \"Ojos de Gato\"?!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "The roads have been getting more and more dangerous recently, that's for sure. But they would be even more dangerous with the likes of him 'guarding' me! So I told him, in no uncertain terms, that I didn't like his looks!"
+msgstr "Los caminos se han vuelto cada vez más peligrosos últimamente, eso es seguro. ¡Pero serían aún más peligrosos con alguien de su calaña \"escoltándome\"! ¡Así que le dije, sin rodeos, que no me gustaba su pinta!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Wait a moment! What exactly is a Catseye?"
+msgstr "¡Espera un momento! ¿Qué es exactamente un \"Ojo de Gato\"?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Thank you Erek. That is all I needed to know."
+msgstr "Gracias, Erek. Eso es todo lo que necesito saber."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, in that case I will leave him alone."
+msgstr "Bueno, en ese caso le dejaré solo."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "You don't trust me, $name? In that case I'm sorry. Unless I know the truth about the gem, I cannot help you."
+msgstr "¿No confías en mí, $name? En ese caso, lo siento. A menos que sepa la verdad sobre la gema, no puedo ayudarte."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I ... I'm sorry, but that is news to me. It must have happened while I was unpacking our luggage. Although to tell the truth, it does not sound like Master Fingolson at all."
+msgstr "Yo..., lo siento, pero es la primera noticia que tengo. Debió de ocurrir mientras yo deshacía nuestro equipaje. Aunque, a decir verdad, eso no es nada propio del Maestro Fingolson."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Oh! The Lady Silverhair said so. I assure you Half-Elf, the Lady Silverhair said quite a lot when we put her under arrest, and it wasn't very lady-like. Come back once you have something more substantial!"
+msgstr "¡Oh! *Lady Silverhair lo dijo.* Te aseguro, Medio-Elfo, que Lady Silverhair dijo bastantes cosas cuando la pusimos bajo arresto, y no fueron muy propias de una dama. ¡Vuelve cuando tengas algo más sólido!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, it's certain that it isn't Lady Silverhair. But I need to learn more."
+msgstr "Bueno, es seguro que no ha sido Lady Silverhair. Pero necesito averiguar más."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, I don't know what you did to anger my dear Lucia, and I don't wanna know, but unless you set things right, she'll be giving you a hard time."
+msgstr "Bueno, no sé qué habrá hecho para enfadar a mi querida Lucia, ni quiero saberlo, pero a menos que arregle las cosas, se lo hará pasar mal."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I hear that Alek Endhelm was very interested in Fingolson's business. Have you noticed him doing anything suspicious?"
+msgstr "He oído que Alek Endhelm estaba muy interesado en los negocios de Fingolson. ¿Has notado si hacía algo sospechoso?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Credits"
+msgstr "Créditos"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Epilogue"
+msgstr "Epílogo"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Title"
+msgstr "Título"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I cannot believe that you have the audacity to refuse my questions. I will leave for now."
+msgstr "No puedo creer que tenga la osadía de negarse a responder mis preguntas. Me marcharé por ahora."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I will go, but I will remember what you said."
+msgstr "Me iré, pero recordaré lo que has dicho."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I will take care of the evidence myself."
+msgstr "Me ocuparé yo mismo de las pruebas."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "You found out that I work for Lady Silverhair. I should have told you earlier."
+msgstr "Has descubierto que trabajo para Lady Silverhair. Debería habértelo dicho antes."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I would rather not say."
+msgstr "Preferiría no decirlo."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I am not ready to tell you yet."
+msgstr "Aún no estoy preparado para contártelo."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Between you and me, this mercenary, Alek, was creeping outside the parlour during negotiations. Lady Silverhair nearly bumped into him when she rushed out."
+msgstr "Entre usted y yo, ese mercenario, Alek, estuvo merodeando fuera del salón durante las negociaciones. Lady Silverhair casi chocó con él al salir apresuradamente."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "That is unlikely perhaps, but not impossible."
+msgstr "Tal vez sea improbable, pero no imposible."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Seems you owe $name here a big favour, if I may say so, Lady."
+msgstr "Parece que le debe un gran favor a $name, si me permite decirlo, señora."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Rest assured that $name's deeds will not be forgotten, good man."
+msgstr "Tenga por seguro que las acciones de $name no serán olvidadas, buen hombre."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Fellnir keeps working, only occasionally glancing in your direction."
+msgstr "Fellnir sigue trabajando, y solo mira de vez en cuando en tu dirección."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Fellnir doesn't even look up as he mutters, \"Take equal parts of vitriol, nitre and sal ammoniac ...\" Then he speaks more clearly."
+msgstr "Fellnir ni siquiera levanta la vista mientras murmura: \"Tomar partes iguales de vitriolo, nitro y sal de amoniaco...\". Luego habla con más claridad."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I wouldn't open my door either to someone as nosy as you. Try asking someone he likes. Erek, maybe. I don't know anything, so I wish you'd stop bothering me."
+msgstr "Yo tampoco le abriría mi puerta a alguien tan fisgón como tú. Prueba a pedírselo a alguien que le caiga bien. A Erek, tal vez. No sé nada, así que ojalá dejaras de molestarme."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Fellnir pours a bluish liquid into one primarily red, and the resulting mixture turns inexplicably green. He swirls it before his eyes for a moment, then takes a sip."
+msgstr "Fellnir vierte un líquido azulado en otro predominantemente rojo, y la mezcla resultante se vuelve inexplicablemente verde. La agita ante sus ojos por un momento y luego toma un sorbo."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, of course she's upset. You got a friend of hers in trouble. I don't want anything to do with it. You straighten it out with the young guard yourself. I'm just keeping to myself here."
+msgstr "Bueno, por supuesto que está enfadada. Metiste en problemas a un amigo suyo. Yo no quiero saber nada del asunto. Arréglalo tú mismo con el joven guardia. Yo aquí solo me ocupo de mis cosas."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "As you finish your question, bubbles appear in a bottle that has no visible flame under it. It boils until a puff of steam makes half the liquid vanish. Fellnir is not impressed."
+msgstr "Cuando terminas tu pregunta, aparecen burbujas en una botella sin ninguna llama visible debajo. Hierve hasta que una bocanada de vapor hace desaparecer la mitad del líquido. Fellnir no parece impresionado."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I will leave you to your inspiration, lady."
+msgstr "Os dejaré con vuestra inspiración, señora."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Unless the real thief wanted to direct all suspicion to your mistress. Ha! Nice idea, Half-elf. But why should I believe that your gem really belongs to Fingolson?"
+msgstr "A menos que el verdadero ladrón quisiera dirigir todas las sospechas hacia tu señora. ¡Ja! Buena idea, Medio-Elfo. ¿Pero por qué iba a creer que tu gema pertenece realmente a Fingolson?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I know that Rhayne Frostbloom heard a noise outside the inn during that night."
+msgstr "Sé que Rhayne Frostbloom oyó un ruido fuera de la posada durante aquella noche."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "He stays here quite often, and has done that for many years. I wouldn't say that I know him well, though. He behaves quite reserved and formal, but he is a pleasant character."
+msgstr "Se aloja aquí bastante a menudo, y lleva haciéndolo muchos años. Aunque no diría que lo conozco bien. Se comporta de manera muy reservada y formal, pero es una persona agradable."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "What would you like to know, sir?"
+msgstr "¿Qué le gustaría saber, señor?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "The landlord calls for Oliver, the boy you met outside, and shortly afterwards he enters the common room to show you to your chamber."
+msgstr "El posadero llama a Oliver, el chico que conociste fuera, y poco después entra en la sala común para acompañarte a tu habitación."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Of course. Theft is not in you, my Lady, nor is deceit. But these folk have not my confidence in you."
+msgstr "Por supuesto. Ni el robo ni el engaño son propios de vos, mi Señora. Pero esta gente no comparte mi confianza en vos."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Then it falls to you, $name, as my sole friend in this outpost, to make certain my name is clear of any stain."
+msgstr "Entonces recae sobre ti, $name, como mi único amigo en este puesto fronterizo, asegurarte de que mi nombre quede libre de toda mancha."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Hi there, Talan. Look, I am sorry that I got you into trouble with Jelom."
+msgstr "Hola, Talan. Siento haberte metido en problemas con Jelom."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "What do you make of Master Fingolson's unusual visit?"
+msgstr "¿Qué opinas de la inusual visita del Maestro Fingolson?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I see. I have another question."
+msgstr "Ya veo. Tengo otra pregunta."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Select Language"
+msgstr "Seleccionar idioma"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Game Paused"
+msgstr "Juego en pausa"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Back to Title"
+msgstr "Volver al título"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "No Memory Card"
+msgstr "No hay tarjeta de memoria"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Card Belongs to Another Game"
+msgstr "La tarjeta pertenece a otro juego"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Empty Slot"
+msgstr "Ranura vacía"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Save Data Is Corrupt"
+msgstr "Los datos guardados están dañados"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Save Is from Another Build"
+msgstr "La partida es de otra versión"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Could Not Save Game"
+msgstr "No se pudo guardar la partida"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Game Saved"
+msgstr "Partida guardada"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Error"
+msgstr "Error"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Empty"
+msgstr "Vacía"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Incompatible Save"
+msgstr "Partida incompatible"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Day"
+msgstr "Día"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Slot"
+msgstr "Ranura"
+
+#. Port credits, including the Vircon32 dedication.
+msgid ""
+"Adonthell\n"
+"\n"
+"- Waste's Edge -\n"
+"\n"
+"\n"
+"directed by:\n"
+"Alexandre Courbot\n"
+"Kai Sterker\n"
+"\n"
+"\n"
+"written by:\n"
+"Kai Sterker\n"
+"Mike Nieforth\n"
+"Josh Glover\n"
+"\n"
+"\n"
+"based on an original idea by:\n"
+"Kai Sterker\n"
+"\n"
+"\n"
+"produced by:\n"
+"the Adonthell team\n"
+"\n"
+"\n"
+"executive producers:\n"
+"Sourceforge.net\n"
+"GNU Savannah\n"
+"Linuxgames.com\n"
+"\n"
+"\n"
+"Vircon32 port by:\n"
+"Fernando Carmona Varo\n"
+"\n"
+"\n"
+"cast:\n"
+"Banec - you\n"
+"Imoen Silverhair - herself\n"
+"Bjarn Fingolson - himself\n"
+"Erek Stonebreaker - himself\n"
+"Orloth Redwyne - himself\n"
+"Alek Endhelm - himself\n"
+"Oliver Redwyne - himself\n"
+"Talan Wendth - himself\n"
+"Jelom Rasgar - himself\n"
+"Tristan Illig - himself\n"
+"Fellnir Kezular - himself\n"
+"Lucia Redwyne - herself\n"
+"Rhayne Frostbloom - herself\n"
+"Sarin Trailfollower - himself\n"
+"Janesta Skywind - herself\n"
+"\n"
+"\n"
+"Mrs. Frostbloom's assistant:\n"
+"Yeti\n"
+"\n"
+"\n"
+"casting:\n"
+"Benjamin Walther-Franks\n"
+"\n"
+"\n"
+"director of photography:\n"
+"Alexandre Courbot\n"
+"\n"
+"\n"
+"art director:\n"
+"James Nash\n"
+"\n"
+"\n"
+"assistant art director:\n"
+"Benjamin Walther-Franks\n"
+"\n"
+"\n"
+"wardrobe:\n"
+"Benjamin Walther-Franks\n"
+"\n"
+"\n"
+"props masters:\n"
+"James Nash\n"
+"Kai Sterker\n"
+"\n"
+"\n"
+"location managers:\n"
+"Alexandre Courbot\n"
+"James Nash\n"
+"\n"
+"\n"
+"grip:\n"
+"Alexandre Courbot\n"
+"\n"
+"\n"
+"\"Window\" unit:\n"
+"\n"
+"\n"
+"director:\n"
+"Joel Vennin\n"
+"\n"
+"\n"
+"assistant director:\n"
+"Joel Vennin\n"
+"\n"
+"\n"
+"best boy:\n"
+"Yeti\n"
+"\n"
+"\n"
+"runner:\n"
+"Joel Vennin\n"
+"\n"
+"\n"
+"music by:\n"
+"Joseph Toscano\n"
+"\n"
+"\n"
+"foley artist:\n"
+"Joseph Toscano\n"
+"\n"
+"\n"
+"title design:\n"
+"John Havard\n"
+"James Nash\n"
+"\n"
+"\n"
+"soundtrack available on:\n"
+"http://bandcamp.zhaytee.net\n"
+"\n"
+"\n"
+"the Adonthell team wishes to thank:\n"
+"\n"
+"Al Koskelin\n"
+"Andrew Henderson\n"
+"Chris Harris\n"
+"Mark Howson\n"
+"Dave Peticolas\n"
+"Ryan O'Neil\n"
+"Meandus\n"
+"Deniz Oezsen\n"
+"\n"
+"\n"
+"The Adonthell team & Vircon32 community wish\n"
+"to thank all those behind the Free Software\n"
+" whose work made this game possible.\n"
+"\n"
+"\n"
+"career portal:\n"
+"http://adonthell.nongnu.org\n"
+"\n"
+"\n"
+"No Yetis were harmed during\n"
+"the production of this game.\n"
+"\n"
+"\n"
+"The END\n"
+msgstr ""
+"Adonthell\n"
+"\n"
+"- Waste's Edge -\n"
+"\n"
+"\n"
+"dirigido por:\n"
+"Alexandre Courbot\n"
+"Kai Sterker\n"
+"\n"
+"\n"
+"escrito por:\n"
+"Kai Sterker\n"
+"Mike Nieforth\n"
+"Josh Glover\n"
+"\n"
+"\n"
+"basado en una idea original de:\n"
+"Kai Sterker\n"
+"\n"
+"\n"
+"producido por:\n"
+"el equipo de Adonthell\n"
+"\n"
+"\n"
+"productores ejecutivos:\n"
+"Sourceforge.net\n"
+"GNU Savannah\n"
+"Linuxgames.com\n"
+"\n"
+"\n"
+"versión para Vircon32:\n"
+"Fernando Carmona Varo\n"
+"\n"
+"\n"
+"reparto:\n"
+"$name - tú\n"
+"Imoen Silverhair - ella misma\n"
+"Bjarn Fingolson - él mismo\n"
+"Erek Stonebreaker - él mismo\n"
+"Orloth Redwyne - él mismo\n"
+"Alek Endhelm - él mismo\n"
+"Oliver Redwyne - él mismo\n"
+"Talan Wendth - él mismo\n"
+"Jelom Rasgar - él mismo\n"
+"Tristan Illig - él mismo\n"
+"Fellnir Kezular - él mismo\n"
+"Lucia Redwyne - ella misma\n"
+"Rhayne Frostbloom - ella misma\n"
+"Sarin Trailfollower - él mismo\n"
+"Janesta Skywind - ella misma\n"
+"\n"
+"\n"
+"asistente de la señora Frostbloom:\n"
+"Yeti\n"
+"\n"
+"\n"
+"casting:\n"
+"Benjamin Walther-Franks\n"
+"\n"
+"\n"
+"director de fotografía:\n"
+"Alexandre Courbot\n"
+"\n"
+"\n"
+"director de arte:\n"
+"James Nash\n"
+"\n"
+"\n"
+"asistente de dirección artística:\n"
+"Benjamin Walther-Franks\n"
+"\n"
+"\n"
+"guardarropa:\n"
+"Benjamin Walther-Franks\n"
+"\n"
+"\n"
+"encargados de utilería:\n"
+"James Nash\n"
+"Kai Sterker\n"
+"\n"
+"\n"
+"jefes de localizaciones:\n"
+"Alexandre Courbot\n"
+"James Nash\n"
+"\n"
+"\n"
+"maquinista:\n"
+"Alexandre Courbot\n"
+"\n"
+"\n"
+"unidad \"Window\":\n"
+"\n"
+"\n"
+"director:\n"
+"Joel Vennin\n"
+"\n"
+"\n"
+"asistente de dirección:\n"
+"Joel Vennin\n"
+"\n"
+"\n"
+"jefe de eléctricos:\n"
+"Yeti\n"
+"\n"
+"\n"
+"asistente de producción:\n"
+"Joel Vennin\n"
+"\n"
+"\n"
+"música de:\n"
+"Joseph Toscano\n"
+"\n"
+"\n"
+"efectos de sala:\n"
+"Joseph Toscano\n"
+"\n"
+"\n"
+"diseño de títulos:\n"
+"John Havard\n"
+"James Nash\n"
+"\n"
+"\n"
+"banda sonora disponible en:\n"
+"http://bandcamp.zhaytee.net\n"
+"\n"
+"\n"
+"el equipo de Adonthell desea agradecer a:\n"
+"\n"
+"Al Koskelin\n"
+"Andrew Henderson\n"
+"Chris Harris\n"
+"Mark Howson\n"
+"Dave Peticolas\n"
+"Ryan O'Neil\n"
+"Meandus\n"
+"Deniz Oezsen\n"
+"\n"
+"\n"
+"El equipo de Adonthell y la comunidad de Vircon32\n"
+"agradecen a todos los responsables del software libre\n"
+"cuyo trabajo hizo posible este juego.\n"
+"\n"
+"\n"
+"portal de empleo:\n"
+"http://adonthell.nongnu.org\n"
+"\n"
+"\n"
+"Ningún yeti sufrió daño durante\n"
+"la producción de este juego.\n"
+"\n"
+"\n"
+"FIN\n"
+
+
+
+
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling Master Orloth of your connection with that Silverhair woman."
+msgstr "Perdóname, pero no pude evitar oírte hablar con el Señor Orloth acerca de tu relación con esa tal Silverhair."
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling the mercenary of your connection with that Silverhair woman."
+msgstr "Perdóname, pero no pude evitar oírte hablar con el mercenario acerca de tu relación con esa tal Silverhair."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to Master Orloth! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Pero sólo por casualidad: ¡te escuché hablar con el Señor Orloth! ¡Simplemente no está bien, $name! Estás vinculado con la principal sospechosa, pero me haces creer que tu investigación busca el bien de todos."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to the mercenary! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Pero sólo por casualidad: ¡te escuché hablar con el mercenario! ¡Simplemente no está bien, $name! Estás vinculado con la principal sospechosa, pero me haces creer que tu investigación busca el bien de todos."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Silverhair has heard a noise outside the inn during that night."
+msgstr "Sé que Lady Silverhair ha oído un ruido fuera de la posada durante aquella noche."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Frostbloom has heard a noise outside the inn during that night."
+msgstr "Sé que Lady Frostbloom ha oído un ruido fuera de la posada durante aquella noche."
+
+#. Original Lucia witness variant.
+msgid "I know that both Lady Silverhair and Lady Frostbloom have heard a noise outside the inn during that night."
+msgstr "Sé que tanto Lady Silverhair como Lady Frostbloom han oído un ruido fuera de la posada durante aquella noche."
+
+#. Original Lucia witness variant.
+msgid "But Lady Silverhair has heard something outside the inn as well."
+msgstr "Pero Lady Silverhair ha oído algo fuera de la posada también."
+
+#. Original Lucia witness variant.
+msgid "But Lady Frostbloom has heard something outside the inn as well."
+msgstr "Pero Lady Frostbloom ha oído algo fuera de la posada también."
+
+#. Original Lucia witness variant.
+msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
+msgstr "Pero tanto Lady Silverhair como Lady Frostbloom han oído algo fuera de la posada también."

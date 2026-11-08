@@ -2214,7 +2214,6 @@ msgid "You do! And you knew of her business."
 msgstr "Você sabia! E você sabia de negócios dela."
 
 #: scripts/dialogues/extro.py:50
-#, fuzzy
 #| msgid ""
 #| "That ... I ... - Master Rasgar, you are not going to believe in this ..., "
 #| "this infamy, are you? Since my arrival at this depraved place I am being "
@@ -7849,3 +7848,99 @@ msgstr "Espaço"
 #: gamedata/manifest.jsonc keyboard controls
 msgid "Delete"
 msgstr "Apagar"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I think that 'theft' is a better word for it than disappearance."
+msgstr "Eu penso que \"roubo\" é uma palavra melhor para isso do que desaparecimento."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Actually, I would mind. I am sure that you already know what happened, so nothing can be gained from bothering me. I would rather you 'recover' the gems from your mistress and return them to me!"
+msgstr "Na verdade, eu me importo sim. Tenho certeza que você sabe o que aconteceu, então nada pode ser obtido por me incomodar. Eu preferiria que você \"recuperasse\" as gemas da sua senhora e as retornasse para mim!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Not even if I've found one of your 'Catseyes'!"
+msgstr "Nem mesmo se eu encontrei um de suas \"olhos de gato\"!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "The roads have been getting more and more dangerous recently, that's for sure. But they would be even more dangerous with the likes of him 'guarding' me! So I told him, in no uncertain terms, that I didn't like his looks!"
+msgstr "As estradas estão cada vez mais perigosas recentemente, com certeza. Mas eles seriam ainda mais perigosos com pessoas como ele me \"guardando\". Então eu disse a ele, em termos inequívocos, que não gostava da aparência dele!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Wait a moment! What exactly is a Catseye?"
+msgstr "Espere um momento! O que exatamente é um \"olhos de gatos\"?"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Thank you Erek. That is all I needed to know."
+msgstr "Obrigado, Erek. É tudo que preciso saber."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, in that case I will leave him alone."
+msgstr "Bem, nesse caso eu vou deixá-lo em paz."
+
+#. Port wording corrects the original English double negation.
+msgid "You don't trust me, $name? In that case I'm sorry. Unless I know the truth about the gem, I cannot help you."
+msgstr "Você não confia em mim, $name? Nesse caso, sinto muito. A menos que eu saiba a verdade sobre a gema, não posso ajudá-lo."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I ... I'm sorry, but that is news to me. It must have happened while I was unpacking our luggage. Although to tell the truth, it does not sound like Master Fingolson at all."
+msgstr "Eu ... sinto muito, mas isso é novidade para mim. Deve ter acontecido enquanto eu estava desfazendo a nossa bagagem. Embora, para dizer a verdade, isso não soe como o Mestre Fingolson."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Oh! The Lady Silverhair said so. I assure you Half-Elf, the Lady Silverhair said quite a lot when we put her under arrest, and it wasn't very lady-like. Come back once you have something more substantial!"
+msgstr "Oh! *Lady Silverhair falou isso.* Eu lhe asseguro, meio elfo, a Lady Silverhair falou bastante quando a colocamos sob prisão, e não era muito parecida com uma dama. Volte quando tiver algo mais substancial!"
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, it's certain that it isn't Lady Silverhair. But I need to learn more."
+msgstr "Bem, é certo que não é a Lady Silverhair. Mas preciso descobri mais."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "Well, I don't know what you did to anger my dear Lucia, and I don't wanna know, but unless you set things right, she'll be giving you a hard time."
+msgstr "Bem, eu não sei o que você fez para irritar minha querida Lucia e eu não quero saber, mas, a menos que você faça as pazes com ela, ela vai dificultar as coisas para você."
+
+#. Port wording; see the corresponding dialogue or UI text.
+msgid "I hear that Alek Endhelm was very interested in Fingolson's business. Have you noticed him doing anything suspicious?"
+msgstr "Ouvi dizer que Alek Endhelm estava muito interessado nos negócios de Fingolson. Você notou ele fazendo algo suspeito?"
+
+
+
+
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling Master Orloth of your connection with that Silverhair woman."
+msgstr "Perdoe-me, mas não pude deixar de ouvir você dizendo a Mestre Orloth da sua conexão com aquela mulher Silverhair."
+
+#. Original Erek line with the person he overheard.
+msgid "Forgive me, but I couldn't help but hear you telling the mercenary of your connection with that Silverhair woman."
+msgstr "Perdoe-me, mas não pude deixar de ouvir você dizendo a o mercenário da sua conexão com aquela mulher Silverhair."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to Master Orloth! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Mas só por acaso: ouvi você falando com Mestre Orloth! Simplesmente não está certo, $name! Você está familiarizado com o principal suspeito, mas me faz acreditar que sua pergunta é para o melhor de todos nós."
+
+#. Original Erek line with the person he overheard.
+msgid "But only by chance: I heard you talking to the mercenary! It's simply not right, $name! You are familiar with the prime suspect, but you make me believe that your inquiry is for the best of us all."
+msgstr "Mas só por acaso: ouvi você falando com o mercenário! Simplesmente não está certo, $name! Você está familiarizado com o principal suspeito, mas me faz acreditar que sua pergunta é para o melhor de todos nós."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Silverhair has heard a noise outside the inn during that night."
+msgstr "Eu sei que Lady Silverhair ouviu ouviu um barulho do lado de fora da pousada durante aquela noite."
+
+#. Original Lucia witness variant.
+msgid "I know that Lady Frostbloom has heard a noise outside the inn during that night."
+msgstr "Eu sei que Lady Frostbloom ouviu ouviu um barulho do lado de fora da pousada durante aquela noite."
+
+#. Original Lucia witness variant.
+msgid "I know that both Lady Silverhair and Lady Frostbloom have heard a noise outside the inn during that night."
+msgstr "Eu sei que Lady Silverhair e Lady Frostbloom ouviram ouviu um barulho do lado de fora da pousada durante aquela noite."
+
+#. Original Lucia witness variant.
+msgid "But Lady Silverhair has heard something outside the inn as well."
+msgstr "Mas Lady Silverhair ouviu ouviu alguma coisa fora da pousada também."
+
+#. Original Lucia witness variant.
+msgid "But Lady Frostbloom has heard something outside the inn as well."
+msgstr "Mas Lady Frostbloom ouviu ouviu alguma coisa fora da pousada também."
+
+#. Original Lucia witness variant.
+msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
+msgstr "Mas Lady Silverhair e Lady Frostbloom ouviram ouviu alguma coisa fora da pousada também."

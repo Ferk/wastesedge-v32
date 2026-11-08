@@ -260,6 +260,22 @@ static int hotspot_script(const struct world_state *world)
 
 static void close_dialogue(struct world_state *world);
 
+/* Apply the compact flag operations shared by dialogue lines and choices. */
+static void apply_dialogue_actions(struct world_state *world,
+    const struct generated_runtime_dialogue_action *actions, int count)
+{
+    int index;
+    for (index = 0; index < count; ++index) {
+        const struct generated_runtime_dialogue_action *action = &actions[index];
+        if (action->flag >= 0 && action->flag < GENERATED_RUNTIME_FLAG_COUNT) {
+            if (action->set_bits)
+                world->flags[action->flag] |= action->value;
+            else
+                world->flags[action->flag] = action->value;
+        }
+    }
+}
+
 /* Enter one dialogue node and apply any audiovisual cue authored on it. */
 static void enter_dialogue_node(struct world_state *world, int node_index)
 {
@@ -273,6 +289,7 @@ static void enter_dialogue_node(struct world_state *world, int node_index)
     if (node_index < 0 || node_index >= dialogue->node_count)
         return;
     node = &dialogue->nodes[node_index];
+    apply_dialogue_actions(world, node->actions, node->action_count);
     achievements_event(world->achievement_progress, 0, world->dialogue, node_index, -1);
     if (node->music_track >= 0 && world->music_track != node->music_track) {
         world->music_track = node->music_track;
@@ -302,34 +319,25 @@ static void emit_ui_sound(struct world_state *world, int sound)
 static void apply_dialogue_choice(struct world_state *world,
                                   const struct generated_runtime_dialogue_choice *choice)
 {
-    int index;
     const struct generated_runtime_dialogue_node *node =
         &generated_runtime_dialogues[world->dialogue].nodes[world->dialogue_node];
     achievements_event(world->achievement_progress, 1, world->dialogue,
                        world->dialogue_node, (int)(choice - node->choices));
-    for (index = 0; index < choice->action_count; ++index) {
-        const struct generated_runtime_dialogue_action *action = &choice->actions[index];
-        if (action->flag >= 0 && action->flag < GENERATED_RUNTIME_FLAG_COUNT)
-            world->flags[action->flag] = action->value;
-    }
+    apply_dialogue_actions(world, choice->actions, choice->action_count);
     if (!choice->repeatable && choice->next_node >= 0 &&
         choice->next_node < GENERATED_RUNTIME_DIALOGUE_USED_COUNT)
         world->dialogue_used[choice->next_node] = 1;
     enter_dialogue_node(world, choice->next_node);
 }
 
-static int dialogue_choice_is_visible(
-    const struct world_state *world,
-    const struct generated_runtime_dialogue_choice *choice)
+/* Test all flag comparisons attached to a dialogue entry or choice. */
+static int dialogue_conditions_match(const struct world_state *world,
+    const struct generated_runtime_dialogue_condition *conditions, int count)
 {
     int index;
-    if (!choice->repeatable && choice->next_node >= 0 &&
-        choice->next_node < GENERATED_RUNTIME_DIALOGUE_USED_COUNT &&
-        world->dialogue_used[choice->next_node])
-        return 0;
-    for (index = 0; index < choice->condition_count; ++index) {
+    for (index = 0; index < count; ++index) {
         const struct generated_runtime_dialogue_condition *condition =
-            &choice->conditions[index];
+            &conditions[index];
         int actual_value;
         int matches;
         if (condition->flag < 0 || condition->flag >= GENERATED_RUNTIME_FLAG_COUNT)
@@ -339,12 +347,27 @@ static int dialogue_choice_is_visible(
                       actual_value == condition->value :
                   condition->comparison == GENERATED_RUNTIME_DIALOGUE_NOT_EQUALS ?
                       actual_value != condition->value :
-                  condition->comparison == GENERATED_RUNTIME_DIALOGUE_LESS_THAN &&
-                      actual_value < condition->value;
+                  condition->comparison == GENERATED_RUNTIME_DIALOGUE_LESS_THAN ?
+                      actual_value < condition->value :
+                  condition->comparison == GENERATED_RUNTIME_DIALOGUE_HAS_BITS ?
+                      (actual_value & condition->value) == condition->value :
+                  condition->comparison == GENERATED_RUNTIME_DIALOGUE_LACKS_BITS &&
+                      (actual_value & condition->value) == 0;
         if (!matches)
             return 0;
     }
     return 1;
+}
+
+/* A choice is available when it has not been used and its conditions match. */
+static int dialogue_choice_is_visible(const struct world_state *world,
+    const struct generated_runtime_dialogue_choice *choice)
+{
+    if (!choice->repeatable && choice->next_node >= 0 &&
+        choice->next_node < GENERATED_RUNTIME_DIALOGUE_USED_COUNT &&
+        world->dialogue_used[choice->next_node])
+        return 0;
+    return dialogue_conditions_match(world, choice->conditions, choice->condition_count);
 }
 
 static const struct generated_runtime_dialogue_choice *dialogue_visible_choice(
@@ -512,12 +535,42 @@ static void close_dialogue(struct world_state *world)
 }
 
 /* Advance to a node's authored successor, or close at a terminal node. */
+static int speech_random_value(struct world_state *world, int minimum, int maximum);
+
+/* Select uniformly among eligible, unused NPC responses, as Adonthell does. */
+static int select_dialogue_response(struct world_state *world,
+    const struct generated_runtime_dialogue_node *node)
+{
+    int index, count = 0, selected;
+    for (index = 0; index < node->response_count; ++index) {
+        const struct generated_runtime_dialogue_response *response = &node->responses[index];
+        if ((response->repeatable || !world->dialogue_used[response->node]) &&
+            dialogue_conditions_match(world, response->conditions, response->condition_count))
+            ++count;
+    }
+    if (count == 0)
+        return -1;
+    selected = speech_random_value(world, 0, count - 1);
+    for (index = 0; index < node->response_count; ++index) {
+        const struct generated_runtime_dialogue_response *response = &node->responses[index];
+        if ((response->repeatable || !world->dialogue_used[response->node]) &&
+            dialogue_conditions_match(world, response->conditions, response->condition_count) &&
+            selected-- == 0) {
+            if (!response->repeatable)
+                world->dialogue_used[response->node] = 1;
+            return response->node;
+        }
+    }
+    return -1;
+}
+
 static void advance_or_close_dialogue(
     struct world_state *world,
     const struct generated_runtime_dialogue_node *node)
 {
-    if (node->next_node >= 0) {
-        enter_dialogue_node(world, node->next_node);
+    int next_node = node->response_count ? select_dialogue_response(world, node) : node->next_node;
+    if (next_node >= 0) {
+        enter_dialogue_node(world, next_node);
         world->dialogue_choice = 0;
     } else {
         close_dialogue(world);
@@ -535,11 +588,13 @@ static void start_dialogue(struct world_state *world, int dialogue)
     for (index = 0; index < GENERATED_RUNTIME_DIALOGUE_USED_COUNT; ++index)
         world->dialogue_used[index] = 0;
     world->dialogue = dialogue;
+    apply_dialogue_actions(world, runtime_dialogue->start_actions, runtime_dialogue->start_action_count);
     for (index = 0; index < runtime_dialogue->start_count; ++index) {
         const struct generated_runtime_dialogue_start *start = &runtime_dialogue->starts[index];
-        if (start->flag < 0 ||
-            (start->flag < GENERATED_RUNTIME_FLAG_COUNT &&
-             world->flags[start->flag] == start->value)) {
+        if ((start->flag < 0 ||
+             (start->flag < GENERATED_RUNTIME_FLAG_COUNT &&
+              world->flags[start->flag] == start->value)) &&
+            dialogue_conditions_match(world, start->conditions, start->condition_count)) {
             start_node = start->node;
             break;
         }
@@ -1601,11 +1656,12 @@ static void advance_past_player_lines(struct world_state *world)
         const struct generated_runtime_dialogue_speaker *speaker = &dialogue->speakers[node->speaker];
         if (!speaker->is_player)
             return;
-        if (node->next_node < 0) {
+        int next_node = node->response_count ? select_dialogue_response(world, node) : node->next_node;
+        if (next_node < 0) {
             close_dialogue(world);
             return;
         }
-        enter_dialogue_node(world, node->next_node);
+        enter_dialogue_node(world, next_node);
         if (world->dialogue < 0)
             return;
     }
