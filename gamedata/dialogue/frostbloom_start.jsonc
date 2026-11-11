@@ -33,11 +33,31 @@
     { "id": "withering_gaze", "speaker": "narrator", "text": "The half-elf fixes you with a withering gaze. For a moment, you feel as if you had been skewered. Her voice is full of sarcasm.", "next": "looks_forward" },
     { "id": "looks_forward", "speaker": "frostbloom", "text": "I look forward to it with all my heart. For now, just go away.", "end": true },
 
-    { "id": "post_yeti_greeting", "speaker": "frostbloom", "text": "Back again, eh? You do hunger for punishment, don't you.", "choices": [
-      { "text": "I try to be diligent, lady.", "next": "introduction" },
-      { "text": "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.", "next": "yeti_response" }
-    ] },
-    { "id": "introduction", "speaker": "frostbloom", "text": "Well, I must admit that such devotion deserves a reward. Very well, you may stay for a while. A short while. My name is Rhayne Frostbloom. Take care you remember it.", "next": "ask_theft_politely" },
+    {
+      "id": "post_yeti_greeting",
+      "speaker": "frostbloom",
+      "text": "Back again, eh? You do hunger for punishment, don't you.",
+      "choices": [
+        {
+          "text": "I try to be diligent, lady.",
+          "next": "introduction"
+        }
+      ]
+    },
+    {
+      "id": "introduction",
+      "speaker": "frostbloom",
+      "text": "Well, I must admit that such devotion deserves a reward. Very well, you may stay for a while. A short while. My name is Rhayne Frostbloom. Take care you remember it.",
+      "choices": [
+        {
+          "next": "ask_theft_politely"
+        },
+        {
+          "text": "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.",
+          "next": "yeti_response"
+        }
+      ]
+    },
     { "id": "ask_theft_politely", "speaker": "player", "text": "Thank you, lady. I would ask you about the theft, if I may.", "next": "sick_of_theft" },
     { "id": "sick_of_theft",
       "achievement_events": [{"achievement": "6", "bit": 8}], "speaker": "frostbloom", "text": "For goodness sake, do not bother me with that nonsense. It's been all anyone speaks about here, and I for one am sick of it.", "next": "lady_in_danger" },

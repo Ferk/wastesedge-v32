@@ -2,7 +2,6 @@
   "id": "record_fingolson_gem",
   "actions": [
     { "op": "set", "flag": "get_item", "value": 2 },
-    { "op": "set", "flag": "have_gem", "value": 1 },
-    { "op": "set", "flag": "silverhair_gem_pending", "value": 1 }
+    { "op": "set", "flag": "have_gem", "value": 1 }
   ]
 }

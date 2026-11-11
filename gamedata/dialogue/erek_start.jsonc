@@ -663,7 +663,7 @@
           "next": "erek_catseye_uncertain"
         },
         {
-          "next": "thanks_goodbye"
+          "next": "helpful_goodbye"
         }
       ]
     },
@@ -872,89 +872,30 @@
       "id": "erek_identifies_gem",
       "speaker": "erek",
       "text": "This is a fine example of a Chrysoberyl. Perfectly suitable for a Lady's ring, were that your Mistress' intention. However, it is no Catseye and as such it is of no use in the workings of magic she had in mind, if I recall correctly.",
+      "actions": [
+        {
+          "op": "set_bits",
+          "flag": "gem_worthless",
+          "value": 2
+        }
+      ],
       "choices": [
         {
           "text": "Could you repeat that for Jelom? He would not believe me.",
           "when": {
-            "all": [
-              {
-                "flag": "convince_jelom",
-                "equals": 1
-              },
-              {
-                "flag": "gem_worthless",
-                "equals": 0
-              }
-            ]
-          },
-          "actions": [
-            {
-              "op": "set",
-              "flag": "gem_worthless",
-              "value": 2
-            },
-            {
-              "op": "set",
-              "flag": "convince_jelom",
-              "value": 2
-            }
-          ],
-          "next": "erek_agrees_jelom"
-        },
-        {
-          "text": "Could you repeat that for Jelom? He would not believe me.",
-          "when": {
-            "all": [
-              {
-                "flag": "convince_jelom",
-                "equals": 1
-              },
-              {
-                "flag": "gem_worthless",
-                "equals": 1
-              }
-            ]
-          },
-          "actions": [
-            {
-              "op": "set",
-              "flag": "gem_worthless",
-              "value": 3
-            },
-            {
-              "op": "set",
-              "flag": "convince_jelom",
-              "value": 2
-            }
-          ],
-          "next": "erek_agrees_jelom"
-        },
-        {
-          "when": {
-            "flag": "gem_worthless",
-            "equals": 0
-          },
-          "actions": [
-            {
-              "op": "set",
-              "flag": "gem_worthless",
-              "value": 2
-            }
-          ],
-          "next": "erek_gem_thanks"
-        },
-        {
-          "when": {
-            "flag": "gem_worthless",
+            "flag": "convince_jelom",
             "equals": 1
           },
           "actions": [
             {
               "op": "set",
-              "flag": "gem_worthless",
-              "value": 3
+              "flag": "convince_jelom",
+              "value": 2
             }
           ],
+          "next": "erek_agrees_jelom"
+        },
+        {
           "next": "erek_gem_thanks"
         }
       ]
@@ -985,6 +926,22 @@
           "next": "fingolson_refusal"
         },
         {
+          "text": "Could you please repeat what you told me about the argument between your master and Lady Silverhair?",
+          "actions": [
+            {
+              "op": "set",
+              "flag": "know_low_quality",
+              "value": 1
+            },
+            {
+              "op": "set",
+              "flag": "know_argument",
+              "value": 1
+            }
+          ],
+          "next": "argument_recount"
+        },
+        {
           "next": "insult_goodbye"
         }
       ]
@@ -1005,7 +962,7 @@
           "next": "erek_catseye_uncertain"
         },
         {
-          "next": "thanks_goodbye"
+          "next": "helpful_goodbye"
         }
       ]
     },

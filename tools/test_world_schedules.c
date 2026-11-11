@@ -1,3 +1,4 @@
+/* Host integration checks for compiled content, world schedules and story routes. */
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -216,7 +217,6 @@ int main(void)
     int bjarn_door_flag;
     int get_item_flag;
     int have_gem_flag;
-    int silverhair_gem_pending_flag;
     int gem_worthless_flag;
     int direction;
     int animation;
@@ -278,8 +278,11 @@ int main(void)
     assert(generated_runtime_title_background.height == 360);
     assert(generated_runtime_title_background.scale_x == 1.0f);
     assert(generated_runtime_title_background.scale_y == 1.0f);
-    assert(generated_runtime_title_logo.source_x == 239);
-    assert(generated_runtime_title_logo.offset_x == 88);
+    assert(generated_runtime_title_logo.source_x == 0);
+    assert(generated_runtime_title_logo.source_y == 720);
+    assert(generated_runtime_title_logo.width == 481);
+    assert(generated_runtime_title_logo.height == 91);
+    assert(generated_runtime_title_logo.offset_x == 250);
     /* Animated scenery retains source-specific frame holds and sequences.
      * These signatures cover the clock's repeated middle frame, the leaking
      * barrel's accelerating drops, and the normal nine-frame smoke loop. */
@@ -2288,9 +2291,6 @@ int main(void)
     tick(&world, 1);
     assert(world.flags[get_item_flag] == 2);
     assert(world.flags[have_gem_flag] == 1);
-    silverhair_gem_pending_flag =
-        generated_runtime_scripts[GENERATED_SCRIPT_RECORD_FINGOLSON_GEM].actions[2].a;
-    assert(world.flags[silverhair_gem_pending_flag] == 1);
 
     /* The recovered gem takes precedence over Silverhair's ordinary repeat
      * greeting and reproduces the complete original assessment. Completing
@@ -2312,7 +2312,7 @@ int main(void)
             find_dialogue_node(silverhair_dialogue, gem_lines[0]);
 
         assert(gem_start != 0);
-        assert(silverhair_dialogue->starts[0].flag == silverhair_gem_pending_flag);
+        assert(silverhair_dialogue->starts[0].flag == have_gem_flag);
         assert(silverhair_dialogue->starts[0].value == 1);
         assert(&silverhair_dialogue->nodes[silverhair_dialogue->starts[0].node] == gem_start);
         world.dialogue = GENERATED_DIALOGUE_SILVERHAIR_START;
@@ -2323,15 +2323,12 @@ int main(void)
             assert(strcmp(world_dialogue_text(&world), gem_lines[frame]) == 0);
             world_update(&world, &interact);
         }
+        gem_worthless_flag = find_dialogue_node(silverhair_dialogue, gem_lines[5])->actions[0].flag;
+        assert(strstr(world_dialogue_text(&world), "Now you must go") != 0);
+        world_update(&world, &interact);
         assert(world.dialogue < 0);
-        assert(world.active_script == GENERATED_SCRIPT_RECORD_SILVERHAIR_GEM_ASSESSMENT);
-        gem_worthless_flag = generated_runtime_scripts[
-                                 GENERATED_SCRIPT_RECORD_SILVERHAIR_GEM_ASSESSMENT]
-                                 .actions[0].a;
-        tick(&world, 1);
         assert(world.flags[gem_worthless_flag] == 1);
         assert(world.flags[have_gem_flag] == 1);
-        assert(world.flags[silverhair_gem_pending_flag] == 0);
     }
 
     /* Erek's original post-discovery branch independently examines the gem.

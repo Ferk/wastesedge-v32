@@ -181,7 +181,7 @@
       "choices": [
         {
           "text": "Thank you, Master Redwyne. I will come back to you when I need some help.",
-          "next": "ask_name"
+          "next": "orloth_initial_exit"
         },
         {
           "text": "First of all I'd like to know what exactly happened.",
@@ -270,7 +270,27 @@
       "id": "silverhair_released_help",
       "speaker": "orloth",
       "text": "Very well. Is there something else you wish to know then, Banec?",
-      "choices": "help_menu"
+      "choices": [
+        {
+          "text": "Could you tell me something about your guests?",
+          "next": "frostbloom",
+          "when": {
+            "flag": "orloth_introduced_guests",
+            "equals": 0
+          }
+        },
+        {
+          "text": "I don't mean to pry, but I couldn't help to notice your wife's dislike of Waste's Edge.",
+          "when": {
+            "flag": "complain_about_wastesedge",
+            "equals": 1
+          },
+          "next": "lucia_wastesedge"
+        },
+        {
+          "next": "goodbye"
+        }
+      ]
     },
     {
       "id": "repeat_greeting",
@@ -307,8 +327,16 @@
         {
           "text": "I'd like to hear about the theft again, Master Redwyne.",
           "when": {
-            "flag": "orloth_explained_events",
-            "equals": 1
+            "all": [
+              {
+                "flag": "orloth_explained_events",
+                "equals": 1
+              },
+              {
+                "flag": "orloth_first_run",
+                "equals": 0
+              }
+            ]
           },
           "next": "theft_recap_menu"
         },
@@ -322,7 +350,11 @@
         },
         {
           "text": "Could you tell me something about your guests?",
-          "next": "frostbloom"
+          "next": "frostbloom",
+          "when": {
+            "flag": "orloth_introduced_guests",
+            "equals": 0
+          }
         },
         {
           "text": "You don't have a spare key to the storeroom, by any chance?",
@@ -368,7 +400,15 @@
       "id": "goodbye",
       "speaker": "player",
       "text": "That's all for now, Master Redwyne. I don't want to keep you off your work any longer.",
-      "end": true
+      "responses": [
+        {
+          "node": "ask_name",
+          "when": {
+            "flag": "orloth_first_run",
+            "equals": 1
+          }
+        }
+      ]
     },
     {
       "id": "events_intro",
@@ -453,7 +493,7 @@
         },
         {
           "text": "Tell me about the other reasons.",
-          "next": "orloth_silverhair_desperate"
+          "next": "night_theft"
         },
         {
           "text": "But the gems were not found on her, right?",
@@ -536,7 +576,7 @@
       "choices": [
         {
           "text": "In that case I'll better hurry and make sure that his presence won't be necessary. Thank you Master Redwyne.",
-          "next": "ask_name"
+          "next": "orloth_initial_exit"
         },
         {
           "text": "Now I see a lot clearer. But I would know a little more about the people here.",
@@ -548,7 +588,14 @@
       "id": "frostbloom",
       "speaker": "orloth",
       "text": "Of course. Well, you may have met Lady Frostbloom in the yard already. She's an artist with a fancy to yetis. She says the wilderness and the nearby mountains inspire her, so she's a regular visitor.",
-      "next": "frostbloom_more"
+      "next": "frostbloom_more",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "orloth_introduced_guests",
+          "value": 1
+        }
+      ]
     },
     {
       "id": "frostbloom_more",
@@ -624,7 +671,7 @@
         },
         {
           "text": "An impolite Dwarf isn't the most pressing problem right now. So please go on.",
-          "next": "other_guests"
+          "next": "tristan_guest"
         },
         {
           "text": "Thank you Master Redwyne. I think I have heard enough of this.",
@@ -637,6 +684,10 @@
       "speaker": "orloth",
       "text": "There was the lot I've already mentioned plus Tristan Illig and, not to forget, that nosy Fellnir Kezular, asking me questions about everyone else. I really hadn't much time to follow the conversations.",
       "choices": [
+        {
+          "text": "Thank you Master Redwyne. I think I have heard enough of this.",
+          "next": "orloth_more_help"
+        },
         {
           "text": "Please tell me more about the last two.",
           "next": "tristan_guest"
@@ -661,23 +712,40 @@
       "text": "I hope I've given you an idea of the people at Waste's Edge. A colourful crowd for sure, but if you'd ask me to point out the thief, I couldn't. I'll support your efforts as good as I can, though.",
       "choices": [
         {
+          "text": "Thank you, Master Redwyne. I will come back to you when I need some help.",
+          "next": "orloth_initial_exit"
+        },
+        {
           "text": "I'd like to know what exactly happened.",
           "when": {
-            "flag": "orloth_explained_events",
-            "equals": 0
+            "all": [
+              {
+                "flag": "orloth_explained_events",
+                "equals": 0
+              },
+              {
+                "flag": "orloth_first_run",
+                "equals": 1
+              }
+            ]
           },
-          "actions": [
-            {
-              "op": "set",
-              "flag": "orloth_explained_events",
-              "value": 1
-            }
-          ],
           "next": "events_intro"
         },
         {
-          "text": "Thank you Master Redwyne. I think I have heard enough of this.",
-          "next": "orloth_more_help"
+          "text": "I'd like to hear about the theft again, Master Redwyne.",
+          "when": {
+            "all": [
+              {
+                "flag": "orloth_explained_events",
+                "equals": 1
+              },
+              {
+                "flag": "orloth_first_run",
+                "equals": 0
+              }
+            ]
+          },
+          "next": "theft_recap_menu"
         }
       ]
     },
@@ -782,7 +850,7 @@
         },
         {
           "text": "I think you were finished.",
-          "next": "goodbye"
+          "next": "silverhair_released_help"
         }
       ]
     },
@@ -838,7 +906,7 @@
         },
         {
           "text": "I think you were finished.",
-          "next": "goodbye"
+          "next": "silverhair_released_help"
         }
       ]
     },
@@ -887,7 +955,7 @@
         },
         {
           "text": "Thank you Master Redwyne, that's all I wanted to hear.",
-          "next": "goodbye"
+          "next": "silverhair_released_help"
         }
       ]
     },
@@ -924,7 +992,7 @@
         },
         {
           "text": "Thank you Master Redwyne, that's all I wanted to hear.",
-          "next": "goodbye"
+          "next": "silverhair_released_help"
         }
       ]
     },
@@ -953,7 +1021,7 @@
       "choices": [
         {
           "text": "Thank you Master Redwyne, that's all I wanted to hear.",
-          "next": "goodbye"
+          "next": "silverhair_released_help"
         }
       ]
     },
@@ -1024,13 +1092,25 @@
         },
         {
           "text": "Could you tell me something about your guests?",
-          "next": "frostbloom"
+          "next": "frostbloom",
+          "when": {
+            "flag": "orloth_introduced_guests",
+            "equals": 0
+          }
         },
         {
           "text": "I'd like to hear about the theft again, Master Redwyne.",
           "when": {
-            "flag": "orloth_explained_events",
-            "equals": 1
+            "all": [
+              {
+                "flag": "orloth_explained_events",
+                "equals": 1
+              },
+              {
+                "flag": "orloth_first_run",
+                "equals": 0
+              }
+            ]
           },
           "next": "theft_recap_menu"
         }
@@ -1099,12 +1179,32 @@
       "text": "No, the only way to calm her is to set things right.",
       "end": true
     }
+  ,
+    {
+      "id": "orloth_initial_exit",
+      "speaker": "player",
+      "text": "Thank you, Master Redwyne. I will come back to you when I need some help.",
+      "responses": [
+        {
+          "node": "ask_name",
+          "when": {
+            "flag": "orloth_first_run",
+            "equals": 1
+          }
+        }
+      ]
+    }
   ],
   "start_actions": [
-    {
-      "op": "set",
-      "flag": "orloth_first_run",
-      "value": 0
-    }
-  ]
+  {
+    "op": "set",
+    "flag": "orloth_first_run",
+    "value": 0
+  },
+  {
+    "op": "set",
+    "flag": "orloth_introduced_guests",
+    "value": 0
+  }
+]
 }

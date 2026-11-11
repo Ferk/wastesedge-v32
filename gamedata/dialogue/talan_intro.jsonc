@@ -82,9 +82,18 @@
       { "next": "n5" }
     ] },
     { "id": "n30", "speaker": "player", "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n31" },
-    { "id": "n31", "speaker": "talan", "text": "I tell you I can't allow you in.", "choices": [
-      { "text": "I am beginning to lose my patience, man. I don't wish you trouble, but I must be allowed in.", "next": "n22" },
-      { "next": "n24" }
-    ] }
+    {
+      "id": "n31",
+      "speaker": "talan",
+      "text": "I tell you I can't allow you in.",
+      "choices": [
+        {
+          "next": "n22"
+        },
+        {
+          "next": "n24"
+        }
+      ]
+    }
   ]
 }

@@ -2,10 +2,63 @@
   "id": "lucia_start",
   "start": [
     {
-      "node": "lucia_pantry_entry",
+      "node": "first_meeting",
       "when": {
-        "flag": "pantry_locked",
-        "equals": 1
+        "flag": "lucia_talked",
+        "equals": 0
+      }
+    },
+    {
+      "node": "lucia_betrayed_reconciled",
+      "when": {
+        "all": [
+          {
+            "flag": "told_on_talan",
+            "equals": 2
+          },
+          {
+            "flag": "soothe_lucia",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "node": "lucia_betrayed_key_request",
+      "when": {
+        "all": [
+          {
+            "flag": "told_on_talan",
+            "equals": 1
+          },
+          {
+            "flag": "get_item",
+            "equals": 1
+          },
+          {
+            "flag": "pantry_locked",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "node": "lucia_betrayed_key_request",
+      "when": {
+        "all": [
+          {
+            "flag": "told_on_talan",
+            "equals": 2
+          },
+          {
+            "flag": "get_item",
+            "equals": 1
+          },
+          {
+            "flag": "pantry_locked",
+            "equals": 1
+          }
+        ]
       }
     },
     {
@@ -23,14 +76,7 @@
       }
     },
     {
-      "node": "lucia_repeat_narration",
-      "when": {
-        "flag": "lucia_talked",
-        "equals": 1
-      }
-    },
-    {
-      "node": "first_meeting"
+      "node": "lucia_repeat_narration"
     }
   ],
   "speakers": [
@@ -1265,41 +1311,7 @@
       "text": "Lucia does not even bother to look up from her work as you approach her.",
       "choices": [
         {
-          "next": "lucia_look_lucia_i_spoke_with_talan_and_he_understands",
-          "when": {
-            "all": [
-              {
-                "flag": "soothe_lucia",
-                "equals": 1
-              },
-              {
-                "flag": "told_on_talan",
-                "equals": 2
-              }
-            ]
-          }
-        },
-        {
-          "next": "lucia_excuse_me_lucia_i_have_to_fetch_something_for_la",
-          "when": {
-            "all": [
-              {
-                "flag": "get_item",
-                "equals": 1
-              },
-              {
-                "flag": "pantry_locked",
-                "equals": 1
-              }
-            ]
-          }
-        },
-        {
-          "next": "player_tries_lucia",
-          "when": {
-            "flag": "told_on_talan",
-            "not_equals": 2
-          }
+          "next": "player_tries_lucia"
         }
       ]
     },
@@ -1790,10 +1802,24 @@
       ]
     },
     {
-      "id": "lucia_pantry_entry",
-      "speaker": "lucia",
-      "text": "Now don't keep me off my work. Ask what you want to know and then out with you!",
-      "choices": "question_menu"
+      "id": "lucia_betrayed_reconciled",
+      "speaker": "narrator",
+      "text": "Lucia does not even bother to look up from her work as you approach her.",
+      "choices": [
+        {
+          "next": "lucia_look_lucia_i_spoke_with_talan_and_he_understands"
+        }
+      ]
+    },
+    {
+      "id": "lucia_betrayed_key_request",
+      "speaker": "narrator",
+      "text": "Lucia does not even bother to look up from her work as you approach her.",
+      "choices": [
+        {
+          "next": "lucia_excuse_me_lucia_i_have_to_fetch_something_for_la"
+        }
+      ]
     }
   ],
   "start_actions": [

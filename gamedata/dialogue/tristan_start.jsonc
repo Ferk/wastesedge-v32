@@ -126,7 +126,7 @@
       "id": "tristan_denies_involvement",
       "speaker": "tristan",
       "text": "What? You cannot seriously consider that! Use your eyes, man! Do I look like a thief to you?",
-      "next": "tristan_warning"
+      "next": "tristan_losses"
     },
     {
       "id": "player_leave",

@@ -4,7 +4,7 @@
     {
       "node": "gem_returned",
       "when": {
-        "flag": "silverhair_gem_pending",
+        "flag": "have_gem",
         "equals": 1
       }
     },
@@ -509,6 +509,9 @@
     },
     {
       "id": "silverhair_calls_gem_worthless",
+      "actions": [
+        { "op": "set_bits", "flag": "gem_worthless", "value": 1 }
+      ],
       "speaker": "silverhair",
       "text": "It cannot be. For this is no Catseye at all, and in fact is hardly worth a fraction of the other stones.",
       "next": "player_confused_by_gem"
@@ -579,8 +582,7 @@
       "id": "silverhair_gem_farewell",
       "speaker": "player",
       "text": "I will try to be worthy of your trust, Lady.  I will return once I know more.",
-      "end": true,
-      "on_end": "record_silverhair_gem_assessment"
+      "end": true
     }
   ]
 }

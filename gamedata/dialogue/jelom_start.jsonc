@@ -9,6 +9,56 @@
       }
     },
     {
+      "node": "jelom_door_repeat_evidence",
+      "when": {
+        "all": [
+          {
+            "flag": "at_silverhairs_door",
+            "equals": 1
+          },
+          {
+            "flag": "know_jelom",
+            "equals": 2
+          },
+          {
+            "flag": "know_olivers_noise",
+            "equals": 1
+          },
+          {
+            "flag": "jelom_not_convinced",
+            "equals": 0
+          },
+          {
+            "flag": "jelom_allows_meddling",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "node": "jelom_door_repeat_retry",
+      "when": {
+        "all": [
+          {
+            "flag": "at_silverhairs_door",
+            "equals": 1
+          },
+          {
+            "flag": "know_jelom",
+            "equals": 2
+          },
+          {
+            "flag": "know_talan_singing",
+            "equals": 2
+          },
+          {
+            "flag": "jelom_not_convinced",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
       "node": "jelom_door_repeat",
       "when": {
         "all": [
@@ -28,6 +78,48 @@
       "when": {
         "flag": "at_silverhairs_door",
         "equals": 1
+      }
+    },
+    {
+      "node": "repeat_greeting_evidence",
+      "when": {
+        "all": [
+          {
+            "flag": "know_jelom",
+            "equals": 2
+          },
+          {
+            "flag": "know_olivers_noise",
+            "equals": 1
+          },
+          {
+            "flag": "jelom_not_convinced",
+            "equals": 0
+          },
+          {
+            "flag": "jelom_allows_meddling",
+            "equals": 1
+          }
+        ]
+      }
+    },
+    {
+      "node": "repeat_greeting_retry",
+      "when": {
+        "all": [
+          {
+            "flag": "know_jelom",
+            "equals": 2
+          },
+          {
+            "flag": "know_talan_singing",
+            "equals": 2
+          },
+          {
+            "flag": "jelom_not_convinced",
+            "equals": 1
+          }
+        ]
       }
     },
     {
@@ -73,13 +165,6 @@
             "flag": "know_jelom",
             "equals": 0
           },
-          "actions": [
-            {
-              "op": "set",
-              "flag": "know_jelom",
-              "value": 2
-            }
-          ],
           "next": "challenge_identity"
         },
         {
@@ -87,13 +172,6 @@
             "flag": "know_jelom",
             "equals": 1
           },
-          "actions": [
-            {
-              "op": "set",
-              "flag": "know_jelom",
-              "value": 2
-            }
-          ],
           "next": "known_identity"
         }
       ],
@@ -115,7 +193,14 @@
       "id": "jelom_identifies",
       "speaker": "jelom",
       "text": "My name is Jelom, and I am the chief of the guard at Waste's Edge! Who the hell are you?",
-      "next": "player_introduces"
+      "choices": [
+        {
+          "next": "demand_entry"
+        },
+        {
+          "next": "player_introduces"
+        }
+      ]
     },
     {
       "id": "known_identity",
@@ -127,7 +212,14 @@
       "id": "jelom_asks_identity",
       "speaker": "jelom",
       "text": "Who are you, and why were you looking for me?",
-      "next": "player_introduces"
+      "choices": [
+        {
+          "next": "demand_entry"
+        },
+        {
+          "next": "player_introduces"
+        }
+      ]
     },
     {
       "id": "player_introduces",
@@ -149,73 +241,38 @@
       "id": "player_defends_silverhair",
       "speaker": "player",
       "text": "My mistress has been wrongly accused, and I intend to clear her name.",
-      "next": "jelom_relents"
+      "responses": [
+        {
+          "node": "jelom_relents",
+          "when": {
+            "flag": "jelom_allows_meddling",
+            "equals": 0
+          }
+        }
+      ]
     },
     {
       "id": "jelom_relents",
       "speaker": "jelom",
       "text": "Listen, Half-Elf! The theft and any investigations are business of the guard and none of yours! But by the looks of it, the only way to keep your nose out would be to lock you up.",
-      "next": "jelom_allows_questions"
+      "next": "jelom_allows_questions",
+      "actions": [
+        {
+          "op": "set",
+          "flag": "jelom_allows_meddling",
+          "value": 1
+        },
+        {
+          "op": "set",
+          "flag": "know_jelom",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "jelom_allows_questions",
       "speaker": "jelom",
       "text": "So I won't prevent you from pestering the folk at the Inn. But should you find out anything, you report to me, you understand! Now, what is it you want from me?",
-      "choices": "question_menu"
-    },
-    {
-      "id": "repeat_greeting",
-      "speaker": "jelom",
-      "text": "You again, Half-Elf? What do you want this time?",
-      "choices": [
-        {
-          "text": "Look, Jelom, I found out something that will cast some serious doubt on Lady Silverhair having committed the theft!",
-          "when": {
-            "all": [
-              {
-                "flag": "know_olivers_noise",
-                "equals": 1
-              },
-              {
-                "flag": "know_talan_singing",
-                "equals": 2
-              }
-            ]
-          },
-          "next": "jelom_hears_evidence"
-        },
-        {
-          "text": "Did you know that Talan left his post during the night of the theft?",
-          "when": {
-            "all": [
-              {
-                "flag": "know_talan_singing",
-                "equals": 2
-              },
-              {
-                "flag": "jelom_not_convinced",
-                "equals": 1
-              }
-            ]
-          },
-          "next": "jelom_asks_talan"
-        },
-        {
-          "repeatable": true,
-          "next": "repeat_questions"
-        }
-      ]
-    },
-    {
-      "id": "repeat_questions",
-      "speaker": "player",
-      "text": "Nice to see you again, Jelom. Look, I have some more questions regarding the theft.",
-      "next": "question_menu"
-    },
-    {
-      "id": "question_menu",
-      "speaker": "jelom",
-      "text": "And what might those questions be, Half-Elf?",
       "choices": [
         {
           "text": "I actually have found out something that should interest you.",
@@ -251,22 +308,39 @@
         },
         {
           "when": {
-            "flag": "know_olivers_noise",
-            "equals": 1
-          },
-          "next": "oliver_noise"
-        },
-        {
-          "when": {
-            "flag": "know_alek_eavesdrop",
-            "equals": 1
+            "all": [
+              {
+                "flag": "know_alek_eavesdrop",
+                "equals": 1
+              },
+              {
+                "flag": "know_talan_singing",
+                "not_equals": 2
+              },
+              {
+                "flag": "know_talan_singing",
+                "not_equals": 2
+              }
+            ]
           },
           "next": "alek_eavesdropping"
         },
         {
           "when": {
-            "flag": "ask_packed_gems",
-            "equals": 1
+            "all": [
+              {
+                "flag": "ask_packed_gems",
+                "equals": 1
+              },
+              {
+                "flag": "know_talan_singing",
+                "not_equals": 2
+              },
+              {
+                "flag": "know_talan_singing",
+                "not_equals": 2
+              }
+            ]
           },
           "next": "erek_packed_gems"
         },
@@ -276,9 +350,98 @@
             "not_equals": 2
           },
           "next": "ask_night"
+        }
+      ]
+    },
+    {
+      "id": "repeat_greeting",
+      "speaker": "jelom",
+      "text": "You again, Half-Elf? What do you want this time?",
+      "choices": [
+        {
+          "repeatable": true,
+          "next": "repeat_questions"
+        }
+      ]
+    },
+    {
+      "id": "repeat_questions",
+      "speaker": "player",
+      "text": "Nice to see you again, Jelom. Look, I have some more questions regarding the theft.",
+      "responses": [
+        {
+          "node": "jelom_relents",
+          "when": {
+            "flag": "jelom_allows_meddling",
+            "equals": 0
+          }
         },
         {
-          "next": "demand_entry"
+          "node": "question_menu",
+          "when": {
+            "flag": "jelom_allows_meddling",
+            "equals": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "question_menu",
+      "speaker": "jelom",
+      "text": "And what might those questions be, Half-Elf?",
+      "choices": [
+        {
+          "text": "Did you know that Talan left his post during the night of the theft?",
+          "when": {
+            "all": [
+              {
+                "flag": "know_talan_singing",
+                "equals": 2
+              },
+              {
+                "flag": "jelom_not_convinced",
+                "equals": 1
+              }
+            ]
+          },
+          "next": "jelom_asks_talan"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "flag": "know_alek_eavesdrop",
+                "equals": 1
+              },
+              {
+                "flag": "know_talan_singing",
+                "not_equals": 2
+              }
+            ]
+          },
+          "next": "alek_eavesdropping"
+        },
+        {
+          "when": {
+            "all": [
+              {
+                "flag": "ask_packed_gems",
+                "equals": 1
+              },
+              {
+                "flag": "know_talan_singing",
+                "not_equals": 2
+              }
+            ]
+          },
+          "next": "erek_packed_gems"
+        },
+        {
+          "when": {
+            "flag": "know_talan_singing",
+            "not_equals": 2
+          },
+          "next": "ask_night"
         }
       ]
     },
@@ -459,13 +622,6 @@
           "next": "talan_left_post"
         },
         {
-          "actions": [
-            {
-              "op": "set",
-              "flag": "jelom_not_convinced",
-              "value": 1
-            }
-          ],
           "next": "real_thief"
         }
       ]
@@ -480,7 +636,14 @@
       "id": "child_fantasies",
       "speaker": "jelom",
       "text": "I say this is crap. You'll need better arguments then mere fantasies of a child to convince me. Now don't hold me off my duty!",
-      "end": true
+      "end": true,
+      "actions": [
+        {
+          "op": "set",
+          "flag": "jelom_not_convinced",
+          "value": 1
+        }
+      ]
     },
     {
       "id": "alek_eavesdropping",
@@ -614,7 +777,14 @@
       "id": "get_lost",
       "speaker": "jelom",
       "text": "Now get lost!",
-      "end": true
+      "end": true,
+      "actions": [
+        {
+          "op": "set",
+          "flag": "know_jelom",
+          "value": 2
+        }
+      ]
     },
     {
       "id": "what_harm",
@@ -626,7 +796,7 @@
       "id": "jelom_no_risk",
       "speaker": "jelom",
       "text": "How should I know!? But I'm not taking any risk.",
-      "end": true
+      "next": "get_lost"
     },
     {
       "id": "jelom_door_first",
@@ -658,7 +828,15 @@
           "value": 0
         }
       ],
-      "choices": "repeat_greeting"
+      "choices": [
+        {
+          "next": "demand_entry"
+        },
+        {
+          "repeatable": true,
+          "next": "repeat_questions"
+        }
+      ]
     },
     {
       "id": "jelom_hears_evidence",
@@ -675,6 +853,71 @@
       "speaker": "jelom",
       "text": "What do you mean? Why wasn't he at his post?",
       "choices": "jelom_asks_talan"
+    }
+  ,
+    {
+      "id": "jelom_door_repeat_evidence",
+      "speaker": "jelom",
+      "text": "Stop right there, Half-Elf! You know that you are not allowed in there!",
+      "choices": [
+        {
+          "next": "demand_entry"
+        },
+        {
+          "text": "Look, Jelom, I found out something that will cast some serious doubt on Lady Silverhair having committed the theft!",
+          "next": "jelom_hears_evidence"
+        }
+      ],
+      "actions": [
+        {
+          "op": "set",
+          "flag": "at_silverhairs_door",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "jelom_door_repeat_retry",
+      "speaker": "jelom",
+      "text": "Stop right there, Half-Elf! You know that you are not allowed in there!",
+      "choices": [
+        {
+          "next": "demand_entry"
+        },
+        {
+          "text": "Did you know that Talan left his post during the night of the theft?",
+          "next": "jelom_asks_talan"
+        }
+      ],
+      "actions": [
+        {
+          "op": "set",
+          "flag": "at_silverhairs_door",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "repeat_greeting_evidence",
+      "speaker": "jelom",
+      "text": "You again, Half-Elf? What do you want this time?",
+      "choices": [
+        {
+          "text": "Look, Jelom, I found out something that will cast some serious doubt on Lady Silverhair having committed the theft!",
+          "next": "jelom_hears_evidence"
+        }
+      ]
+    },
+    {
+      "id": "repeat_greeting_retry",
+      "speaker": "jelom",
+      "text": "You again, Half-Elf? What do you want this time?",
+      "choices": [
+        {
+          "text": "Did you know that Talan left his post during the night of the theft?",
+          "next": "jelom_asks_talan"
+        }
+      ]
     }
   ]
 }

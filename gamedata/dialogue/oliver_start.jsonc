@@ -63,11 +63,18 @@
       ]
     },
     {
-      "id": "lady_details", "speaker": "oliver",
+      "id": "lady_details",
+      "speaker": "oliver",
       "text": "Yes, sir. Lady Silverbeard. From Cirdanth. And her two servants! She frightened me a bit, but now she's locked up in her room.",
       "choices": [
-        { "text": "Why would anyone want to lock her up?", "next": "theft" },
-        { "text": "Then you better tell me about the Elven Lady, Oliver.", "next": "theft_story" }
+        {
+          "text": "Why would anyone want to lock her up?",
+          "next": "theft_story"
+        },
+        {
+          "text": "Then you better tell me about the Elven Lady, Oliver.",
+          "next": "theft_story"
+        }
       ]
     },
     {

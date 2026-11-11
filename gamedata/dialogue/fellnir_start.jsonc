@@ -9,6 +9,58 @@
       }
     },
     {
+      "node": "guard_greeting",
+      "when": {
+        "all": [
+          {
+            "flag": "know_jelom",
+            "equals": 2
+          },
+          {
+            "flag": "silverhair_talked",
+            "equals": 0
+          }
+        ]
+      }
+    },
+    {
+      "node": "fingolson_greeting",
+      "when": {
+        "flag": "bjarn_door_open",
+        "equals": 1
+      }
+    },
+    {
+      "node": "noise_greeting",
+      "when": {
+        "all": [
+          {
+            "flag": "know_noise",
+            "not_equals": 0
+          },
+          {
+            "flag": "know_talan_singing",
+            "equals": 0
+          }
+        ]
+      }
+    },
+    {
+      "node": "lucia_greeting",
+      "when": {
+        "all": [
+          {
+            "flag": "lucia_refuses_key",
+            "equals": 1
+          },
+          {
+            "flag": "pantry_locked",
+            "not_equals": 2
+          }
+        ]
+      }
+    },
+    {
       "node": "question_menu"
     }
   ],
@@ -78,75 +130,19 @@
     {
       "id": "question_menu",
       "speaker": "fellnir",
-      "text": "Fellnir keeps working, only occasionally glancing in your direction.",
+      "text": "What do you want from me? I don't know anything.",
       "choices": [
-        {
-          "text": "Excuse me? I realize you know nothing of the theft, but you must know the people of this inn well enough. Is there any way the guard could be convinced to allow me into my Lady's room?",
-          "when": {
-            "all": [
-              {
-                "flag": "know_jelom",
-                "equals": 2
-              },
-              {
-                "flag": "silverhair_talked",
-                "equals": 0
-              }
-            ]
-          },
-          "next": "guard_advice"
-        },
-        {
-          "text": "Pardon me, good sir? I hate to trouble you, but do you know this Fingolson well? I need to enter his room but he will not allow me.",
-          "when": {
-            "flag": "bjarn_door_open",
-            "equals": 1
-          },
-          "next": "fingolson_advice"
-        },
-        {
-          "text": "Do you know anything about strange noises the night of the theft?",
-          "when": {
-            "all": [
-              {
-                "flag": "know_noise",
-                "has_bits": 2
-              },
-              {
-                "flag": "know_talan_singing",
-                "equals": 0
-              }
-            ]
-          },
-          "next": "noise_answer"
-        },
-        {
-          "text": "You've been such a great help sir, I hate to bother you again. But I seem to have angered the innkeeper's wife, and I need her help. Have you any advice?",
-          "when": {
-            "all": [
-              {
-                "flag": "lucia_refuses_key",
-                "equals": 1
-              },
-              {
-                "flag": "pantry_locked",
-                "equals": 1
-              }
-            ]
-          },
-          "next": "lucia_advice"
-        },
         {
           "text": "I'm still trying to find information that may help my employer. Are you certain you cannot help?",
           "repeatable": true,
-          "next": "generic_reaction"
+          "next": "first_reaction"
         }
       ]
     },
     {
       "id": "guard_advice",
       "speaker": "narrator",
-      "text": "Fellnir doesn't even look up at you as you speak.  He mutters a little, \"Take equal parts of vitriol, nitre and sal ammoniac ...\"  Then he speaks more clearly to you.",
+      "text": "Fellnir pours a blueish liquid into one primarily red, and the resulting mixture turns inexplicably green. He swirls it before his eyes for a moment, then takes a sip. By the look on his face, it doesn't taste very good.",
       "next": "guard_answer"
     },
     {
@@ -170,7 +166,7 @@
     {
       "id": "lucia_advice",
       "speaker": "narrator",
-      "text": "Fellnir pours a blueish liquid into one primarily red, and the resulting mixture turns inexplicably green. He swirls it before his eyes for a moment, then takes a sip. By the look on his face, it doesn't taste very good.",
+      "text": "Fellnir doesn't even look up at you as you speak.  He mutters a little, \"Take equal parts of vitriol, nitre and sal ammoniac ...\"  Then he speaks more clearly to you.",
       "next": "lucia_answer"
     },
     {
@@ -183,13 +179,58 @@
       "id": "generic_reaction",
       "speaker": "narrator",
       "text": "As you finish your question, bubbles begin appearing in a bottle that has no visible flame under it.  It boils for a few moments, until suddenly there is a puff of steam and half the liquid vanishes.  Fellnir is not impressed at this.",
-      "next": "knows_nothing"
+      "next": "noise_answer"
     },
     {
       "id": "noise_answer",
       "speaker": "fellnir",
       "text": "I have better things to do than pay attention to what idle people do with their time.",
-      "end": true
+      "next": "dismissed"
+    }
+  ,
+    {
+      "id": "guard_greeting",
+      "speaker": "fellnir",
+      "text": "What do you want from me? I don't know anything.",
+      "choices": [
+        {
+          "text": "Excuse me? I realize you know nothing of the theft, but you must know the people of this inn well enough. Is there any way the guard could be convinced to allow me into my Lady's room?",
+          "next": "guard_advice"
+        }
+      ]
+    },
+    {
+      "id": "fingolson_greeting",
+      "speaker": "fellnir",
+      "text": "What do you want from me? I don't know anything.",
+      "choices": [
+        {
+          "text": "Pardon me, good sir? I hate to trouble you, but do you know this Fingolson well? I need to enter his room but he will not allow me.",
+          "next": "fingolson_advice"
+        }
+      ]
+    },
+    {
+      "id": "noise_greeting",
+      "speaker": "fellnir",
+      "text": "What do you want from me? I don't know anything.",
+      "choices": [
+        {
+          "text": "Do you know anything about strange noises the night of the theft?",
+          "next": "generic_reaction"
+        }
+      ]
+    },
+    {
+      "id": "lucia_greeting",
+      "speaker": "fellnir",
+      "text": "What do you want from me? I don't know anything.",
+      "choices": [
+        {
+          "text": "You've been such a great help sir, I hate to bother you again. But I seem to have angered the innkeeper's wife, and I need her help. Have you any advice?",
+          "next": "lucia_advice"
+        }
+      ]
     }
   ]
 }

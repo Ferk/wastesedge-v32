@@ -91,16 +91,25 @@
     { "id": "bjarn_backpedals", "speaker": "bjarn",
       "text": "Asleep? I? Certainly not! I was just taking a rest, perhaps. Later I put the pouch with the gems into our luggage, from where the thief - your fine mistress - stole it during the night!",
       "next": "bjarn_ends_packing" },
-    { "id": "bjarn_ends_packing", "speaker": "bjarn",
+    {
+      "id": "bjarn_ends_packing",
+      "speaker": "bjarn",
       "text": "I can't believe I am justifying myself in front of the thief's servant! Why am I talking to you at all! You are not doing anything to retrieve my Chrysoberyls. All you care about is freeing your mistress!",
-      "choices": [
-        { "text": "I will go, but I will remember what you said.",
-          "actions": [{ "op": "set", "flag": "ask_packed_gems", "value": 3 }],
-          "next": "packing_exit" }
+      "next": "packing_exit"
+    },
+    {
+      "id": "packing_exit",
+      "speaker": "bjarn",
+      "text": "You are but wasting my time! Out of my sight you go!",
+      "end": true,
+      "actions": [
+        {
+          "op": "set",
+          "flag": "ask_packed_gems",
+          "value": 3
+        }
       ]
     },
-    { "id": "packing_exit", "speaker": "bjarn",
-      "text": "You are but wasting my time! Out of my sight you go!", "end": true },
 
     { "id": "insult_excuse", "speaker": "bjarn",
       "text": "You blame me for your mistress' absence of humour? All I wanted was to liven up the atmosphere before turning to business. I can see nothing wrong with that. Now please stop wasting my time!",
@@ -160,24 +169,53 @@
           "when": { "flag": "gem_worthless", "equals": 3 }, "next": "dismiss_silverhair" }
       ]
     },
-    { "id": "dismiss_erek", "speaker": "bjarn",
+    {
+      "id": "dismiss_erek",
+      "speaker": "bjarn",
       "text": "Huh? Erek is young and has much to learn yet, so please excuse his mistake. But this gem is a Chrysoberyl Catseye, no doubt. Now hand it over, so I may take it to Jelom.",
-      "next": "keep_evidence" },
-    { "id": "dismiss_silverhair", "speaker": "bjarn",
+      "choices": [
+        {
+          "next": "keep_evidence"
+        },
+        {
+          "next": "gem_exit"
+        }
+      ]
+    },
+    {
+      "id": "dismiss_silverhair",
+      "speaker": "bjarn",
       "text": "The thief? Of course she would say that! Even you cannot be that foolish to take her word over mine. I tell you that this gem is a Chrysoberyl Catseye. Now hand it over, so I can take it to Jelom.",
-      "next": "keep_evidence" },
+      "choices": [
+        {
+          "next": "keep_evidence"
+        },
+        {
+          "next": "gem_exit"
+        }
+      ]
+    },
     { "id": "keep_evidence", "speaker": "player",
       "text": "I'm sorry, but I won't give this piece of evidence out of my hands.",
       "next": "bjarn_concedes" },
-    { "id": "bjarn_concedes", "speaker": "bjarn",
+    {
+      "id": "bjarn_concedes",
+      "speaker": "bjarn",
       "text": "Oh well, it's not as if you could run off with the gem I suppose. You may keep it for now, as long as you see to it that Silverhair gets what she deserves. Now be on your way!",
-      "choices": [
-        { "text": "I will take care of the evidence myself.",
-          "actions": [{ "op": "set", "flag": "bjarn_lies", "value": 1 }],
-          "next": "gem_exit" }
-      ]
+      "actions": [
+        {
+          "op": "set",
+          "flag": "bjarn_lies",
+          "value": 1
+        }
+      ],
+      "end": true
     },
-    { "id": "gem_exit", "speaker": "player",
-      "text": "Don't worry Master Fingolson, I will take care of that myself.", "end": true }
+    {
+      "id": "gem_exit",
+      "speaker": "player",
+      "text": "Don't worry Master Fingolson, I will take care of that myself.",
+      "next": "bjarn_concedes"
+    }
   ]
 }
