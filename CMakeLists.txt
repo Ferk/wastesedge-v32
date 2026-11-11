@@ -80,6 +80,17 @@ add_custom_command(
   COMMENT "Compiling Tiled, JSONC, graphics, and audio content"
   VERBATIM)
 
+# Host regressions exercise the real generated content without console tools.
+add_custom_target(check
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tests.py" --skip-content
+  DEPENDS "${content_stamp}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  USES_TERMINAL
+  VERBATIM)
+enable_testing()
+add_test(NAME host_regressions
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tests.py")
+
 set(runtime_sources
   "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/achievements.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/achievements.c"

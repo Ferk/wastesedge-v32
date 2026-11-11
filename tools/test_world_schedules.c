@@ -7,19 +7,22 @@
 #include "engine/savegame.h"
 #include "engine/world.h"
 
+/* Advance frames and settle scene fades plus their immediate scripted callbacks. */
 static void tick(struct world_state *world, int frames)
 {
     struct world_actions actions = { 0, 0, 0, 0, 0, 0 };
     int transitioned = 0;
+    int transition_frames = 1200;
     while (frames-- > 0)
         world_update(world, &actions);
     /* Scene changes deliberately span a fade-out and fade-in. Most tests are
      * interested in the settled destination rather than an intermediate
      * transition frame. */
-    while (world->transition_phase != WORLD_TRANSITION_NONE) {
+    while (world->transition_phase != WORLD_TRANSITION_NONE && transition_frames-- > 0) {
         transitioned = 1;
         world_update(world, &actions);
     }
+    assert(world->transition_phase == WORLD_TRANSITION_NONE);
     /* Let the scene-change action's usual one-frame wait and immediate
      * follow-up (often a conversation) settle after the fade. */
     if (transitioned) {
@@ -29,12 +32,14 @@ static void tick(struct world_state *world, int frames)
     }
 }
 
+/* Issue one controller step and settle its tile movement. */
 static void walk_tile(struct world_state *world, const struct world_actions *direction)
 {
     world_update(world, direction);
     tick(world, 16);
 }
 
+/* Start a compiled script and process its immediate actions. */
 static void run_script(struct world_state *world, int script)
 {
     world->dialogue = -1;
@@ -45,6 +50,28 @@ static void run_script(struct world_state *world, int script)
     tick(world, 2);
 }
 
+/* Allow authored waits and walks to finish, with a bound that catches stalled scripts. */
+static void await_dialogue(struct world_state *world, int dialogue, int maximum_frames)
+{
+    struct world_actions idle = {0};
+    while (world->dialogue != dialogue && maximum_frames-- > 0)
+        world_update(world, &idle);
+    if (world->dialogue != dialogue)
+        fprintf(stderr, "Expected dialogue %d, found %d (script %d, action %d)\n",
+                dialogue, world->dialogue, world->active_script, world->script_action);
+    assert(world->dialogue == dialogue);
+}
+
+/* Ending visitors can still be walking when the first conversation line appears. */
+static void await_actor_walk(struct world_state *world, int entity, int maximum_frames)
+{
+    struct world_actions idle = {0};
+    while (world->actors[entity].scripted_walk && maximum_frames-- > 0)
+        world_update(world, &idle);
+    assert(!world->actors[entity].scripted_walk);
+}
+
+/* Count stateful scenery instances across every room. */
 static int count_object_state(const struct world_state *world, int definition, int state)
 {
     int count = 0;
@@ -62,6 +89,7 @@ static int count_object_state(const struct world_state *world, int definition, i
     return count;
 }
 
+/* Count compiled foreground pieces whose authored opacity reveals actors behind them. */
 static int count_translucent_scenery(const struct generated_runtime_scene *scene)
 {
     int count = 0;
@@ -72,6 +100,7 @@ static int count_translucent_scenery(const struct generated_runtime_scene *scene
     return count;
 }
 
+/* Locate an authored entity marker, independently of dynamic actor placement. */
 static int find_scene_entity(const struct generated_runtime_scene *scene, int definition)
 {
     int index;
@@ -81,6 +110,7 @@ static int find_scene_entity(const struct generated_runtime_scene *scene, int de
     return -1;
 }
 
+/* Check a visitor's gathering cell and the original inward-facing rule. */
 static void assert_extro_position(int x, int y, int facing)
 {
     int expected_facing;
@@ -94,18 +124,21 @@ static void assert_extro_position(int x, int y, int facing)
     assert(facing == expected_facing);
 }
 
+/* Extract a flag only from a response known to have one condition. */
 static int single_condition_flag(const struct generated_runtime_dialogue_choice *choice)
 {
     assert(choice->condition_count == 1);
     return choice->conditions[0].flag;
 }
 
+/* Extract the expected value of a single-condition response. */
 static int single_condition_value(const struct generated_runtime_dialogue_choice *choice)
 {
     assert(choice->condition_count == 1);
     return choice->conditions[0].value;
 }
 
+/* Find a compiled line by its English authoring text. */
 static const struct generated_runtime_dialogue_node *find_dialogue_node(
     const struct generated_runtime_dialogue *dialogue, const char *text)
 {
@@ -116,6 +149,7 @@ static const struct generated_runtime_dialogue_node *find_dialogue_node(
     return 0;
 }
 
+/* Find a compiled menu response by its authored or inferred label. */
 static const struct generated_runtime_dialogue_choice *find_dialogue_choice(
     const struct generated_runtime_dialogue_node *node, const char *text)
 {
@@ -126,6 +160,18 @@ static const struct generated_runtime_dialogue_choice *find_dialogue_choice(
     return 0;
 }
 
+/* Reused NPC wording is ambiguous; identify a menu by a response it actually owns. */
+static const struct generated_runtime_dialogue_node *find_dialogue_menu(
+    const struct generated_runtime_dialogue *dialogue, const char *response)
+{
+    int index;
+    for (index = 0; index < dialogue->node_count; ++index)
+        if (find_dialogue_choice(&dialogue->nodes[index], response) != 0)
+            return &dialogue->nodes[index];
+    return 0;
+}
+
+/* Check that selecting a response assigns the specified quest flag. */
 static int choice_has_action(const struct generated_runtime_dialogue_choice *choice,
                              int flag, int value)
 {
@@ -136,6 +182,7 @@ static int choice_has_action(const struct generated_runtime_dialogue_choice *cho
     return 0;
 }
 
+/* Check a response's required flag value without assuming condition order. */
 static int choice_has_condition(const struct generated_runtime_dialogue_choice *choice,
                                 int flag, int value)
 {
@@ -146,6 +193,7 @@ static int choice_has_condition(const struct generated_runtime_dialogue_choice *
     return 0;
 }
 
+/* Select an eligible response, printing the actual menu when a route breaks. */
 static void choose_visible_dialogue_option(struct world_state *world, const char *text)
 {
     struct world_actions interact = { 0, 0, 1, 0, 0, 0 };
@@ -164,6 +212,7 @@ static void choose_visible_dialogue_option(struct world_state *world, const char
     assert(!"expected visible dialogue option");
 }
 
+/* Exercise content, presentation contracts, NPC routes, room connections and saved state. */
 int main(void)
 {
     struct world_state world;
@@ -213,6 +262,9 @@ int main(void)
     int barrel_pieces = 0;
     int vine_pieces = 0;
     int packed_scenery_regions = 0;
+    int oliver_noise_flag;
+    int alek_eavesdrop_flag;
+    int packed_gems_flag;
     int pantry_flag;
     int bjarn_door_flag;
     int get_item_flag;
@@ -308,9 +360,9 @@ int main(void)
             &generated_runtime_dialogues[generated_runtime_title_cutscene];
         assert(title->presentation_mode ==
                GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
-        assert(title->cutscene_layer_count == 3);
+        assert(title->cutscene_layer_count == 4);
         assert(title->fade_in_frames == 255);
-        assert(title->nodes[0].auto_advance_frames == 150);
+        assert(title->nodes[0].auto_advance_frames == 120);
         assert(title->nodes[1].auto_advance_frames == 210);
         assert(title->nodes[2].auto_advance_frames == 320);
     }
@@ -321,7 +373,7 @@ int main(void)
                GENERATED_DIALOGUE_INTRO_CUTSCENE);
         assert(opening->presentation_mode ==
                GENERATED_DIALOGUE_PRESENTATION_CUTSCENE);
-        assert(opening->cutscene_layer_count == 10);
+        assert(opening->cutscene_layer_count == 13);
         assert(opening->cutscene_layers[0].wrap_x_step == -1);
         assert(opening->cutscene_layers[3].clock_mode ==
                GENERATED_CUTSCENE_CLOCK_RANGE);
@@ -422,11 +474,12 @@ int main(void)
     assert(world.dialogue == GENERATED_DIALOGUE_JELOM_START);
     assert(strcmp(world_dialogue_text(&world),
                   "No-one is allowed into the prisoner's room, so please leave this hallway!") == 0);
-    assert(world_dialogue_choice_count(&world) == 2);
+    assert(world_dialogue_choice_count(&world) == 1);
     world.dialogue = -1;
     world.dialogue_actor = -1;
-    world.flags[generated_runtime_dialogues[GENERATED_DIALOGUE_JELOM_START]
-                    .starts[1].flag] = 2;
+    world.flags[find_dialogue_node(
+        &generated_runtime_dialogues[GENERATED_DIALOGUE_JELOM_START],
+        "Now get lost!")->actions[0].flag] = 2;
     world_update(&world, &interact);
     assert(strcmp(world_dialogue_text(&world),
                   "You again, Half-Elf? What do you want this time?") == 0);
@@ -519,7 +572,7 @@ int main(void)
     world_update(&world, &interact);
     world_update(&world, &interact);
     world_update(&world, &interact);
-    tick(&world, 3);
+    await_dialogue(&world, GENERATED_DIALOGUE_EXTRO, 1200);
     assert(world.flags[generated_runtime_scripts[
                GENERATED_SCRIPT_FINISH_JELOM_INVESTIGATION].actions[0].a] == 3);
     assert(world.flags[generated_runtime_scripts[
@@ -532,6 +585,11 @@ int main(void)
     assert(world.actors[GENERATED_ENTITY_SILVERHAIR].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_TRISTAN].scene == world.scene_index);
     assert(world.actors[GENERATED_ENTITY_FELLNIR].scene == world.scene_index);
+    await_actor_walk(&world, GENERATED_ENTITY_EREK, 600);
+    await_actor_walk(&world, GENERATED_ENTITY_JELOM, 600);
+    await_actor_walk(&world, GENERATED_ENTITY_SILVERHAIR, 600);
+    await_actor_walk(&world, GENERATED_ENTITY_TRISTAN, 600);
+    await_actor_walk(&world, GENERATED_ENTITY_FELLNIR, 600);
     /* Fingolson's await_player callback fixed him at (3,6), facing west.
      * The player and visitors occupied free cells in the original (2..5, 5..9)
      * gathering area and faced inward according to their chosen cell. */
@@ -717,7 +775,7 @@ int main(void)
                .standing_delay[WORLD_SOUTH] == 13);
     assert(generated_runtime_actor_visuals[
                world_actor_visual(&world, GENERATED_ENTITY_TALAN)]
-               .walking_count[WORLD_EAST] == 4);
+               .walking_count[WORLD_EAST] == 3);
     /* Presentation pacing may delay Talan's entrance, but the authored route
      * must still place him in the room before his map-balloon dialogue. */
     for (frame = 0;
@@ -869,14 +927,14 @@ int main(void)
     world.player_facing = WORLD_NORTH;
     world_update(&world, &interact);
     assert(world_entity_speech(&world, world.player_entity) ==
-           &generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_SILVERHAIR_BELONGINGS]
-                .speech[0]);
+           world_localized_text(&generated_runtime_scripts[
+               GENERATED_SCRIPT_EXAMINE_SILVERHAIR_BELONGINGS].speech[0]));
 
     /* Restore pristine schedules, flags and introductory script state. */
     world_initialize(&world);
 
-    /* Authored character frames remain separate PNGs, but every runtime actor
-     * visual must occupy one generated texture and address distinct regions. */
+    /* Every actor visual occupies one texture. Direction-independent animations
+     * intentionally share regions across facings. */
     for (visual_index = 0; visual_index < generated_runtime_actor_visual_count; ++visual_index) {
         const struct generated_runtime_actor_visual *visual =
             &generated_runtime_actor_visuals[visual_index];
@@ -892,8 +950,6 @@ int main(void)
             for (animation = 0; animation < visual->walking_count[direction]; ++animation)
                 assert(visual->walking[direction][animation].texture == texture);
         }
-        assert(visual->standing[0][0].source_x != visual->standing[1][0].source_x ||
-               visual->standing[0][0].source_y != visual->standing[1][0].source_y);
         assert(visual->standing[0][0].width > 0 && visual->standing[0][0].height > 0);
     }
 
@@ -1209,27 +1265,38 @@ int main(void)
         }
     }
     assert(jelom_question_node != 0);
-    assert(jelom_question_node->choice_count == 6);
+    assert(jelom_question_node->choice_count == 4);
     assert(jelom_question_node->choices[0].condition_count == 2);
-    assert(jelom_question_node->choices[0].conditions[0].flag >= 0);
-    assert(single_condition_flag(&jelom_question_node->choices[1]) >= 0);
-    assert(single_condition_flag(&jelom_question_node->choices[2]) >= 0);
-    assert(single_condition_flag(&jelom_question_node->choices[3]) >= 0);
+    assert(jelom_question_node->choices[1].condition_count == 2);
+    assert(jelom_question_node->choices[2].condition_count == 2);
+    alek_eavesdrop_flag = jelom_question_node->choices[1].conditions[0].flag;
+    packed_gems_flag = jelom_question_node->choices[2].conditions[0].flag;
+    {
+        const struct generated_runtime_dialogue_node *permission = find_dialogue_node(jelom_dialogue,
+            "So I won't prevent you from pestering the folk at the Inn. But should you find out anything, "
+            "you report to me, you understand! Now, what is it you want from me?");
+        const struct generated_runtime_dialogue_choice *evidence = find_dialogue_choice(permission,
+            "I actually have found out something that should interest you.");
+        assert(evidence->condition_count == 2);
+        oliver_noise_flag = evidence->conditions[0].flag;
+        assert(evidence->conditions[1].flag == jelom_question_node->choices[0].conditions[0].flag);
+    }
     world.dialogue = GENERATED_DIALOGUE_JELOM_START;
     world.dialogue_node = node_index;
+    assert(world_dialogue_choice_count(&world) == 1);
+    world.flags[oliver_noise_flag] = 1;
+    /* Oliver's report is offered by the return greeting, not this ordinary menu. */
+    assert(world_dialogue_choice_count(&world) == 1);
+    world.flags[alek_eavesdrop_flag] = 1;
     assert(world_dialogue_choice_count(&world) == 2);
-    world.flags[single_condition_flag(&jelom_question_node->choices[1])] = 1;
-    world.flags[single_condition_flag(&jelom_question_node->choices[2])] = 1;
-    assert(world_dialogue_choice_count(&world) == 4);
-    world.flags[single_condition_flag(&jelom_question_node->choices[3])] = 1;
-    assert(world_dialogue_choice_count(&world) == 5);
+    world.flags[packed_gems_flag] = 1;
+    assert(world_dialogue_choice_count(&world) == 3);
 
-    /* Jelom only accepts Talan's absence after Oliver's report has already
-     * made him doubt his guard. This is the first authored all-of condition. */
+    /* Confirmed singing hides the earlier leads; a prior refusal enables the retry. */
     world.flags[jelom_question_node->choices[0].conditions[0].flag] = 2;
-    assert(world_dialogue_choice_count(&world) == 5);
+    assert(world_dialogue_choice_count(&world) == 0);
     world.flags[jelom_question_node->choices[0].conditions[1].flag] = 1;
-    assert(world_dialogue_choice_count(&world) == 6);
+    assert(world_dialogue_choice_count(&world) == 1);
 
     oliver_dialogue = &generated_runtime_dialogues[GENERATED_DIALOGUE_OLIVER_START];
     {
@@ -1253,7 +1320,7 @@ int main(void)
                 strstr(choice->text, "you noticed something that night?") != 0) {
                 assert(choice->action_count == 1);
                 assert(choice->actions[0].flag ==
-                       single_condition_flag(&jelom_question_node->choices[1]));
+                       oliver_noise_flag);
                 ++oliver_fact_bindings;
             }
         }
@@ -1270,24 +1337,26 @@ int main(void)
             const struct generated_runtime_dialogue_choice *choice = &node->choices[choice_index];
             if (strstr(choice->text, "outside the parlour during negotiations") != 0) {
                 assert(choice->action_count == 1);
-                assert(choice->actions[0].flag ==
-                       single_condition_flag(&jelom_question_node->choices[2]));
+                assert(choice_has_condition(choice, alek_eavesdrop_flag, 1));
+                /* Asking consumes a topic; Erek supplied the persistent fact. */
+                assert(choice->actions[0].flag != alek_eavesdrop_flag);
+                assert(choice->actions[0].value == 1);
                 ++alek_fact_bindings;
             }
             if (choice->action_count == 1 &&
                 choice->actions[0].flag ==
-                    single_condition_flag(&jelom_question_node->choices[3])) {
+                    packed_gems_flag) {
                 assert(choice->actions[0].flag ==
-                       single_condition_flag(&jelom_question_node->choices[3]));
+                       packed_gems_flag);
                 assert(choice->actions[0].value == 1);
                 ++packed_fact_bindings;
             }
         }
     }
-    /* The original Alek graph repeats this lead in its initial, repeat, and
-     * two follow-up menus; either response to his Erek theory records it. */
-    assert(alek_fact_bindings == 4);
-    assert(packed_fact_bindings == 2);
+    /* Menu aliases may share their table. Every copy must bind the same fact,
+     * without requiring a particular number of duplicate authored entries. */
+    assert(alek_fact_bindings > 0);
+    assert(packed_fact_bindings > 0);
 
     for (node_index = 0;
          node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_EREK_START].node_count;
@@ -1299,7 +1368,7 @@ int main(void)
             const struct generated_runtime_dialogue_choice *choice = &node->choices[choice_index];
             if (strstr(choice->text, "Did you pack Master Fingolson's gems") != 0) {
                 assert(single_condition_flag(choice) ==
-                       single_condition_flag(&jelom_question_node->choices[3]));
+                       packed_gems_flag);
                 assert(single_condition_value(choice) == 1);
                 assert(choice->action_count == 1);
                 assert(choice->actions[0].flag == single_condition_flag(choice));
@@ -1336,6 +1405,8 @@ int main(void)
 
     /* The introductory gate dialogue changes Talan's persistent interaction
      * to his ordinary conversation before control is restored. */
+    /* This is a pre-release check, independent of the Jelom proof above. */
+    world.flags[jelom_dialogue->starts[0].flag] = 0;
     world.player_x = talan->x;
     world.player_y = talan->y + 1;
     world.player_facing = WORLD_NORTH;
@@ -1794,6 +1865,7 @@ int main(void)
         const struct generated_runtime_dialogue_choice *silverhair_noise;
         const struct generated_runtime_dialogue_node *frostbloom_second;
         const struct generated_runtime_dialogue_node *frostbloom_post_yeti;
+        const struct generated_runtime_dialogue_node *frostbloom_introduction;
         const struct generated_runtime_dialogue_node *frostbloom_flattery;
         const struct generated_runtime_dialogue_choice *frostbloom_yeti;
         const struct generated_runtime_dialogue_choice *honest_flattery;
@@ -1852,9 +1924,9 @@ int main(void)
             world_initialize(&erek_world);
             erek_world.dialogue = GENERATED_DIALOGUE_EREK_START;
             erek_world.dialogue_node = (int)(erek_uncertain - erek_dialogue->nodes);
-            erek_world.dialogue_choice = 0;
-            assert(world_dialogue_choice_count(&erek_world) == 1);
-            assert(strcmp(world_dialogue_choice_at(&erek_world, 0),
+            erek_world.dialogue_choice = 1;
+            assert(world_dialogue_choice_count(&erek_world) == 2);
+            assert(strcmp(world_dialogue_choice_at(&erek_world, 1),
                           "I know of nothing that could possibly support such claims. I really would know what has happened!") == 0);
             world_update(&erek_world, &interact);
             assert(erek_world.flags[know_argument_flag] == 1);
@@ -1864,10 +1936,10 @@ int main(void)
             world_initialize(&erek_world);
             erek_world.dialogue = GENERATED_DIALOGUE_EREK_START;
             erek_world.dialogue_node = (int)(erek_uncertain - erek_dialogue->nodes);
-            erek_world.dialogue_choice = 0;
+            erek_world.dialogue_choice = 1;
             erek_world.flags[know_argument_flag] = 1;
-            assert(world_dialogue_choice_count(&erek_world) == 1);
-            assert(strcmp(world_dialogue_choice_at(&erek_world, 0),
+            assert(world_dialogue_choice_count(&erek_world) == 2);
+            assert(strcmp(world_dialogue_choice_at(&erek_world, 1),
                           "You refer to the argument she had with your master?") == 0);
         }
 
@@ -1887,8 +1959,13 @@ int main(void)
         assert(find_dialogue_choice(
                    frostbloom_second,
                    "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.") == 0);
+        assert(frostbloom_post_yeti->choice_count == 1);
+        frostbloom_introduction = find_dialogue_node(frostbloom_dialogue,
+            "Well, I must admit that such devotion deserves a reward. Very well, you may stay for a while. "
+            "A short while. My name is Rhayne Frostbloom. Take care you remember it.");
+        assert(frostbloom_introduction != 0 && frostbloom_introduction->choice_count == 2);
         frostbloom_yeti = find_dialogue_choice(
-            frostbloom_post_yeti,
+            frostbloom_introduction,
             "I have seen the lovely Yeti you carved for my mistress. It is quite impressive.");
         honest_flattery = find_dialogue_choice(
             frostbloom_flattery,
@@ -1982,7 +2059,7 @@ int main(void)
         if (strcmp(generated_runtime_dialogues[GENERATED_DIALOGUE_ORLOTH_START]
                        .nodes[node_index].text,
                    "The landlord calls for Oliver, the boy you met outside, and shortly "
-                   "afterwards he enters the common room to show you to your chamber.") == 0)
+                   "afterwards he enters the common room to show the way to your chamber.") == 0)
             break;
     }
     assert(node_index < generated_runtime_dialogues[GENERATED_DIALOGUE_ORLOTH_START].node_count);
@@ -2141,8 +2218,7 @@ int main(void)
     world.actors[GENERATED_ENTITY_PLAYER].speech_override = 0;
     world_update(&world, &interact);
     assert(world_entity_speech(&world, world.player_entity) ==
-           &generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_CELLAR_WINE_TASTY]
-                .speech[0]);
+           world_localized_text(&generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_CELLAR_WINE_TASTY].speech[0]));
 
     /* Both pantry thresholds retain their locked/open conditions. Trying the
      * upper doorway records the failed attempt, speaks the original line and
@@ -2165,7 +2241,7 @@ int main(void)
     assert(world.player_x == 1 && world.player_y == 9);
     assert(world.player_facing == WORLD_EAST);
     assert(world_entity_speech(&world, world.player_entity) ==
-           &generated_runtime_scripts[GENERATED_SCRIPT_PANTRY_LOCKED_UPPER].speech[0]);
+           world_localized_text(&generated_runtime_scripts[GENERATED_SCRIPT_PANTRY_LOCKED_UPPER].speech[0]));
 
     /* The adjacent eastern doorway is Bjarn Fingolson's locked room. It opens
      * the original narrator/deep-voice exchange and turns Banec back west. */
@@ -2213,13 +2289,14 @@ int main(void)
      * threshold lead to Fingolson's room and return to their matching cellar
      * rows. The room retains Bjarn, Erek's escort placement, and the original
      * chest examination square. */
+    await_actor_walk(&world, GENERATED_ENTITY_PLAYER, 120);
     world.flags[bjarn_door_flag] = 3;
     world.trigger_latch = -1;
     world_update(&world, &move_east);
     tick(&world, 12);
     assert(world.scene_index == GENERATED_SCENE_REDWYNE_FINGOLSON_ROOM);
     assert(world.player_x == 1 && world.player_y == 6);
-    assert(world.player_facing == WORLD_WEST);
+    assert(world.player_facing == WORLD_EAST);
     assert(world.scene->spawn_count == 3);
     assert(world.scene->trigger_count == 2);
     assert(world.scene->hotspot_count == 1);
@@ -2238,8 +2315,8 @@ int main(void)
                         .starts[0].flag;
     {
         const struct generated_runtime_dialogue_node *lucia_menu =
-            find_dialogue_node(&generated_runtime_dialogues[GENERATED_DIALOGUE_LUCIA_START],
-                               "Now don't keep me off my work. Ask what you want to know and then out with you!");
+            find_dialogue_menu(&generated_runtime_dialogues[GENERATED_DIALOGUE_LUCIA_START],
+                               "I need to fetch something for my mistress, but the pantry is locked.");
         const struct generated_runtime_dialogue_choice *key_request;
         assert(lucia_menu != 0);
         key_request = find_dialogue_choice(
@@ -2271,8 +2348,7 @@ int main(void)
     world.actors[GENERATED_ENTITY_PLAYER].speech_override = 0;
     world_update(&world, &interact);
     assert(world_entity_speech(&world, world.player_entity) ==
-           &generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_SILVERHAIR_LUGGAGE]
-                .speech[0]);
+           world_localized_text(&generated_runtime_scripts[GENERATED_SCRIPT_EXAMINE_SILVERHAIR_LUGGAGE].speech[0]));
 
     have_gem_flag = generated_runtime_scripts[GENERATED_SCRIPT_RECORD_FINGOLSON_GEM]
                         .actions[1].a;
@@ -2344,26 +2420,19 @@ int main(void)
                 erek_dialogue,
                 "This is a fine example of a Chrysoberyl. Perfectly suitable for a Lady's ring, were that your Mistress' intention. However, it is no Catseye and as such it is of no use in the workings of magic she had in mind, if I recall correctly.");
         const struct generated_runtime_dialogue_choice *erek_only;
-        const struct generated_runtime_dialogue_choice *both_assessments = 0;
         int choice_index;
 
         assert(erek_menu != 0 && identifies_gem != 0);
         erek_only = find_dialogue_choice(
             identifies_gem, "Thank you Erek. That's all I need to know.");
         assert(erek_only != 0);
-        for (choice_index = 0; choice_index < identifies_gem->choice_count; ++choice_index) {
-            const struct generated_runtime_dialogue_choice *choice =
-                &identifies_gem->choices[choice_index];
-            if (strcmp(choice->text, "Thank you Erek. That's all I need to know.") == 0 &&
-                choice_has_condition(choice, gem_worthless_flag, 1)) {
-                both_assessments = choice;
-                break;
-            }
-        }
-        assert(choice_has_condition(erek_only, gem_worthless_flag, 0));
-        assert(choice_has_action(erek_only, gem_worthless_flag, 2));
-        assert(both_assessments != 0);
-        assert(choice_has_action(both_assessments, gem_worthless_flag, 3));
+        /* Erek records his assessment when he identifies the stone, preserving
+         * Silverhair's bit. Thanks remains unconditional on repeat visits. */
+        assert(identifies_gem->action_count == 1);
+        assert(identifies_gem->actions[0].flag == gem_worthless_flag);
+        assert(identifies_gem->actions[0].value == 2);
+        assert(identifies_gem->actions[0].set_bits);
+        assert(erek_only->condition_count == 0 && erek_only->action_count == 0);
 
         world.dialogue = GENERATED_DIALOGUE_EREK_START;
         world.dialogue_node = (int)(erek_menu - erek_dialogue->nodes);

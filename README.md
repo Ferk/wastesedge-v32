@@ -27,6 +27,17 @@ setting.
 The build first compiles editable Tiled/JSONC content and source assets from
 `gamedata/` into reproducible files under `generated/`.
 
+## Testing
+
+```sh
+cmake --build build --target check
+```
+
+This runs all host C and Python regression tests against regenerated content.
+It requires a host C compiler (`cc`, or set `CC`). You can also run
+`python3 tools/run_tests.py` directly, or use `ctest --test-dir build`.
+These checks complement an emulator playthrough.
+
 ## Controls
 
 - D-pad: move, or select a menu/dialogue choice.
