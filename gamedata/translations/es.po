@@ -963,8 +963,8 @@ msgid ""
 "seen to be guilty. The truth is that she is the thief and that is all there "
 "is to it."
 msgstr ""
-"Te va a costar un buen trabajo lograrlo. La dama es culpable y todo apunta "
-"a su culpabilidad. La verdad es que ella es la ladrona y no hay más que "
+"Te va a costar un buen trabajo lograrlo. La dama es culpable y se le ha "
+"considerado culpable. La verdad es que fue ella la ladrona y no hay más que "
 "hablar."
 
 #: scripts/dialogues/demo_intro_1.py:28

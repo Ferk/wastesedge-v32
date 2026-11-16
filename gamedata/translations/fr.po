@@ -2240,7 +2240,6 @@ msgid "You do! And you knew of her business."
 msgstr "Vous ! Et vous connaissiez ce qu'elle faisait ici."
 
 #: scripts/dialogues/extro.py:50
-#, fuzzy
 #| msgid ""
 #| "That ... I ... - Master Rasgar, you are not going to believe in this ..., "
 #| "this infamy, are you? Since my arrival at this depraved place I am being "
@@ -2252,7 +2251,7 @@ msgid ""
 msgstr ""
 "C'est... Je... - Maître Rasgar, vous n'allez pas croire cette... cette "
 "infamie ? Depuis mon arrivée dans ce lieu de perdition j'ai été en "
-"permanence insulté !"
+"permanence insultée !"
 
 #: scripts/dialogues/extro.py:51
 msgid ""
@@ -8058,3 +8057,75 @@ msgstr "Mais Dame Frostbloom a a entendu quelque chose au dehors de l'auberge."
 #. Original Lucia witness variant.
 msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
 msgstr "Mais et Dame Silverhair et Dame Frostbloom ont a entendu quelque chose au dehors de l'auberge."
+
+#. Vircon32 interface.
+msgid "Back to Title"
+msgstr "Retour au titre"
+
+#. Vircon32 interface.
+msgid "Card Belongs to Another Game"
+msgstr "Carte utilisée par un autre jeu"
+
+#. Vircon32 interface.
+msgid "Could Not Save Game"
+msgstr "Impossible de sauvegarder"
+
+#. Vircon32 interface.
+msgid "Credits"
+msgstr "Crédits"
+
+#. Vircon32 interface.
+msgid "Day"
+msgstr "Jour"
+
+#. Vircon32 interface.
+msgid "Empty"
+msgstr "Vide"
+
+#. Vircon32 interface.
+msgid "Empty Slot"
+msgstr "Emplacement vide"
+
+#. Vircon32 interface.
+msgid "Epilogue"
+msgstr "Épilogue"
+
+#. Vircon32 interface.
+msgid "Error"
+msgstr "Erreur"
+
+#. Vircon32 interface.
+msgid "Game Paused"
+msgstr "Jeu en pause"
+
+#. Vircon32 interface.
+msgid "Game Saved"
+msgstr "Partie sauvegardée"
+
+#. Vircon32 interface.
+msgid "Incompatible Save"
+msgstr "Sauvegarde incompatible"
+
+#. Vircon32 interface.
+msgid "No Memory Card"
+msgstr "Aucune carte mémoire"
+
+#. Vircon32 interface.
+msgid "Save Data Is Corrupt"
+msgstr "Sauvegarde corrompue"
+
+#. Vircon32 interface.
+msgid "Save Is from Another Build"
+msgstr "Sauvegarde d'une autre version"
+
+#. Vircon32 interface.
+msgid "Select Language"
+msgstr "Choisir la langue"
+
+#. Vircon32 interface.
+msgid "Slot"
+msgstr "Emplacement"
+
+#. Vircon32 interface.
+msgid "Title"
+msgstr "Titre"

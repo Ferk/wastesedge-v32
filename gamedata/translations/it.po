@@ -2767,7 +2767,6 @@ msgstr ""
 "liberarla?"
 
 #: scripts/dialogues/janesta_start.py:10
-#, fuzzy
 msgid ""
 "I will try, Janesta.  But you must be brave.  This is a difficult time for "
 "Lady Silverhair, and she needs us all to help her through."
@@ -7342,88 +7341,88 @@ msgstr "Una vecchia cassa vuota!"
 
 #: scripts/modules/achievement_screen.py:33
 msgid "Sommelier"
-msgstr ""
+msgstr "Sommelier"
 
 #: scripts/modules/achievement_screen.py:33
 msgid "You know a good drop when you taste it"
-msgstr ""
+msgstr "Sai riconoscere un buon vino"
 
 #: scripts/modules/achievement_screen.py:34
 msgid "Conversationalist"
-msgstr ""
+msgstr "Conversatore"
 
 #: scripts/modules/achievement_screen.py:34
 msgid "None will escape your silver tongue"
-msgstr ""
+msgstr "Nessuno resiste alla tua parlantina"
 
 #: scripts/modules/achievement_screen.py:35
 msgid "Keeper of secrets"
-msgstr ""
+msgstr "Custode di segreti"
 
 #: scripts/modules/achievement_screen.py:35
 msgid "Embarrassing confessions are safe with you"
-msgstr ""
+msgstr "Le confessioni imbarazzanti sono al sicuro con te"
 
 #: scripts/modules/achievement_screen.py:36
 msgid "Revealer of truth"
-msgstr ""
+msgstr "Rivelatore della verità"
 
 #: scripts/modules/achievement_screen.py:36
 msgid "Under your vigilant eye, no wrongdoing stays hidden"
-msgstr ""
+msgstr "Al tuo sguardo vigile non sfugge alcun misfatto"
 
 #: scripts/modules/achievement_screen.py:37
 msgid "Trusty servant"
-msgstr ""
+msgstr "Servitore fidato"
 
 #: scripts/modules/achievement_screen.py:37
 msgid "As always, you keep your mistress out of harm's way"
-msgstr ""
+msgstr "Come sempre, proteggi la tua signora dai pericoli"
 
 #: scripts/modules/achievement_screen.py:38
 msgid "Yetin acolyte"
-msgstr ""
+msgstr "Accolito yetin"
 
 #: scripts/modules/achievement_screen.py:38
 msgid "You walk the path of the yetin spirit"
-msgstr ""
+msgstr "Segui il cammino dello spirito yetin"
 
 #: scripts/modules/achievement_screen.py:39
 msgid "Master detective"
-msgstr ""
+msgstr "Maestro investigatore"
 
 #: scripts/modules/achievement_screen.py:39
 msgid "Your inquisitive powers lead you to the right conclusions"
-msgstr ""
+msgstr "Il tuo intuito ti porta alle giuste conclusioni"
 
 #: scripts/modules/achievement_screen.py:40
 msgid "Gem-bearer"
-msgstr ""
+msgstr "Portatore della gemma"
 
 #: scripts/modules/achievement_screen.py:40
 msgid "What is thought to be lost, you already discovered"
-msgstr ""
+msgstr "Hai già trovato ciò che si credeva perduto"
 
 #: scripts/modules/achievement_screen.py:41
 msgid "Paragon of virtue"
-msgstr ""
+msgstr "Modello di virtù"
 
 #: scripts/modules/achievement_screen.py:41
 msgid "Neither lie nor deceit parts your lips"
-msgstr ""
+msgstr "Nessuna menzogna esce dalle tue labbra"
 
 #: scripts/modules/achievement_screen.py:42
 msgid "Leet haxor"
-msgstr ""
+msgstr "Hacker provetto"
 
 #: scripts/modules/achievement_screen.py:42
 msgid "Your hex editing skillz are unparalleled ... or your disk broken"
-msgstr ""
+msgstr "La tua abilità con gli editor esadecimali è insuperabile... o il disco è rotto"
 
 #: scripts/modules/achievement_screen.py:95 scripts/modules/main_menu.py:98
 #: scripts/modules/main_menu.py:322
 msgid "Achievements"
-msgstr ""
+msgstr "Obiettivi"
 
 #: scripts/modules/character_screen.py:43
 msgid "Enter your character's name"
@@ -7431,37 +7430,36 @@ msgstr "Come si chiama il tuo personaggio?"
 
 #: scripts/modules/option_screen.py:52 scripts/modules/option_screen.py:103
 msgid "Default"
-msgstr ""
+msgstr "Predefinito"
 
 #: scripts/modules/option_screen.py:97 scripts/modules/option_screen.py:207
 msgid "Windowed"
-msgstr ""
+msgstr "Finestra"
 
 #: scripts/modules/option_screen.py:99 scripts/modules/option_screen.py:208
 msgid "Letterbox"
-msgstr ""
+msgstr "Bande nere"
 
 #: scripts/modules/option_screen.py:101 scripts/modules/option_screen.py:209
 msgid "Fullscreen"
-msgstr ""
+msgstr "Schermo intero"
 
 #: scripts/modules/option_screen.py:110
 msgid "Screen Mode"
-msgstr ""
+msgstr "Modalità schermo"
 
 #: scripts/modules/option_screen.py:111
 msgid "Music Volume"
-msgstr ""
+msgstr "Volume musica"
 
 #: scripts/modules/option_screen.py:112
 msgid "Language"
-msgstr ""
+msgstr "Lingua"
 
 #: scripts/modules/option_screen.py:113
-#, fuzzy
 #| msgid "Save Game"
 msgid "Save"
-msgstr "Salva Partita"
+msgstr "Salva"
 
 #: scripts/modules/intro.py:94
 msgid ""
@@ -7541,7 +7539,6 @@ msgstr ""
 "che sembra essere l'edificio principale."
 
 #: scripts/modules/intro.py:107
-#, fuzzy
 #| msgid ""
 #| "The heavy wooden doors are closed,\n"
 #| "and no one is there to let you in. As you\n"
@@ -7554,7 +7551,8 @@ msgid ""
 msgstr ""
 "I pesanti cancelli di legno sono chiusi\n"
 "e non si vede nessuno che possa farti entrare.\n"
-"All'improvviso senti una voce dall'interno."
+"Avvicinandoti al cancello, all'improvviso\n"
+"senti una voce dall'interno."
 
 #: scripts/modules/intro.py:109
 msgid ""
@@ -7663,11 +7661,11 @@ msgstr ""
 
 #: scripts/game_events/to_storage.py:43
 msgid "The door to the pantry is locked."
-msgstr ""
+msgstr "La porta della dispensa è chiusa a chiave."
 
 #: scripts/game_events/silverhair_to_fst.py:41
 msgid "I better leave the way I came."
-msgstr ""
+msgstr "È meglio uscire da dove sono entrato."
 
 #: gamedata/manifest.jsonc keyboard controls
 msgid "Begin"
@@ -7776,3 +7774,75 @@ msgstr "Ma anche Lady Frostbloom ha sentito qualcosa fuori dalla locanda."
 #. Original Lucia witness variant.
 msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
 msgstr "Ma anche Lady Silverhair e Lady Frostbloom hanno sentito qualcosa fuori dalla locanda."
+
+#. Vircon32 interface.
+msgid "Back to Title"
+msgstr "Torna al titolo"
+
+#. Vircon32 interface.
+msgid "Card Belongs to Another Game"
+msgstr "Scheda di un altro gioco"
+
+#. Vircon32 interface.
+msgid "Could Not Save Game"
+msgstr "Impossibile salvare"
+
+#. Vircon32 interface.
+msgid "Credits"
+msgstr "Crediti"
+
+#. Vircon32 interface.
+msgid "Day"
+msgstr "Giorno"
+
+#. Vircon32 interface.
+msgid "Empty"
+msgstr "Vuoto"
+
+#. Vircon32 interface.
+msgid "Empty Slot"
+msgstr "Slot vuoto"
+
+#. Vircon32 interface.
+msgid "Epilogue"
+msgstr "Epilogo"
+
+#. Vircon32 interface.
+msgid "Error"
+msgstr "Errore"
+
+#. Vircon32 interface.
+msgid "Game Paused"
+msgstr "Gioco in pausa"
+
+#. Vircon32 interface.
+msgid "Game Saved"
+msgstr "Partita salvata"
+
+#. Vircon32 interface.
+msgid "Incompatible Save"
+msgstr "Salvataggio incompatibile"
+
+#. Vircon32 interface.
+msgid "No Memory Card"
+msgstr "Nessuna scheda di memoria"
+
+#. Vircon32 interface.
+msgid "Save Data Is Corrupt"
+msgstr "Salvataggio danneggiato"
+
+#. Vircon32 interface.
+msgid "Save Is from Another Build"
+msgstr "Salvataggio di un'altra versione"
+
+#. Vircon32 interface.
+msgid "Select Language"
+msgstr "Seleziona lingua"
+
+#. Vircon32 interface.
+msgid "Slot"
+msgstr "Slot"
+
+#. Vircon32 interface.
+msgid "Title"
+msgstr "Titolo"

@@ -7925,3 +7925,75 @@ msgstr "Men Lady Frostbloom har hørte også noget uden for kroen."
 #. Original Lucia witness variant.
 msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
 msgstr "Men både Silverhair og lady Frostbloom har hørte også noget uden for kroen."
+
+#. Vircon32 interface.
+msgid "Back to Title"
+msgstr "Tilbage til titlen"
+
+#. Vircon32 interface.
+msgid "Card Belongs to Another Game"
+msgstr "Kortet tilhører et andet spil"
+
+#. Vircon32 interface.
+msgid "Could Not Save Game"
+msgstr "Kunne ikke gemme spillet"
+
+#. Vircon32 interface.
+msgid "Credits"
+msgstr "Medvirkende"
+
+#. Vircon32 interface.
+msgid "Day"
+msgstr "Dag"
+
+#. Vircon32 interface.
+msgid "Empty"
+msgstr "Tom"
+
+#. Vircon32 interface.
+msgid "Empty Slot"
+msgstr "Tom plads"
+
+#. Vircon32 interface.
+msgid "Epilogue"
+msgstr "Epilog"
+
+#. Vircon32 interface.
+msgid "Error"
+msgstr "Fejl"
+
+#. Vircon32 interface.
+msgid "Game Paused"
+msgstr "Spillet er sat på pause"
+
+#. Vircon32 interface.
+msgid "Game Saved"
+msgstr "Spillet er gemt"
+
+#. Vircon32 interface.
+msgid "Incompatible Save"
+msgstr "Inkompatibelt gemt spil"
+
+#. Vircon32 interface.
+msgid "No Memory Card"
+msgstr "Intet hukommelseskort"
+
+#. Vircon32 interface.
+msgid "Save Data Is Corrupt"
+msgstr "Gemmefilerne er beskadiget"
+
+#. Vircon32 interface.
+msgid "Save Is from Another Build"
+msgstr "Gemt med en anden version"
+
+#. Vircon32 interface.
+msgid "Select Language"
+msgstr "Vælg sprog"
+
+#. Vircon32 interface.
+msgid "Slot"
+msgstr "Plads"
+
+#. Vircon32 interface.
+msgid "Title"
+msgstr "Titel"

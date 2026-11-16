@@ -7967,3 +7967,75 @@ msgstr "Maar Juffrouw Frostbloom heeft heeft ook iets gehoord buiten de herberg.
 #. Original Lucia witness variant.
 msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
 msgstr "Maar juffrouw Silverhair en juffrouw Frostbloom hebben allebei heeft ook iets gehoord buiten de herberg."
+
+#. Vircon32 interface.
+msgid "Back to Title"
+msgstr "Terug naar titelscherm"
+
+#. Vircon32 interface.
+msgid "Card Belongs to Another Game"
+msgstr "Kaart hoort bij een ander spel"
+
+#. Vircon32 interface.
+msgid "Could Not Save Game"
+msgstr "Opslaan mislukt"
+
+#. Vircon32 interface.
+msgid "Credits"
+msgstr "Medewerkers"
+
+#. Vircon32 interface.
+msgid "Day"
+msgstr "Dag"
+
+#. Vircon32 interface.
+msgid "Empty"
+msgstr "Leeg"
+
+#. Vircon32 interface.
+msgid "Empty Slot"
+msgstr "Lege plek"
+
+#. Vircon32 interface.
+msgid "Epilogue"
+msgstr "Epiloog"
+
+#. Vircon32 interface.
+msgid "Error"
+msgstr "Fout"
+
+#. Vircon32 interface.
+msgid "Game Paused"
+msgstr "Spel gepauzeerd"
+
+#. Vircon32 interface.
+msgid "Game Saved"
+msgstr "Spel opgeslagen"
+
+#. Vircon32 interface.
+msgid "Incompatible Save"
+msgstr "Opslag niet compatibel"
+
+#. Vircon32 interface.
+msgid "No Memory Card"
+msgstr "Geen geheugenkaart"
+
+#. Vircon32 interface.
+msgid "Save Data Is Corrupt"
+msgstr "Opslaggegevens beschadigd"
+
+#. Vircon32 interface.
+msgid "Save Is from Another Build"
+msgstr "Opslag van andere versie"
+
+#. Vircon32 interface.
+msgid "Select Language"
+msgstr "Kies taal"
+
+#. Vircon32 interface.
+msgid "Slot"
+msgstr "Plek"
+
+#. Vircon32 interface.
+msgid "Title"
+msgstr "Titel"

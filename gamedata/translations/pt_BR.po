@@ -7944,3 +7944,75 @@ msgstr "Mas Lady Frostbloom ouviu ouviu alguma coisa fora da pousada também."
 #. Original Lucia witness variant.
 msgid "But both Lady Silverhair and Lady Frostbloom have heard something outside the inn as well."
 msgstr "Mas Lady Silverhair e Lady Frostbloom ouviram ouviu alguma coisa fora da pousada também."
+
+#. Vircon32 interface.
+msgid "Back to Title"
+msgstr "Voltar ao título"
+
+#. Vircon32 interface.
+msgid "Card Belongs to Another Game"
+msgstr "Cartão pertence a outro jogo"
+
+#. Vircon32 interface.
+msgid "Could Not Save Game"
+msgstr "Não foi possível salvar"
+
+#. Vircon32 interface.
+msgid "Credits"
+msgstr "Créditos"
+
+#. Vircon32 interface.
+msgid "Day"
+msgstr "Dia"
+
+#. Vircon32 interface.
+msgid "Empty"
+msgstr "Vazio"
+
+#. Vircon32 interface.
+msgid "Empty Slot"
+msgstr "Espaço vazio"
+
+#. Vircon32 interface.
+msgid "Epilogue"
+msgstr "Epílogo"
+
+#. Vircon32 interface.
+msgid "Error"
+msgstr "Erro"
+
+#. Vircon32 interface.
+msgid "Game Paused"
+msgstr "Jogo pausado"
+
+#. Vircon32 interface.
+msgid "Game Saved"
+msgstr "Jogo salvo"
+
+#. Vircon32 interface.
+msgid "Incompatible Save"
+msgstr "Salvamento incompatível"
+
+#. Vircon32 interface.
+msgid "No Memory Card"
+msgstr "Sem cartão de memória"
+
+#. Vircon32 interface.
+msgid "Save Data Is Corrupt"
+msgstr "Dados salvos corrompidos"
+
+#. Vircon32 interface.
+msgid "Save Is from Another Build"
+msgstr "Salvamento de outra versão"
+
+#. Vircon32 interface.
+msgid "Select Language"
+msgstr "Selecionar idioma"
+
+#. Vircon32 interface.
+msgid "Slot"
+msgstr "Espaço"
+
+#. Vircon32 interface.
+msgid "Title"
+msgstr "Título"
