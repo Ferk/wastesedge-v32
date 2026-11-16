@@ -1,0 +1,2025 @@
+= Adventure Engine Game-Data Authoring Guide
+:toc: left
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+This document describes the editable formats accepted by the engine's current
+content compiler. It is intended for authors creating a game by replacing the
+contents of `gamedata/`; knowledge of any other game or engine is not required.
+
+The engine does not read JSON or Tiled files on the console. During the build,
+the host-side compiler validates the authoring data, resolves names to numeric
+IDs, packs graphics and text, converts audio, and emits compact C tables and
+Vircon32 resources under `generated/`.
+
+IMPORTANT: This is a guide to the formats implemented now. The limitations
+section lists features that are not yet available. Do not invent properties or script
+operations: unknown values are normally rejected, and unrecognized Tiled
+metadata may have no runtime effect.
+
+== Quick start
+
+. Keep the engine and build files, and replace or edit `gamedata/`.
+. Open `gamedata/WastesEdge.tiled-project` in Tiled, or create an equivalent
+  project pointing at your own `maps/`, `tilesets/`, and `assets/` folders.
+. Define reusable actors and stateful objects in `entities/*.jsonc`.
+. Create at least one finite orthogonal Tiled map and give it a scene `id`.
+. Place one player-controlled entity in every playable scene and add a spawn
+  for every destination used by `change_scene`.
+. Add dialogue, scripts, schedules, and audio definitions as needed.
+. List every source document in `gamedata/manifest.jsonc`.
+. Validate and build:
+
+[source,shell]
+----
+python3 tools/content_compiler/compile_content.py --project-root .
+cmake -S . -B build
+cmake --build build
+----
+
+The ROM is written to `build/WastesEdge.v32` with the repository's current
+branding. See <<branding,Branding a separate game>> to rename it.
+
+== Directory layout
+
+[source,text]
+----
+gamedata/
+  manifest.jsonc
+  WastesEdge.tiled-project       # Tiled convenience project; not compiled
+  maps/*.tmj                     # scenes
+  tilesets/*.tsj                 # external collection-of-images tilesets
+  entities/*.jsonc               # reusable actor/object definitions
+  dialogue/*.jsonc               # modal dialogue graphs
+  scripts/*.jsonc                # cooperative action sequences
+  schedules/*.jsonc              # actor routes and ambient speech
+  audio/*.jsonc                  # music declarations
+  translations/*.po             # gettext translation catalogs
+  ui/font.jsonc                  # byte-indexed dialogue font description
+  assets/
+    audio/*.{ogg,wav}
+    world/<location>/*.png         # terrain, architecture, props, and effects
+    actors/<actor-id>/*.png        # standing, walking, and special actor frames
+    ui/fonts/*-cp1252.png         # editable 16x16 dialogue-font grid
+    ui/portraits/*.png
+generated/                       # build output; never edit
+----
+
+All compiled source assets must remain inside `gamedata/`. Paths are relative
+to `gamedata/` or to the Tiled document containing them, as noted below. A path
+that escapes `gamedata/` is rejected.
+
+The `world/` and `actors/` directories describe the artwork's purpose, not how
+Tiled renders it. A world object such as a door or a floor tile may still be a
+Tiled tile image, while every frame for an actor belongs under that actor's
+directory. Keep location-specific world artwork directly under a meaningful
+location ID such as `world/redwyne_kitchen/`; do not add category directories
+for furniture, terrain, or effects unless a new game has a concrete need for
+them.
+
+All JSON-family documents are read as JSONC. Both `// line comments` and
+`/* block comments */` are accepted. Trailing commas are not accepted.
+
+== Common conventions
+
+=== IDs
+
+Scene, entity, dialogue, script, schedule, flag, state, node, speaker, spawn,
+and track IDs use lower-case snake case:
+
+[source,text]
+----
+village_square
+front_door
+merchant_first_meeting
+----
+
+They must match `[a-z][a-z0-9_]*`. IDs are stable authoring references; the
+compiler assigns deterministic numeric runtime IDs. Most global ID categories
+must be unique across every file in that category. Tiled object IDs supplied
+through the custom `id` property need only be unique within their scene.
+
+=== Coordinates, directions, and time
+
+Tiled stores object positions in pixels. Scripts and schedules use tile
+coordinates, with `(0, 0)` at the upper-left. Directions are `north`, `south`,
+`west`, and `east`.
+
+The current game uses square 20-pixel map cells. The compiler derives the cell
+size from the map's `tilewidth`, but the runtime, imported actor metadata, and
+existing assets are designed around square 20-pixel cells. Use that size for a
+new game unless the runtime is deliberately adapted.
+
+Timing values are simulation frames. The target simulation rate is 60 frames
+per second, so 60 frames is approximately one second.
+
+=== Flags
+
+Flags are signed integer variables. They do not need a separate declaration:
+referencing a flag from a `set` action or a supported condition adds it to the
+compiled flag table. Every flag starts at zero when a new world is initialized.
+
+Flags currently have no namespaces and must therefore have globally meaningful
+names. Dialogue conditions support `equals`, `not_equals`, `less_than`, `has_bits`,
+and `lacks_bits`; scripts cannot yet branch.
+
+== The content manifest
+
+`gamedata/manifest.jsonc` is the root of the content graph. Files that are not
+listed here are not compiled, even if they are present under `gamedata/`.
+
+[source,json]
+----
+{
+  "format": "wastesedge-content-v1",
+  "initial_scene": "village_square",
+  "initial_game_time": 0,
+  "title_cutscene": "title_reveal",
+  "new_game_cutscene": "opening",
+  "game_title": "Example Adventure",
+  "font": "ui/font.jsonc",
+  "languages": [
+    { "id": "en", "name": "English" },
+    { "id": "fr", "name": "Français", "catalog": "translations/fr.po" }
+  ],
+  "translation_variables": { "$name": "Banec" },
+  "translation_variants": { "fm": 1 },
+  "ui_text": {
+    "new_game": "New Game", "load_game": "Load Game",
+    "language": "Language", "select_language": "Select Language",
+    "game_paused": "Game Paused", "continue": "Continue",
+    "save_game": "Save Game", "back_to_title": "Back to Title",
+    "no_memory_card": "No Memory Card",
+    "foreign_card": "Card Belongs to Another Game",
+    "empty_slot": "Empty Slot", "corrupt_save": "Save Data Is Corrupt",
+    "incompatible_save": "Save Is from Another Build",
+    "save_failed": "Could Not Save Game", "game_saved": "Game Saved",
+    "error": "Error", "empty": "Empty",
+    "incompatible": "Incompatible Save", "day": "Day", "slot": "Slot",
+    "enter_name": "Enter your character's name",
+    "keyboard_space": "Space", "keyboard_delete": "Delete",
+    "keyboard_begin": "Begin", "achievements": "Achievements"
+  },
+  "title_music": "title_theme",
+  "ui_sounds": {
+    "move": "ui_switch",
+    "confirm": "ui_select"
+  },
+  "save_signature": "EXAMPLE-V32-SAVE",
+  "save_version": 1,
+  "save_magic": "EXSV",
+  "title_background": {
+    "source": "assets/ui/title/title_atlas.png",
+    "rect": [320, 0, 640, 360]
+  },
+  "title_logo": {
+    "source": "assets/ui/title/title_atlas.png",
+    "rect": [0, 360, 145, 27], "x": 88, "y": 30,
+    "scale": [2, 1.5]
+  },
+  "cutscene_images": [
+    { "id": "opening_forest", "source": "assets/cutscene/forest.png" },
+    { "id": "legacy_actor", "source": "assets/cutscene/actor.png",
+      "scale": [2, 1.5] }
+  ],
+  "maps": ["maps/village_square.tmj"],
+  "entities": ["entities/core.jsonc"],
+  "audio": ["audio/music.jsonc"],
+  "dialogue": ["dialogue/merchant.jsonc"],
+  "scripts": ["scripts/talk_to_merchant.jsonc"],
+  "schedules": ["schedules/routes.jsonc"]
+}
+----
+
+All six arrays are required, but any category not used by a game may be an
+empty array. `format` must currently remain `wastesedge-content-v1`; it is a
+schema version, not a game title. `initial_scene` must name one of the compiled
+maps. `title_background` is a required PNG path below `gamedata/`, or an object
+with `source` and an optional atlas `rect`. Images render at native pixel size
+by default, so a 640 by 360 rectangle fills the title display without scaling.
+An optional positive `scale: [x, y]` applies an explicit transform.
+`title_logo` is optional and uses the same image-or-atlas form; `x` and `y`
+place it above the menu in the coordinate space selected by that scale.
+
+`game_title` is the title-menu heading. `title_music` is optional and names a
+compiled music track; omit it for a silent title screen. `ui_sounds` is also
+optional and maps interface roles to compiled effects, as detailed under
+<<Music and UI sounds>>.
+
+`ui_icons` optionally supplies controller glyphs using the same PNG path or
+`{ "source": "...", "rect": [x, y, width, height] }` form as title images.
+Supported roles are `button_a`, `button_b`, `button_x`, `button_y`, `button_l`,
+`button_r`, `button_start`, and `dpad_up`, `dpad_down`, `dpad_left`,
+`dpad_right`, `dpad_up_left`, `dpad_up_right`, `dpad_down_left`, `dpad_down_right`.
+Icons share the normal sprite atlas and render at native resolution. Missing
+button images fall back to text hints. The name-entry keyboard uses A for
+typing or activating a focused key, X for Space, B for deletion, Start for acceptance, and
+L/R for switching character pages. For example:
+
+[source,json]
+----
+"ui_icons": {
+  "button_a": "assets/ui/buttons/buttonA.png",
+  "button_start": "assets/ui/buttons/buttonS.png"
+}
+----
+
+`font` names the required byte-indexed UI font descriptor described under
+<<UI font and portraits>>.
+
+`languages` declares the title-menu language choices in display order. The
+first entry must be built-in English with ID `en` and no catalog. Every later
+entry names a UTF-8 gettext `.po` file. See <<translations>>.
+
+`ui_text` supplies the English gettext source strings for the fixed title,
+pause, save, and storage-message roles used by the platform UI. Every role in
+the example is required. Keeping the wording here lets another game replace
+those labels without editing the engine or content compiler; catalogs translate
+them in exactly the same way as dialogue text.
+
+`title_cutscene` is optional. It names a dialogue using `cutscene`
+presentation and plays it once at program startup before the title menu accepts
+input. It must have one unconditional start and cannot contain choices or
+script hooks. Its layers can share an atlas with `title_background` and
+`title_logo`, so a closed-background reveal and an open menu background need
+not consume separate Vircon32 textures. A or natural timing advances its
+nodes; B or Start skips directly to the title menu. Title music starts before
+this sequence and continues into the menu.
+
+`save_signature` identifies the game's memory card using at most 19 ASCII
+characters. `save_version` occupies the final signature word and should change
+when old save cards must be rejected. `save_magic` is exactly four ASCII
+characters and is written as the commit marker at the start of every slot. The
+engine writes it last, after the payload and checksum, so a reset or removed
+card during saving leaves the slot invalid instead of looking complete. Keep
+all three stable while save compatibility is intended; changing `save_magic`
+makes existing slots appear empty, while `save_version` and the content
+fingerprint are the compatibility checks for otherwise well-formed saves.
+
+`new_game_cutscene` is optional. When present, it names a dialogue using the
+`cutscene` presentation; New Game plays it before entering `initial_scene`.
+This startup sequence must have one unconditional start node and cannot contain
+choices or dialogue completion scripts. The standalone cutscene player handles
+its timing and audiovisual cues without creating a game world first. The same
+paused cutscene player is used for scripted cutscenes after gameplay begins;
+the loaded world remains in memory but does not advance until the cutscene and
+its immediate continuation have finished.
+
+`cutscene_images` is an optional array of named PNG resources used by compiled
+cutscene presentations. Each entry requires a globally unique snake-case
+`id` and a `source` path below `gamedata/`. The compiler validates the image,
+assigns a deterministic runtime ID, and includes it in the cartridge texture
+table. Images render at their native pixel dimensions by default. Set `scale`
+to two positive factors such as `[2, 1.5]` only when an image needs an explicit
+transform. The scale applies to both the image and its layer positions, allowing
+legacy 320 by 240 coordinates to remain intact. Without `scale`, image and
+position coordinates are native 640 by 360 display pixels. The Waste's Edge
+opening uses these entries for its forest,
+approach, guard, player, and gate illustrations; its three music cues remain
+ordinary tracks in `audio/music.jsonc`.
+
+`initial_game_time` is optional and defaults to zero. It uses tenths of an
+in-world minute: `0` is Day 0 at 00:00, while `7200` is Day 0 at 12:00. The
+clock advances only while gameplay simulation is running and is stored in save
+slots; title and pause menus do not advance it.
+
+Manifest order does not determine runtime IDs. IDs are sorted to keep builds
+reproducible.
+
+== Reusable entity definitions
+
+An entity file contains one `entities` array:
+
+[source,json]
+----
+{
+  "entities": [
+    {
+      "id": "player",
+      "kind": "actor",
+      "player_controlled": true,
+      "speech_color": "#FFEE7F"
+    },
+    {
+      "id": "merchant",
+      "kind": "actor",
+      "blocks_movement": true,
+      "visuals": [
+        { "id": "injured", "tileset": "tilesets/merchant_injured.tsj" }
+      ]
+    },
+    {
+      "id": "shop_door",
+      "kind": "object",
+      "states": ["closed", "opening", "open"]
+    }
+  ]
+}
+----
+
+[cols="1,1,1,3",options="header"]
+|===
+|Field |Type |Default |Meaning
+
+|`id` |ID |required |Global reusable entity ID.
+|`kind` |ID |required |`actor` or `object`.
+|`player_controlled` |boolean |`false` |Marks the player definition. At most one definition may set it.
+|`blocks_movement` |boolean |`true` for actors, `false` for objects |Whether an actor's anchor square blocks other actors.
+|`speech_color` |`#RRGGBB` string |`"#FFFFFF"` |Color used for this actor's modal-dialogue text and speech-bubble text, border, and tail.
+|`states` |array of IDs |`["default"]` |Ordered visual states. Mainly used by stateful objects.
+|`visuals` |array |`[]` |Named alternate actor appearances, each with an `id` and standalone collection-tileset path.
+|===
+
+An actor definition represents one persistent actor, even when that actor can
+visit several scenes. An object definition describes reusable state behavior;
+each placed object receives independent state storage.
+
+Speech colors belong to actor definitions rather than individual dialogue or
+script lines. This keeps ambient schedule speech, scripted speech, and object
+examination remarks consistent whenever they are spoken by the same actor.
+
+== Tiled maps and tilesets
+
+=== Supported map shape
+
+Use a finite, orthogonal `.tmj` map with square cells and external `.tsj`
+tilesets. Infinite/chunked maps, tile flipping/rotation flags, tile animations,
+and embedded tilesets are not supported by the current compiler.
+
+Maps used by pathfinding must be no larger than 64 by 64 cells. A scene must
+have a player-controlled entity placement. Every scene targeted by
+`change_scene` must also contain the player placement and the named destination
+spawn.
+
+At map level, create these custom properties:
+
+[cols="1,1,1,3",options="header"]
+|===
+|Property |Type |Required |Meaning
+
+|`id` |string |yes |Scene ID used by scripts and schedules.
+|`display_name` |string |no |Human-readable scene name shown in save-slot metadata. Defaults to the scene ID converted from snake case.
+|`on_enter` |string |no |Dialogue-opening script used only when this is the initial scene. See <<scene-entry-limit>>.
+|===
+
+=== Tilesets and PNG assets
+
+Runtime map tiles must come from an external collection-of-images `.tsj`: each
+tile entry has its own PNG `image`, `imagewidth`, and `imageheight`. Although
+Tiled supports atlas tilesets, the current runtime materializer only resolves
+per-tile images.
+
+PNG is the only supported map and portrait image format. Transparent pixels
+remain transparent. Image paths in a `.tsj` are relative to that tileset file.
+
+Map and actor PNGs are native 640-by-360-display artwork. Their `imagewidth`
+and `imageheight` remain the logical dimensions used by Tiled placement,
+collision, and depth sorting; the actual PNG dimensions must be 1.5 times
+those values, rounded to the nearest pixel. For example, a logical 20-by-30
+actor frame is stored as a 30-by-45 PNG. The compiler validates this relation
+and the runtime draws these assets at a 1:1 pixel scale.
+
+Oversized images are allowed. Tiled aligns a collection tile used in a Tile
+Layer to the bottom-left of its cell. This is useful for ground decals that
+extend above their logical cell.
+
+=== Tile layers: background terrain
+
+Every visible Tiled Tile Layer is composited, in map order, into background
+chunks. Use Tile Layers for static art that must always remain behind actors:
+floors, roads, grass bases, rugs, and non-occluding decoration.
+
+Tile Layer data must contain exactly `map width * map height` GIDs. GID zero is
+transparent. Layer names are for authors only; properties such as
+`render_group` currently have no runtime effect. Layer opacity, offsets, and
+visibility are not compiled, so author the intended pixels directly and keep
+compiled layers at their normal origin.
+
+Do not put scenery that must sometimes cover an actor in a Tile Layer. Use a
+tile object so it participates in footing-depth sorting.
+
+=== Static depth-sorted scenery
+
+Place a tile object on an Object Layer and omit the `kind` property to create
+ordinary depth-sorted scenery. Its visible position follows Tiled's tile-object
+bottom edge. The default sorting depth is that bottom edge.
+
+Optional object properties are:
+
+[cols="1,1,1,3",options="header"]
+|===
+|Property |Type |Default |Meaning
+
+|`sort_y` |integer |tile object's derived footing |Explicit depth-sort value in map pixels.
+|`alpha` |integer |`255` |Draw opacity from `0` (invisible) to `255` (opaque).
+|===
+
+=== Ambient animated scenery
+
+An ordinary depth-sorted tile object can use a legacy multi-frame object
+visual. Keep the same `source_object`, `source_animation`, and consecutive
+`source_image` properties on every frame in the collection tileset, then add
+`animation_delay` to the first (placed) frame's tile properties. A positive
+value enables looping animation; it is measured in engine game-time units,
+not pixels or milliseconds. The remaining frames are collected by their
+zero-based `source_image` values and must not contain gaps. By default every
+frame inherits the placed frame's delay. Add `animation_delay` to an individual
+frame when the source animation holds that image for a different duration.
+
+When an animation repeats an image or only uses part of the imported image set,
+put `animation_sequence` on the placed frame as a comma-separated list of
+zero-based `source_image` values, for example `"0,1,2,1"`. Without this
+property, images play once each in ascending order before looping.
+
+For example, a clock, fire, smoke plume, or dripping tap can be authored as a
+normal `kind = "map_object"` placement with `animation_delay = 1`. Objects
+whose frames represent scripted states (doors, gates, and similar objects)
+should omit `animation_delay`; their state is changed by scripts instead of
+being looped automatically.
+
+An explicit `sort_y` is useful when several images form one visual object and
+must sort together. Alpha blending affects redraw cost, so reserve it for art
+that needs transparency.
+
+If one source image contains pixels that belong on both sides of an actor,
+split it into two transparent images placed at the same coordinates: a rear
+plane with `sort_y` at or before the actor's path, and a foreground plane with
+`sort_y` after it. A single scenery object has only one depth and cannot, for
+example, keep a wall behind an actor while drawing its projecting roof above
+the actor.
+
+Tiles produced for this engine may also carry `offset_x`, `offset_y`, and
+`base_y` integer properties. These let the compiler recover a logical footing
+different from the image bottom. For newly authored art, `sort_y` is usually
+clearer when the default footing is unsuitable.
+
+=== Object kinds and custom properties
+
+The following `kind` values are compiled from Tiled Object Layers.
+
+==== `spawn`
+
+A grid-aligned point object used as a scene-transition destination.
+
+[source,text]
+----
+kind = "spawn"       (string)
+id = "front_door"   (string)
+facing = "south"    (string, optional; default south)
+----
+
+The point's `x` and `y` must align to the tile grid.
+
+==== `entity`
+
+A tile object placing an actor or stateful object:
+
+[source,text]
+----
+kind = "entity"
+id = "merchant_here"
+entity_def = "merchant"
+facing = "west"                    # actors; default south
+interaction = "talk_to_merchant"   # actors; optional
+initially_present = true            # actors; optional
+initial_state = "closed"            # objects; optional
+alpha = 255                         # stateful objects; optional
+sort_y = 120                        # stateful objects; optional
+----
+
+`id` is the scene-local placement/object ID. `entity_def` names a reusable
+definition.
+
+For an actor, the tile must be a character frame carrying the character
+metadata described in <<actor-tilesets>>. `interaction`, when present, names a
+script containing `show_dialogue`. The adjacent-interaction runtime binds that
+dialogue directly; other actions in that particular script are not executed.
+Use a hotspot if the interaction needs a general action sequence.
+
+An actor is a world-level runtime instance, not a scene-owned object. Give a
+non-player actor at most one placement with `initially_present` set to `true`;
+that placement establishes its starting scene, anchor, and facing. Schedules
+and scripts may then place or move it into any compiled scene without a marker
+in the destination map.
+
+The compiler currently obtains an actor's visual and default interaction from
+its Tiled placement metadata, so every actor still needs one visual-bearing
+placement somewhere in the project. An actor that only appears later may use a
+single `initially_present = false` placement as its definition template. Do not
+duplicate that template in every scene the actor can visit.
+
+For an object, the tile must carry `source_object` metadata. `initial_state`
+defaults to the first state in its entity definition.
+
+==== `hotspot`
+
+A positive, grid-aligned rectangle describing the *player squares* from which
+an interaction may be activated:
+
+[source,text]
+----
+kind = "hotspot"
+id = "inspect_painting"
+interaction = "examine_painting"
+facing = "north"       # optional
+priority = 10          # optional; default 0
+----
+
+The interaction names a script. When hotspots overlap, the matching hotspot
+with the highest priority runs. An adjacent actor interaction is checked before
+hotspots.
+
+==== `exit` and `trigger`
+
+Both names currently create the same positive, grid-aligned position trigger:
+
+[source,text]
+----
+kind = "exit"
+id = "leave_shop"
+script = "leave_shop"
+when = "enter"                 # enter or leave; default enter
+facing = "south"               # optional
+condition_flag = "door_open"   # optional pair
+condition_equals = 1
+----
+
+`enter` fires after the player finishes moving onto a covered square. `leave`
+fires before movement starts from a covered square. `facing` restricts the
+trigger to one direction. A condition is optional, but `condition_flag` and
+`condition_equals` must be supplied together. Only integer equality is
+supported.
+
+For overlapping triggers, the first matching object in compiled map order
+runs. Use mutually exclusive conditions for ordered outcomes.
+
+==== `collision`
+
+A pixel rectangle contributing a four-bit directional walkability mask:
+
+[source,text]
+----
+kind = "collision"
+walkability = 12
+----
+
+The rectangle need not be grid aligned; every cell it overlaps receives the
+mask. A cell with no overlapping collision rectangle has mask `15`, meaning
+that all four directions are permitted. Collision objects restrict that
+default: overlapping masks are combined with bitwise AND, so an additional
+collision object can remove permissions but cannot add them back.
+
+`walkability` is an integer from `0` through `15`. Treat its four bits as four
+independent yes/no switches. The values below are decimal values written in
+Tiled or JSON; the binary column is explanatory because JSON does not accept
+binary integer notation.
+
+[cols="1,1,1,3",options="header"]
+|===
+|Direction |Value |Binary bit |Movement allowed from that cell
+|south |1 |`0001` |toward increasing Y
+|north |2 |`0010` |toward decreasing Y
+|east |4 |`0100` |toward increasing X
+|west |8 |`1000` |toward decreasing X
+|===
+
+To construct a mask, add or bitwise-OR the values for every direction that
+should remain open. For example:
+
+[cols="1,1,2",options="header"]
+|===
+|Decimal |Binary |Meaning
+|`15` |`1111` |south, north, east, and west; no restriction
+|`0`  |`0000` |no direction; a fully solid cell
+|`12` |`1100` |east and west only; a horizontal corridor
+|`3`  |`0011` |north and south only; a vertical corridor
+|`14` |`1110` |everything except south
+|`13` |`1101` |everything except north
+|`11` |`1011` |everything except east
+|`7`  |`0111` |everything except west
+|===
+
+For example, `12` is `8 + 4`: the west and east bits are set, while the north
+and south bits are clear. In bitwise terms, a direction is allowed when
+`mask & direction_value` is nonzero. With mask `12`:
+
+[source,text]
+----
+12 & 4 = 4    # east is allowed
+12 & 8 = 8    # west is allowed
+12 & 2 = 0    # north is blocked
+12 & 1 = 0    # south is blocked
+----
+
+===== Crossing between two cells
+
+Movement checks both ends of an edge. The source cell must allow movement out
+in the requested direction, and the destination cell must allow entry through
+the opposite direction:
+
+[cols="1,2,2",options="header"]
+|===
+|Move |Required source bit |Required destination bit
+|east  |east (`4`)  |west (`8`)
+|west  |west (`8`)  |east (`4`)
+|south |south (`1`) |north (`2`)
+|north |north (`2`) |south (`1`)
+|===
+
+Thus a move east from cell A to cell B is accepted only when both expressions
+are nonzero:
+
+[source,text]
+----
+A_mask & 4    # A permits leaving east
+B_mask & 8    # B permits entering from the west
+----
+
+Checking both cells prevents a permissive mask on one side from opening an edge
+that the other side declares closed. It does not create one-way travel: the
+reverse move checks the same pair of bits in reverse order, so a shared edge is
+either open or closed in both directions.
+
+Diagonal steps test both component directions against the source and diagonal
+destination. Moving southeast requires the source's east and south bits and
+the destination's west and north bits. The two orthogonally adjacent cells are
+not checked as intermediate cells. When a diagonal must not cut across a
+corner, restrict the diagonal source or destination as well.
+
+===== Combining overlapping collision objects
+
+Every cell begins as `15` (`1111`). For each collision rectangle overlapping
+that cell, the engine performs:
+
+[source,text]
+----
+cell_mask = cell_mask & object_walkability
+----
+
+Suppose one rectangle supplies `14` (`1110`, no south) and another supplies
+`7` (`0111`, no west). Their overlap becomes:
+
+[source,text]
+----
+1110    14
+0111     7
+====    ==
+0110     6    # north and east remain
+----
+
+The order of overlapping collision objects does not matter because bitwise AND
+is commutative. A rectangle with mask `15` has no effect. A rectangle with mask
+`0` makes every overlapped cell fully solid regardless of other authored
+collision masks.
+
+Because the rectangle is measured in pixels, even a small overlap with a map
+cell applies its complete mask to that cell. Align rectangles to the tile grid
+when whole-cell collision is intended; use non-aligned rectangles deliberately
+when importing the original maps' edge coverage.
+
+===== Runtime overrides and other blockers
+
+`set_walkability` is different from overlapping Tiled collision objects. It
+replaces the complete effective mask for one cell for the rest of the current
+play session; it is not ANDed with the authored masks underneath. A door script
+must therefore provide the exact closed and open masks it wants, including any
+directions that should remain restricted for other reasons.
+
+Directional masks describe traversable edges. Movement is additionally denied
+at map boundaries and when the destination anchor is occupied by a blocking
+actor. Only an actor's ground-anchor cell blocks movement; the upper part of a
+tall sprite does not. `navigation_blocker` is a separate authoring object used
+to keep A* routes out of an area whose directional edges alone would still
+make it look like a useful corridor.
+
+==== `navigation_blocker`
+
+A positive, grid-aligned rectangle excluded from A* routes:
+
+[source,text]
+----
+kind = "navigation_blocker"
+----
+
+The destination cell itself may still be selected. A* considers all eight
+neighbouring cells and uses the original 10:14 cardinal-to-diagonal cost ratio.
+Use collision for physical movement edges. Also cover the occupied cells of a
+solid wall or similarly bulky object with a navigation blocker when its
+directional collision mask permits movement parallel to the object; otherwise
+an NPC could incorrectly treat the object's footprint as a route corridor.
+
+==== `tiled_occluder`
+
+A compact rectangle of repeated square foreground tiles:
+
+[source,text]
+----
+kind = "tiled_occluder"
+id = "grass_front_strip"
+tile_gid = 42
+alpha = 255             # optional
+----
+
+The source tile must be exactly one map cell in size. The rectangle's X and
+width must align to the grid, its width must be positive, and its height must
+contain at least one complete row. The compiler emits one depth-sorted strip
+per row, reducing hundreds of objects to a few draw entries.
+
+[[actor-tilesets]]
+=== Actor character tilesets
+
+An actor uses a collection-of-images tileset whose frame tiles contain:
+
+[cols="1,1,3",options="header"]
+|===
+|Property |Type |Meaning
+|`source_character` |string |Stable key shared by all frames of one character.
+|`source_move` |string |A cardinal `stand_*` or `walk_*` name, or the direction-independent fallback `stand_any` or `walk_any`.
+|`source_image` |integer |Standing-frame index from `0` through `3`, or walking-frame index from `0` through `2`.
+|`frame_delay` |integer |Delay in engine frames. Required and positive when a standing direction has multiple frames.
+|`offset_x`, `offset_y` |integer |Visual offset metadata used to recover the actor anchor.
+|`base_x`, `base_y` |integer |Anchor cell within the source sprite footprint.
+|===
+
+Every direction must resolve to a standing animation. Standing accepts up to
+four frames per direction. `stand_any` and `walk_any` provide complete fallback
+animations for cardinal directions that have no animation of their own; a
+specific direction overrides the whole corresponding fallback animation.
+Walking accepts up to three unique frames per direction and plays them as a
+ping-pong cycle (`0, 1, 2, 1`). Legacy fourth walking frames are accepted during
+compilation but discarded even if they differ from frame 1. The compiler expands the
+fallbacks, gathers every matching tile, and packs the frames into one generated
+character sheet. A packed character must fit within a 1024 by 1024 Vircon32
+texture.
+
+The default visual is obtained from the actor's Tiled placement. Alternate
+visuals are declared in the actor definition's `visuals` array and point to
+standalone collection tilesets; they do not require dummy map placements.
+Scripts select them by name and may restore the placement visual with
+`visual = "default"`.
+
+Place the actor with any one of its character-frame tiles; the placement's
+`facing` chooses the initial standing frame.
+
+=== Stateful object tilesets
+
+Frames belonging to one stateful object visual carry:
+
+[cols="1,1,3",options="header"]
+|===
+|Property |Type |Meaning
+|`source_object` |string |Stable key shared by the object's frames.
+|`source_animation` |integer |Variant key; normally `0`.
+|`source_image` |integer |Zero-based state-frame index with no gaps.
+|`offset_x`, `offset_y` |integer |Visual placement offset.
+|`base_y` |integer |Optional logical footing metadata.
+|===
+
+Frame order must match the entity definition's `states` order. There may be no
+more frames than states. Missing trailing frames compile as invisible states,
+which is useful for objects that disappear.
+
+[[scene-entry-limit]]
+=== Current scene-entry limitation
+
+The map-level `on_enter` script must contain `show_dialogue`. It is currently
+used only when the game initializes directly into that scene; changing scenes
+does not execute it. Put ordinary arrival behavior in the trigger or script
+that performs `change_scene`.
+
+== Dialogue graphs
+
+Dialogue files define modal conversations. A complete small graph looks like:
+
+[source,json]
+----
+{
+  "id": "merchant_first_meeting",
+  "start": [
+    { "node": "repeat", "when": { "flag": "merchant_met", "equals": 1 } },
+    { "node": "greeting" }
+  ],
+  "on_end": "resume_merchant_route",
+  "speakers": [
+    {
+      "id": "player", "name": "Mira", "role": "player",
+      "portrait": "assets/ui/portraits/player.png"
+    },
+    {
+      "id": "merchant", "name": "Ivo", "role": "npc",
+      "entity": "merchant",
+      "portrait": "assets/ui/portraits/merchant.png"
+    },
+    { "id": "narrator", "name": "Narrator", "role": "narrator" }
+  ],
+  "nodes": [
+    {
+      "id": "greeting", "speaker": "merchant",
+      "text": "Looking for supplies?",
+      "choices": [
+        {
+          "text": "What do you sell?",
+          "actions": [{ "op": "set", "flag": "merchant_met", "value": 1 }],
+          "next": "wares"
+        },
+        { "text": "Not today.", "next": "goodbye" }
+      ]
+    },
+    { "id": "wares", "speaker": "merchant", "text": "Rope, lamps, and maps.", "end": true },
+    { "id": "goodbye", "speaker": "merchant", "text": "Safe travels.", "end": true },
+    { "id": "repeat", "speaker": "merchant", "text": "Back again?", "next": "greeting" }
+  ]
+}
+----
+
+=== Top-level dialogue fields
+
+[cols="1,1,1,3",options="header"]
+|===
+|Field |Type |Required |Meaning
+|`id` |ID |yes |Global dialogue ID.
+|`start` |string or array |yes |Initial node or ordered conditional entry cases.
+|`start_actions` |array |no |Run `set`/`set_bits` flag updates once when this conversation opens, before testing `start`. Gameplay dialogue only.
+|`speakers` |array |yes |Speakers available to nodes.
+|`nodes` |array |yes |Non-empty dialogue graph.
+|`on_end` |script ID |no |Fallback script run when the conversation closes.
+|`presentation` |string or object |no |Rendering style; defaults to the normal `panel`.
+|===
+
+A string start is an unconditional node ID. An array is tested from top to
+bottom; conditional cases accept the same comparison, bit-mask, and
+`all` conditions as choices, and the final case must be unconditional.
+
+Use `start_actions` for per-conversation resets shared by all entry paths:
+
+[source,json]
+----
+"start_actions": [
+  { "op": "set", "flag": "asked_about_noise", "value": 0 }
+]
+----
+
+These actions run once per opening, including actor interactions and script-opened
+conversations. They do not run when following `next`, choosing an answer, or
+reusing a menu. Start conditions see the updated flag values. Actions attached
+to the selected entry node run afterwards. Keep entry-specific effects on that
+node. Illustrated cinematic sequences cannot use `start_actions`.
+
+=== Speakers
+
+Each speaker has `id`, non-empty display `name`, and a `role` of `player`,
+`npc`, or `narrator`. At most one speaker may have the `player` role.
+
+`entity` is optional and, when present, must name an entity definition. Use it
+for the NPC represented by the conversation; its `speech_color` colors lines
+spoken by this speaker. An NPC speaker whose ID is also an entity ID inherits
+that entity automatically, and a player speaker inherits the player-controlled
+entity. `portrait` is an optional PNG path relative to `gamedata/`; 64 by 64
+pixels is the established UI size. Narrators normally omit it and use white.
+
+Names and text support the manifest's `$name` player-name substitution.
+The renderer word-wraps text; keep paragraphs reasonably
+short and test long choices on the console-sized UI.
+Normal dialogue panels grow for their content up to the available screen
+height. When the prompt and choices do not fit, they share a scrolling area:
+moving between choices scrolls the content to keep the focused response
+in view. A line without choices has no independent scroll control, and a
+single response taller than the viewport can still be clipped. Split long
+lines into nodes and check translations at the console display size.
+
+=== Nodes and flow
+
+Every entry in `nodes` is one dialogue line. There is no separate JSON type
+for a ``normal dialogue'' node and a ``choice'' node: the presence of
+`choices` determines which form is used. The following fields are shared by
+both forms:
+
+[cols="1,1,1,1,3",options="header"]
+|===
+|Field |Type |Required |Allowed on |Meaning
+|`id` |ID |yes |all nodes |Unique within this dialogue.
+|`speaker` |speaker ID |yes |all nodes |Speaker presenting the line. A `player` speaker may not own a choice menu.
+|`text` |string |yes |all nodes |Line displayed before the node's response or continuation.
+|`translation_parts` |array of strings |no |all nodes |Gettext fragments that reconstruct `text`; see <<translations>>.
+|`presentation` |string |no |normal nodes |Override the dialogue presentation with `panel`, `map_balloon`, `notice`, or `ambient`; not allowed in cutscenes.
+|`actions` |array |no |gameplay dialogue nodes |Run `set` or `set_bits` flag updates when this node is entered.
+|`achievement_events` |array |no |all nodes |Record achievement progress when the node is entered; see <<achievements>>.
+|`music` |music track ID |no |all nodes |Starts this track when the node is entered.
+|`music_delay_frames` |integer |no |all nodes |Delays that node's music cue.
+|`music_fade_out_frames` |integer |no |all nodes |Fades the preceding track before the delayed cue.
+|`cutscene_text` |object |no |all nodes |Overrides cutscene text mode, position, rate, and hold time.
+|`cutscene_finish_ranges` |boolean |no |all nodes |Snaps active range-clock layer tracks to their final keyframes before this node is shown.
+|`auto_advance_frames` |integer |no |all nodes |Advances a cinematic node automatically after this many engine frames.
+|`hold_at_end` |boolean |no |all nodes |With `auto_advance_frames`, freezes on the final frame instead of closing.
+|===
+
+`notice` presents the speaker's portrait as an illustration beside centered,
+wrapped text in a compact translucent window, without a speaker name. A or B
+advances it. It cannot contain choices. The window grows up to the screen
+height but does not scroll, so authors should verify that long translated
+text and individual words fit. `ambient` shows a terminal line as
+non-modal actor speech: it needs an actor speaker and a positive
+`auto_advance_frames` duration, and cannot have choices or completion scripts.
+Both modes are useful as entry nodes selected by conditional dialogue starts.
+
+The following fields control what happens after the line. They are mutually
+exclusive: choose one of `next`, `responses`, `choices`, or `end`.
+
+[cols="1,1,1,3",options="header"]
+|===
+|Field |Type |Allowed on |Meaning
+|`next` |node ID |normal dialogue nodes |After confirmation, enter this node.
+|`responses` |array |normal dialogue nodes |Randomly select one eligible continuation after confirmation. Each entry has a `node` ID, optional `when`, and optional `repeatable` boolean.
+|`choices` |array or node ID |choice nodes |Show a selectable response menu. An array contains the choices directly; a node ID reuses another node's literal choices.
+|`end` |`true` |terminal nodes |Close the dialogue after confirmation. `false` is not useful and should be omitted.
+|`on_end` |script ID |terminal nodes |Run this script when the dialogue closes; overrides the dialogue-level `on_end`.
+|===
+
+==== Normal dialogue node
+
+A normal node displays one line and then continues to another node or closes.
+It must not contain a `choices` field. Use `next` for an explicit continuation,
+or `end: true` for a terminal line:
+
+[source,json]
+----
+{
+  "id": "wares",
+  "speaker": "merchant",
+  "text": "Rope, lamps, and maps.",
+  "next": "goodbye"
+}
+{
+  "id": "goodbye",
+  "speaker": "merchant",
+  "text": "Safe travels.",
+  "end": true,
+  "on_end": "resume_merchant_route"
+}
+----
+
+If none of `next`, `responses`, `choices`, or `end` is present, the compiler uses the next
+node in the file. Do not rely on that implicit fallthrough: an explicit `next`
+or `end` continues to work when nodes are reordered.
+
+==== Choice node
+
+A choice node displays its line and waits for the player to select one of the
+entries in `choices`. A choice node normally has an array of choice objects:
+
+[source,json]
+----
+{
+  "id": "greeting",
+  "speaker": "merchant",
+  "text": "Looking for supplies?",
+  "choices": [
+    {
+      "text": "What do you sell?",
+      "next": "wares",
+      "actions": [
+        { "op": "set", "flag": "merchant_met", "value": 1 }
+      ]
+    },
+    {
+      "text": "Not today.",
+      "next": "goodbye"
+    }
+  ]
+}
+----
+
+The node's `speaker`, `text`, and shared presentation fields belong to the
+question or menu introduction. The fields inside each choice belong only to
+that selectable response; do not put choice fields beside `text` at node
+level. A player can select a choice with Up/Down and confirm it with A/X.
+
+Instead of repeating an identical menu, `choices` may be a node ID. The current
+node still displays its own speaker and text, then uses the target node's
+literal choices array. The target is not entered, and its music, scripts,
+presentation, and text are ignored. References may not point to another
+reference, may not point to themselves, and must target a node that contains a
+literal `choices` array. These restrictions are compile-time errors and prevent
+choice-reference cycles. The generated nodes share one choice table, so this
+reuse does not duplicate the menu in ROM.
+
+A node spoken by the `player` cannot contain choices. When a choice targets a
+player node, the runtime treats that node as the selected response and skips
+directly through it to the following NPC or narrator line, avoiding duplicate
+display of the selected option. It is also valid to target the reply directly.
+
+==== Choice fields
+
+Each object in a node's `choices` array accepts exactly these fields:
+
+[cols="1,1,1,3",options="header"]
+|===
+|Field |Type |Required |Meaning
+|`text` |string |conditional |The response shown in the menu. May be omitted only when `next` targets a node whose speaker has the `player` role.
+|`translation_parts` |array of strings |no |Gettext fragments for the response. Inferred from the target only when `text` is omitted, unless explicitly overridden.
+|`next` |node ID |yes |Node entered after this response is confirmed.
+|`when` |condition object |no |Hides this response when the condition is false.
+|`actions` |array |no |Immediate integer flag changes made after selection.
+|`repeatable` |boolean |no |Allows this response to remain available during the current conversation; default `false`.
+|`achievement_events` |array |no |Record achievement progress when this response is selected; see <<achievements>>.
+|===
+
+If a choice leads to an authored player line, write its wording once:
+
+[source,json]
+----
+"choices": [
+  { "next": "ask_about_theft" }
+]
+----
+
+The compiler takes `text` and, by default, `translation_parts` from the player
+node `ask_about_theft`. Its actions, achievement events and continuation remain
+on that node and run as usual after selection. The choice retains its own
+`when`, `actions`, `repeatable` and achievement events. This is resolved at
+build time and adds no runtime lookup. Missing targets and omitted labels for
+NPC/narrator targets are compile-time errors. An explicit `text` overrides the
+label and uses the choice's own gettext metadata, preserving existing behavior.
+
+Both nodes and choices accept `actions`: arrays of `{ "op": "set", "flag": ID,
+"value": integer }` or `{ "op": "set_bits", "flag": ID, "value": mask }`.
+`set` replaces the flag value; `set_bits` ORs the mask into the existing value,
+so learning one fact does not erase other facts stored in that flag. Node actions
+run once when that node is entered, before its text or choices are presented.
+Choice actions run after that response is selected. Illustrated cinematic sequences cannot use these flag actions or `responses`;
+use the surrounding game script for their state changes. Node actions also run when
+a selected player line is skipped to avoid displaying it twice. A `choices`
+reference does not enter its target node or run that target's actions.
+
+These action arrays are not general scripts and cannot contain
+`show_dialogue`, movement, waits, scene changes, or other script operations.
+Use a terminal node's `on_end` script for longer consequences.
+
+Choices are non-repeatable within one opening of the conversation by default.
+After selection, every choice targeting the same response node is hidden until
+the conversation is closed and opened again. Set `repeatable: true` only for
+an intentional loop.
+
+==== Conditions
+
+`when` may be one comparison object or an `{ "all": [...] }` object:
+
+[source,json]
+----
+"when": {
+  "all": [
+    { "flag": "saw_tower", "equals": 1 },
+    { "flag": "tower_answered", "not_equals": 1 }
+  ]
+}
+----
+
+Each comparison contains `flag` and exactly one integer operator:
+`equals`, `not_equals`, `less_than`, `has_bits`, or `lacks_bits`.
+`has_bits: mask` requires every bit in the positive mask to be set;
+`lacks_bits: mask` requires every bit in the mask to be clear. For example,
+`has_bits: 2` matches both 2 and 3, while `has_bits: 3` requires both witness
+bits. These tests do not change the value. There is no OR or arbitrary expression
+operator. The same conditions apply to entry cases, choice visibility and
+`responses` entries. They are not fields on speakers or the displayed text.
+
+==== Alternative NPC responses
+
+A normal node may use `responses` instead of `next`, `choices`, or `end`:
+
+[source,json]
+----
+"responses": [
+  { "node": "heard_one_witness", "when": { "flag": "noise_witnesses", "equals": 1 } },
+  { "node": "heard_both", "when": { "flag": "noise_witnesses", "equals": 3 } }
+]
+----
+
+After confirmation, the engine chooses uniformly among the eligible entries.
+An omitted `when` always qualifies; it is not an ordered fallback. If no entry
+qualifies, the conversation closes normally. Each selected destination is used
+once per conversation unless its entry has `repeatable: true`. Use disjoint
+conditions for deterministic branching, or overlapping conditions for the
+original style of randomly varied NPC replies.
+
+==== Dialogue completion and scripts
+
+`on_end` is a completion hook, not an action list on an ordinary line. Without
+an `on_end` hook, a dialogue opened from a script returns to the next action in
+that script. A node-level or dialogue-level `on_end` hook instead starts the
+named completion script when the dialogue closes; that hook becomes the active
+script and replaces the caller's remaining action sequence. Put post-dialogue
+work either in the caller or in the hook, not partly in both. The current
+format accepts node and choice `actions` for flag updates; use an `on_end`
+script for movement, waits, scene changes, or other general behavior.
+
+=== Dialogue and cutscene presentation
+
+Use `presentation: "panel"` for ordinary modal conversations and
+`presentation: "map_balloon"` for automatically timed actor speech drawn over
+the live map. Balloon speakers must resolve to an entity through their
+`entity`, role, or matching entity ID. A timed map balloon advances naturally
+after its `auto_advance_frames`; pressing A advances only the current balloon,
+while pressing B dismisses the remaining balloon sequence and runs its normal
+completion action.
+
+An illustrated sequence uses a compiled, data-driven presentation:
+
+[source,json]
+----
+"presentation": {
+  "type": "cutscene",
+  "background": "#101820",
+  "fade_in_frames": 60,
+  "text": {
+    "mode": "typeover", "x": 80, "y": 45,
+    "width": 480, "bottom": 180, "rate": 7
+  },
+  "layers": [
+    {
+      "image": "forest_back",
+      "clock": "sequence",
+      "wrap_x_delay": 5,
+      "wrap_x_step": -1
+    },
+    {
+      "images": ["runner_0", "runner_1", "runner_2"],
+      "clock": "sequence", "frame_delay": 8,
+      "x": 110, "y": 120
+    }
+  ]
+}
+----
+
+Cutscene images are IDs from the manifest's `cutscene_images` array.
+
+The presentation object itself accepts:
+
+[cols="1,1,3",options="header"]
+|===
+|Field |Type |Meaning
+|`type` |string |Required; must be `cutscene`.
+|`background` |`#RRGGBB` string |Optional solid background behind all layers. If omitted, the authored image layers should cover every area that must be replaced.
+|`fade_in_frames` |integer |Optional non-negative fade from black over the start of the cutscene.
+|`text` |object |Default text mode and geometry inherited by every node.
+|`layers` |array |Back-to-front list of image and animation layers.
+|===
+
+The presentation-level `text` object accepts `mode`, `x`, `y`, `width`,
+`bottom`, `rate`, and `shadow`. Their defaults are `none`, `0`, `0`, `500`,
+`360`, `1`, and `false`; a bubble instead defaults `x` to `-1`, which centers
+it over its speaker. A node-level `cutscene_text` object inherits these values
+and can override any of them.
+
+Layers are drawn in array order and accept these fields:
+
+[cols="1,1,3",options="header"]
+|===
+|Field |Type |Meaning
+|`image` |image ID |One static image.
+|`images` |image ID array |Animation frames; requires positive `frame_delay`.
+|`from_node`, `to_node` |node IDs |Inclusive node range in which the layer is visible.
+|`clock` |`node`, `sequence`, or `range` |Uses time since the current node, the whole cutscene, or `from_node` respectively. Defaults to `range` for a multi-node layer and `node` for a single-node layer.
+|`x`, `y` |integer |Base image-space position. It is a native display position by default; an image's explicit `scale` transforms it with the image.
+|`frame_delay` |integer |Frames displayed per animation image.
+|`wrap_x_delay` |integer |Moves horizontally at this cadence and wraps at the image's real width.
+|`wrap_x_step` |integer |Signed pixels per movement step; defaults to `1`, while `-1` moves left.
+|`fade_in_frames` |integer |Fades from transparent to opaque over this many frames. `alpha_frames` is accepted as a legacy alias.
+|`x_keyframes` |array |Increasing `{frame, x}` points, linearly interpolated by the selected clock.
+|`y_keyframes` |array |Increasing `{frame, y}` points for reusable vertical pans.
+|`alpha_keyframes` |array |Increasing `{frame, alpha}` points; alpha ranges from 0 through 255.
+|===
+
+The `node` clock resets whenever the dialogue enters another node. `sequence`
+counts from the beginning of the cutscene presentation. `range` starts when
+the layer's `from_node` is entered and continues across every node through
+`to_node`; it is useful for animations that must not restart when the caption
+changes. Keyframed values use linear interpolation between points and retain
+the first or last value outside the authored range.
+`fade_in_frames` is a simple zero-to-opaque fade-in shorthand; use
+`alpha_keyframes` instead when the layer also needs to fade out or follow a
+non-linear sequence.
+
+Transitions are opt-in. With no fade or alpha keyframes, changing nodes does
+not alter a layer that remains visible. To cross-fade illustrations, keep the
+outgoing full-screen layer visible during the incoming layer's first node and
+draw the incoming layer afterward with `fade_in_frames`. For example:
+
+[source,json]
+----
+{ "image": "closed_bag", "from_node": "niche", "to_node": "reveal" },
+{ "image": "open_bag", "from_node": "reveal", "to_node": "reaction",
+  "fade_in_frames": 255 }
+----
+
+Because multi-node layers default to the `range` clock, the incoming image
+continues its fade across a caption change instead of becoming transparent
+again. Set `clock: "node"` explicitly only when an animation or fade is meant
+to restart for every node.
+
+The cutscene text `mode` may be `none`, `bubble`, `typeover`, or `scroll`.
+`rate` is frames per revealed glyph for typeover text and frames per vertical
+pixel for scrolling text. A scroll can be frozen at its authored final frame
+with the node-level `hold_at_end` field. A node's `cutscene_text` object accepts
+the same fields as the presentation-level `text` object and may additionally
+set `hold_frames`. This lets one cutscene mix narration, positioned speech
+balloons, and scrolling text without adding game-specific renderer branches.
+Set `shadow: true` to draw type-over text with a one-pixel translucent black
+shadow over detailed artwork.
+
+All cutscene presentations, including the manifest's `new_game_cutscene` and
+cutscenes opened by `show_dialogue`, use the same paused player and controls: A
+reveals the rest of the current type-over line, or advances when the line is
+already complete; B or Start skips the remaining sequence. A terminal node
+with `hold_at_end` instead fast-forwards to its final frame and remains there.
+An
+`auto_advance_frames` value advances independently of text revelation and layer
+animation. This permits a looping character animation or scrolling background
+to continue while text is held on screen.
+
+=== Choices, conditions, and effects
+
+The complete choice-node, choice-field, condition, and effect schemas are
+documented in the “Choice node” and “Choice fields” sections above. The compact
+example below is retained as a quick reference:
+
+Every choice needs `next`; `text` is optional when the target is a player node.
+For example:
+
+[source,json]
+----
+{
+  "text": "Ask about the locked tower.",
+  "when": {
+    "all": [
+      { "flag": "saw_tower", "equals": 1 },
+      { "flag": "tower_answered", "equals": 0 }
+    ]
+  },
+  "actions": [
+    { "op": "set", "flag": "tower_answered", "value": 1 }
+  ],
+  "repeatable": false,
+  "next": "tower_reply"
+}
+----
+
+`when` may be one comparison object or `{ "all": [...] }` containing one or
+more comparisons. Each comparison contains `flag` and exactly one integer
+operator: `equals`, `not_equals`, `less_than`, `has_bits`, or `lacks_bits`. There is no OR,
+greater-than, or arbitrary expression operator.
+
+Node and choice actions support integer `set` and `set_bits`. For longer consequences,
+end at a node whose `on_end` starts a general script.
+
+Choices are non-repeatable within one opening of the conversation by default.
+After selection, every choice targeting the same response node is hidden until
+the conversation is closed and opened again. Set `repeatable: true` only for an
+intentional loop.
+
+=== Connecting dialogue to the world
+
+Create a small script:
+
+[source,json]
+----
+{
+  "id": "talk_to_merchant",
+  "actions": [
+    { "op": "show_dialogue", "dialogue": "merchant_first_meeting" }
+  ]
+}
+----
+
+List both files in the manifest, then set the actor placement's Tiled
+`interaction` property to `talk_to_merchant`. The player activates adjacent
+actors with A or X; Up and Down select choices.
+
+== Scripts
+
+A script is a cooperative, ordered action list:
+
+[source,json]
+----
+{
+  "id": "open_gate",
+  "actions": [
+    { "op": "set_control", "enabled": false },
+    { "op": "set_entity_state", "entity": "gate", "state": "opening" },
+    { "op": "wait", "frames": 8 },
+    { "op": "set_entity_state", "entity": "gate", "state": "open" },
+    { "op": "set_walkability", "scene": "village_square", "x": 9, "y": 6, "mask": 15 },
+    { "op": "set", "flag": "gate_open", "value": 1 },
+    { "op": "set_control", "enabled": true }
+  ]
+}
+----
+
+Immediate actions continue in the same update. `wait`, player movement, and
+modal dialogue yield to later frames. Scripts have no local variables,
+conditions, calls, or loops; model branching with conditioned dialogue choices
+or conditioned Tiled triggers.
+
+=== Script action reference
+
+[cols="1,3,4",options="header"]
+|===
+|Operation |Fields |Behavior and constraints
+
+|`set`
+|`flag`, `value`
+|Writes an integer global flag.
+
+|`set_control`
+|`enabled` (boolean)
+|Enables or disables player input. Always restore control after a scripted sequence.
+
+|`show_dialogue`
+|`dialogue`
+|Opens a compiled modal dialogue and resumes the script when it closes.
+
+|`speak`
+|`entity`, `text`, `duration_frames` (optional, default 180)
+|Shows a non-modal floating speech bubble for an actor. Duration must be positive.
+
+|`wait`
+|`frames`
+|Waits a positive number of frames without blocking rendering or schedules.
+
+|`face`
+|`entity`, `facing`
+|Immediately turns an actor, including the player, without starting or stopping its schedule. Use `stop_schedule` first when the new facing must not be overwritten by an active route.
+
+|`place_actor`
+|`entity`, `scene`, `x`, `y`, `facing`
+|Immediately stages an actor at an exact tile and stops its previous schedule. The player may only be placed in the current scene; placing the player also reveals one hidden by `change_scene`. Use this for scripted gatherings and escorts that do not need visible movement.
+
+|`place_actor_random`
+|`entity`, `scene`, non-empty `positions` array containing `x`, `y`, and `facing`
+|Stops the actor's previous schedule, then uniformly selects a currently free, walkable authored position. If all candidates are occupied, the script waits and retries. Repeated candidate arrays share generated runtime storage.
+
+|`walk_actor`
+|`entity`, `scene`, `x`, `y`, `facing`
+|Stops the actor's previous schedule and starts a non-blocking pathfind to the exact tile. The actor, including the player if selected, must already be in that scene. Later script actions continue immediately; use `wait_actor` when they depend on arrival. An unreachable or occupied target can leave the walk waiting, so author a reachable destination.
+
+|`walk_actor_random`
+|`entity`, `scene`, non-empty `positions` array containing `x`, `y`, and `facing`
+|Selects one currently free, walkable destination and starts it through the same non-blocking path logic as `walk_actor`. Randomization affects only destination selection.
+
+|`wait_actor`
+|`entity`
+|Pauses the script until that actor's current `walk_actor` or `walk_actor_random` route finishes. Other actors, schedules, rendering, and live-map dialogue continue.
+
+|`change_scene`
+|`scene`, `spawn`, optional `player_hidden`
+|Fades to black, changes to a scene while fully obscured, places the player at a named spawn, and fades back in. `player_hidden` defaults to `false`; set it to `true` when the spawn should anchor the camera but the player must neither render nor block actors until a later `place_actor` reveals them. Script execution and player input resume after the fade. The target scene must contain a player placement.
+
+|`set_entity_state`
+|`entity`, `state`
+|Changes every placed stateful object of that definition in the *current* scene. Use unique definitions when objects need independent scripted control; schedules can target a placement ID instead.
+
+|`set_walkability`
+|`scene`, `x`, `y`, `mask`
+|Overrides one cell's directional mask for the current play session. Mask range is 0 through 15.
+
+|`play_music`
+|`track`
+|Starts a music track. Requesting the active track again does not restart it.
+
+|`start_schedule`
+|`entity`, `schedule`, `delay_frames` (optional, default 0)
+|Starts or restarts a schedule belonging to that actor after a non-negative delay.
+
+|`wait_schedule`
+|`entity`
+|Pauses this script until the actor's current non-looping schedule finishes. Rendering, animation, and all schedules continue. Do not wait on a looping schedule unless another event will stop or replace it.
+
+|`save_actor_state`
+|`entity`
+|Stores the actor's current scene, tile, facing, visual, dialogue, and schedule progress in that actor's checkpoint. A later `restore_actor_state` schedule step consumes it. Saving again replaces the previous checkpoint.
+
+|`stop_schedule`
+|`entity`
+|Stops the actor's route and clears its current ambient/scheduled speech.
+
+|`set_entity_dialogue`
+|`entity`, `dialogue`
+|Persistently overrides an actor's interaction dialogue, including across scenes.
+
+|`set_actor_visual`
+|`entity`, `visual`
+|Switches an actor to a named visual declared by its entity definition. Use `default` to restore its placement visual. Animation restarts from its first frame.
+|===
+
+`speak` does not pause the script by itself. For an ordered cutscene exchange,
+follow each `speak` with a `wait` of the same duration. Movement schedules,
+animation, music, and rendering continue during that wait, so these exchanges
+remain visible in the scene instead of opening the modal dialogue window. Use
+modal dialogue for player choices and `speak` sequences for authored exchanges
+that do not require a response.
+
+== NPC schedules
+
+A schedule belongs to one actor and contains at least one step:
+
+[source,json]
+----
+{
+  "schedules": [
+    {
+      "id": "merchant_round",
+      "entity": "merchant",
+      "loop": true,
+      "speech": {
+        "lines": ["Fresh supplies!", "Maps for every road!"],
+        "delay_min_frames": 600,
+        "delay_max_frames": 1200,
+        "duration_frames": 180
+      },
+      "steps": [
+        { "op": "move", "scene": "village_square", "x": 8, "y": 6,
+          "facing": "west", "delay_min_frames": 60, "delay_max_frames": 120 },
+        { "op": "speak", "text": "Time to close the stall.", "duration_frames": 180 },
+        { "op": "wait", "delay_frames": 60 }
+      ]
+    }
+  ]
+}
+----
+
+`loop` defaults to true. A non-looping schedule may set `next` to another
+schedule owned by the same actor. Schedules do not start automatically; launch
+them with `start_schedule` from an initialization or story script.
+
+The optional `speech` block supplies autonomous random remarks. It requires a
+non-empty `lines` array, positive `delay_min_frames`, a maximum not less than
+the minimum, and a positive `duration_frames` (default 180). Ambient speech
+does not open dialogue or stop player control.
+
+Every step may set `delay_frames`, or inclusive `delay_min_frames` and
+`delay_max_frames`. Delays default to zero except that a `wait` step must have
+a positive delay. A step may also define a schedule-local `label`.
+
+=== Schedule step reference
+
+[cols="1,3,4",options="header"]
+|===
+|Operation |Fields |Behavior
+
+|`move`
+|`scene`, `x`, `y`, `facing`
+|Uses eight-direction A* within the named scene, including diagonal steps. Solid cells and directional collision masks constrain the route; actors temporarily blocking the next cell cause replanning.
+
+|`place`
+|`scene`, `x`, `y`, `facing`
+|Immediately transfers the actor as one step of an ongoing route, normally at a doorway. No actor marker is required in the destination scene. Use script `place_actor` instead for one-time cutscene staging.
+
+|`place_random`
+|`scene`, non-empty `positions` array containing `x`, `y`, and `facing`
+|Uniformly chooses among the currently free, walkable authored positions and immediately transfers the actor there. Occupied positions are excluded before the choice; if none are free, the step waits and retries. This is useful for original-style gatherings whose formation varies from one playthrough to another.
+
+|`face`
+|`facing`
+|Immediately turns the actor in place. This also works for the player actor during a scripted sequence.
+
+|`wait`
+|positive delay field
+|Waits without moving.
+
+|`speak`
+|`text`, optional `duration_frames`
+|Shows one specific non-modal remark at this route position.
+
+|`set_object_state`
+|`scene`, `object`, `state`
+|Changes one stateful object placement by its scene-local Tiled `id`, even off-screen.
+
+|`toggle_object_state`
+|`scene`, `object`
+|Toggles a stateful placement with exactly two states.
+
+|`jump`
+|`target`
+|Continues at the step carrying that label.
+
+|`random_jump`
+|`targets` (non-empty array)
+|Uniformly chooses one of the named labels. Duplicate or missing labels are rejected.
+
+|`restore_actor_state`
+|none
+|Consumes the schedule actor's saved checkpoint and returns the actor to it. A saved active schedule resumes from its saved step; a saved idle actor remains idle. If no checkpoint exists, the route simply continues.
+|===
+
+For a temporary escort, use `save_actor_state` before starting the escort and
+end the return route with `restore_actor_state`. This preserves whether the
+actor was idle or following a schedule. If the story instead requires a fixed
+destination or routine, omit the checkpoint operations and use the non-looping
+schedule's `next` field, or start the desired schedule explicitly from a
+script.
+
+Talking to a scheduled actor pauses that actor, turns it toward the player, and
+resumes the route when dialogue closes. Other schedules continue. Schedules
+also update while their actor is in another scene.
+
+== Music and UI sounds
+
+An audio file may contain a `tracks` array for music and an `effects` array for
+short sounds:
+
+[source,json]
+----
+{
+  "tracks": [
+    {
+      "id": "village_theme",
+      "source": "assets/audio/village_theme.ogg",
+      "sample_rate": 11025,
+      "volume": 0.5,
+      "loop": true
+    }
+  ],
+  "effects": [
+    {
+      "id": "ui_select",
+      "source": "assets/audio/select.wav",
+      "sample_rate": 22050,
+      "volume": 0.5
+    }
+  ]
+}
+----
+
+`source` accepts Ogg Vorbis or WAV inside `gamedata/`. `sample_rate` defaults to
+11025 and must be from 8000 through 44100. `volume` defaults to 0.5 and must be
+from 0 through 1. Music `loop` defaults to true; effect `loop` defaults to
+false.
+
+Audio is converted at build time to signed 16-bit stereo PCM. Lower sample
+rates greatly reduce ROM size; playback speed is adjusted so pitch and duration
+remain correct. Music uses Vircon32 channel 0 and UI effects use channel 1.
+
+The manifest maps optional interface roles to effect IDs:
+
+[source,json]
+----
+"ui_sounds": {
+  "move": "ui_switch",
+  "confirm": "ui_select",
+  "cancel": "ui_cancel"
+}
+----
+
+`move` plays only when a menu or dialogue selection actually changes.
+`confirm` plays when the player activates a selection or advances dialogue.
+`cancel` plays when backing out of a menu. Timed dialogue and cutscene
+fast-forwarding are deliberately silent. Any omitted role is silent, which is
+useful when the game has no matching source asset.
+
+=== Starting music from content
+
+Music can currently be requested in three places:
+
+* `title_music` in the manifest starts on the title screen.
+* `music` on a dialogue node starts when that node is entered. This also applies
+  when an automatic `next` or `auto_advance_frames` transition enters the node.
+* A script `play_music` action starts the named track when that action executes.
+
+For example, an illustrated sequence can change music on the exact line where
+the scene changes:
+
+[source,json]
+----
+{
+  "id": "approach",
+  "speaker": "narrator",
+  "text": "At last, the gate came into view.",
+  "music": "gate_approach",
+  "music_delay_frames": 120,
+  "music_fade_out_frames": 120,
+  "auto_advance_frames": 300,
+  "next": "at_gate"
+}
+----
+
+In a cutscene, `music_delay_frames` counts from entry into the node.
+While waiting, `music_fade_out_frames` lowers the preceding track's volume; use
+equal delay and fade durations for a continuous fade followed by the new cue.
+A zero delay starts the new track immediately, so no preceding-track fade is
+audible. Ordinary panel and map-balloon dialogues honor `music` immediately;
+their playback does not use the cutscene timing fields.
+
+A music request replaces the track on the single music channel. Requesting the
+track that is already selected does not seek to its beginning or restart it.
+This is especially relevant to tracks authored with `loop: false`: after a
+one-shot track finishes, it remains silent until content selects a different
+track. A scripted cutscene leaves its current music playing so its completion
+script can retain or replace it without a silent frame. The new-game wrapper
+stops its cutscene music before gameplay begins. There is not yet a general
+script action for fading or stopping music, nor a script action for arbitrary
+non-UI sound effects.
+
+[[translations]]
+== Translations
+
+Translation catalogs use ordinary gettext `.po` files and remain UTF-8 source
+documents. The host-side content compiler reads them directly; the ROM does
+not contain gettext, parse catalogs, or perform Unicode conversion. Each
+translated string is converted to the font's compact glyph IDs during the
+build.
+
+The English `text` in dialogue, cutscene, script-speech, and schedule-speech
+records is the gettext `msgid`. Menu and save-screen labels also use compiled
+messages. The compiler first matches a `msgid` exactly, then compares forms
+with manifest-defined variables and variants resolved. As a final fallback it
+also collapses whitespace in both strings, allowing dialogue cleaned of the
+original 360-pixel line wrapping to reuse the same catalog entry. Exact
+matches retain authored line breaks; whitespace-fallback translations use the
+port's automatic wrapping. Missing, empty, fuzzy, or port-specific entries
+fall back to English.
+The compiler prints matched/total counts for every language so incomplete
+catalogs are visible during normal builds. Plural entries and `msgctxt` are
+not currently supported because Waste's Edge does not use them.
+
+The optional `translation_variables` object resolves original gettext tokens
+without hard-coding game-specific names in the engine. For example,
+`"$name": "Banec"` lets authored dialogue retain the original `$name`
+placeholder. `$name` is retained as a runtime player-name token; its manifest
+value supplies the default shown when starting a new game. Literal occurrences
+of that default name in legacy dialogue are also converted to the token.
+The gamepad name-entry screen accepts up to 20 CP-1252 characters. The initial
+default is selected, so the first typed character replaces it. X inserts a
+space. B deletes immediately, then repeats after 24 frames while held, every
+four frames until the name is empty. A types the focused character,
+and START accepts; accepting an empty name restores the default. L/R switches
+between basic letters/numbers and the international CP-1252 letter page.
+Space is an explicit key, alongside Delete and Accept; an underscore
+is neither displayed nor inserted. Keyboard labels use the game's font;
+the acceptance text comes from the
+`ui_text.keyboard_begin` gettext string ("Begin" in English). The international
+page includes the typographic apostrophe `’` for names such as `O’Connor`.
+The keyboard's editing, navigation and
+page logic live independently in `src/ui/virtual_keyboard.c`, operating on
+a caller-provided bounded text buffer. The platform renders it with the
+player portrait already authored on a player dialogue speaker, at native size.
+The chosen
+name is stored in each save and substituted before localized text is measured,
+wrapped, or revealed in a cutscene. This applies to speaker names, dialogue,
+choices, and scripted speech.
+`translation_variants` selects a zero-based alternative from original forms
+such as `$fm{madam/sir}`; selecting `1`
+produces `sir`. Undefined variables, invalid alternatives, unsupported
+characters, and malformed catalogs are build errors.
+
+When a legacy catalog split one displayed line around a variable, retain one
+readable runtime `text` string and add `translation_parts`. Its strings are
+looked up independently and concatenated after translation; after manifest
+variables are resolved, they must reconstruct `text`. This keeps dialogue
+authored in terms of the configurable `$name`,
+without duplicating a port-specific full-line msgid in every catalog.
+
+[source,json]
+----
+{
+  "text": "I am $name, come as an agent for my employer.",
+  "translation_parts": ["I am ", "$name", ", come as an agent for my employer."]
+}
+----
+
+The title menu exposes a language picker using each entry's native `name`.
+The selected language applies to the title cutscene, intro, dialogue,
+cutscenes, ambient speech, and compiled menu labels. It is stored in a small
+global memory-card record after the four save slots, so it is independent of
+individual saved games and save-format compatibility. If no compatible memory
+card is present, the selection still applies for the current session.
+At startup, a valid stored language takes priority. Otherwise the platform
+tries an optional system locale supplied at boot, matching the language ID and,
+when available, its territory suffix (for example `pt_br`). If there is no
+valid supported locale, it uses the first language, English. The boot-locale
+record is a platform convention, not a required BIOS feature.
+
+Catalog characters must exist in the selected font. With the current
+CP-1252 atlas, English, Danish, Spanish, French, Italian, Dutch, Brazilian
+Portuguese, and Swedish are supported. Add an explicitly mapped font
+extension before enabling a language that requires other characters.
+
+== UI font and portraits
+
+The manifest's `font` field names a JSONC descriptor for the dialogue,
+cutscene, and ambient-speech font:
+
+[source,json]
+----
+{
+  "format": "wastesedge-font-v1",
+  "source": "assets/ui/fonts/aclonica-cp1252.png",
+  "encoding": "cp1252",
+  "grid": [16, 16],
+  "cell": [20, 20],
+  "glyph_height": 19,
+  "line_height": 19,
+  "hotspot": [1, 1],
+  "advance_marker": [255, 0, 255, 255]
+}
+----
+
+The PNG is a 16 by 16 row-major byte grid: cell `N` represents CP-1252 byte
+`N`. For example, `A` is in cell `0x41` and `é` is in cell `0xE9`. Dialogue
+JSONC remains normal UTF-8; the compiler converts each authored character to
+its CP-1252 byte and reports an error for text outside that repertoire.
+
+Each 20 by 20 cell uses its upper `glyph_height` rows for visible pixels. The
+last row is metadata and is never rendered. Place exactly one opaque pixel of
+the configured `advance_marker` color at horizontal position `advance - 1`.
+Moving that pixel changes the proportional advance; removing it marks the byte
+as unavailable. The space cell must have a marker even though it has no visible
+pixels. `hotspot` selects the cell coordinate drawn at the text cursor, and
+`line_height` controls vertical layout.
+
+The complete 256-entry table is compiled even when the current game does not
+use every character. Undefined CP-1252 and control-byte cells may remain blank
+or may be filled with project-specific symbols. The normal build consumes only
+the PNG and descriptor; it does not rasterize a TTF.
+
+To regenerate the initial atlas from an archived TrueType source, run:
+
+[source,shell]
+----
+python3 tools/generate_cp1252_font.py \
+  gamedata/assets-original/ui/fonts/Aclonica.ttf \
+  gamedata/assets/ui/fonts/aclonica-cp1252.png
+----
+
+This command overwrites the editable PNG, so it is an explicit import tool and
+is not part of the normal build. The archived TTF and extraction helper are
+optional local resources and may be absent from a clean checkout. Unsupported TTF characters initially use the
+question-mark glyph; their byte cells can then be redrawn manually.
+
+Portraits must be PNG files inside `gamedata/`. Transparent 64 by 64 images fit
+the established layout best and are rendered at their native resolution.
+
+[[branding]]
+== Branding a separate game
+
+Game content is replaceable through `gamedata/`, but cartridge branding is
+currently build configuration rather than content data. For a separately named
+game, update:
+
+* `project_name` near the top of `CMakeLists.txt`; this determines the `.wasm`,
+  `.vbin`, `.xml`, and `.v32` names;
+* the version in `rom.xml.in`, if desired;
+* the Tiled project filename and README references, for author convenience;
+* the manifest font descriptor and its PNG atlas, if different branding needs
+  another typeface.
+
+The resource lists in the ROM XML are generated by CMake. Do not edit a
+generated `build/*.xml` or the root `WastesEdge.xml` artifact.
+
+== Validation, generated files, and build limits
+
+Run the compiler directly for fast feedback:
+
+[source,shell]
+----
+python3 tools/content_compiler/compile_content.py --project-root .
+----
+
+It reports malformed JSONC, invalid IDs and types, duplicate IDs, missing
+assets, unsupported operations, invalid geometry, and unknown scene/entity/
+dialogue/script/schedule/state references. CMake runs the same compiler
+automatically and tracks changes beneath `gamedata/`.
+
+Never edit `generated/`. Important outputs include:
+
+[source,text]
+----
+generated/content_manifest.json
+generated/content_ids.h
+generated/content_data.c
+generated/content_scene_data.h
+generated/content_scene_data.c
+generated/content_assets.cmake
+generated/backgrounds/*.png
+generated/characters/*.png
+generated/dialogue/*.png
+generated/runtime-atlases/*.png
+generated/audio/*.wav
+----
+
+Run `cmake --build build --target check` for the host regression suite, or
+`ctest --test-dir build` after configuring. These checks exercise the current
+project's content and do not replace an emulator playthrough of a custom game.
+
+Current practical and enforced limits include:
+
+* at most 256 cartridge textures after generated packing;
+* one packed actor sheet must fit in 1024 by 1024 pixels;
+* pathfinding scenes are at most 64 by 64 cells;
+* at most 16 distinct cells may have runtime `set_walkability` overrides;
+* four standing directions and at most three unique walking frames per direction;
+* a fixed 4096-entry renderer command buffer, making large amounts of
+  depth-sorted scenery more expensive than baked Tile Layers;
+* fixed-size runtime storage generated from the compiled content;
+* no runtime filesystem or JSON parsing.
+
+Prefer Tile Layers for non-occluding terrain, `tiled_occluder` for repeated
+foreground strips, and as few separate translucent scenery pieces as the art
+permits. These choices reduce both texture switches and drawing work.
+
+== Features not currently expressible in game data
+
+The current authoring vocabulary deliberately covers the mechanics already
+implemented by the engine. It does not yet provide:
+
+* arbitrary script expressions, script conditionals, variables, calls, or
+  parallel scripts;
+* dialogue OR conditions, greater-than comparisons, or arbitrary expressions;
+* inventory/item operations or inventory UI;
+* script-triggered arbitrary sound effects;
+* Tiled animated tiles, flipped tiles, infinite maps, or atlas tilesets;
+* automatic `on_enter` scripts for every scene transition;
+* a manifest-controlled ROM title or cartridge version.
+
+When a new game genuinely needs one of these capabilities, extend the content
+compiler, generated runtime representation, engine behavior, validation, and
+this document together. Do not encode a game-specific special case in the
+platform layer.
+
+== Saved-game behavior
+
+Games automatically receive four Vircon32 memory-card slots. Save files do
+not require a separate authoring document: the engine records the mutable
+world state produced by maps, dialogue, scripts, and schedules. This includes
+the current scene and player, persistent actors, dialogue choices already
+used, flags, stateful objects, active script progress, collision overrides,
+music, transitions, random-generator state, and the in-world clock. Occupied
+slots show a six-by-six-tile reconstruction around the saved player together
+with the scene's `display_name` and `Day N - HH:MM`. Preview pixels are rebuilt
+from the saved state and therefore consume no additional memory-card space.
+
+The save format is versioned and checksummed. It also contains a fingerprint
+of the compiled game data. A save made by another game or by a build with a
+different content signature is shown as incompatible instead of applying its
+numeric IDs to the wrong content. During development, changing authored data
+can therefore invalidate existing saves; begin a new game when testing a new
+content build. The decoder also validates the payload version, generated
+entity/flag/object/dialogue counts, and restored state. Each slot has a maximum
+payload of 1000 words; a larger world can fail to save even when it compiles.
+The current payload does not preserve an in-flight `walk_actor` route. Avoid
+depending on saving during a scripted walk; check resumption behavior if a
+custom game allows its pause menu during such a sequence.
+
+The title menu offers New Game, Load Game, Language, and Achievements. During
+play, Start pauses the world and offers Continue, Save Game, Load Game,
+Achievements, and Back to Title. The normal
+interact button confirms a choice; B/Y or Start cancels a slot screen. The
+pause menu itself is engine UI and is not described in Tiled or JSONC.
+
+[[achievements]]
+== Achievements
+
+The optional manifest field `"achievements": "achievements.jsonc"` names a
+JSONC document with these fields:
+
+* `locked_icon`: optional PNG path or image/rectangle specification, used for
+  locked entries in the achievement list.
+* `entries`: an ordered array of up to 32 achievement definitions. Its order
+  determines the bits in the externally observable unlock mask.
+
+Each definition accepts:
+
+* `id`: required nonempty unique string. Numeric strings such as `"1"` are
+  allowed here, unlike scene and script identifiers.
+* `title`, `description`: required strings, translated through the normal PO
+  catalogs. Locked entries show their descriptions too.
+* `icon`: required PNG path or image/rectangle specification. The shipped
+  badges are 48 by 48 pixels: the list renders them at native size, while
+  compact unlock popups render them at half scale.
+* `expected`: required unsigned 32-bit progress mask, as an integer or a
+  hexadecimal string such as `"0x80200800"`.
+* `initial`: optional unsigned 32-bit starting progress mask; defaults to zero.
+* `points`: optional nonnegative integer used by the local RetroAchievements
+  export; defaults to 5. These local point values do not constitute a published set.
+
+For example:
+
+[source,json]
+----
+{
+  "locked_icon": "assets/ui/achievements/0.png",
+  "entries": [
+    { "id": "wine", "title": "Sommelier",
+      "description": "You know a good drop when you taste it",
+      "icon": "assets/ui/achievements/1.png",
+      "expected": "0x80200800", "points": 5 }
+  ]
+}
+----
+
+`achievement_events` is an optional array on a dialogue node, on an
+individual choice, or at the top level of a script document. Each element
+contains `achievement` (a defined achievement ID string) and `bit` (0 through
+31). Node events run when entering that node, choice events only when choosing
+that answer, and script events once whenever the script starts. A reused
+`choices` menu also reuses its choices' events; it does not replay the menu
+owner's node events. Events are supported in both map dialogues and illustration
+cutscenes. Unknown achievement IDs and invalid bit numbers fail compilation.
+
+[source,json]
+----
+"achievement_events": [{ "achievement": "wine", "bit": 31 }]
+----
+
+An event ORs its bit into that achievement's current progress. Unlocking requires
+an *exact match* with `expected`, following the original Adonthell rules.
+Therefore an event outside the expected mask can disqualify an achievement for
+the current playthrough. Repeating an event is harmless. After an achievement
+unlocks, its progress freezes and it cannot be disqualified retroactively.
+
+Unfinished progress is stored per save slot (save payload version 7). Earned
+badges persist separately on the game's memory card, independently of save slots
+and the selected language. Starting a new game resets unfinished progress but
+keeps earned badges. Loading an older slot cannot remove a badge. Unlocks are
+written automatically; without a writable card they remain available for this
+session and writing is retried. The profile record has a checksum and a signature
+of the ordered achievement IDs and rules, so changing that layout invalidates
+the old badge profile instead of assigning badges to the wrong definitions.
+
+The title and pause menus offer Achievements. Up/Down scrolls the list; B or
+Start returns. Unlocks display queued badge notifications during gameplay and
+cutscenes. Notifications pause while menus are open. Waste's Edge supplies its
+nine original gameplay achievements. The original checksum-corruption joke
+badge is not part of this earnable list.
+
+=== RetroAchievements and RAM addresses
+
+Every normal ROM build also produces:
+
+* `WastesEdge.map`: the `wasm-ld --Map` link map, including the ordinary C
+  object `achievement_ram`.
+* `WastesEdge-User.txt`: RAIntegration's local `-User.txt` format, with nine
+  local achievement records and the original titles, descriptions and badges.
+* `WastesEdge.achievements.txt`: the same definitions as a ROM sidecar for
+  compatible frontends, plus the badge PNGs under the adjacent `local/` directory.
+* `WastesEdge-User.ram.json`: the exact ROM SHA-256, Wasm byte offset, console
+  RAM word address, frontend byte address, field addresses and achievement bits.
+
+These are generated build outputs, not editable sources. Definitions come from
+`gamedata/achievements.jsonc` and the record address comes from the actual link
+map. No permanent RAM window is reserved, no address global is exported, and
+the game uses ordinary C array writes. The exporter rejects a missing, duplicate,
+unaligned or incorrectly sized record.
+
+The record has four consecutive 32-bit words:
+
+[cols="1,3"]
+|===
+|Byte offset |Meaning
+|0 |Magic `0x57454143`
+|4 |Record schema version, currently 1
+|8 |Permanently unlocked achievement bits; bit 0 is the first authored entry
+|12 |1 while gameplay or a world cutscene is active; 0 in title/menu screens
+|===
+
+The current wasm2vircon backend maps Wasm byte offsets onto console RAM word
+1,000,000. The Vircon32 libretro core exposes native system RAM as bytes starting
+at zero. Thus `frontend_byte_address = 4,000,000 + wasm_byte_offset`, while
+`console_word_address = 1,000,000 + wasm_byte_offset / 4`. CMake exposes
+`WASM_LINEAR_RAM_BYTE_BASE` explicitly for a backend with a different mapping;
+the exporter checks that the entire record fits in the core's 16 MiB system RAM.
+Simulator word addresses and RetroAchievements byte addresses are different units.
+
+Each generated trigger checks the magic, schema version, active-gameplay word
+and its unlock bit. This local set mirrors the game's persistent badge profile:
+already earned badges may also be awarded by the frontend when resuming play.
+It is a starting point for achievement authoring, not an uploaded or approved
+RetroAchievements set.
+
+Use the TXT/JSON files generated for the *exact ROM being tested*. Addresses can
+move when code or game data changes. When adding a new ROM version to an existing
+set, validate every address used by its logic, as required by
+https://docs.retroachievements.org/guidelines/content/adding-hashes.html[the
+RetroAchievements compatibility guidance]. If a release must retain identical
+addresses across builds, object-specific placement with overlap detection would
+be a separate opt-in build feature; there is no compiler-wide reservation here.
+
+== New-game checklist
+
+Before considering a custom game-data set complete, verify all of the following:
+
+* Every source document and asset stays under `gamedata/`.
+* The manifest lists every map, entity, audio, dialogue, script, and schedule file.
+* IDs use lower-case snake case and cross-references resolve.
+* Exactly one entity definition is player-controlled.
+* Every playable scene contains a player placement and required destination spawns.
+* Every actor resolves all four standing directions, directly or through `stand_any`, and has one visual-bearing placement; at most one non-player placement is initially present.
+* Background art that never occludes actors is on Tile Layers.
+* Foreground art has a tested footing, `sort_y`, and alpha value.
+* Collision permits both sides of every intended movement edge.
+* Actor talk scripts contain `show_dialogue`; complex examinations use hotspots.
+* Every dialogue path terminates or loops intentionally and preserves a visible choice.
+* Cutscene-like scripts restore player control.
+* NPC schedules are explicitly started; their destination scenes need only valid routes and coordinates, not duplicate actor markers.
+* The standalone content compiler succeeds.
+* A clean CMake build produces the ROM and the result is tested in a Vircon32 emulator.

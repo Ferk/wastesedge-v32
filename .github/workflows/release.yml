@@ -34,15 +34,20 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: WastesEdge-ROM
           path: release
+      - name: Generate ROM checksum
+        run: cd release && md5sum WastesEdge.v32 > WastesEdge.v32.md5
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" release/WastesEdge.v32 \
+          gh release create "$TAG" \
+            release/WastesEdge.v32 release/WastesEdge.v32.md5 \
+            docs/WastesEdge.nfo docs/boxart/WastesEdge-boxart.png \
             --title "Waste's Edge V32 $TAG" --verify-tag

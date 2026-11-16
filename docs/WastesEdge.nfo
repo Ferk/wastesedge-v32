@@ -1,0 +1,10 @@
+<game>
+  <title>Waste's Edge</title>
+  <platform>Vircon32</platform>
+  <genre>Adventure</genre>
+  <developer>Adonthell team & Ferk</developer>
+  <desc>An RPG investigation story. As a loyal servant of the elven Lady Silverhair you arrive at the remote trading post of Waste's Edge, where she is negotiating with the dwarfish merchant Bjarn Fingolson — and only you can stop what happens next from destroying her reputation. A new data-driven engine that replays Adonthell's story on the console.</desc>
+  <license>GPLv3</license>
+  <website name="Github repo">https://github.com/Ferk/wastesedge-v32</website>
+  <website name="Adonthell website">https://adonthell.nongnu.org/</website>
+</game>

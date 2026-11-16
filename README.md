@@ -1,4 +1,6 @@
-# V32 Adonthell - Wastes Edge
+# V32 Adonthell - Wastes Edge <img src="docs/icon128.png" height="32">
+
+![Waste's Edge box art](docs/boxart/WastesEdge-boxart.png)
 
 This is a port to [Vircon32](https://www.vircon32.com/) of the RPG investigation
 story from [*Adonthell - Waste's Edge*](https://adonthell.nongnu.org/).
