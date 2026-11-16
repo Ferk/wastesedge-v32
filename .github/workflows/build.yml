@@ -1,0 +1,83 @@
+name: Build and test
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ clang lld cmake ninja-build ffmpeg libsdl2-dev libpng-dev python3-pil
+      - name: Check out wasm2vircon
+        uses: actions/checkout@v4
+        with:
+          repository: Ferk/wasm2vircon
+          ref: 4e97a19111ea455c6fda924761313a489543bdbc
+          path: dependencies/wasm2vircon
+      - name: Check out Vircon32 tools
+        uses: actions/checkout@v4
+        with:
+          repository: vircon32/ComputerSoftware
+          ref: 5219741ce473ab686931db0933131c317bd50343
+          path: dependencies/ComputerSoftware
+      - name: Check out Binaryen headers
+        uses: actions/checkout@v4
+        with:
+          repository: WebAssembly/binaryen
+          ref: version_133
+          path: dependencies/binaryen-source
+      - name: Install Binaryen library
+        shell: bash
+        run: |
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/binaryen.tar.gz" https://github.com/WebAssembly/binaryen/releases/download/version_133/binaryen-version_133-x86_64-linux.tar.gz
+          echo '2dc9c7813f5375db93d96ead4b78222fcc3e2677bbb832297af4797782a37489  '"$RUNNER_TEMP/binaryen.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/binaryen"
+          tar -xzf "$RUNNER_TEMP/binaryen.tar.gz" -C "$RUNNER_TEMP/binaryen"
+          library=$(find "$RUNNER_TEMP/binaryen" \( -name libbinaryen.a -o -name libbinaryen.so \) -print -quit)
+          if [[ -z "$library" ]]; then
+            echo 'Binaryen archive contains no libbinaryen.a or libbinaryen.so' >&2
+            tar -tzf "$RUNNER_TEMP/binaryen.tar.gz" | head -100
+            exit 1
+          fi
+          echo "Using Binaryen library: $library"
+          echo "BINARYEN_LIBRARY=$library" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$(dirname "$library")" >> "$GITHUB_ENV"
+      - name: Build wasm2vircon
+        run: |
+          cxx_runtime=$(g++ -print-file-name=libstdc++.so)
+          if [[ ! -f "$cxx_runtime" ]]; then
+            echo "Could not locate the C++ runtime: $cxx_runtime" >&2
+            exit 1
+          fi
+          cmake -S dependencies/wasm2vircon -B "$RUNNER_TEMP/wasm2vircon-build" -G Ninja \
+            -DCMAKE_C_FLAGS="-isystem $GITHUB_WORKSPACE/dependencies/binaryen-source/src" \
+            -DWASM2VIRCON_BINARYEN_INCLUDE_DIR="$GITHUB_WORKSPACE/dependencies/binaryen-source/src" \
+            -DWASM2VIRCON_BINARYEN_LIBRARY="$BINARYEN_LIBRARY" \
+            -DBINARYEN_CXX_RUNTIME="$cxx_runtime" \
+            -DWASM2VIRCON_EMBEDDED_BINARYEN=AUTO
+          cmake --build "$RUNNER_TEMP/wasm2vircon-build" --target wasm2vircon
+          echo "$RUNNER_TEMP/wasm2vircon-build" >> "$GITHUB_PATH"
+      - name: Build Vircon32 tools
+        run: |
+          cmake -S dependencies/ComputerSoftware/DevelopmentTools -B "$RUNNER_TEMP/vircon-tools" -G Ninja
+          cmake --build "$RUNNER_TEMP/vircon-tools" --target assemble packrom png2vircon wav2vircon
+          echo "$RUNNER_TEMP/vircon-tools" >> "$GITHUB_PATH"
+      - name: Build ROM
+        run: |
+          cmake -S . -B build -G Ninja
+          cmake --build build
+      - name: Run host regression tests
+        run: cmake --build build --target check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WastesEdge-ROM
+          path: build/WastesEdge.v32
+          if-no-files-found: error

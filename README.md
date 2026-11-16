@@ -22,7 +22,8 @@ there is no secondary Makefile or shell build wrapper.
 
 By default CMake finds `wasm2vircon` and the Vircon32 development tools on
 `PATH`. Override its location when needed with `WASM2VIRCON_EXECUTABLE` cmake
-setting.
+setting. The content compiler also needs Python 3 with Pillow (for example,
+the `python3-pil` package on Ubuntu).
 
 The build first compiles editable Tiled/JSONC content and source assets from
 `gamedata/` into reproducible files under `generated/`.
